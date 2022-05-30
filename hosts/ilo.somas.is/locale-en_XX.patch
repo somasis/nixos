@@ -1,0 +1,199 @@
+diff -urN glibc-2.35.orig/localedata/SUPPORTED glibc-2.35/localedata/SUPPORTED
+--- glibc-2.35.orig/localedata/SUPPORTED	2022-09-06 13:55:43.386609158 -0400
++++ glibc-2.35/localedata/SUPPORTED	2022-09-06 13:56:09.268185701 -0400
+@@ -157,6 +157,7 @@
+ en_SG/ISO-8859-1 \
+ en_US.UTF-8/UTF-8 \
+ en_US/ISO-8859-1 \
++en_XX@POSIX/UTF-8 \
+ en_ZA.UTF-8/UTF-8 \
+ en_ZA/ISO-8859-1 \
+ en_ZM/UTF-8 \
+diff -urN glibc-2.35.orig/localedata/locales/en_XX@POSIX glibc-2.35/localedata/locales/en_XX@POSIX
+--- glibc-2.35.orig/localedata/locales/en_XX@POSIX	1969-12-31 19:00:00.000000000 -0500
++++ glibc-2.35/localedata/locales/en_XX@POSIX	2022-09-06 13:58:34.590900481 -0400
+@@ -0,0 +1,184 @@
++escape_char /
++comment_char %
++% International English, a mix of en_US and i18n with ISO and a little POSIX.
++% Author: Xyne
++% Website: http://xyne.archlinux.ca/projects/locale-en_xx/
++
++LC_IDENTIFICATION
++title      "International English with ISO and POSIX formats"
++source     ""
++address    ""
++contact    ""
++email      "xyne@archlinux.ca"
++tel        ""
++fax        ""
++language   "English"
++territory  "International"
++revision   "1.0"
++date       "2017-11-01"
++%
++category  "i18n:2012";LC_IDENTIFICATION
++category  "i18n:2012";LC_CTYPE
++category  "i18n:2012";LC_COLLATE
++category  "i18n:2012";LC_TIME
++category  "i18n:2012";LC_NUMERIC
++category  "i18n:2012";LC_MONETARY
++category  "i18n:2012";LC_MESSAGES
++category  "i18n:2012";LC_PAPER
++category  "i18n:2012";LC_NAME
++category  "i18n:2012";LC_ADDRESS
++category  "i18n:2012";LC_TELEPHONE
++
++END LC_IDENTIFICATION
++
++LC_CTYPE
++% en_US copies en_GB, which copies i18n, so this should be equivalent to copying
++% from en_US
++%copy "i18n"
++copy "en_US"
++END LC_CTYPE
++
++LC_COLLATE
++% en_US copies the template from ISO/IEC 14651
++copy "iso14651_t1"
++% This doesn't seem to work.
++% copy "i18n"
++END LC_COLLATE
++
++LC_MONETARY
++% This section is a mix of en_US and i18n.
++% "XDR " and the international currency symbol '¤' are taken from i18n
++%
++% '.' is used as the decimal mark despite the ISO standard ',' for the following
++% reasons:
++% * All English-speaking countries use '.' and this is intended to be an English
++%   locale.
++% * '.' is established as the decimal mark in programming languages and is
++%   widespread in technical usage. It is used by the POSIX locale.
++% * The geographical distributions of '.' and ',' are about the same.
++%
++% Separators are removed following the i18n standard. It also makes automatic
++% processing easier.
++%
++% A positive sign is used for uniformity of output.
++int_curr_symbol     "XDR "
++currency_symbol     "¤"
++mon_decimal_point   "."
++mon_thousands_sep   ""
++mon_grouping        -1
++positive_sign       "+"
++negative_sign       "-"
++int_frac_digits     2
++frac_digits         2
++int_p_sep_by_space  0
++int_n_sep_by_space  0
++p_sep_by_space      0
++n_sep_by_space      0
++p_cs_precedes       1
++n_cs_precedes       1
++p_sign_posn         1
++n_sign_posn         1
++END LC_MONETARY
++
++LC_NUMERIC
++copy "POSIX"
++END LC_NUMERIC
++
++LC_TIME
++% Mix of en_US, i18n and POSIX
++abday       "Sun";"Mon";/
++            "Tue";"Wed";/
++            "Thu";"Fri";/
++            "Sat"
++day         "Sunday";/
++            "Monday";/
++            "Tuesday";/
++            "Wednesday";/
++            "Thursday";/
++            "Friday";/
++            "Saturday"
++abmon       "Jan";"Feb";/
++            "Mar";"Apr";/
++            "May";"Jun";/
++            "Jul";"Aug";/
++            "Sep";"Oct";/
++            "Nov";"Dec"
++mon         "January";/
++            "February";/
++            "March";/
++            "April";/
++            "May";/
++            "June";/
++            "July";/
++            "August";/
++            "September";/
++            "October";/
++            "November";/
++            "December"
++%
++% Weekday and week numbering according to ISO 8601
++week    7;19971201;4
++first_weekday	1
++first_workday	1
++
++am_pm   "AM";"PM"
++
++% Date formats following ISO 8601
++% Appropriate date and time representation (%c)
++%       "%F %T"
++%d_t_fmt "%F %T %a %V %Z"
++d_t_fmt "%F W%V-%u %T %z"
++%
++% Appropriate date representation (%x)   "%F"
++d_fmt   "%F"
++%
++% Appropriate time representation (%X)   "%T"
++t_fmt   "%T"
++t_fmt_ampm ""
++
++date_fmt "%F %T %z"
++END LC_TIME
++
++
++
++
++
++
++LC_MESSAGES
++yesexpr "^[yY].*"
++noexpr  "^[nN].*"
++yesstr  "Yes"
++nostr   "No"
++END LC_MESSAGES
++
++LC_PAPER
++copy "i18n"
++END LC_PAPER
++
++LC_NAME
++name_fmt    "%d%t%g%t%m%t%f"
++name_miss   "Miss"
++name_mr     "Mr."
++name_mrs    "Mrs."
++name_ms     "Ms."
++END LC_NAME
++
++
++LC_ADDRESS
++% This is a mix i18n and English locales.
++% postal_fmt has been slightly modified:
++% * spaces have been replaced with '%t'
++postal_fmt    "%a%N%f%N%d%N%b%N%s%t%h%t%e%t%r%N%C-%z%t%T%N%N%c%N"
++lang_name     "English"
++lang_ab       "en"
++lang_term     "eng"
++lang_lib      "eng"
++END LC_ADDRESS
++
++LC_TELEPHONE
++copy "i18n"
++END LC_TELEPHONE
++
++LC_MEASUREMENT
++copy "i18n"
++END LC_MEASUREMENT

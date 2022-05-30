@@ -1,0 +1,3 @@
+{
+  hardware.brillo.enable = true;
+}

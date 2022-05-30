@@ -1,0 +1,444 @@
+{ config
+, pkgs
+, nixosConfig
+, inputs
+, ...
+}:
+# TODO: write catgirl configuration templating
+let
+  catgirl = (pkgs.catgirl.overrideAttrs (
+    let
+      year = builtins.substring 0 4 (inputs.catgirl.lastModifiedDate);
+      month = builtins.substring 4 2 (inputs.catgirl.lastModifiedDate);
+      day = builtins.substring 6 2 (inputs.catgirl.lastModifiedDate);
+    in
+    oldAttrs:
+    {
+      name = "catgirl";
+      version = "unstable-${year}-${month}-${day}";
+      src = inputs.catgirl;
+    }
+  ));
+
+  catgirls = (pkgs.writeShellApplication {
+    name = "catgirls";
+    runtimeInputs = [
+      catgirl
+      pkgs.coreutils
+      pkgs.gnused
+      pkgs.libnotify
+      pkgs.tmux
+    ];
+
+    text = ''
+        : "''${XDG_CONFIG_HOME:=$HOME/.config}"
+
+        mode=tmux
+
+        while getopts :cn arg >/dev/null 2>&1; do
+            case "$arg" in
+                c) mode=catgirl ;;
+                n) mode=notify ;;
+                *)
+                    printf '%s\n' 'usage: catgirls [-cn] [catgirl arguments/notification arguments]' >&2
+                    exit 69
+                    ;;
+            esac
+        done
+        shift $((OPTIND - 1))
+
+        case "$mode" in
+            catgirl)
+                exec catgirl \
+                    -u "${nixosConfig.networking.fqdn}" \
+                    -c "$XDG_CONFIG_HOME/catgirl/client-${nixosConfig.networking.fqdn}.crt" \
+                    -N "$0 -n" \
+                    "$@"
+                ;;
+
+            notify)
+                server=$(tr '\0' '\n' < /proc/"$PPID"/cmdline | tail -n1)
+                server="''${server##*/}"; server="''${server%%.conf}"
+
+                chat="$1"; shift
+                if printf '%s\n' "$*" | grep -E "^(<\S+>|\* \S+)$(printf '\t')"; then
+                    sender=$(printf '%s' "$1" \
+                        | cut -f1 \
+                        | sed -E '/^\* / s/^\* (\S+)/\1/; /^<\S+>/ s/^<(\S+)>/\1/')
+                    message=$(printf '%s' "$1" | cut -f2-)
+                else
+                    sender=
+                    message="$*"
+                fi
+                shift
+
+                [[ "$chat" == "$sender" ]] && sender=
+                message=$(printf '%s' "$message" | sed 's/</\&lt;/g;s/>/\&gt;/g')
+
+                id=$(
+                    printf '%s' "$chat" \
+                        | sha1sum \
+                        | tr -cd '1-9' \
+                        | cut -c-8
+                )
+
+                action=$(
+                   notify-send \
+                        -a catgirl \
+                        -i irc-chat \
+                        -A 'Read' \
+                        -r "$id" \
+                        -- \
+                        "$chat" \
+                        "''${sender:+&lt;$sender&gt; }$message"
+                ) || exit 0
+
+                exec >/dev/null 2>&1
+
+                # oh this is disgusting i LOVE IT
+                case "$action" in
+                    'Read')
+                        "$0" find-window -N "$server" \; send-keys Down Enter
+                        "$0" send-keys M-0 End C-u
+                        "$0" send-keys -l "/window $chat"
+                        "$0" send-keys Enter C-y
+                        raise "^catgirl - .+$" terminal "$0"
+                        ;;
+                esac
+
+                exit $?
+                ;;
+      esac
+
+      [[ $# -eq 0 ]] && set -- attach-session
+
+      exec tmux -L catgirls -f "$XDG_CONFIG_HOME"/tmux/catgirls.conf "$@"
+    '';
+  });
+
+  catgirls-uri = (pkgs.writeShellApplication {
+    name = "catgirls-uri";
+    runtimeInputs = [
+      catgirl
+      catgirls
+      pkgs.coreutils
+    ];
+
+    text = ''
+      c() {
+          local k="$1"
+          shift
+          local v="$*"
+
+          printf '%s = %s\n' "$k" "$v" >>"$config"
+      }
+
+      warn() {
+          warned=true
+          printf 'warning: %s\n' "$@" >&2
+      }
+
+      prompt() {
+          printf "%s: " "$1" >&2
+          read -r -s prompt
+          printf '%s' "$prompt"
+          unset prompt
+      }
+
+      config=$(mktemp)
+
+      uri="$1"
+
+      case "$uri" in
+          'ircs:' | 'irc:' | 'ircs://' | 'irc://' | 'ircs:///' | 'irc:///')
+              protocol=''${uri%%:*}
+
+              base=irc.tilde.chat
+              channels='#ascii.town'
+              ;;
+          'ircs:///'* | 'irc:///'*)
+              protocol=''${uri%%://*}
+
+              base=irc.tilde.chat
+
+              remain=''${uri#"$protocol":///}
+              remain=''${remain#*///}
+              ;;
+          'ircs://'* | 'irc://'*)
+              protocol=''${uri%%://*}
+
+              base=''${uri#"$protocol"://}
+              base=''${base%%/*}
+
+              remain=''${uri#"$protocol"://}
+              remain=''${remain#*/}
+              ;;
+          *)
+              printf "error: invalid uri: '%s'\n" "$uri" >&2
+              exit 1
+              ;;
+      esac
+
+      case "$remain" in
+          *'?'*)
+              string=''${remain#*\?}
+              remain=''${remain%\?*}
+              ;;
+      esac
+
+      case "$base" in
+          '['*']')
+              server="$base"
+              ;;
+          *':'*'@'*)
+              server=''${base#*@}
+
+              nick=''${base%@*}
+              nick=''${nick%%:*}
+
+              nick_pass=''${base#*:}
+              nick_pass=''${nick_pass%@*}
+              ;;
+          *':'*)
+              port=''${base##*:}
+              server=''${base%:"$port"}
+              ;;
+          *'@'*)
+              server=''${base#*@}
+              nick=''${base%@*}
+              ;;
+          *)
+              # echo "base: $base" >&2
+              server="$base"
+              ;;
+      esac
+
+      [[ "$base" == "$remain" ]] && remain=
+
+      c host "$server"
+      c port "''${port:-6697}"
+
+      if [[ -n "$string" ]]; then
+          IFS='&'
+          # shellcheck disable=SC2086
+          set -- $string
+          unset IFS
+
+          while [[ $# -gt 0 ]]; do
+              case "$1" in
+                  'key='*)
+                      keys="''${1#*=},$keys"
+                      ;;
+                  *)
+                      warn "unsupported attribute: $1"
+                      ;;
+              esac
+              shift
+          done
+      fi
+
+      if [[ -n "$remain" ]]; then
+          IFS=,
+          # shellcheck disable=SC2086
+          set -- $remain
+          unset IFS
+
+          while [[ $# -gt 0 ]]; do
+              case "$1" in
+                  *'!'*'@'*)
+                      query_nick=''${1%%!*}
+
+                      query_user=''${1#*!}
+                      query_user=''${query_user%@*}
+
+                      warn "unsupported feature: querying nick '$1'; execute '/query $query_nick' at startup"
+                      ;;
+
+                  'isserver' | 'ischannel') : ;;
+                  'needpass')
+                      server_password=$(prompt "password for '$server'")
+                      c pass "$server_password"
+                      ;;
+
+                  'isnick')
+                      warn "unsupported: $1"
+                      isnick=true
+                      ;;
+
+                  'is'* | 'need'*) warn "unsupported: $1" ;;
+
+                  '#'*)
+                      channels="$1''${channels:+,$channels}"
+                      ;;
+                  *)
+                      [[ "$isnick" = "true" ]] && continue
+                      [[ -n "$1" ]] && channels="#$1''${channels:+,$channels}"
+                      ;;
+              esac
+              shift
+          done
+      fi
+
+      if [[ -n "$nick" ]]; then
+          c nick "$nick"
+          [[ -n "$nick_pass" ]] && c sasl-plain "$nick:$nick_pass"
+      fi
+
+      [[ -n "$channels" ]] && c join "$channels''${keys:+ $keys}"
+
+      if [[ "$warned" == "true" ]]; then
+          printf 'press any key to continue...' >&2
+          read -r -s -n 1
+      fi
+
+      trap 'rm -f "$config"' EXIT
+      tmux -L catgirls -f "$XDG_CONFIG_HOME"/tmux/catgirls.conf \
+          new-window -n "$server" -- "$0" -c "$config"
+      exit $?
+    '';
+  });
+
+  catgirls-spoiler = (pkgs.writeShellApplication {
+    name = "catgirls-spoiler";
+    runtimeInputs = [
+      pkgs.coreutils
+      pkgs.tmux
+    ];
+
+    text = ''
+      : "''${XDG_CONFIG_HOME:=$HOME/.config}"
+      : "''${XDG_RUNTIME_DIR:=/tmp/$(id -un)}"
+
+      usage() {
+          printf 'usage: %s [-c] NETWORK\n' "''${0##*/}" >&2
+          exit 69 # EX_USAGE
+      }
+
+      clean() { rm -rf "$runtime"; }
+
+      runtime="$XDG_RUNTIME_DIR/catgirls-spoiler"
+      mkdir -p "$runtime"
+
+      [ "$1" = '-c' ] && clean
+
+      [ $# -lt 1 ] && usage
+
+      # Provide black fg/black bg toggling as a "spoiler function"
+      if [ -f "$runtime"/spoiler-"$1" ]; then
+          tmux -L catgirls -f "''$XDG_CONFIG_HOME"/tmux/catgirls.conf send-keys C-z c
+          exec rm -f "$runtime"/spoiler-"$1"
+      else
+          tmux -L catgirls -f "$XDG_CONFIG_HOME"/tmux/catgirls.conf send-keys C-z s
+          exec touch "$runtime"/spoiler-"$1"
+      fi
+    '';
+  });
+in
+{
+  home.packages = [
+    catgirl
+    catgirls
+    catgirls-uri
+    catgirls-spoiler
+  ];
+
+  xdg.desktopEntries.catgirls-uri = {
+    name = "catgirls-uri";
+    genericName = "ilo toki IRC";
+    icon = "irc-chat";
+    categories = [ "Network" "Chat" "InstantMessaging" "IRCClient" "ConsoleOnly" ];
+
+    exec = "${catgirls-uri} %U";
+    terminal = true;
+    mimeType = [
+      "x-scheme-handler/irc"
+      "x-scheme-handler/ircs"
+    ];
+  };
+
+
+  home.persistence."/persist${config.home.homeDirectory}".files = [
+    "etc/catgirl/client-${nixosConfig.networking.fqdn}.crt"
+    # "share/catgirl/bitlbee.pounce.somas.is.buf"
+    "share/catgirl/libera.pounce.somas.is.buf"
+    "share/catgirl/oftc.pounce.somas.is.buf"
+    "share/catgirl/tilde.pounce.somas.is.buf"
+  ];
+
+  xdg.configFile = {
+    # "catgirl/bitlbee.pounce.somas.is.conf".text = ''
+    #   host = bitlbee.pounce.somas.is
+    #   sasl-external
+    #   save = bitlbee.pounce.somas.is.buf
+    #   highlight = root!*@* PRIVMSG #twitter_* You: \[[0123456789abcdef][0123456789abcdef]->[0123456789abcdef][0123456789abcdef]\]
+    # '';
+
+    "catgirl/libera.pounce.somas.is.conf".text = ''
+      host = libera.pounce.somas.is
+      sasl-external
+      save = libera.pounce.somas.is.buf
+      ignore = * [JPQM][OAU][IRD][NTE] #*
+    '';
+
+    "catgirl/oftc.pounce.somas.is.conf".text = ''
+      host = oftc.pounce.somas.is
+      user = kylie
+      sasl-external
+      save = oftc.pounce.somas.is.buf
+      ignore = * [JPQM][OAU][IRD][NTE] #*
+    '';
+
+    "catgirl/tilde.pounce.somas.is.conf".text = ''
+      host = tilde.pounce.somas.is
+      sasl-external
+      save = tilde.pounce.somas.is.buf
+
+      ignore = * [JPQM][OAU][IRD][NTE] #*
+      ignore = tildebot!*@* PRIVMSG * \[*Karma*\]*
+      ignore = tildebot!*@* PRIVMSG * \[*Demojize*\]*
+      ignore = tildebot!*@* PRIVMSG * \[*Ducks*\]*
+      ignore = tildebot!*@* PRIVMSG * \[*Sed*\]*
+      ignore = sedbot
+      ignore = downgrade
+      ignore = tildebot!*@* PRIVMSG #meta \[*Tilderadio*\]*
+      ignore = tildecraft_mc_bot_v1!*@* PRIVMSG #minecraft *
+    '';
+  };
+
+  services.dunst.settings = {
+    zz-catgirl = {
+      appname = "catgirl";
+      background = config.xresources.properties."*color2";
+    };
+
+    zz-catgirl-channel-cassie = {
+      appname = "catgirl";
+      body = "<cassie>*";
+      background = "#7596ff";
+      foreground = "#ffffff";
+    };
+
+    zz-catgirl-dm-cassie = {
+      appname = "catgirl";
+      summary = "<cassie>*";
+      background = "#7596ff";
+      foreground = "#ffffff";
+    };
+
+    zz-catgirl-channel-june = {
+      appname = "catgirl";
+      body = "<june>*";
+      background = "#995b6b";
+      foreground = "#ffffff";
+    };
+
+    zz-catgirl-dm-june = {
+      appname = "catgirl";
+      summary = "<june>*";
+      background = "#995b6b";
+      foreground = "#ffffff";
+    };
+  };
+
+  services.sxhkd.keybindings."super + c" = "${config.home.homeDirectory}/bin/raise \"^catgirl - .+$\" terminal catgirls";
+}
