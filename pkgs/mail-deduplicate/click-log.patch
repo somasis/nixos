@@ -1,0 +1,28 @@
+From ede6764411ee6f444c4dbb10ab3d4ae51366e2bc Mon Sep 17 00:00:00 2001
+From: Kylie McClain <kylie@somas.is>
+Date: Fri, 30 Sep 2022 16:08:43 -0400
+Subject: [PATCH] click-log: bump
+
+---
+ pyproject.toml | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/pyproject.toml b/pyproject.toml
+index 735e12d..a58c473 100644
+--- a/pyproject.toml
++++ b/pyproject.toml
+@@ -34,7 +34,7 @@ classifiers = [
+ python = "^3.6"
+-boltons = ">=20.2.1,<22.0.0"
++boltons = "^23.0.0"
+ click = "^8.0.0"
+-click-log = "^0.3.2"
++click-log = "^0.4.0"
+-tabulate = "^0.8.7"
++tabulate = "^0.9.0"
+-tomlkit = "^0.7.0"
++tomlkit = "^0.11.0"
+ # Should have been put in dev-dependencies but extras only works from main
+-- 
+2.37.2
+

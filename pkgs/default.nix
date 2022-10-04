@@ -3,7 +3,10 @@
 , ...
 }:
 let
-  inherit (pkgs) callPackage;
+  inherit (pkgs)
+    callPackage
+    python3Packages
+    ;
 in
 rec
 {
@@ -32,6 +35,7 @@ rec
   qutebrowser-sync = callPackage ./qutebrowser-sync { };
 
   ffsclient = callPackage ./ffsclient { };
-  wcal = callPackage ./wcal { };
+  mail-deduplicate = python3Packages.callPackage ./mail-deduplicate { };
   notify-send-all = callPackage ./notify-send-all { };
+  wcal = callPackage ./wcal { };
 } // import ./trivial-builders { inherit lib pkgs; }

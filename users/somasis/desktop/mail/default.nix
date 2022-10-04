@@ -164,5 +164,5 @@ in
   #   # set-hook -t 0.0 pane-exited "kill-session -t mtui"
   # '';
 
-  # home.packages = [ pkgs.mail-deduplicate ];
+  home.packages = [ pkgs.mail-deduplicate ];
 }
