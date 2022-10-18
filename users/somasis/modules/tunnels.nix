@@ -27,25 +27,13 @@ in
   };
 
   config = mkIf (config.somasis.tunnels.enable) {
-    systemd.user.targets = {
-      tunnels = {
-        Unit = {
-          Description = "All tunnels";
-          PartOf = [ "default.target" ];
-        };
-
-        Install.WantedBy = [ "default.target" ];
+    systemd.user.targets.tunnels = {
+      Unit = {
+        Description = "All tunnels";
+        PartOf = [ "default.target" ];
       };
 
-      tunnels-ssh = {
-        Unit = {
-          Description = "All ssh(1) tunnels";
-          PartOf = [ "tunnels.target" ];
-          After = [ "ssh-agent.service" ];
-        };
-
-        Install.WantedBy = [ "tunnels.target" ];
-      };
+      Install.WantedBy = [ "default.target" ];
     };
 
     systemd.user.services = foldr
@@ -61,11 +49,11 @@ in
             Unit = {
               StartLimitIntervalSec = "30s";
               StartLimitBurst = "2";
-              PartOf = [ "tunnels-ssh.target" ];
+              PartOf = [ "tunnel.target" ];
               After = [ "ssh-agent.service" ];
             };
 
-            Install.WantedBy = [ "tunnels-ssh.target" ];
+            Install.WantedBy = [ "tunnel.target" ];
           };
         })
       { }

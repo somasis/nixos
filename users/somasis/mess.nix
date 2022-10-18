@@ -49,19 +49,6 @@ in
   };
 
   systemd.user = {
-    timers.mess = {
-      Unit.Description = "Manage ~/mess at the top of every hour and at boot";
-
-      Timer = {
-        OnCalendar = "hourly";
-        OnClockChange = true;
-        OnStartupSec = 0;
-        Persistent = true;
-      };
-
-      Install.WantedBy = [ "timers.target" ];
-    };
-
     services.mess = {
       Unit.Description = "Maintain ~/mess directory hierarchy";
 
@@ -78,6 +65,19 @@ in
       };
 
       Install.WantedBy = [ "default.target" ];
+    };
+
+    timers.mess = {
+      Unit.Description = "Manage ~/mess at the top of every hour and at boot";
+
+      Timer = {
+        OnCalendar = "hourly";
+        OnClockChange = true;
+        OnStartupSec = 0;
+        Persistent = true;
+      };
+
+      Install.WantedBy = [ "timers.target" ];
     };
   };
 
