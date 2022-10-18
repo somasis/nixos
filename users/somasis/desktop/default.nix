@@ -32,7 +32,6 @@
     ./mouse.nix
     ./music.nix
     ./panel.nix
-    ./pass.nix
     ./pdf.nix
     ./phone-integration.nix
     ./photo.nix

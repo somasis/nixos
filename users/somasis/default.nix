@@ -14,6 +14,7 @@
     ./less.nix
     ./man.nix
     ./mess.nix
+    ./pass.nix
     ./skim.nix
     ./spell.nix
     ./ssh.nix
