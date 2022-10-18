@@ -24,8 +24,8 @@ let
       : "''${XDG_CONFIG_HOME:=$HOME/.config}"
       : "''${XDG_RUNTIME_DIR:=/run/user/$(id -un)}"
       runtime="''${XDG_RUNTIME_DIR}/pass-beets"
-
       [ -d "$runtime" ] || mkdir -m 700 "$runtime"
+
       pass www/acoustid.org \
           | jq -R "{ acoustid: { apikey: . }" \
           | yq -y > "$runtime"/acoustid.yml
