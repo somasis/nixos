@@ -1,8 +1,8 @@
 { config, ... }:
 let
-  musicSource = "${config.home.homeDirectory}/audio/source";
-  musicLossless = "${config.home.homeDirectory}/audio/lossless";
-  musicLossy = "${config.home.homeDirectory}/audio/lossy";
+  musicSource = "${config.home.homeDirectory}/audio/library/source";
+  musicLossless = "${config.home.homeDirectory}/audio/library/lossless";
+  musicLossy = "${config.home.homeDirectory}/audio/library/lossy";
 
   xdgRuntimeDir = "/run/user/${toString nixosConfig.users.users.${config.home.username}.uid}";
 
