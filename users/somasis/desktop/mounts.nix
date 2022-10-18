@@ -16,8 +16,8 @@ in
   systemd.user.tmpfiles.rules = [
     "d ${home}/mnt 755 - - - -"
     "d ${home}/mnt/gdrive 755 - - - -"
-    "d ${home}/mnt/gdrive/personal 755 - - - -"
     "d ${home}/mnt/gdrive/appstate 755 - - - -"
+    "d ${home}/mnt/gdrive/personal 755 - - - -"
     "d ${home}/mnt/ssh 755 - - - -"
     # "L+ ${home}/audio/library/lossless - - - - ${home}/mnt/ssh/spinoza.7596ff.com_raid/somasis/audio/library/lossless"
     # "L+ ${home}/audio/source - - - - ${home}/mnt/ssh/spinoza.7596ff.com_raid/somasis/audio/source"
@@ -33,10 +33,10 @@ in
       Mount.Type = "fuse.sshfs";
       Mount.Options = [
         "compression=yes"
-        "idmap=user"
-        "transform_symlinks"
         "dir_cache=yes"
+        "idmap=user"
         "max_conns=4"
+        "transform_symlinks"
       ];
       Mount.What = "somasis@lacan.somas.is:/";
       Mount.Where = "${home}/mnt/ssh/lacan.somas.is";
@@ -49,10 +49,10 @@ in
       Mount.Type = "fuse.sshfs";
       Mount.Options = [
         "compression=yes"
-        "idmap=user"
-        "transform_symlinks"
         "dir_cache=yes"
+        "idmap=user"
         "max_conns=4"
+        "transform_symlinks"
       ];
       Mount.What = "somasis@spinoza.7596ff.com:/";
       Mount.Where = "${home}/mnt/ssh/spinoza.7596ff.com";
@@ -65,10 +65,10 @@ in
       Mount.Type = "fuse.sshfs";
       Mount.Options = [
         "compression=yes"
-        "idmap=user"
-        "transform_symlinks"
         "dir_cache=yes"
+        "idmap=user"
         "max_conns=4"
+        "transform_symlinks"
       ];
       Mount.What = "somasis@spinoza.7596ff.com:/mnt/raid";
       Mount.Where = "${home}/mnt/ssh/spinoza.7596ff.com_raid";
@@ -81,10 +81,10 @@ in
       Mount.Type = "fuse.sshfs";
       Mount.Options = [
         "compression=yes"
-        "idmap=user"
-        "transform_symlinks"
         "dir_cache=yes"
+        "idmap=user"
         "max_conns=4"
+        "transform_symlinks"
       ];
       Mount.What = "somasis@genesis.whatbox.ca:";
       Mount.Where = "${home}/mnt/ssh/genesis.whatbox.ca";
