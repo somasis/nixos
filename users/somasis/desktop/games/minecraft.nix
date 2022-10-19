@@ -1,6 +1,6 @@
 { pkgs, config, ... }: {
   home.packages = [
-    pkgs.polymc
+    # pkgs.polymc
     pkgs.jdk
   ];
 
