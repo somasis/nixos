@@ -395,7 +395,7 @@
     ];
   };
 
-  home.persistence."/persist${config.home.homeDirectory}".directories = [ "share/kak/state-save" ];
+  home.persistence."/cache${config.home.homeDirectory}".directories = [ "share/kak/state-save" ];
 
   # TODO: Not included in home-manager 22.05
   # editorconfig = {
