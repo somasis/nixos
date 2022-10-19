@@ -16,34 +16,28 @@ let
     ];
 
     text = ''
+      trap 'echo' EXIT
+
       set -eu
       set -o pipefail
 
       umask 0077
 
       : "''${XDG_CONFIG_HOME:=$HOME/.config}"
-      : "''${XDG_RUNTIME_DIR:=/run/user/$(id -un)}"
-      runtime="''${XDG_RUNTIME_DIR}/pass-beets"
-      [ -d "$runtime" ] || mkdir -m 700 "$runtime"
 
-      pass www/acoustid.org \
-          | jq -R "{ acoustid: { apikey: . }" \
-          | yq -y > "$runtime"/acoustid.yml
-
-      pass www/musicbrainz.org/Somasis \
+      (
+          pass www/acoustid.org
+          pass www/musicbrainz.org/Somasis
+      ) \
           | jq -R \
-              --arg user "Somasis" \
-              '{ user: $user, pass: . }' \
-          | yq -y > "$runtime"/musicbrainz.yml
-
-      yq -y \
-          -n \
-          --arg runtime "$runtime" \
-          '{ include: [
-              "\($runtime)/acoustid.yml",
-              "\($runtime)/musicbrainz.yml"
-          }' \
-          >> "$runtime"/beets.yml
+              --arg musicbrainz_user Somasis \
+              '. as $acoustid_apikey
+                  | inputs as $musicbrainz_pass
+                  | {
+                    acoustid: { apikey: $acoustid_apikey },
+                    musicbrainz: { user: $musicbrainz_user, pass: $musicbrainz_pass }
+                  }' \
+          | yq -y
     '';
   });
 
@@ -90,7 +84,7 @@ let
       requests
     ];
 
-    meta = with pkgs.lib;      {
+    meta = with pkgs.lib; {
       description = "Gazelle origin.yaml generator";
       homepage = "https://github.com/spinfast319/${pname}";
       license = licenses.unfree; # TODO <https://github.com/x1ppy/beets-originquery/issues/3>
@@ -121,10 +115,9 @@ in
     });
 
     settings = rec {
-      library = "${config.programs.beets.settings.directory}/beets.db";
-      directory = "${musicLossless}";
+      include = "${xdgRuntimeDir}/pass-beets/beets.yaml";
 
-      include = "${xdgRuntimeDir}/pass-beets/beets.yml";
+      directory = "${musicLossless}";
 
       sort_case_insensitive = false;
 
@@ -134,9 +127,11 @@ in
         "barcode"
         "originquery"
 
+        "types"
+
         # acousticbrainz/acoustid: apikey comes from `pass-beets`
-        "acousticbrainz"
         "absubmit"
+        "acousticbrainz"
         "chroma"
 
         # mbsubmit/mbsync: musicbrainz user/password comes from `pass-beets`
@@ -161,18 +156,23 @@ in
         extra_tags = [ "year" "catalognum" "country" "media" "label" ];
       };
 
+      types = {
+        rating = "int";
+        sample = "bool";
+      };
+
       convert = {
         # auto = true;
 
         copy_album_art = true;
         embed = false;
         album_art_maxwidth = "1024";
-        quiet = true;
 
+        dest = "${musicLossy}";
         format = "opus";
-        formats = {
-          opus.command = "ffmpeg -i $source -y -vn -acodec libopus -ab 96k -ar 48000 $dest";
-          opus.extension = "opus";
+        formats.opus = {
+          command = "${pkgs.ffmpeg-full}/bin/ffmpeg -i $source -y -vn -acodec libopus -ab 96k -ar 48000 $dest";
+          extension = "opus";
         };
       };
 
@@ -216,11 +216,12 @@ in
       };
 
       paths = {
-        # _$albumtype/
         default = "$albumartist - $album%if{$original_year, ($original_year)}/$track - $artist - $title";
         "singleton:true" = "_single/$artist/$title";
         "comp:true" = "_compilation/$albumartist - $title/$track - $artist - $title";
         "albumtype:soundtrack" = "_soundtracks/$albumartist - $album%if{$original_year, ($original_year)}/$track - $artist - $title";
+
+        "sample:true" = "_samples/$albumartist - $album%if{$original_year, ($original_year)}/$track - $artist - $title";
       };
     }
     // lib.optionalAttrs config.services.mopidy.enable { mpd.host = config.services.mopidy.settings.mpd.hostname; }
