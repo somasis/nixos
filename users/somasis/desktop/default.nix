@@ -79,6 +79,8 @@
     pkgs.bc
     pkgs.bmake
     pkgs.poedit
+
+    pkgs.ffmpeg-full
   ];
 
   home.persistence."/persist${config.home.homeDirectory}".directories = [
