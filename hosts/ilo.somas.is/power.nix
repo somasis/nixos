@@ -25,7 +25,5 @@
   };
 
   # ananicy spams the log constantly
-  systemd.services.ananicy-cpp.unitConfig.StandardOutput = "null";
-
-  powerManagement.cpuFreqGovernor = "performance";
+  # systemd.services.ananicy-cpp.serviceConfig.StandardOutput = "null";
 }
