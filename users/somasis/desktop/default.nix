@@ -22,7 +22,6 @@
     ./dates.nix
     ./discord.nix
     ./dmenu.nix
-    ./dunst.nix
     ./feeds.nix
     ./file-manager.nix
     ./fonts.nix
@@ -31,6 +30,7 @@
     ./mounts.nix
     ./mouse.nix
     ./music.nix
+    ./notifications.nix
     ./panel.nix
     ./pdf.nix
     ./phone-integration.nix
