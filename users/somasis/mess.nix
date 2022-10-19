@@ -56,9 +56,9 @@ in
         Type = "oneshot";
         ExecStart = "${mess}/bin/mess";
         ExecStartPost = [
-          "${pkgs.coreutils}/bin/mkdir -p ~/mess/current/incoming"
-          "${pkgs.coreutils}/bin/mkdir -p ~/mess/current/src"
-          "${pkgs.coreutils}/bin/mkdir -p ~/mess/current/screenshots"
+          ''${pkgs.coreutils}/bin/mkdir -p "${config.home.homeDirectory}/mess/current/incoming"''
+          ''${pkgs.coreutils}/bin/mkdir -p "${config.home.homeDirectory}/mess/current/src"''
+          ''${pkgs.coreutils}/bin/mkdir -p "${config.home.homeDirectory}/mess/current/screenshots"''
         ];
 
         StandardOutput = "null";
