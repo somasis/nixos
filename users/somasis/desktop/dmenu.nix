@@ -14,7 +14,7 @@ let
         owner = "bakkeby";
         repo = "dmenu-flexipatch";
         rev = "b210a99e318e6724b9823eb48149704c006d2282";
-        sha256 = "sha256-tTWm+AYJvc5xbXnR1mM2uThwqmUq0F3nUVi79XgZq88=";
+        hash = "sha256-tTWm+AYJvc5xbXnR1mM2uThwqmUq0F3nUVi79XgZq88=";
       };
 
       buildInputs = [

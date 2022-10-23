@@ -9,7 +9,7 @@
           owner = "NNBnh";
           repo = "clipb.kak";
           rev = "b640b2324ef21630753c4b42ddf31207233a98d2";
-          sha256 = "1rs9ilzpl3pp0rm8ljcf5kp1vbw1f7wa62079d2971mg45jj46ib";
+          hash = "sha256-KxoiZSGvhpNESwcIo/hxga8d7iyOSYpqBvcOej+NSec=";
         };
       })
     ];

@@ -9,17 +9,16 @@
 , libXcursor
 , libXft
 , ncurses
-,
 }:
 stdenv.mkDerivation rec {
   pname = "st-flexipatch";
   version = "0.8.5.20220306";
 
   src = fetchFromGitHub {
+    repo = pname;
     owner = "bakkeby";
-    repo = "st-flexipatch";
     rev = "51dc6ba469cf4e05496665c6a957cf4d5a5f9bf9";
-    sha256 = "sha256-xVANnofzZGzDSf9CikH6VQlAWxjXrej2o271rMZZOlU=";
+    hash = "sha256-xVANnofzZGzDSf9CikH6VQlAWxjXrej2o271rMZZOlU=";
   };
 
   nativeBuildInputs = [

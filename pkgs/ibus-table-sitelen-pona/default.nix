@@ -11,7 +11,7 @@ stdenvNoCC.mkDerivation {
   src = fetchurl {
     name = "tokipona.txt";
     url = "https://raw.githubusercontent.com/Id405/sitelen-pona-ucsur-guide/main/tokipona.txt";
-    sha256 = "sha256-VSyj3PzsP/+WHfkygLm7i70uPQ6yWqoj4mkf5rW4brE=";
+    hash = "sha256-VSyj3PzsP/+WHfkygLm7i70uPQ6yWqoj4mkf5rW4brE=";
   };
 
   dontUnpack = true;

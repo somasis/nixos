@@ -68,7 +68,7 @@
           owner = "sysvinit";
           repo = "execshell";
           rev = "b0b41d50cdb09f26b7f31e960e078c0500c661f5";
-          sha256 = "sha256-TCk9U396NoZL1OvAddcMa2IFyvyDs/3daKv5IRxkRYE=";
+          hash = "sha256-TCk9U396NoZL1OvAddcMa2IFyvyDs/3daKv5IRxkRYE=";
           fetchSubmodules = true;
         };
 

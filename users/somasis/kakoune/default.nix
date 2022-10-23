@@ -12,7 +12,7 @@
 #           owner = "maandree";
 #           repo = "makel";
 #           rev = "0650e17761ffc45b4fc5d32287514796d6da332d";
-#           sha256 = "sha256-ItZaByPpheCuSXdd9ej+ySeX3P6DYgnNNAQlAQeNEDA=";
+#           hash = "sha256-ItZaByPpheCuSXdd9ej+ySeX3P6DYgnNNAQlAQeNEDA=";
 #         };
 
 #         buildInputs = [
@@ -23,7 +23,7 @@
 #             src = pkgs.fetchgit rec {
 #               url = "git://git.suckless.org/libgrapheme";
 #               rev = "1930624b9a9703c3449d2a877640e33c6d71f190";
-#               sha256 = "sha256-RjvIzfT3FxqAB6l2L1eRdBiv5qb15mXDEh2m4qih1f4=";
+#               hash = "sha256-RjvIzfT3FxqAB6l2L1eRdBiv5qb15mXDEh2m4qih1f4=";
 #             };
 
 #             makeFlags = [ "CC:=$(CC)" "PREFIX:=$(out)" ];
@@ -355,7 +355,7 @@
           owner = "matthias-margush";
           repo = pname;
           rev = "23adaadb795af2d86dcb3daf7af3ebe12e932441";
-          sha256 = "0qldzh3gr3m7sa1hibbmf1br5lgiqwn84ggm75iin113zc67avbi";
+          hash = "sha256-cW11DPsjBBtjOfU9gizH8dGSV3B1rQiD0qeO/Ab8jWI=";
         };
       })
 
@@ -367,7 +367,7 @@
           owner = "occivink";
           repo = pname;
           rev = "3cd043b25688fc447eadd9b8ae254e3224391a01";
-          sha256 = "1dha98rdahgjw1n21xxk7zj4dba0s8cczccklf4grr54zhm8l8ld";
+          hash = "sha256-jSKKKvyk5PyIo5OxzxjSQK1G5D+z9yBs4PJB1TJKCrY=";
         };
       })
 
@@ -378,7 +378,7 @@
           owner = "andreyorst";
           repo = "smarttab.kak";
           rev = "86ac6599b13617ff938905ba4cdd8225d7eb6a2e";
-          sha256 = "sha256-STLZSwQPM+gTnkA+FQOF4I0ifPTjQWpEc/95JRzvIqU=";
+          hash = "sha256-STLZSwQPM+gTnkA+FQOF4I0ifPTjQWpEc/95JRzvIqU=";
         };
       })
 
@@ -389,7 +389,7 @@
           owner = "Delapouite";
           repo = pname;
           rev = "44b4ffad945acb635fc1a9c1c23957ff16461102";
-          sha256 = "sha256-k8I9SR5ygX6Ku+6vTXIPNAp1ZxD5B/ucwTKWigpWZjk=";
+          hash = "sha256-k8I9SR5ygX6Ku+6vTXIPNAp1ZxD5B/ucwTKWigpWZjk=";
         };
       })
     ];

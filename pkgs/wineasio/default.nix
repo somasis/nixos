@@ -21,7 +21,7 @@ multiStdenv.mkDerivation rec {
 
   src = fetchzip {
     url = "https://github.com/${pname}/${pname}/releases/download/v${version}/${pname}-${version}.tar.gz";
-    sha256 = "sha256-IVgiGTrcs1c0NNMHIc0NElj3Hgd9RO+zrkAefQ26+AM=";
+    hash = "sha256-IVgiGTrcs1c0NNMHIc0NElj3Hgd9RO+zrkAefQ26+AM=";
   };
 
   buildInputs = [

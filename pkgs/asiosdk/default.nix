@@ -1,7 +1,6 @@
 { lib
 , stdenv
 , fetchzip
-,
 }:
 stdenv.mkDerivation rec {
   pname = "asiosdk";
@@ -11,7 +10,7 @@ stdenv.mkDerivation rec {
   # to get someone in trouble, since this is not a legal way to redistribute the SDK.
   src = fetchzip rec {
     url = "https://download.steinberg.net/sdk_downloads/${pname}_${version}.zip";
-    sha256 = "sha256-tsrhHmjZEt13Zw8gJQW4nrXhBTpa0PhcIS3vg3icVio=";
+    hash = "sha256-tsrhHmjZEt13Zw8gJQW4nrXhBTpa0PhcIS3vg3icVio=";
   };
 
   installPhase = "cp -r . $out";
