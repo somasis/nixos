@@ -37,10 +37,13 @@
     '')
   ];
 
-  home.file.".cache".source = config.lib.file.mkOutOfStoreSymlink config.xdg.cacheHome;
-  home.file.".config".source = config.lib.file.mkOutOfStoreSymlink config.xdg.configHome;
-  home.file.".local/bin".source = config.lib.file.mkOutOfStoreSymlink "${config.home.homeDirectory}/bin";
-  home.file.".local/lib".source = config.lib.file.mkOutOfStoreSymlink "${config.home.homeDirectory}/lib";
-  home.file.".local/share".source = config.lib.file.mkOutOfStoreSymlink config.xdg.dataHome;
-  home.file.".local/state".source = config.lib.file.mkOutOfStoreSymlink config.xdg.stateHome;
+  # HACK this shouldn't be needed!
+  home.file = {
+    ".cache".source = config.lib.file.mkOutOfStoreSymlink config.xdg.cacheHome;
+    ".config".source = config.lib.file.mkOutOfStoreSymlink config.xdg.configHome;
+    ".local/bin".source = config.lib.file.mkOutOfStoreSymlink "${config.home.homeDirectory}/bin";
+    ".local/lib".source = config.lib.file.mkOutOfStoreSymlink "${config.home.homeDirectory}/lib";
+    ".local/share".source = config.lib.file.mkOutOfStoreSymlink config.xdg.dataHome;
+    ".local/state".source = config.lib.file.mkOutOfStoreSymlink config.xdg.stateHome;
+  };
 }
