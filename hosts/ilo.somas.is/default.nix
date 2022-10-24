@@ -150,6 +150,8 @@
 
   boot.kernelPackages = pkgs.linuxKernel.packages.linux_5_19;
 
+  services.udisks2.enable = true;
+
   system.stateVersion = "21.11";
 
   # virtualisation.docker.enable = true;
