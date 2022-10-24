@@ -121,11 +121,11 @@ let
 
       text = ''
         : "''${DMENU_EMOJI_LIST:=${pkgs.unicode-emoji}/share/unicode/emoji/emoji-test.txt}"
-        : "''${DMENU_EMOJI_RECENT:=''${XDG_CACHE_HOME:=~/.cache}/dmenu/''${0##*/}.cache}"
+        : "''${DMENU_EMOJI_RECENT:=''${XDG_CACHE_HOME:=~/.cache}/dmenu/dmenu-emoji.cache}"
 
         usage() {
             cat >&2 <<EOF
-        usage: ''${0##*/} [-clt]
+        usage: dmenu-emoji [-clt]
         EOF
             exit 69
         }
@@ -407,7 +407,7 @@ let
       text = ''
         usage() {
             cat >&2 <<EOF
-        usage: ''${0##*/} [dmenu options]
+        usage: dmenu-session [dmenu options]
         EOF
             exit 69
         }
