@@ -132,14 +132,18 @@ in
   }";
 
   systemd.user.services.discord = {
-    Unit.Description = "Discord instant messaging client";
-    Service.Type = "simple";
-    Service.ExecStart = "${discord}/bin/discord --start-minimized";
-    Service.Restart = "on-failure";
-    Service.StandardError = "null";
-
+    Unit = {
+      Description = "Discord instant messaging client";
+      PartOf = [ "graphical-session.target" ];
+    };
     Install.WantedBy = [ "graphical-session.target" ];
-    Unit.PartOf = [ "graphical-session.target" ];
+
+    Service = {
+      Type = "simple";
+      ExecStart = "${discord}/bin/discord --start-minimized";
+      Restart = "on-failure";
+      StandardError = "null";
+    };
   };
 
 }

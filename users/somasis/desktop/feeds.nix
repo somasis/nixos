@@ -520,32 +520,48 @@ in
 
   home.persistence."/cache${config.home.homeDirectory}".directories = [ "var/cache/newsboat" ];
 
-  systemd.user.services.feeds = {
-    Unit.Description = "Update feeds";
-    Service = {
-      Type = "oneshot";
-      ExecStart = [
-        "-${pkgs.newsboat}/bin/newsboat -x reload"
-        "-${pkgs.newsboat}/bin/newsboat --cleanup"
-      ];
-
-      Nice = 19;
-      CPUSchedulingPolicy = "idle";
-      IOSchedulingClass = "idle";
-      IOSchedulingPriority = 7;
+  systemd.user = {
+    targets.feeds = {
+      Unit = {
+        Description = "All feed-related services";
+        PartOf = [ "default.target" ];
+      };
+      Install.WantedBy = [ "default.target" ];
     };
-  };
 
-  systemd.user.timers.feeds = {
-    Unit.Description = "Update feeds every day";
-    Timer = {
-      OnCalendar = "daily";
-      Persistent = true;
-      AccuracySec = "15m";
-      RandomizedDelaySec = "5m";
+    services.feeds = {
+      Unit = {
+        Description = "Update feeds";
+        PartOf = [ "feeds.target" ];
+      };
+      Install.WantedBy = [ "feeds.target" ];
+
+      Service = {
+        Type = "oneshot";
+        ExecStart = [ "-${pkgs.newsboat}/bin/newsboat -x reload" ];
+        ExecStartPost = [ "-${pkgs.newsboat}/bin/newsboat --cleanup" ];
+
+        Nice = 19;
+        CPUSchedulingPolicy = "idle";
+        IOSchedulingClass = "idle";
+        IOSchedulingPriority = 7;
+      };
     };
-    Unit.PartOf = [ "timers.target" ];
-    Install.WantedBy = [ "timers.target" ];
+
+    timers.feeds = {
+      Unit = {
+        Description = "Update feeds every day";
+        PartOf = [ "feeds.target" ];
+      };
+      Install.WantedBy = [ "feeds.target" ];
+
+      Timer = {
+        OnCalendar = "daily";
+        Persistent = true;
+        AccuracySec = "15m";
+        RandomizedDelaySec = "5m";
+      };
+    };
   };
 
   programs.qutebrowser.keyBindings.normal."<z><p><f>" =

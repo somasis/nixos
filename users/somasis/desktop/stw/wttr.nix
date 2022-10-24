@@ -92,64 +92,66 @@ in
 {
   home.packages = [ wttr ];
 
-  systemd.user.services.wttr = {
-    Unit = {
-      Description = "Update weather at the current location";
-      StartLimitInterval = 60;
+  systemd.user = {
+    services.wttr = {
+      Unit = {
+        Description = "Update weather at the current location";
+        StartLimitInterval = 60;
 
-      PartOf = [ "stw.target" ];
-      Requires = [ "geoclue-agent.service" ];
+        PartOf = [ "stw.target" ];
+        Requires = [ "geoclue-agent.service" ];
+      };
+
+      Install.WantedBy = [ "stw.target" ];
+
+      Service = {
+        Type = "oneshot";
+        ExecStart = [ "${wttr}/bin/wttr" ];
+        ExecStopPost = [ "-${pkgs.systemd}/bin/systemctl reload --user stw-wttr.service" ];
+        StandardOutput = "null";
+      };
     };
 
-    Install.WantedBy = [ "stw.target" ];
-
-    Service = {
-      Type = "oneshot";
-      ExecStart = [ "${wttr}/bin/wttr" ];
-      ExecStopPost = [ "-${pkgs.systemd}/bin/systemctl reload --user stw-wttr.service" ];
-      StandardOutput = "null";
+    timers.wttr = {
+      Unit.Description = "Refresh weather for the current location every hour";
+      Install.WantedBy = [ "stw.target" ];
+      Unit.PartOf = [ "stw.target" ];
+      # Timer.OnCalendar = "0/2:00:00";
+      Timer = {
+        OnCalendar = "hourly";
+        AccuracySec = "30m";
+        RandomizedDelaySec = "5m";
+        OnClockChange = true;
+        OnTimezoneChange = true;
+        Persistent = true;
+      };
     };
-  };
 
-  systemd.user.timers.wttr = {
-    Unit.Description = "Refresh weather for the current location every hour";
-    Install.WantedBy = [ "stw.target" ];
-    Unit.PartOf = [ "stw.target" ];
-    # Timer.OnCalendar = "0/2:00:00";
-    Timer = {
-      OnCalendar = "hourly";
-      AccuracySec = "30m";
-      RandomizedDelaySec = "5m";
-      OnClockChange = true;
-      OnTimezoneChange = true;
-      Persistent = true;
-    };
-  };
+    services.stw-wttr = {
+      Unit = {
+        Description = "Display weather at the current location on the desktop";
+        StartLimitInterval = 0;
+      };
+      Install.WantedBy = [ "stw.target" ];
+      Unit.PartOf = [ "stw.target" ];
 
-  systemd.user.services.stw-wttr = {
-    Unit = {
-      Description = "Display weather at the current location on the desktop";
-      StartLimitInterval = 0;
-    };
-    Install.WantedBy = [ "stw.target" ];
-    Unit.PartOf = [ "stw.target" ];
-
-    Service = {
-      Type = "simple";
-      ExecStartPre = [ "${pkgs.networkmanager}/bin/nm-online -q" ];
-      ExecStart = [
-        ''
-          ${pkgs.stw}/bin/stw \
-            -F 'monospace:style=heavy:size=10' \
-            -f "${config.xresources.properties."*darkForeground"}" \
-            -A 0 \
-            -x 24 -y 72 \
-            -B 12 \
-            -p 60 \
-            cat "%C/wttr/forecast.txt"
-        ''
-      ];
-      ExecReload = [ "${pkgs.coreutils}/bin/kill -ALRM $MAINPID" ];
+      Service = {
+        Type = "simple";
+        ExecStartPre = [ "${pkgs.networkmanager}/bin/nm-online -q" ];
+        ExecStart = [
+          ''
+            ${pkgs.stw}/bin/stw \
+              -F 'monospace:style=heavy:size=10' \
+              -f "${config.xresources.properties."*darkForeground"}" \
+              -A 0 \
+              -x 24 -y 72 \
+              -B 12 \
+              -p 60 \
+              cat "%C/wttr/forecast.txt"
+          ''
+        ];
+        ExecReload = [ "${pkgs.coreutils}/bin/kill -ALRM $MAINPID" ];
+      };
     };
   };
 }

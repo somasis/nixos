@@ -111,7 +111,8 @@ in
     '';
 
   systemd.user.services.vdirsyncer = {
-    Unit.Description = "Synchronize calendars and contacts";
+    Unit.Description = pkgs.vdirsyncer.meta.description;
+
     Service = {
       Type = "oneshot";
       # ExecStartPre = "${pkgs.writeShellScript "vdirsyncer-discover" ''
@@ -140,29 +141,36 @@ in
   };
 
   systemd.user.timers.vdirsyncer = {
-    Unit.Description = "Synchronize calendars and contacts every thirty minutes, and fifteen minutes after startup";
+    Unit = {
+      Description = "Synchronize calendars and contacts every thirty minutes, and fifteen minutes after startup";
+      PartOf = [ "pim.target" ];
+    };
+    Install.WantedBy = [ "pim.target" ];
+
     Timer = {
       OnStartupSec = "900";
       OnCalendar = "*:0/30";
       RandomizedDelaySec = "5m";
     };
-    Unit.PartOf = [ "pim.target" ];
-    Install.WantedBy = [ "pim.target" ];
   };
 
   systemd.user.paths.vdirsyncer = {
     Unit.Description = "Synchronize calendars and contacts on local changes";
+    Install.WantedBy = [ "pim.target" ];
+
     Path = {
       PathChanged = "${data}";
       Unit = "vdirsyncer.service";
     };
-    Install.WantedBy = [ "pim.target" ];
   };
 
   systemd.user.targets.pim = {
-    Unit.Description = "Calendar and contact related services";
+    Unit = {
+      Description = "Calendar and contact related services";
+      PartOf = [ "default.target" ];
+    };
+
     Install.WantedBy = [ "default.target" ];
-    Unit.PartOf = [ "default.target" ];
   };
 
   home.persistence."/persist${config.home.homeDirectory}".directories = [

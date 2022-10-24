@@ -193,29 +193,36 @@ in
     ;
   };
 
-  systemd.user.services.beets-web = {
-    Unit = {
-      Description = "beets' web interface";
-      PartOf = [ "default.target" ];
-    };
-    Install.WantedBy = [ "default.target" ];
-    Service.Type = "simple";
-    Service.ExecStart = "${config.programs.beets.package}/bin/beet web";
-  };
+  systemd.user = {
+    services.pass-beets = {
+      Unit = {
+        Description = "Authenticate `beets` using `pass`";
+        PartOf = [ "default.target" ];
+      };
+      Install.WantedBy = [ "default.target" ];
 
-  systemd.user.services."pass-beets" = {
-    Unit = {
-      Description = "Authenticate `beets` using `pass`";
-      PartOf = [ "default.target" ];
-    };
-    Install.WantedBy = [ "default.target" ];
+      Service = {
+        Type = "oneshot";
+        RemainAfterExit = true;
 
-    Service = {
-      Type = "oneshot";
-      RemainAfterExit = true;
+        ExecStart = [ "${pass-beets}/bin/pass-beets" ];
+        ExecStop = [ "${pkgs.coreutils}/bin/rm -rf %t/pass-beets" ];
 
-      ExecStart = [ "${pass-beets}/bin/pass-beets" ];
-      ExecStop = [ "${pkgs.coreutils}/bin/rm -rf %t/pass-beets" ];
+        StandardOutput = "file:${xdgRuntimeDir}/pass-beets/beets.yaml";
+      };
     };
-  };
+  } // (lib.optionalAttrs (builtins.elem "web" config.programs.beets.settings.plugins) {
+    services.beets-web = {
+      Unit = {
+        Description = "beets' web interface";
+        PartOf = [ "default.target" ];
+      };
+      Install.WantedBy = [ "default.target" ];
+
+      Service = {
+        Type = "simple";
+        ExecStart = "${config.programs.beets.package}/bin/beet web";
+      };
+    };
+  });
 }

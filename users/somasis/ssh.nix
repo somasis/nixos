@@ -67,46 +67,13 @@
         hostname = "lacan.somas.is";
 
         forwardAgent = true;
-        dynamicForwards = [
-          {
-            address = "localhost";
-            port = 6003;
-          }
-        ];
-
-        localForwards = [
-          {
-            # somasis@lacan.somas.is:syncthing
-            host.address = "localhost";
-            host.port = 8384;
-            bind.address = "localhost";
-            bind.port = 8385;
-          }
-          {
-            # somasis@lacan.somas.is:scooper
-            host.address = "localhost";
-            host.port = 9400;
-            bind.address = "localhost";
-            bind.port = 9401;
-          }
-        ];
+        dynamicForwards = [{ address = "localhost"; port = 6003; }];
       };
 
       "trotsky.somas.is" = {
         host = "trotsky.somas.is trotsky";
         hostname = "trotsky.somas.is";
         port = 5398;
-
-        # somasis@trotsky.somas.is:syncthing
-        localForwards = [
-          {
-            host.address = "localhost";
-            host.port = 8386;
-
-            bind.address = "localhost";
-            bind.port = 8386;
-          }
-        ];
 
         forwardAgent = true;
         forwardX11 = true;
@@ -117,17 +84,6 @@
         hostname = "spinoza.7596ff.com";
         port = 1312;
 
-        # somasis@spinoza.7596ff.com:syncthing
-        localForwards = [
-          {
-            host.address = "localhost";
-            host.port = 8384;
-
-            bind.address = "localhost";
-            bind.port = 45435;
-          }
-        ];
-
         forwardAgent = true;
         forwardX11 = true;
       };
@@ -135,28 +91,7 @@
       "genesis.whatbox.ca" = {
         host = "genesis.whatbox.ca whatbox genesis";
         hostname = "genesis.whatbox.ca";
-        localForwards = [
-          {
-            # somasis@genesis.whatbox.ca:syncthing
-            host.address = "localhost";
-            host.port = 10730;
-            bind.address = "localhost";
-            bind.port = 10730;
-          }
-          {
-            # somasis@genesis.whatbox.ca:transmission
-            host.address = "localhost";
-            host.port = 17994;
-            bind.address = "localhost";
-            bind.port = 17994;
-          }
-        ];
-        dynamicForwards = [
-          {
-            address = "localhost";
-            port = 6004;
-          }
-        ];
+        dynamicForwards = [{ address = "localhost"; port = 6004; }];
       };
     };
   };

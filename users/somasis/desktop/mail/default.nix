@@ -107,13 +107,7 @@ in
   programs.offlineimap.enable = true;
   programs.msmtp.enable = true;
 
-  systemd.user = {
-    targets.mail = {
-      Unit.Description = "All mail management services";
-      Install.WantedBy = [ "default.target" ];
-    };
-  }
-  // lib.foldr
+  systemd.user = (lib.foldr
     (n: a:
       lib.recursiveUpdate a {
         services."offlineimap-${systemdName n}" = {
@@ -160,9 +154,18 @@ in
           Install.WantedBy = [ "mail.target" ];
         };
       })
-    { }
+    {
+      targets.mail = {
+        Unit = {
+          Description = "All mail management services";
+          PartOf = [ "default.target" ];
+        };
+
+        Install.WantedBy = [ "default.target" ];
+      };
+    }
     (builtins.attrNames config.accounts.email.accounts)
-  ;
+  );
 
   services.imapnotify.enable = true;
 
