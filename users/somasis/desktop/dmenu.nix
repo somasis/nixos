@@ -22,16 +22,7 @@ let
         pkgs.xorg.libXinerama
         pkgs.zlib
 
-        # Necessary for dmenu to use emojis properly.
         pkgs.pango
-        (pkgs.xorg.libXft.overrideAttrs (oldAttrs: {
-          patches = [
-            (pkgs.fetchpatch {
-              url = "https://gitlab.freedesktop.org/xorg/lib/libxft/merge_requests/1.patch";
-              sha256 = "sha256-MfPOOhruG6XHt5ABpXi/oEiy8nfVGWVsq4zqjXbAtW4=";
-            })
-          ];
-        }))
       ];
 
       nativeBuildInputs = [ pkgs.pkg-config ];
