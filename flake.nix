@@ -173,7 +173,7 @@
               #   # nixMinecraft.nixosModules.home-manager.minecraft
               # ];
 
-              # verbose = true;
+              verbose = true;
 
               users.somasis = {
                 imports = [
