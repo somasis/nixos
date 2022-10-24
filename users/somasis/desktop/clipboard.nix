@@ -1,6 +1,22 @@
 { pkgs
 , ...
 }: {
+  home.packages = [
+    (pkgs.writeShellApplication {
+      name = "clip";
+
+      runtimeInputs = [ pkgs.xclip ];
+
+      text = ''
+        [[ -t 1 ]] && exec xclip -selection clipboard -i "$@"
+        exec xclip -selection clipboard -o "$@"
+      '';
+    })
+
+    # TODO switch from clipmenu to copyq
+    # pkgs.copyq
+  ];
+
   services.clipmenu.enable = true;
 
   services.sxhkd.keybindings = {
@@ -15,17 +31,4 @@
           | clip >/dev/null
     '';
   };
-
-  home.packages = [
-    (pkgs.writeShellApplication {
-      name = "clip";
-
-      runtimeInputs = [ pkgs.xclip ];
-
-      text = ''
-        [ -t 1 ] && exec xclip -selection clipboard -i "$@"
-        exec xclip -selection clipboard -o "$@"
-      '';
-    })
-  ];
 }
