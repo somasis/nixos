@@ -63,8 +63,8 @@
       };
 
       urgency_normal = {
-        background = config.xresources.properties."*colorAccent";
-        foreground = config.xresources.properties."*foreground";
+        background = config.xresources.properties."*lightBackground";
+        foreground = config.xresources.properties."*lightForeground";
       };
 
       urgency_critical = {

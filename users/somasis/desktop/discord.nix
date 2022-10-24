@@ -79,6 +79,7 @@ in
 
       # Discord blue
       background = "#6654ec";
+      foreground = "#ffffff";
     };
 
     zz-discord-cassie = {
