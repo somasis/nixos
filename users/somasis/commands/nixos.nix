@@ -236,7 +236,7 @@ in
                             ~/src/"$basename/$pkgSource"; do
                             [ -e "$d" ] && printf '%s\n' "$d" && break
                         done
-                    done | tr '\n' ' '
+                    done
             )
 
             args+=( "$pkgFile" )
