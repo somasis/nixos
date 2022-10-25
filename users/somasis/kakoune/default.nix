@@ -395,49 +395,49 @@
 
   home.persistence."/cache${config.home.homeDirectory}".directories = [ "share/kak/state-save" ];
 
-  # TODO: Not included in home-manager 22.05
-  # editorconfig = {
-  #   enable = true;
+  # NOTE: Not included in home-manager 22.05
+  editorconfig = {
+    enable = true;
 
-  #   settings = {
-  #     "*" = {
-  #       tab_width = 4;
-  #       insert_final_newline = true;
-  #       indent_style = "space";
-  #       indent_size = 4;
-  #       trim_trailing_whitespace = true;
+    settings = {
+      "*" = {
+        tab_width = 4;
+        insert_final_newline = true;
+        indent_style = "space";
+        indent_size = 4;
+        trim_trailing_whitespace = true;
 
-  #       # NOTE: max_line_length being enabled triggers editorconfig-load to set a highlighter
-  #       #       that is annoying to override.
-  #       # max_line_length          = 100
+        # NOTE: max_line_length being enabled triggers editorconfig-load to set a highlighter
+        #       that is annoying to override.
+        # max_line_length          = 100
 
-  #       # Handled by shfmt(1).
-  #       # Ideally these would be hidden behind a [[shell]] block or something; that's a work-in-progress:
-  #       # <https://github.com/mvdan/sh/issues/664>
-  #       binary_next_line = true;
-  #       switch_case_indent = true;
-  #       keep_padding = true;
-  #     };
+        # Handled by shfmt(1).
+        # Ideally these would be hidden behind a [[shell]] block or something; that's a work-in-progress:
+        # <https://github.com/mvdan/sh/issues/664>
+        binary_next_line = true;
+        switch_case_indent = true;
+        keep_padding = true;
+      };
 
-  #     "*.json" = {
-  #       max_line_length = 0;
-  #     };
+      "*.json" = {
+        max_line_length = 0;
+      };
 
-  #     "{Makefile,*.mak,*.mk}" = {
-  #       indent_style = "tab";
-  #     };
+      "{Makefile,*.mak,*.mk}" = {
+        indent_style = "tab";
+      };
 
-  #     "{*.scd,*.{0..9},*.{0-9}p}" = {
-  #       max_line_length = 72;
-  #     };
+      "{*.scd,*.{0..9},*.{0-9}p}" = {
+        max_line_length = 72;
+      };
 
-  #     "{*.c,*.h,*.cpp,*.hpp" = {
-  #       indent_style = "tab";
-  #     };
+      "{*.c,*.h,*.cpp,*.hpp" = {
+        indent_style = "tab";
+      };
 
-  #     "troff" = {
-  #       max_line_length = 72;
-  #     };
-  #   };
-  # };
+      "troff" = {
+        max_line_length = 72;
+      };
+    };
+  };
 }
