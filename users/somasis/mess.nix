@@ -64,24 +64,37 @@ in
     download = "${config.home.homeDirectory}/mess/current/incoming";
   };
 
-  systemd.user.timers.mess = {
-    Unit.Description = "Manage ~/mess at the top of every hour and at boot";
-    Timer = {
-      OnCalendar = "hourly";
-      OnClockChange = true;
-      OnStartupSec = 0;
-      AccuracySec = "1h";
-      Persistent = true;
-    };
-    Install.WantedBy = [ "timers.target" ];
-  };
+  systemd.user = {
+    timers.mess = {
+      Unit.Description = "Manage ~/mess at the top of every hour and at boot";
 
-  systemd.user.services.mess = {
-    Unit.Description = "Maintain ~/mess directory hierarchy";
-    Service.Type = "oneshot";
-    Service.ExecStart = "mess";
-    Service.StandardOutput = "null";
-    Install.WantedBy = [ "default.target" ];
+      Timer = {
+        OnCalendar = "hourly";
+        OnClockChange = true;
+        OnStartupSec = 0;
+        Persistent = true;
+      };
+
+      Install.WantedBy = [ "timers.target" ];
+    };
+
+    services.mess = {
+      Unit.Description = "Maintain ~/mess directory hierarchy";
+
+      Service = {
+        Type = "oneshot";
+        ExecStart = "${mess}/bin/mess";
+        ExecStartPost = [
+          "${pkgs.coreutils}/bin/mkdir -p ~/mess/current/incoming"
+          "${pkgs.coreutils}/bin/mkdir -p ~/mess/current/src"
+          "${pkgs.coreutils}/bin/mkdir -p ~/mess/current/screenshots"
+        ];
+
+        StandardOutput = "null";
+      };
+
+      Install.WantedBy = [ "default.target" ];
+    };
   };
 
   programs.bash.initExtra = ''

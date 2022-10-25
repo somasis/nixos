@@ -143,16 +143,21 @@ in
             RandomizedDelaySec = "1m";
           };
 
-          Unit.PartOf = [ "timers.target" "mail.target" ];
-          Install.WantedBy = [ "timers.target" "mail.target" ];
+          Unit.PartOf = [ "mail.target" ];
+          Install.WantedBy = [ "mail.target" ];
         };
 
         paths."offlineimap-${systemdName n}" = {
           Unit.Description = "Synchronize IMAP boxes on local changes";
           Path.PathChanged = config.accounts.email.accounts."${n}".maildir.absPath;
 
-          Unit.PartOf = [ "paths.target" "mail.target" ];
-          Install.WantedBy = [ "paths.target" "mail.target" ];
+          Unit.PartOf = [ "mail.target" ];
+          Install.WantedBy = [ "mail.target" ];
+        };
+
+        services."imapnotify-${systemdName n}" = {
+          Unit.PartOf = [ "mail.target" ];
+          Install.WantedBy = [ "mail.target" ];
         };
       })
     { }
