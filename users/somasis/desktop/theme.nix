@@ -125,9 +125,6 @@
     name = "Hackneyed";
     package = pkgs.hackneyed;
     size = 32;
-    # name = "OpenZone_White";
-    # package = pkgs.openzone-cursors;
-    # size = 48;
 
     x11.enable = true;
     gtk.enable = true;
