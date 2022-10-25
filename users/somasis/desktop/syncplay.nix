@@ -73,7 +73,7 @@ let
     gui = {
       alerttimeout = 5.0;
       chatbottommargin = 30.0;
-      chatdirectinput = false;
+      chatdirectinput = true;
       chatinputenabled = true;
       chatinputfontcolor = "#ffff00";
       chatinputfontfamily = "monospace";
