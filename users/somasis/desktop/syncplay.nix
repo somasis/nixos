@@ -3,12 +3,13 @@
 , config
 , ...
 }:
+with lib.generators;
 let
-  mkList = list:
-    "[" + (lib.concatStringsSep "," (map (x: ''"${x}"'') list)) + "]";
+  mkList = list: "[" + (lib.concatStringsSep "," (map (x: ''"${x}"'') list)) + "]";
+
   mpv = "${config.programs.mpv.package}/bin/mpv";
 
-  syncplayINI = lib.generators.toINI { } {
+  syncplayINI = toINI { } {
     general.checkforupdatesautomatically = false;
 
     client_settings = {
@@ -155,25 +156,24 @@ in
     };
   };
 
-  home.packages = [
-    pass-syncplay
-    pkgs.syncplay
-  ];
+  home.packages = [ pass-syncplay pkgs.syncplay ];
 
-  xdg.configFile."Syncplay/MainWindow.conf".text = lib.generators.toINI { } {
-    MainWindow = {
-      autoplayChecked = false;
-      autoplayMinUsers = 3;
-      showAutoPlayButton = true;
-      showPlaybackButtons = false;
+  xdg.configFile = {
+    "Syncplay/MainWindow.conf".text = toINI { } {
+      MainWindow = {
+        autoplayChecked = false;
+        autoplayMinUsers = 3;
+        showAutoPlayButton = true;
+        showPlaybackButtons = false;
+      };
     };
-  };
 
-  xdg.configFile."Syncplay/MoreSettings.conf".text = lib.generators.toINI { } {
-    MoreSettings.ShowMoreSettings = true;
-  };
+    "Syncplay/MoreSettings.conf".text = toINI { } {
+      MoreSettings.ShowMoreSettings = true;
+    };
 
-  xdg.configFile."Syncplay/PlayerList.conf".text = lib.generators.toINI { } {
-    PlayerList.PlayerList = mpv;
+    "Syncplay/PlayerList.conf".text = toINI { } {
+      PlayerList.PlayerList = mpv;
+    };
   };
 }
