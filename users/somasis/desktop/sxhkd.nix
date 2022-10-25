@@ -129,9 +129,7 @@ in
         || :
   '';
 
-  home.packages = [
-    xinput-notify
-  ];
+  home.packages = [ xinput-notify ];
 
   services.sxhkd = {
     enable = true;
@@ -231,9 +229,7 @@ in
         "super + XF86AudioLowerVolume" = "ponymix-snap -t source decrease 5";
 
         # Hardware: toggle touchpad - super + f1
-        "super + F2" = ''
-          ${xinput-notify}/bin/xinput-notify touchpad
-        '';
+        "super + F2" = "${xinput-notify}/bin/xinput-notify touchpad";
       };
   };
 }
