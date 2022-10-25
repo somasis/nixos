@@ -567,11 +567,15 @@ in
   programs.qutebrowser.keyBindings.normal."<z><p><f>" =
     let
       quteFeeds = pkgs.writeShellScript "qute-feeds" ''
+        set -eu
+        set -o pipefail
+
         : "''${QUTE_FIFO:?}"
         : "''${QUTE_HTML:?}"
 
-        ${pkgs.sfeed}/bin/sfeed_web < "$QUTE_HTML" \
-            | dmenu -l -p "qute [feeds]:" \
+        <"$QUTE_HTML" \
+            ${pkgs.sfeed}/bin/sfeed_web "$1" \
+            | dmenu -p "qutebrowser [feeds]:" \
             | cut -f1 \
             | ${pkgs.xclip}/bin/xclip -i -selection clipboard
 
@@ -583,10 +587,5 @@ in
             "Copied feed to clipboard."
       '';
     in
-    "spawn -u ${quteFeeds}   ";
+    "spawn -u ${quteFeeds} {url:domain}";
 }
-
-
-
-
-
