@@ -13,12 +13,12 @@ in
   outputs = currentFlake.outputs;
 
   "${hostName}" = currentHost;
+  "${userName}" = currentUser;
+  host = currentHost;
+  user = currentUser;
 
-  config = currentHost.pkgs.lib.recursiveUpdate
-    currentHost.config
-    { hm = builtins.removeAttrs currentUser [ "lib" ]; };
+  config = currentHost.pkgs.lib.recursiveUpdate currentHost.config { hm = builtins.removeAttrs currentUser [ "lib" ]; };
 
-  lib = currentHost.pkgs.lib.recursiveUpdate
-    currentHost.pkgs.lib
-    { hm = currentUser.lib; };
+  lib = currentHost.pkgs.lib.recursiveUpdate currentHost.pkgs.lib { hm = currentUser.lib; };
+
 } // currentFlake
