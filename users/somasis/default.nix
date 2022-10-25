@@ -99,19 +99,21 @@
 
     pkgs.moreutils
     pkgs.dateutils
+    pkgs.teip
 
     pkgs.nq
     pkgs.jq
     pkgs.snooze
     pkgs.xe
 
-    # TODO Not in NixOS 22.05
-    # pkgs.outils
+    # NOTE Not in NixOS 22.05
+    pkgs.outils
 
     pkgs.extrace
     pkgs.uq
     pkgs.ltrace
     pkgs.file
+    pkgs.pv
 
     pkgs.rsync
 
