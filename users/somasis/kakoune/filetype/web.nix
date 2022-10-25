@@ -9,9 +9,11 @@ let
   '';
 
   # CSS
-  lintCSS = pkgs.writeShellScript "lint" ''
-    ${pkgs.nodePackages.stylelint}/bin/stylelint --formatter unix --stdin-filename="$kak_buffile" < "$1"
-  '';
+  # TODO Need a new CSS linting tool; stylelint is broken with recent NixOS updates, it seems, due to
+  #      not having a default configuration loaded
+  # lintCSS = pkgs.writeShellScript "lint" ''
+  #   ${pkgs.nodePackages.stylelint}/bin/stylelint --formatter unix --stdin-filename="$kak_buffile" < "$1"
+  # '';
 
   # JavaScript
   lintJavaScript = pkgs.writeShellScript "lint" ''
@@ -44,7 +46,9 @@ in
     {
       name = "WinSetOption";
       option = "filetype=css";
-      commands = "set-option window lintcmd '${lintCSS}'";
+      commands = ''
+        set-option window formatcmd '${format}'
+      '';
     }
 
     # JavaScript
