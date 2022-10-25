@@ -352,7 +352,10 @@ in
 
         "qa" = "set-cmd-text :quickmark-add {url} \"{title}\"";
         "ql" = "set-cmd-text -s :quickmark-load";
-        "qd" = "set-cmd-text :quickmark-del {url:domain} ;; fake-key -g <Tab>";
+        "qd" = [
+          "set-cmd-text :quickmark-del {url:domain}"
+          "fake-key -g <Tab>"
+        ];
         "ba" = "set-cmd-text :bookmark-add {url} \"{title}\"";
         "bl" = "set-cmd-text -s :bookmark-load";
 
@@ -375,7 +378,11 @@ in
         "<Ctrl+Shift+i>" = "devtools";
 
         # Emulate Tree Style Tabs keyboard shortcuts.
-        "<F1>" = "config-cycle tabs.show never always ;; config-cycle statusbar.show in-mode always ;; config-cycle scrolling.bar never always";
+        "<F1>" = [
+          "config-cycle tabs.show never always"
+          "config-cycle statusbar.show in-mode always"
+          "config-cycle scrolling.bar never always"
+        ];
 
         # Provide some Kakoune-style keyboard shortcuts.
         "gg" = "scroll-to-perc 0";
