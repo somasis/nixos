@@ -389,7 +389,7 @@ in
         "ge" = "scroll-to-perc 100";
       }
       // (lib.optionalAttrs (tor.enable && tor.client.enable) {
-        "cnp" = "config-cycle content.proxy system socks://${tor.client.socksListenAddress.addr}:${toString tor.client.socksListenAddress.port}";
+        "cnp" = "config-cycle -p content.proxy system socks://${tor.client.socksListenAddress.addr}:${toString tor.client.socksListenAddress.port}";
       })
       ;
     };
