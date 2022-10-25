@@ -118,16 +118,14 @@ in
       include = "${xdgRuntimeDir}/pass-beets/beets.yaml";
 
       directory = "${musicLossless}";
+      library = "${directory}/beets.db";
 
       sort_case_insensitive = false;
 
       plugins = [
         # "check"
-        # "web"
         "barcode"
         "originquery"
-
-        "types"
 
         # acousticbrainz/acoustid: apikey comes from `pass-beets`
         "absubmit"
@@ -143,6 +141,7 @@ in
         "lastgenre"
         "lyrics"
         "replaygain"
+        "types"
       ]
       ++ lib.optional config.services.mopidy.enable "mpdupdate"
       ;
@@ -157,7 +156,7 @@ in
       };
 
       types = {
-        rating = "int";
+        rating = "float";
         sample = "bool";
       };
 
