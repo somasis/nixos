@@ -44,7 +44,7 @@
         markup = "full";
 
         ignore_newline = false;
-        format = ''<span font="${font} heavy">%s</span> %b %p'';
+        format = ''<span font_weight="heavy">%s</span> %b %p'';
         word_wrap = true;
         ellipsize = "end";
 
