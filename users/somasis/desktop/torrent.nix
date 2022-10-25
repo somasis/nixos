@@ -42,6 +42,8 @@ let
         start-paused = false;
         delete-local-torrent = true;
 
+        last-add-destination = "/home/somasis/files/audio/library/source/torrent";
+
         exec-commands =
           let
             args = ''-h "http://%{hostname}:%{port}%{rpc-url-path}" -a "%{username}:%{password}" -H "%{profile-name}"'';
