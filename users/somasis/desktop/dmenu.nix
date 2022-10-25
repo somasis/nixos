@@ -250,147 +250,146 @@ let
       '';
     });
 
-  dmenu-pass = (
-    pkgs.writeShellApplication {
-      name = "dmenu-pass";
+  dmenu-pass = (pkgs.writeShellApplication {
+    name = "dmenu-pass";
 
-      runtimeInputs = [
-        dmenu
-        config.programs.password-store.package
-        pkgs.coreutils
-        pkgs.findutils
-        pkgs.gnugrep
-        pkgs.gnused
-        pkgs.libnotify
-        pkgs.uq
-        pkgs.xclip
-      ];
-      text = ''
-        usage() {
-            cat >&2 <<EOF
-        usage: dmenu-pass [-cn] [-i query] [-m print|username|password|otp] [dmenu options]
-        EOF
-            exit 69
-        }
+    runtimeInputs = [
+      dmenu
+      config.programs.password-store.package
+      pkgs.coreutils
+      pkgs.findutils
+      pkgs.gnugrep
+      pkgs.gnused
+      pkgs.libnotify
+      pkgs.uq
+      pkgs.xclip
+    ];
+    text = ''
+      usage() {
+          cat >&2 <<EOF
+      usage: dmenu-pass [-cn] [-i query] [-m print|username|password|otp] [dmenu options]
+      EOF
+          exit 69
+      }
 
-        : "''${PASSWORD_STORE_DIR:=''${HOME}/.password-store}"
-        : "''${PASSWORD_STORE_CLIP_TIME:=45}"
-        : "''${XDG_CACHE_HOME:=''${HOME}/.cache}"
+      : "''${PASSWORD_STORE_DIR:=''${HOME}/.password-store}"
+      : "''${PASSWORD_STORE_CLIP_TIME:=45}"
+      : "''${XDG_CACHE_HOME:=''${HOME}/.cache}"
 
-        clip=false
-        notify=false
-        initial=
-        mode=password
+      clip=false
+      notify=false
+      initial=
+      mode=password
 
-        while getopts :cni:m: arg >/dev/null 2>&1; do
-            case "''${arg}" in
-                c) clip=true ;;
-                n) notify=true ;;
-                i) initial="''${OPTARG}" ;;
-                m)
-                    case "''${OPTARG}" in
-                        print | username | password | otp) mode="''${OPTARG}" ;;
-                    esac
-                    ;;
-                *) usage;;
-            esac
-        done
-        shift $((OPTIND - 1))
+      while getopts :cni:m: arg >/dev/null 2>&1; do
+          case "''${arg}" in
+              c) clip=true ;;
+              n) notify=true ;;
+              i) initial="''${OPTARG}" ;;
+              m)
+                  case "''${OPTARG}" in
+                      print | username | password | otp) mode="''${OPTARG}" ;;
+                  esac
+                  ;;
+              *) usage;;
+          esac
+      done
+      shift $((OPTIND - 1))
 
-        h="''${XDG_CACHE_HOME}"/dmenu/dmenu-pass.cache
-        mkdir -p "''${h%/*}"
+      h="''${XDG_CACHE_HOME}"/dmenu/dmenu-pass.cache
+      mkdir -p "''${h%/*}"
 
-        c=$(
-            (
-                cd "''${PASSWORD_STORE_DIR}"
-                find .// \
-                    -type f \
-                    ! -path '*/.*/*' \
-                    ! -name '.*' \
-                    -name '*.gpg' \
-                    -printf '%d %p\n' 2>/dev/null \
-                    | sort -n \
-                    | sed 's@^[0-9]* @@; s@^\.//@@; s@\.gpg$@@' \
-                    | cat "''${h}" - 2>/dev/null
-            )   | uq \
-                | ''${DMENU:-dmenu} ''${initial:+-n -it "''${initial}"} -S -p "pass"
-        )
+      c=$(
+          (
+              cd "''${PASSWORD_STORE_DIR}"
+              find .// \
+                  -type f \
+                  ! -path '*/.*/*' \
+                  ! -name '.*' \
+                  -name '*.gpg' \
+                  -printf '%d %p\n' 2>/dev/null \
+                  | sort -n \
+                  | sed 's@^[0-9]* @@; s@^\.//@@; s@\.gpg$@@' \
+                  | cat "''${h}" - 2>/dev/null
+          )   | uq \
+              | ''${DMENU:-dmenu} ''${initial:+-n -it "''${initial}"} -S -p "pass"
+      )
 
-        [ -n "''${c}" ] || exit 0
+      [ -n "''${c}" ] || exit 0
 
-        touch "''${h}"
+      touch "''${h}"
 
-        case "''${mode}" in
-            print)
-                printf '%s\n' "''${c}"
-                ;;
-            username)
-                username="''${c##*/}"
+      case "''${mode}" in
+          print)
+              printf '%s\n' "''${c}"
+              ;;
+          username)
+              username="''${c##*/}"
 
-                if pass show "''${c}" | grep -Eq "^(user|username):"; then
-                    username=$(
-                        pass show "''${c}" \
-                            | sed -E \
-                                '/^(user|username):/ s/^(user|username): ?//'
-                    )
-                fi
+              if pass show "''${c}" | grep -Eq "^(user|username):"; then
+                  username=$(
+                      pass show "''${c}" \
+                          | sed -E \
+                              '/^(user|username):/ s/^(user|username): ?//'
+                  )
+              fi
 
-                if "''${clip}"; then
-                    printf '%s\n' "''${username}" \
-                        | xclip -in -selection clipboard
-                else
-                    printf '%s\n' "''${username}"
-                fi
-                ;;
-            password)
-                if "''${clip}"; then
-                    out=$(pass show -c "''${c}")
-                    if "''${notify}"; then
-                        notify-send \
-                            -a pass \
-                            -i password \
-                            "pass" \
-                            "Copied $1 to clipboard. Will clear in ''${PASSWORD_STORE_CLIP_TIME} seconds."
-                    else
-                        printf '%s\n' "''${out}"
-                    fi
-                else
-                    pass show "''${c}" \
-                        | head -n1
-                fi
-                ;;
-            otp)
-                if "''${clip}"; then
-                    out=$(pass otp -c "''${c}")
-                    if "''${notify}"; then
-                        notify-send \
-                            -a pass \
-                            -i password \
-                            "pass" \
-                            "Copied OTP code for $1 to clipboard. Will clear in 45 seconds."
-                    else
-                        printf '%s\n' "''${out}"
-                    fi
-                else
-                    pass otp "''${c}"
-                fi
-                ;;
-        esac
+              if "''${clip}"; then
+                  printf '%s\n' "''${username}" \
+                      | xclip -in -selection clipboard
+              else
+                  printf '%s\n' "''${username}"
+              fi
+              ;;
+          password)
+              if "''${clip}"; then
+                  out=$(pass show -c "''${c}")
+                  if "''${notify}"; then
+                      notify-send \
+                          -a pass \
+                          -i password \
+                          "pass" \
+                          "Copied $1 to clipboard. Will clear in ''${PASSWORD_STORE_CLIP_TIME} seconds."
+                  else
+                      printf '%s\n' "''${out}"
+                  fi
+              else
+                  pass show "''${c}" \
+                      | head -n1
+              fi
+              ;;
+          otp)
+              if "''${clip}"; then
+                  out=$(pass otp -c "''${c}")
+                  if "''${notify}"; then
+                      notify-send \
+                          -a pass \
+                          -i password \
+                          "pass" \
+                          "Copied OTP code for $1 to clipboard. Will clear in 45 seconds."
+                  else
+                      printf '%s\n' "''${out}"
+                  fi
+              else
+                  pass otp "''${c}"
+              fi
+              ;;
+      esac
 
-        t=$(mktemp)
+      t=$(mktemp)
 
-        {
-            cat - "''${h}" <<EOF
-        $c
-        EOF
-        }   | head -n 24 \
-            | grep -v "^\s*$" \
-            | uq \
-            | sponge "''${t}"
+      {
+          cat - "''${h}" <<EOF
+      $c
+      EOF
+      }   | head -n 24 \
+          | grep -v "^\s*$" \
+          | uq \
+          | sponge "''${t}"
 
-        mv -f "''${t}" "''${h}"
-      '';
-    });
+      mv -f "''${t}" "''${h}"
+    '';
+  });
 
   dmenu-session = (
     pkgs.writeShellApplication {
