@@ -29,6 +29,7 @@
 
       peek = "tee /dev/stderr";
 
+      systemctl = "systemctl -l --legend=false";
       userctl = "systemctl --user";
       journalctl = "journalctl -e";
       syslog = "${journalctl} -b";
