@@ -43,6 +43,8 @@ in
   home.packages = [
     discord
 
+    pkgs.discordchatexporter-cli
+
     # Used for developing discord-tokipona.
     pkgs.bc
     pkgs.gnugrep
