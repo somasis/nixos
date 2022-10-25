@@ -1,17 +1,29 @@
-{ pkgs, ... }: {
+{ pkgs
+, nixosConfig
+, ...
+}: {
   home.packages = [ pkgs.batsignal ];
 
   systemd.user.services.batsignal = {
-    Service.Type = "simple";
-    Service.ExecStart = ''
-      ${pkgs.batsignal}/bin/batsignal \
-        -I 'battery' \
-        -e \
-        -D '${pkgs.systemd}/bin/systemctl suspend'
-    '';
-    Service.Restart = "on-failure";
-    Service.RestartSec = 1;
+    Unit = {
+      Description = pkgs.batsignal.meta.description;
+      PartOf = [ "graphical-session.target" ];
+    };
     Install.WantedBy = [ "graphical-session.target" ];
-    Unit.PartOf = [ "graphical-session.target" ];
+
+    Service = {
+      Type = "simple";
+      ExecStart = ''
+        ${pkgs.batsignal}/bin/batsignal \
+          -e \
+          -I "battery" \
+          -D "${pkgs.systemd}/bin/systemctl suspend" \
+          -w "${builtins.toString nixosConfig.services.upower.percentageLow}" \
+          -c "${builtins.toString nixosConfig.services.upower.percentageCritical}"
+      '';
+
+      Restart = "on-failure";
+      RestartSec = 1;
+    };
   };
 }

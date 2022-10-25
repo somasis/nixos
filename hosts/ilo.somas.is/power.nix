@@ -1,5 +1,6 @@
-{ pkgs, ... }: {
+{
   services.logind = {
+    lidSwitch = "suspend";
     lidSwitchExternalPower = "ignore";
 
     extraConfig = ''
@@ -8,6 +9,17 @@
       PowerKeyIgnoreInhibited=yes
     '';
   };
+
+  services.upower = {
+    enable = true;
+    criticalPowerAction = "PowerOff";
+
+    percentageLow = 15;
+    percentageCritical = 5;
+    percentageAction = 0;
+  };
+
+  powerManagement.cpuFreqGovernor = "performance";
 
   # Auto-tune with powertop on boot.
   powerManagement.powertop.enable = true;
