@@ -79,189 +79,218 @@ in
   systemd.services."borgbackup-job-spinoza".serviceConfig.Nice = 19;
 
   environment.systemPackages = let inherit (defaults) extraArgs; in [
-    (pkgs.writeShellScriptBin "borg-import-tumblr" ''
-      set -e
+    (pkgs.writeShellApplication rec {
+      name = "borg-import-tumblr";
 
-      usage() {
-          cat >&2 <<EOF
-      usage: ''${0##*/} *.zip
-      EOF
-          exit 69
-      }
+      runtimeInputs = [
+        pkgs.coreutils
+        pkgs.libarchive
+        pkgs.jq
+      ];
 
-      [ "$#" -ge 1 ] || usage
+      text = ''
+        set -e
 
-      date=$(TZ=UTC ${pkgs.coreutils}/bin/date +%Y-%m-%dT%H:%M:%S)
+        usage() {
+            cat >&2 <<EOF
+        usage: ${name} *.zip
+        EOF
+            exit 69
+        }
 
-      files=()
-      for f; do
-          files+=("@''${f}")
-      done
+        [ "$#" -ge 1 ] || usage
 
-      t=$(mktemp -d)
+        date=$(TZ=UTC date +%Y-%m-%dT%H:%M:%S)
 
-      ${pkgs.libarchive}/bin/bsdtar -cf - --format=ustar "''${files[@]}" \
-          | ${pkgs.libarchive}/bin/bsdtar -C "$t" -x -f - "payload-0.json"
+        files=()
+        for f; do
+            files+=("@''${f}")
+        done
 
-      a=$(
-          ${pkgs.jq}/bin/jq -r '.[0].data.email' < "$t"/payload-0.json
-      )
+        t=$(mktemp -d)
 
-      d=$(
-          ${pkgs.coreutils}/bin/date \
-              --date="@$(${pkgs.coreutils}/bin/stat -c %Y "$t"/payload-0.json)" \
-              +%Y-%m-%dT%H:%M:%S
-      )
+        bsdtar -cf - --format=ustar "''${files[@]}" \
+            | bsdtar -C "$t" -x -f - "payload-0.json"
 
-      rm -r "$t"
+        a=$(
+            jq -r '.[0].data.email' < "$t"/payload-0.json
+        )
 
-      printf '::tumblr-%s-%s (%s)\n' "$a" "$date" "$d"
+        d=$(
+            date \
+                --date="@$(stat -c %Y "$t"/payload-0.json)" \
+                +%Y-%m-%dT%H:%M:%S
+        )
 
-      ${pkgs.libarchive}/bin/bsdtar -cf - --format=ustar "''${files[@]}" \
-          | doas borg-job-spinoza \
-              import-tar \
-                  ${extraArgs} \
-                  --stats -p \
-                  --comment="imported with borg import-tar via. borg-import-tumblr" \
-                  --timestamp="''${d}" \
-                  "::tumblr-''${a}-''${date}.failed" \
-                  -
+        rm -r "$t"
 
-      doas borg-job-spinoza \
-          rename \
-              ${extraArgs} \
-              "::tumblr-''${a}-''${date}.failed" \
-              "tumblr-''${a}-''${date}"
+        printf '::tumblr-%s-%s (%s)\n' "$a" "$date" "$d"
 
-      doas borg-job-spinoza \
-          prune \
-              ${extraArgs} \
-              --keep-monthly=12 --keep-yearly=4 \
-              -a "tumblr-''${aid}-*"
-    '')
+        bsdtar -cf - --format=ustar "''${files[@]}" \
+            | doas borg-job-spinoza \
+                import-tar \
+                    ${extraArgs} \
+                    --stats -p \
+                    --comment="imported with borg import-tar via. borg-import-tumblr" \
+                    --timestamp="''${d}" \
+                    "::tumblr-''${a}-''${date}.failed" \
+                    -
 
-    (pkgs.writeShellScriptBin "borg-import-twitter" ''
-      set -e
+        doas borg-job-spinoza \
+            rename \
+                ${extraArgs} \
+                "::tumblr-''${a}-''${date}.failed" \
+                "tumblr-''${a}-''${date}"
 
-      usage() {
-          cat >&2 <<EOF
-      usage: ''${0##*/} twitter-1970-01-01-*
-      EOF
-          exit 69
-      }
+        doas borg-job-spinoza \
+            prune \
+                ${extraArgs} \
+                --keep-monthly=12 --keep-yearly=4 \
+                -a "tumblr-''${a}-*"
+      '';
+    })
 
-      [ "$#" -ge 1 ] || usage
+    (pkgs.writeShellApplication rec {
+      name = "borg-import-twitter";
 
-      date=$(TZ=UTC ${pkgs.coreutils}/bin/date +%Y-%m-%dT%H:%M:%S)
+      runtimeInputs = [
+        pkgs.coreutils
+        pkgs.libarchive
+        pkgs.gnused
+        pkgs.jq
+      ];
 
-      files=()
-      for f; do
-          files+=("@''${f}")
-      done
+      text = ''
+        set -e
 
-      a=$(
-          ${pkgs.libarchive}/bin/bsdtar -cf - --format=ustar "''${files[@]}" \
-              | ${pkgs.libarchive}/bin/bsdtar -Ox -f - "data/account.js" \
-              | ${pkgs.gnused}/bin/sed '/\[$/d; /^\]$/d' \
-              | ${pkgs.jq}/bin/jq -r '"\(.account.accountId)-\(.account.username)"'
-      )
+        usage() {
+            cat >&2 <<EOF
+        usage: ${name} twitter-1970-01-01-*
+        EOF
+            exit 69
+        }
 
-      user=''${a#*-}
-      aid=''${a%-*}
+        [ "$#" -ge 1 ] || usage
 
-      d=''${1##*/}
-      d=''${d%.*}
-      d=''${d%-*}
-      d=''${d#twitter-}
-      d="''${d}"T00:00:00
+        date=$(TZ=UTC date +%Y-%m-%dT%H:%M:%S)
 
-      printf '::twitter-%s-%s (%s)\n' "$a" "$date" "$d"
+        files=()
+        for f; do
+            files+=("@''${f}")
+        done
 
-      ${pkgs.libarchive}/bin/bsdtar -cf - --format=ustar "''${files[@]}" \
-          | doas borg-job-spinoza \
-              import-tar \
-                  ${extraArgs} \
-                  --stats -p \
-                  --comment="imported with borg import-tar via. borg-import-twitter" \
-                  --timestamp="''${d}" \
-                  "::twitter-''${a}-''${date}.failed" \
-                  -
+        a=$(
+            bsdtar -cf - --format=ustar "''${files[@]}" \
+                | bsdtar -Ox -f - "data/account.js" \
+                | sed '/\[$/d; /^\]$/d' \
+                | jq -r '"\(.account.accountId)-\(.account.username)"'
+        )
 
-      doas borg-job-spinoza \
-          rename \
-              ${extraArgs} \
-              "::twitter-''${a}-''${date}.failed" \
-              "twitter-''${a}-''${date}"
+        aid=''${a%-*}
 
-      doas borg-job-spinoza \
-          prune \
-              ${extraArgs} \
-              --keep-monthly=12 --keep-yearly=4 \
-              -a "twitter-''${aid}-*"
-    '')
+        d=''${1##*/}
+        d=''${d%.*}
+        d=''${d%-*}
+        d=''${d#twitter-}
+        d="''${d}"T00:00:00
 
-    (pkgs.writeShellScriptBin "borg-import-google-takeout" ''
-      set -e
+        printf '::twitter-%s-%s (%s)\n' "$a" "$date" "$d"
 
-      usage() {
-          cat >&2 <<EOF
-      usage: ''${0##*/} takeout-19700101T000000Z-*
-      EOF
-          exit 69
-      }
+        bsdtar -cf - --format=ustar "''${files[@]}" \
+            | doas borg-job-spinoza \
+                import-tar \
+                    ${extraArgs} \
+                    --stats -p \
+                    --comment="imported with borg import-tar via. borg-import-twitter" \
+                    --timestamp="''${d}" \
+                    "::twitter-''${a}-''${date}.failed" \
+                    -
 
-      [[ "$#" -ge 1 ]] || usage
+        doas borg-job-spinoza \
+            rename \
+                ${extraArgs} \
+                "::twitter-''${a}-''${date}.failed" \
+                "twitter-''${a}-''${date}"
 
-      date=$(TZ=UTC ${pkgs.coreutils}/bin/date +%Y-%m-%dT%H:%M:%S)
+        doas borg-job-spinoza \
+            prune \
+                ${extraArgs} \
+                --keep-monthly=12 --keep-yearly=4 \
+                -a "twitter-''${aid}-*"
+      '';
+    })
 
-      d=''${1##*/}
-      d=''${d%.tgz}
-      d=''${d#takeout-}
-      d=''${d%-*}
-      d=''${d%Z}
-      d="''${d:0:4}"-"''${d:4:2}"-"''${d:6:2}"T"''${d:9:2}":"''${d:11:2}":"''${d:13:2}"
+    (pkgs.writeShellApplication rec {
+      name = "borg-import-google-takeout";
 
-      files=()
-      for f; do
-          files+=("@''${f}")
-      done
+      runtimeInputs = [
+        pkgs.coreutils
+        pkgs.libarchive
+        pkgs.htmlq
+        pkgs.gnugrep
+      ];
 
-      a=$(
-          ${pkgs.libarchive}/bin/bsdtar -cf - --format=ustar "''${files[@]}" \
-              | ${pkgs.libarchive}/bin/bsdtar -Oxf - "Takeout/archive_browser.html" \
-              | ${pkgs.htmlq}/bin/htmlq -t 'html > body h1.header_title' \
-              | ${pkgs.coreutils}/bin/tr ' ' '\n' \
-              | ${pkgs.gnugrep}/bin/grep '@' \
-              | ${pkgs.coreutils}/bin/head -n1
-      )
+      text = ''
+        set -e
 
-      printf '::google-takeout-%s-%s (%s)\n' "$a" "$date" "$d"
+        usage() {
+            cat >&2 <<EOF
+        usage: ${name} takeout-19700101T000000Z-*
+        EOF
+            exit 69
+        }
 
-      ${pkgs.libarchive}/bin/bsdtar -cf - --format=ustar "''${files[@]}" \
-          | doas borg-job-spinoza \
-              import-tar \
-                  ${extraArgs} \
-                  --stats -p \
-                  --comment="imported with borg import-tar via. borg-import-google-takeout" \
-                  --timestamp="''${d}" \
-                  "::google-takeout-''${a}-''${date}.failed" \
-                  -
+        [[ "$#" -ge 1 ]] || usage
 
-          doas borg-job-spinoza \
-              rename \
-                  ${extraArgs} \
-                  "::google-takeout-''${a}-''${date}.failed" \
-                  "google-takeout-''${a}-''${date}"
+        date=$(TZ=UTC date +%Y-%m-%dT%H:%M:%S)
 
-          doas borg-job-spinoza \
-              prune \
-                  ${extraArgs} \
-                  --keep-monthly=12 --keep-yearly=4 \
-                  -a "google-takeout-''${a}-*"
-    '')
+        d=''${1##*/}
+        d=''${d%.tgz}
+        d=''${d#takeout-}
+        d=''${d%-*}
+        d=''${d%Z}
+        d="''${d:0:4}"-"''${d:4:2}"-"''${d:6:2}"T"''${d:9:2}":"''${d:11:2}":"''${d:13:2}"
+
+        files=()
+        for f; do
+            files+=("@''${f}")
+        done
+
+        a=$(
+            bsdtar -cf - --format=ustar "''${files[@]}" \
+                | bsdtar -Oxf - "Takeout/archive_browser.html" \
+                | htmlq -t 'html > body h1.header_title' \
+                | tr ' ' '\n' \
+                | grep '@' \
+                | head -n1
+        )
+
+        printf '::google-takeout-%s-%s (%s)\n' "$a" "$date" "$d"
+
+        bsdtar -cf - --format=ustar "''${files[@]}" \
+            | doas borg-job-spinoza \
+                import-tar \
+                    ${extraArgs} \
+                    --stats -p \
+                    --comment="imported with borg import-tar via. borg-import-google-takeout" \
+                    --timestamp="''${d}" \
+                    "::google-takeout-''${a}-''${date}.failed" \
+                    -
+
+            doas borg-job-spinoza \
+                rename \
+                    ${extraArgs} \
+                    "::google-takeout-''${a}-''${date}.failed" \
+                    "google-takeout-''${a}-''${date}"
+
+            doas borg-job-spinoza \
+                prune \
+                    ${extraArgs} \
+                    --keep-monthly=12 --keep-yearly=4 \
+                    -a "google-takeout-''${a}-*"
+      '';
+    })
   ];
 
-  environment.persistence."/cache".directories = [
-    { directory = "/root/.cache/borg"; mode = "0770"; }
-  ];
+  environment.persistence."/cache".directories = [{ directory = "/root/.cache/borg"; mode = "0770"; }];
 }
