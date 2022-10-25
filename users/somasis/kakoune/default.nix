@@ -59,15 +59,13 @@
     # Used by spell.kak; see spell.nix for dictionaries
     pkgs.aspell
 
-    # Used by editorconfig.kak
     (pkgs.writeShellScriptBin "editor" ''
       exec terminal kak "$@"
     '')
-
-    # TODO: can remove on next Kakoune release, probably
-    #       <https://github.com/mawww/kakoune/pull/4699>
   ];
 
+  # TODO: can remove on next Kakoune release, probably
+  #       <https://github.com/mawww/kakoune/pull/4699>
   xdg.desktopEntries.kakoune = {
     name = "Kakoune";
     genericName = "Text Editor";
