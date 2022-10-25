@@ -144,6 +144,8 @@ in
     Unit = {
       Description = "Authenticate `syncplay` using `pass`";
       PartOf = [ "graphical-session.target" ];
+
+      After = [ "gpg-agent.service" ];
     };
     Install.WantedBy = [ "graphical-session.target" ];
 

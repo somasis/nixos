@@ -411,6 +411,8 @@ in
     Unit = {
       Description = "Authenticate `transmission-remote-gtk` using `pass`";
       PartOf = [ "default.target" ];
+
+      After = [ "gpg-agent.service" ];
     };
     Install.WantedBy = [ "default.target" ];
 

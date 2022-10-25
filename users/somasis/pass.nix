@@ -13,6 +13,11 @@
   ];
 
   programs.gpg.enable = true;
+  services.gpg-agent = {
+    enable = true;
+    enableExtraSocket = true;
+    pinentryFlavor = "gtk2";
+  };
 
   programs.password-store = {
     enable = true;
