@@ -1,4 +1,9 @@
-{ config, ... }:
+{ pkgs
+, lib
+, config
+, nixosConfig
+, ...
+}:
 let
   musicSource = "${config.home.homeDirectory}/audio/library/source";
   musicLossless = "${config.home.homeDirectory}/audio/library/lossless";
