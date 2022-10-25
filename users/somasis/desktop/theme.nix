@@ -104,12 +104,6 @@
   services.xsettingsd = {
     enable = true;
     settings = {
-      # "Xft/DPI" = 1024 * config.xresources.properties."Xft.dpi";
-      "Xft/Antialias" = config.xresources.properties."Xft.antialias";
-      "Xft/Hinting" = config.xresources.properties."Xft.hinting";
-      # "Xft/HintStyle" = config.xresources.properties."Xft.hintstyle";
-      "Xft/RGBA" = config.xresources.properties."Xft.rgba";
-
       "Net/ThemeName" = config.gtk.theme.name;
       "Net/IconThemeName" = config.gtk.iconTheme.name;
       "Gtk/CursorThemeName" = config.home.pointerCursor.name;
