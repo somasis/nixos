@@ -107,7 +107,7 @@
           done
           shift $(( OPTIND - 1 ))
 
-          [ "$#" -eq 1 ] && usage ;;
+          [ "$#" -eq 1 ] && usage
 
           success=true
 
