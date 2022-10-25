@@ -220,9 +220,12 @@ in
         "alt + Print" = "${screenshot}";
 
         # Hardware: {mute, lower, raise} output volume - fn + {f1,f2,f3}
-        "XF86AudioMute" = "ponymix toggle";
-        "XF86AudioLowerVolume" = "ponymix-snap decrease 5";
-        "XF86AudioRaiseVolume" = "ponymix-snap increase 5";
+        "XF86AudioMute" = "ponymix -t sink toggle";
+        "super + XF86AudioMute" = "ponymix -t source toggle";
+        "XF86AudioRaiseVolume" = "ponymix-snap -t sink increase 5";
+        "XF86AudioLowerVolume" = "ponymix-snap -t sink decrease 5";
+        "super + XF86AudioRaiseVolume" = "ponymix-snap -t source increase 5";
+        "super + XF86AudioLowerVolume" = "ponymix-snap -t source decrease 5";
 
         # Hardware: toggle touchpad - super + f1
         "super + F2" = ''
