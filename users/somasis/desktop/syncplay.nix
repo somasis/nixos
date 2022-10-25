@@ -57,8 +57,8 @@ let
         "${config.home.homeDirectory}/mess/current"
         "${config.xdg.userDirs.videos}/film"
         "${config.xdg.userDirs.videos}/tv"
-        "${config.home.homeDirectory}/mnt/ssh/genesis.whatbox.ca/video/film"
-        "${config.home.homeDirectory}/mnt/ssh/genesis.whatbox.ca/video/tv"
+        "${config.home.homeDirectory}/mnt/ssh/genesis.whatbox.ca/files/video/film"
+        "${config.home.homeDirectory}/mnt/ssh/genesis.whatbox.ca/files/video/tv"
       ];
 
       room = "anime";
