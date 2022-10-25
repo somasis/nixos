@@ -22,7 +22,7 @@
     enable = config.services.mopidy.enable;
     mpd = {
       host = config.services.mopidy.settings.mpd.hostname;
-      musicDirectory = config.xdg.userDirs.music;
+      musicDirectory = config.services.mopidy.settings.file.media_dirs;
     };
   };
 }
