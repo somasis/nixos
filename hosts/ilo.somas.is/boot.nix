@@ -25,12 +25,13 @@
       # TODO: NixOS installer image accessible from bootloader?
       # extraEntries."nixos-installer.conf" = ''
       #   title NixOS Installer
-      #   efi /EFI/nixos-installer/memdisk.efi
+      #   efi /EFI/nixos-installer/nixos-installer.efi
       # '';
 
       # extraFiles = {
-      #   "EFI/nixos-installer/nixos-installer.iso" = nixosInstaller;
-      #   "EFI/nixos-installer/memdisk.efi" = "${pkgs.syslinux}/share/memdisk";
+      #   "EFI/nixos-installer/nixos-installer.efi" = nixos-generators.nixosGenreate {
+      #     system = "x86_64-linux";
+      #     format = "kexec-bundle";
       # };
     };
     timeout = 0;
