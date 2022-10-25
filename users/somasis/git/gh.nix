@@ -45,9 +45,7 @@ let
   });
 in
 {
-  home.packages = [
-    pass-gh
-  ];
+  home.packages = [ pass-gh ];
 
   programs.gh = {
     enable = true;
