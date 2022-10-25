@@ -143,9 +143,9 @@ in
   systemd.user.services."pass-syncplay" = {
     Unit = {
       Description = "Authenticate `syncplay` using `pass`";
-      PartOf = [ "default.target" ];
+      PartOf = [ "graphical-session.target" ];
     };
-    Install.WantedBy = [ "default.target" ];
+    Install.WantedBy = [ "graphical-session.target" ];
 
     Service = {
       Type = "oneshot";
