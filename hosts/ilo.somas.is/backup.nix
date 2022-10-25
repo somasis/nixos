@@ -36,7 +36,6 @@ let
       "*[Cc]ache*"
       "*[Tt]humbnail*"
       ".stversions"
-      "/persist/home/somasis/etc/GIMP/*/CrashLog"
       "/persist/home/somasis/etc/syncthing/index-*.db"
       "pp:/persist/home/somasis/audio/source"
       "re:/persist/home/somasis/etc/discord/[0-9\.]+/.*"
