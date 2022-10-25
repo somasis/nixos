@@ -62,6 +62,25 @@ in
 
     urls =
       let
+        curl = lib.escapeShellArgs [
+          "${pkgs.curl}/bin/curl"
+          (lib.optionalString (tor.enable && tor.client.enable) "-x socks5h://${tor.client.socksListenAddress.addr}:${toString tor.client.socksListenAddress.port}")
+          "-A \"${userAgent}\""
+        ];
+
+        discardContent = pkgs.writeShellScript "discard-content" ''
+          umask 0077
+
+          feed="$1"
+          shift
+
+          ${curl} -Lf "''${feed}" \
+              | ${pkgs.xmlstarlet}/bin/xml ed \
+                  -d '//channel/item/description' \
+                  -d '//channel/item/content:encoded' \
+                  -d '//feed/entry/content'
+        '';
+
         # generateRedacted = pkgs.writeShellScript "generate-redacted" ''
         #   entry=www/redacted.ch
 
@@ -83,25 +102,21 @@ in
 
           subreddit="$1"
           shift
+          jq="''${2:-}"
 
           json=$(${pkgs.coreutils}/bin/mktemp)
-          trap '${pkgs.coreutils}/bin/rm -f "$json"' EXIT
+          trap '${pkgs.coreutils}/bin/rm -f "''${json}"' EXIT
 
-          ${pkgs.curl}/bin/curl \
-              ${lib.optionalString (tor.enable && tor.client.enable) "-x socks5h://${tor.client.socksListenAddress.addr}:${toString tor.client.socksListenAddress.port} \ "}
-              -A "${userAgent}" \
-              -Lf \
-              -o "$json" \
-              "https://www.reddit.com/r/''${subreddit}/.json"
+          ${curl} -Lf -o "''${json}" "https://www.reddit.com/r/''${subreddit}/.json"
 
-          [ -s "$json" ] || exit 1
+          [[ -s "''${json}" ]] || exit 1
 
-          <"$json" ${config.programs.jq.package}/bin/jq -r --arg subreddit "$subreddit" '
+          <"''${json}" ${config.programs.jq.package}/bin/jq -r --arg subreddit "''${subreddit}" '
               "<?xml version=\"1.0\" encoding=\"utf-8\"?><feed xmlns=\"http://www.w3.org/2005/Atom\"><title>/r/\($subreddit)</title><id>https://www.reddit.com/r/\($subreddit)</id><link rel=\"alternate\" href=\"https://www.reddit.com/r/\($subreddit)\" /><updated>\(.data.children[0].data.created_utc | todate)</updated>",
               (
                   .data.children
                       | map(
-                          select(.kind == "t3" and (.data | .stickied == false'"''${*:+ and $*}"'))
+                          select(.kind == "t3" and (.data | .stickied == false'"''${jq:+ and ''${jq}}"'))
                               | .data
                               | (((.link_flair_text // empty | "\(.): ") // null) + .title) as $title
                               | (.created_utc | todate) as $updated
@@ -119,6 +134,68 @@ in
           '
         '';
 
+        generateNews = pkgs.writeShellApplication {
+          name = "generate-news";
+
+          runtimeInputs = [
+            config.programs.jq.package
+            pkgs.coreutils
+            pkgs.pandoc
+          ];
+
+          text = ''
+            umask 0077
+
+            # shellcheck disable=SC2016
+            # don't lint the json declaration
+            ${lib.toShellVar "json" (builtins.toJSON config.news.entries)}
+
+            cat <<EOF
+            <?xml version="1.0" encoding="utf-8"?>
+            <feed xmlns="http://www.w3.org/2005/Atom">
+            <title>home-manager</title>
+            EOF
+
+            # Convert to TSV (from <https://stackoverflow.com/a/51929863>)
+            <<< "$json" \
+                jq -r '
+                    [ [ paths(scalars)[1:] | tojson ] | unique[] | fromjson ] as $p
+                        | [
+                            (
+                                $p[]
+                                | map(if type=="number" then "[\(.)]" else ".\(.)" end)
+                                | join("")
+                            )
+                        ],
+                        (.[] | [getpath($p[])]) | @tsv
+                ' \
+                | tail -n +2 \
+                | while IFS=$(printf '\t') read -r condition id content date; do
+                    # shellcheck disable=SC2001
+                    content=$(sed 's/\\t/\t/g; s/\\n/\n/g' <<< "''${content}")
+                    title=$(pandoc -f markdown-raw_html+smart -t plain --wrap=none <<< "''${content}" | sed 's/[\.:]$//' | head -n1 | tr -d '\n' | base64 -w0)
+                    content=$(pandoc -f markdown-raw_html+smart -t html --wrap=none <<< "''${content}" | base64 -w0)
+
+                    printf '%s\t%s\t%s\t%s\t%s\n' "$title" "$date" "$condition" "$id" "$content"
+                done \
+                | sort -t $'\t' -k2 \
+                | jq -rRs '
+                    split("\n")[:-1]
+                        | map(
+                            [ split("\t") ][]
+                                | { title: (.[0] | @base64d), date: .[1], condition: .[2], id: .[3], content: (.[4] | @base64d) }
+                        )
+                ' \
+                | jq -r '
+                    sort_by(.date)
+                        | map("<entry><title type=\"html\">\(.title)</title><id>\(.id)</id><updated>\(.date)</updated><content type=\"html\">\(.content | @html)</content></entry>")[]
+                '
+
+            cat <<EOF
+            </feed>
+            EOF
+          '';
+        };
       in
       [
         # Blogs
@@ -197,17 +274,17 @@ in
         }
         {
           title = "Oil Shell";
-          url = ''"exec:${generateReddit} oilshell .is_self == false"'';
+          url = ''"exec:${generateReddit} \"oilshell\" \".is_self == false\""'';
           tags = [ "blog" "computer" "programming" ];
         }
         {
           title = "Reddit: toki pona";
-          url = ''"exec:${generateReddit} tokipona+tokiponataso+mi_lon+sitelen_musi"'';
+          url = ''"exec:${generateReddit} \"tokipona+tokiponataso+mi_lon+sitelen_musi\""'';
           tags = [ "reddit" "toki pona" ];
         }
         {
           title = "Reddit: sitelen musi pi toki pona";
-          url = ''"exec:${generateReddit} mi_lon+sitelen_musi"'';
+          url = ''"exec:${generateReddit} \"mi_lon+sitelen_musi\""'';
           tags = [ "reddit" "toki pona" ];
         }
         {
@@ -354,9 +431,10 @@ in
           url = "https://nixers.net/newsletter/feed.xml";
           tags = [ "computer" ];
         }
+
         # OpenStreetMap
         {
-          url = "https://www.weeklyosm.eu/feed";
+          url = "\"exec:${discardContent} https://www.weeklyosm.eu/feed\"";
           title = "weeklyOSM";
           tags = [ "news" "OpenStreetMap" ];
         }
@@ -411,6 +489,7 @@ in
         }
         # System
         { url = "https://nixos.org/blog/announcements-rss.xml"; tags = [ "computer" "NixOS" ]; }
+        { url = "exec:${generateNews}/bin/generate-news"; tags = [ "computer" "NixOS" ]; }
 
         # YouTube
         {
@@ -456,13 +535,7 @@ in
                 ${config.programs.password-store.package}/bin/pass \
                     www/github.com/somasis.private.atom \
                     | ${pkgs.coreutils}/bin/tr -d '\n' \
-                    | ${pkgs.curl}/bin/curl \
-                        ${lib.optionalString (tor.enable && tor.client.enable) "-x socks5h://${tor.client.socksListenAddress.addr}:${toString tor.client.socksListenAddress.port} \ "}
-                        -A "${userAgent}" \
-                        -Lf \
-                        -G \
-                        --data-urlencode "token@-" \
-                        "https://github.com/somasis.private.atom"
+                    | ${curl} -Lf -G --data-urlencode "token@-" "https://github.com/somasis.private.atom"
               '';
             in
             "exec:${generate}";
