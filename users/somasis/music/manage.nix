@@ -47,33 +47,67 @@ let
     '';
   });
 
-  gazelle-origin = (pkgs.python3Packages.buildPythonApplication rec {
-    pname = "gazelle-origin";
-    version = "unstable-2020-11-16";
+  bencoder = (pkgs.python3Packages.buildPythonPackage rec {
+    pname = "bencoder";
+    version = "0.2.0";
 
-    src = pkgs.fetchFromGitHub {
-      owner = "x1ppy";
-      repo = pname;
-      rev = "4bfffa575ace819b02d576e9f0b79d20335c03c5";
-      hash = "sha256-0000000000000000000000000000000000000000000=";
+    src = pkgs.python3Packages.fetchPypi {
+      inherit pname version;
+      hash = "sha256-rENvM/3X51stkFdJHSq+77VjHvsTyBNAPbCtsRq1L8I=";
     };
 
-    propagatedBuildInputs = [
-      pkgs.python3Packages.setuptools
+    buildInputs = with pkgs.python3Packages; [ setuptools ];
+
+    meta = with pkgs.lib; {
+      description = "A simple bencode decoder/encoder library in pure Python";
+      homepage = "https://github.com/utdemir/${pname}";
+      license = licenses.gpl2;
+      maintainers = with maintainers; [ somasis ];
+    };
+  });
+
+  gazelle-origin = (pkgs.python3Packages.buildPythonApplication rec {
+    pname = "gazelle-origin";
+    version = "3.0.0";
+
+    src = pkgs.fetchFromGitHub {
+      repo = pname;
+
+      # owner = "x1ppy";
+      # rev = "4bfffa575ace819b02d576e9f0b79d20335c03c5";
+      # hash = "sha256-2FazeqwpRHVuvb5IuFUAvxh7541/xg965kw8dzCsRCI=";
+
+      # Use the spinfast319 fork, since it seems that upstream is inactive
+      owner = "spinfast319";
+      rev = version;
+      hash = "sha256-bFUadSJ8eV3y9I9udQsDukLk6kKKW610zn4aIYxhZ5w=";
+    };
+
+    buildInputs = with pkgs.python3Packages; [ setuptools ];
+    propagatedBuildInputs = with pkgs.python3Packages; [
+      bencoder
+      pyyaml
+      requests
     ];
 
     meta = with pkgs.lib;      {
       description = "Gazelle origin.yaml generator";
-      homepage = "https://github.com/x1ppy/gazelle-origin";
-      license = licenses.unfree;
+      homepage = "https://github.com/spinfast319/${pname}";
+      license = licenses.unfree; # TODO <https://github.com/x1ppy/beets-originquery/issues/3>
       maintainers = with maintainers; [ somasis ];
     };
   });
 in
 {
   home.packages = [
+    (pkgs.writeShellScriptBin "gazelle-origin" ''
+      ${gazelle-origin}/bin/gazelle-origin --env /dev/stdin "$@" <<EOF
+      export ORIGIN_TRACKER="RED"
+      export RED_API_KEY=$(pass ${nixosConfig.networking.fqdn}/gazelle-origin/redacted.ch)
+      EOF
+    '')
+
     pass-beets
-    gazelle-origin
   ];
 
   programs.beets = {
