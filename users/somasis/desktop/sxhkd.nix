@@ -139,10 +139,13 @@ in
       let
         screenshots = "${config.home.homeDirectory}/mess/current/screenshots";
         screenshot = pkgs.writeShellScript "screenshot" ''
+          set -eu
+          set -o pipefail
+
           mkdir -p "${screenshots}"
 
           export TMPDIR=$(mktemp -d "${screenshots}"/.tmp.XXXXXX)
-          d=$(date +"%Y%m%d_%H%M%S.png")
+          d=$(TZ=UTC date +"%Y-%m-%dT%H:%M:%S.png")
 
           ${pkgs.maim}/bin/maim "$@" \
               | ${pkgs.moreutils}/bin/sponge "${screenshots}/$d"
