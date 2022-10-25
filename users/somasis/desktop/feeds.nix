@@ -212,11 +212,6 @@ in
           tags = [ "blog" "computer" "friends" ];
         }
         {
-          url = "https://1.0.168.192.in-addr.xyz/blag/index.atom";
-          title = "multi";
-          tags = [ "blog" "computer" "friends" ];
-        }
-        {
           url = "https://www.7596ff.com/rss.xml";
           tags = [ "blog" "friends" ];
         }
@@ -233,16 +228,7 @@ in
           tags = [ "blog" "computer" ];
         }
         {
-          url = "https://www.somas.is/notes.atom";
-          tags = [ "blog" "me" ];
-        }
-        {
-          url = "https://www.somas.is/rhizome.atom";
-          tags = [ "blog" "me" ];
-        }
-        {
           url = "https://waldon.blog/feed";
-          title = "Chris Waldon";
           tags = [ "blog" "computer" ];
         }
         {
@@ -250,26 +236,12 @@ in
           tags = [ "blog" "computer" "OpenBSD" "NixOS" ];
         }
         {
-          url = "https://www.landley.net/rss.xml";
-          title = "Rob Landley";
-          tags = [ "blog" "computer" ];
-        }
-        {
           url = "https://flak.tedunangst.com/rss";
           title = "Ted Unangst: flak";
           tags = [ "blog" "computer" "OpenBSD" ];
         }
         {
-          url = "https://www.cogitri.dev/posts/index.xml";
-          title = "Cogitri's blog";
-          tags = [ "blog" "computer" ];
-        }
-        {
           url = "https://apenwarr.ca/log/rss.php";
-          tags = [ "blog" "computer" ];
-        }
-        {
-          url = "https://bicompact.space/feeds/all.atom.xml";
           tags = [ "blog" "computer" ];
         }
         {
@@ -292,20 +264,8 @@ in
           tags = [ "blog" ];
         }
         {
-          url = "https://feeds.feedburner.com/MayContainTracesOfBolts";
-          tags = [ "blog" "computer" ];
-        }
-        {
           url = "https://mforney.org/blog/atom.xml";
           tags = [ "blog" "computer" ];
-        }
-        {
-          url = "https://qntm.org/rss.php?blog";
-          tags = [ "blog" ];
-        }
-        {
-          url = "https://qntm.org/rss.php?src";
-          tags = [ "blog" "computer" "programming" ];
         }
         {
           url = "https://ariadne.space/feed/";
@@ -314,6 +274,10 @@ in
         {
           url = "https://christine.website/blog.atom";
           tags = [ "blog" "computer" "friends" ];
+        }
+        {
+          url = "https://whynothugo.nl/posts.xml";
+          tags = [ "blog" "computer" ];
         }
         {
           url = "http://john.ankarstrom.se/desktop/feed/";
@@ -325,21 +289,19 @@ in
         }
         {
           url = "https://jcs.org/rss";
-          tags = [ "blog" "computer" ];
-        }
-        {
-          url = "https://www.hillelwayne.com/post/";
-          tags = [ "blog" "computer" ];
-        }
-        {
-          url = "https://buttondown.email/hillelwayne/rss";
-          tags = [ "newsletter" "computer" ];
+          tags = [ "blog" "computer" "OpenBSD" ];
         }
         {
           url = "https://rnd.neocities.org/blog/main.rss";
           title = "jan Lentan";
           tags = [ "blog" "toki pona" ];
         }
+        {
+          url = "https://hisham.hm/?x=feed:rss2&category=1";
+          title = "hisham.hm";
+          tags = [ "blog" ];
+        }
+
         # Tumblr
         {
           url = "https://phidica.tumblr.com/rss";
@@ -347,18 +309,16 @@ in
           tags = [ "blog" "friends" "tumblr" ];
         }
         {
-          url = "https://screenshotsofdespair.tumblr.com/rss";
-          tags = [ "tumblr" ];
-        }
-        {
           url = "https://control--panel.com/rss";
           tags = [ "blog" "computer" "tumblr" ];
         }
+
         # Aggregators
         {
           url = "https://tilde.news/rss";
           tags = [ "aggregators" ];
         }
+
         # News
         {
           url = "https://lwn.net/headlines/newrss";
@@ -393,11 +353,7 @@ in
           title = "High Country Press";
           tags = [ "news" "Boone, NC" ];
         }
-        # Magazines
-        {
-          url = "https://atmos.earth/";
-          tags = [ "magazine" ];
-        }
+
         # Computers
         {
           url = "https://latacora.micro.blog/feed.xml";
@@ -418,14 +374,6 @@ in
         {
           url = "https://onethingwell.org/rss";
           tags = [ "computer" "tumblr" ];
-        }
-        {
-          url = "https://www.srcbeat.com/index.xml";
-          tags = [ "computer" ];
-        }
-        {
-          url = "https://www.dgsiegel.net/rss";
-          tags = [ "computer" ];
         }
         {
           url = "https://nixers.net/newsletter/feed.xml";
@@ -467,11 +415,8 @@ in
           url = "https://osmand.net/rss.xml";
           tags = [ "OpenStreetMap" ];
         }
+
         # Comics
-        {
-          url = "https://www.webtoons.com/en/challenge/i-want-to-be-a-cute-anime-girl/rss?title_no=349416";
-          tags = [ "comics" "trans" ];
-        }
         {
           url = "https://xkcd.com/atom.xml";
           tags = [ "comics" ];
@@ -481,12 +426,15 @@ in
           title = "Honestly Undefined";
           tags = [ "comics" ];
         }
+
         # Journals
         {
           url = "https://www.cambridge.org/core/rss/product/id/F3D70AB528A9726BC052F1AEB771A611";
           title = "Hypatia";
           tags = [ "journal" "philosophy" ];
         }
+        # TODO: Does Duke University Press have a feed for Transgender Studies Quarterly?
+
         # System
         { url = "https://nixos.org/blog/announcements-rss.xml"; tags = [ "computer" "NixOS" ]; }
         { url = "exec:${generateNews}/bin/generate-news"; tags = [ "computer" "NixOS" ]; }
@@ -522,10 +470,6 @@ in
           url = "https://kijetesantakalu-o.tumblr.com/rss";
           title = "kijetesantakalu o!";
           tags = [ "toki pona" "blog" ];
-        }
-        {
-          url = "https://thorp.dev/index.xml";
-          tags = [ "blog" "friend" ];
         }
         {
           title = "GitHub: timeline";
