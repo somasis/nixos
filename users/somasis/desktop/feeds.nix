@@ -55,17 +55,10 @@ in
       ''
     ;
 
-    queries = {
-      "!!! unread" = ''unread = "yes" and tags !# "query"'';
-      "... aggregators" = ''tags # "aggregators"'';
-      "... blogs" = ''tags # "blog"'';
-      "... friends" = ''tags # "friend"'';
-      "... news" = ''tags # "news"'';
-      "... computer" = ''tags # "computer"'';
-      "... mapping" = ''tags # "map"'';
-      "... comics" = ''tags # "comics"'';
-      "... journals" = ''tags # "journal"'';
-    };
+    # Create a list of queries from all URLs' tags.
+    queries = { "!!! unread" = ''unread = "yes"''; }
+      // (lib.foldr (a: b: a // b) { } (
+      builtins.map (x: { "... ${x}" = ''tags # "${x}"''; }) (lib.unique (lib.concatLists (lib.catAttrs "tags" config.programs.newsboat.urls)))));
 
     urls =
       let
@@ -131,28 +124,28 @@ in
         # Blogs
         {
           url = "https://leahneukirchen.org/blog/index.atom";
-          tags = [ "blog" "friend" ];
+          tags = [ "blog" "friends" ];
         }
         {
           url = "https://leahneukirchen.org/trivium/index.atom";
-          tags = [ "blog" "friend" ];
+          tags = [ "blog" "friends" ];
         }
         {
           url = "https://text.causal.agency/feed.atom";
-          tags = [ "blog" "computer" "friend" ];
+          tags = [ "blog" "computer" "friends" ];
         }
         {
           url = "https://1.0.168.192.in-addr.xyz/blag/index.atom";
           title = "multi";
-          tags = [ "blog" "computer" "friend" ];
+          tags = [ "blog" "computer" "friends" ];
         }
         {
           url = "https://www.7596ff.com/rss.xml";
-          tags = [ "blog" "friend" ];
+          tags = [ "blog" "friends" ];
         }
         {
           url = "https://pikhq.com/index.xml";
-          tags = [ "blog" "friend " ];
+          tags = [ "blog" "friends" ];
         }
         {
           url = "https://www.uninformativ.de/blog/feeds/en.atom";
@@ -177,7 +170,7 @@ in
         }
         {
           url = "https://dataswamp.org/~solene/rss.xml";
-          tags = [ "blog" "computer" ];
+          tags = [ "blog" "computer" "OpenBSD" "NixOS" ];
         }
         {
           url = "https://www.landley.net/rss.xml";
@@ -187,7 +180,7 @@ in
         {
           url = "https://flak.tedunangst.com/rss";
           title = "Ted Unangst: flak";
-          tags = [ "blog" "computer" ];
+          tags = [ "blog" "computer" "OpenBSD" ];
         }
         {
           url = "https://www.cogitri.dev/posts/index.xml";
@@ -210,12 +203,12 @@ in
         {
           title = "Reddit: toki pona";
           url = ''"exec:${generateReddit} tokipona+tokiponataso+mi_lon+sitelen_musi"'';
-          tags = [ "reddit" "tokipona" ];
+          tags = [ "reddit" "toki pona" ];
         }
         {
           title = "Reddit: sitelen musi pi toki pona";
           url = ''"exec:${generateReddit} mi_lon+sitelen_musi"'';
-          tags = [ "reddit" "tokipona" ];
+          tags = [ "reddit" "toki pona" ];
         }
         {
           url = "https://one-button.org/feeds/articles.atom.xml";
@@ -239,11 +232,11 @@ in
         }
         {
           url = "https://ariadne.space/feed/";
-          tags = [ "blog" "computer" "irc" "friend" ];
+          tags = [ "blog" "computer" ];
         }
         {
           url = "https://christine.website/blog.atom";
-          tags = [ "blog" "computer" "friend" ];
+          tags = [ "blog" "computer" "friends" ];
         }
         {
           url = "http://john.ankarstrom.se/desktop/feed/";
@@ -268,13 +261,13 @@ in
         {
           url = "https://rnd.neocities.org/blog/main.rss";
           title = "jan Lentan";
-          tags = [ "blog" ];
+          tags = [ "blog" "toki pona" ];
         }
         # Tumblr
         {
           url = "https://phidica.tumblr.com/rss";
           title = "Phidica";
-          tags = [ "blog" "friend" "tumblr" ];
+          tags = [ "blog" "friends" "tumblr" ];
         }
         {
           url = "https://screenshotsofdespair.tumblr.com/rss";
@@ -301,27 +294,27 @@ in
         {
           url = "https://theappalachianonline.com/feed/";
           title = "The Appalachian";
-          tags = [ "news" "asu" ];
+          tags = [ "news" "Appalachian State University" "Boone, NC" ];
         }
         {
           url = "https://www.wataugademocrat.com/search/?f=rss&t=article&c=news/local&l=50&s=start_time&sd=desc";
           title = "Watauga Democrat: local news";
-          tags = [ "!hide" "news" "local" "wataugademocrat" ];
+          tags = [ "news" "Boone, NC" ];
         }
         {
           url = "https://www.wataugademocrat.com/search/?f=rss&t=article&c=news/asu_news&l=50&s=start_time&sd=desc";
           title = "Watauga Democrat: Appalachian State University news";
-          tags = [ "!hide" "news" "asu" "wataugademocrat" ];
+          tags = [ "news" "Appalachian State University" "Boone, NC" ];
         }
         {
           url = "https://wataugaonline.com/feed/";
           title = "Watauga Online";
-          tags = [ "news" "local" ];
+          tags = [ "news" "Boone, NC" ];
         }
         {
           url = "https://feeds.feedburner.com/HCPress";
           title = "High Country Press";
-          tags = [ "news" "local" ];
+          tags = [ "news" "Boone, NC" ];
         }
         # Magazines
         {
@@ -331,19 +324,19 @@ in
         # Computers
         {
           url = "https://latacora.micro.blog/feed.xml";
-          tags = [ "computer" ];
+          tags = [ "blog" "computer" ];
         }
         {
           url = "https://sanctum.geek.nz/arabesque/feed/";
-          tags = [ "computer" ];
+          tags = [ "blog" "computer" ];
         }
         {
           url = "https://ewontfix.com/feed.rss";
-          tags = [ "computer" "friend" ];
+          tags = [ "blog" "computer" ];
         }
         {
           url = "https://beepb00p.xyz/atom.xml";
-          tags = [ "computer" ];
+          tags = [ "blog" "computer" ];
         }
         {
           url = "https://onethingwell.org/rss";
@@ -359,46 +352,42 @@ in
         }
         {
           url = "https://nixers.net/newsletter/feed.xml";
-          tags = [ "computer" "nix" ];
+          tags = [ "computer" ];
         }
         # OpenStreetMap
         {
           url = "https://www.weeklyosm.eu/feed";
           title = "weeklyOSM";
-          tags = [ "news" "map" "osm" ];
+          tags = [ "news" "OpenStreetMap" ];
         }
         {
           url = "https://www.openstreetmap.org/api/0.6/notes/feed?bbox=-81.918076,36.111477,-81.455917,36.391293";
           title = "OpenStreetMap: notes in Watauga County";
-          tags = [ "map" "notifications" "osm" ];
+          tags = [ "notification" "OpenStreetMap" ];
         }
         {
           url = "https://www.openstreetmap.org/api/0.6/notes/feed?bbox=-80.7872772,35.1850329,-80.2963257,35.5093128";
           title = "OpenStreetMap: notes in Cabarrus County";
-          tags = [ "map" "notifications" "osm" ];
+          tags = [ "notification" "OpenStreetMap" ];
         }
         {
           url = "https://resultmaps.neis-one.org/osm-suspicious-feed-bbox?hours=96&mappingdays=-1&tsearch=review_requested%3Dyes&anyobj=t&bbox=-81.918076,36.111477,-81.455917,36.391293";
           title = "OpenStreetMap: changes to be reviewed in Watauga County";
-          tags = [
-            "map"
-            "notifications"
-            "osm"
-          ];
+          tags = [ "notification" "OpenStreetMap" ];
         }
         {
           url = "https://resultmaps.neis-one.org/osm-suspicious-feed-bbox?hours=96&mappingdays=-1&tsearch=review_requested%3Dyes&anyobj=t&bbox=-80.7872772,35.1850329,-80.2963257,35.5093128";
           title = "OpenStreetMap: changes to be reviewed in Cabarrus County";
-          tags = [ "map" "notifications" "osm" ];
+          tags = [ "notification" "OpenStreetMap" ];
         }
         {
           url = "https://us3.campaign-archive.com/feed?u=162692bfdedb78ec46fd108a3&id=801ce00e6d";
-          title = "OpenStreetMap US Newsletter";
-          tags = [ "newsletter" "osm" ];
+          title = "OpenStreetMap US";
+          tags = [ "newsletter" "OpenStreetMap" ];
         }
         {
           url = "https://osmand.net/rss.xml";
-          tags = [ "osm" ];
+          tags = [ "OpenStreetMap" ];
         }
         # Comics
         {
@@ -412,31 +401,22 @@ in
         {
           url = "https://rakhim.org/honestly-undefined/index.xml";
           title = "Honestly Undefined";
-          tags = [
-            "comics"
-          ];
+          tags = [ "comics" ];
         }
         # Journals
         {
           url = "https://www.cambridge.org/core/rss/product/id/F3D70AB528A9726BC052F1AEB771A611";
-          title = "Hypatia: most recent";
+          title = "Hypatia";
           tags = [ "journal" "philosophy" ];
         }
         # System
-        {
-          url = "https://nixos.org/blog/announcements-rss.xml";
-          title = "NixOS: announcements";
-          tags = [ "system" ];
-        }
+        { url = "https://nixos.org/blog/announcements-rss.xml"; tags = [ "computer" "NixOS" ]; }
 
         # YouTube
         {
           url = "https://www.youtube.com/feeds/videos.xml?channel_id=UCXnNibvR_YIdyPs8PZIBoEw";
-          title = "YouTube: Cathode Ray Dude";
-          tags = [
-            "youtube"
-            "tech"
-          ];
+          title = "Cathode Ray Dude";
+          tags = [ "YouTube" "tech" ];
         }
         { url = "https://www.youtube.com/feeds/videos.xml?channel_id=UCqdUXv9yQiIhspWPYgp8_XA"; }
         { url = "https://www.youtube.com/feeds/videos.xml?channel_id=UC18ju52OET36bdewLRHzPdQ"; }
@@ -447,22 +427,22 @@ in
         # Toki Pona
         {
           url = "https://feeds.redcircle.com/901407e0-53e9-4aa2-aa3d-509393d10783";
-          title = "Podcast: kalama sin";
-          tags = [ "podcast" "tokipona" ];
+          title = "kalama sin";
+          tags = [ "podcast" "toki pona" ];
         }
         {
           url = "https://jonathangabel.com/feed.xml";
-          tags = [ "tokipona" "blog" ];
+          tags = [ "toki pona" "blog" ];
         }
         {
           url = "https://janketami.wordpress.com/feed/";
           title = "jan Ke Tami";
-          tags = [ "tokipona" "tumblr" ];
+          tags = [ "toki pona" "blog" ];
         }
         {
           url = "https://kijetesantakalu-o.tumblr.com/rss";
           title = "kijetesantakalu o!";
-          tags = [ "tokipona" "tumblr" ];
+          tags = [ "toki pona" "blog" ];
         }
         {
           url = "https://thorp.dev/index.xml";
@@ -486,7 +466,7 @@ in
               '';
             in
             "exec:${generate}";
-          tags = [ "notifications" ];
+          tags = [ "notification" ];
         }
         # {
         #   url = ''"exec:${generateRedacted} https://redacted.ch/feeds.php?feed=feed_news"'';
@@ -496,22 +476,22 @@ in
         # {
         #   url = ''"exec:${generateRedacted} https://redacted.ch/feeds.php?feed=feed_blog"'';
         #   title = "Redacted: blog";
-        #   tags = [ "blog" "redacted" ];
+        #   tags = [ "redacted" ];
         # }
         {
           url = "https://www.wataugademocrat.com/classifieds/?f=rss&s=start_time&sd=asc";
           title = "Watauga Democrat: classifieds";
-          tags = [ "classifieds" "local" ];
+          tags = [ "Boone, NC" ];
         }
         {
           url = "https://www.townofboone.net/RSSFeed.aspx?ModID=63&CID=All-0";
           title = "Town of Boone: alerts";
-          tags = [ "notifications" ];
+          tags = [ "notification" ];
         }
         {
           url = "https://www.exploreboone.com/event/rss/";
           title = "Explore Boone: events";
-          tags = [ "local" "events" ];
+          tags = [ "Boone, NC" ];
         }
       ];
   };
