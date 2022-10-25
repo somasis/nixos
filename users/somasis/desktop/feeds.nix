@@ -13,26 +13,23 @@ in
     enable = true;
 
     browser = builtins.toString (pkgs.writeShellScript "newsboat-browser" ''
-      ${pkgs.coreutils}/bin/nohup \
-          ${pkgs.xdg-utils}/bin/xdg-open "$1" >/dev/null 2>&1 \
-          &
+      ${pkgs.coreutils}/bin/nohup ${pkgs.xdg-utils}/bin/xdg-open "$1" >/dev/null 2>&1 &
     '');
 
     extraConfig =
       let
-        newsboatHTMLRenderer =
-          pkgs.writeShellScript "newsboat-html-renderer" ''
-            ${pkgs.rdrview}/bin/rdrview \
-                -T body \
-                -H "$@" \
-                | ${pkgs.html-tidy}/bin/tidy \
-                    -q \
-                    -asxml \
-                    -w 0 2>/dev/null \
-                | ${pkgs.w3m-nox}/bin/w3m \
-                    -dump \
-                    -T text/html
-          '';
+        newsboatHTMLRenderer = pkgs.writeShellScript "newsboat-html-renderer" ''
+          ${pkgs.rdrview}/bin/rdrview \
+              -T body \
+              -H "$@" \
+              | ${pkgs.html-tidy}/bin/tidy \
+                  -q \
+                  -asxml \
+                  -w 0 2>/dev/null \
+              | ${pkgs.w3m-nox}/bin/w3m \
+                  -dump \
+                  -T text/html
+        '';
       in
       ''
         download-full-page yes
@@ -41,6 +38,7 @@ in
 
         articlelist-format "%4i %f %D %?T?|%-17T| ?%t"
         datetime-format %Y-%m-%d
+        feedlist-format "%4i %n %11u %t%?T? #%T? "
 
         text-width 100
 
