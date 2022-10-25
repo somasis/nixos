@@ -83,7 +83,6 @@
   ];
 
   home.persistence."/persist${config.home.homeDirectory}".directories = [
-
     "etc/poedit"
     "etc/libreoffice"
   ];
