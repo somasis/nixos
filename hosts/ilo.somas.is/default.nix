@@ -118,7 +118,7 @@
       # Necessary for `nixos-rebuild`'s git stuff
       pkgs.git
 
-      pkgs.gnome.gnome-tweaks
+      pkgs.gparted
     ];
 
     variables = {
