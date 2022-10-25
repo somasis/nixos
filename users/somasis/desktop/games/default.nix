@@ -16,7 +16,7 @@
     pkgs.opentyrian
     pkgs.pingus
     pkgs.sgtpuzzles
-    pkgs.zaz
+    # pkgs.zaz # TODO broken because of SDL.h
 
     pkgs.pcsx2
   ];

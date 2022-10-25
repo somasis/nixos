@@ -290,7 +290,8 @@
     ]);
   };
 
-  services.pass-secret-service.enable = true;
+  # TODO broken with dbus-next check failure
+  # services.pass-secret-service.enable = true;
 
   programs.qutebrowser.keyBindings.normal =
     let

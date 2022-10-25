@@ -20,8 +20,8 @@
   services.ananicy = {
     enable = true;
 
-    # Use the fast C++ reimplementation of ananicy.
-    package = pkgs.ananicy-cpp;
+    # TODO Use the fast C++ reimplementation of ananicy.
+    # package = pkgs.ananicy-cpp;
   };
 
   # ananicy spams the log constantly
