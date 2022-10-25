@@ -26,7 +26,6 @@
     ./feeds.nix
     ./file-manager.nix
     ./fonts.nix
-    ./kdeconnect.nix
     ./ledger.nix
     ./list.nix
     ./mounts.nix
@@ -35,6 +34,7 @@
     ./panel.nix
     ./pass.nix
     ./pdf.nix
+    ./phone-integration.nix
     ./photo.nix
     ./picom.nix
     ./power.nix
