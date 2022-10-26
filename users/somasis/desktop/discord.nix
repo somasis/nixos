@@ -9,9 +9,7 @@ let
 
     extraElectronArgs = "--disable-smooth-scrolling";
 
-    # discord = pkgs.discord-canary.override {
-    #   withOpenASAR = true;
-    # };
+    withOpenAsar = true;
 
     plugins = {
       inherit (inputs)
