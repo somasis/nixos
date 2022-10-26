@@ -20,134 +20,151 @@ in
   ];
 
   # TODO This really ought to be templated.
-  systemd.user.mounts = {
-    "home-somasis-mnt-ssh-genesis.whatbox.ca" = {
-      Unit.PartOf = [ "mounts.target" ];
-      Install.WantedBy = [ "mounts.target" ];
+  systemd.user = {
+    targets = {
+      sshfs = {
+        Unit = {
+          Description = "All sshfs mounts";
+          PartOf = [ "mounts.target" ];
+        };
+        Install.WantedBy = [ "mounts.target" ];
+      };
 
-      Mount = {
-        Type = "fuse.sshfs";
-        What = "somasis@genesis.whatbox.ca:";
-        Where = "${home}/mnt/ssh/genesis.whatbox.ca";
-
-        Options = [
-          "_netdev"
-          "compression=yes"
-          "dir_cache=yes"
-          "idmap=user"
-          "max_conns=4"
-          "transform_symlinks"
-        ];
+      rclone = {
+        Unit = {
+          Description = "All rclone mounts";
+          PartOf = [ "mounts.target" ];
+        };
+        Install.WantedBy = [ "mounts.target" ];
       };
     };
 
-    "home-somasis-mnt-ssh-lacan.somas.is" = {
-      Unit.PartOf = [ "mounts.target" ];
-      Install.WantedBy = [ "mounts.target" ];
+    mounts = {
+      "home-somasis-mnt-ssh-genesis.whatbox.ca" = {
+        Unit.PartOf = [ "sshfs.target" ];
+        Install.WantedBy = [ "sshfs.target" ];
 
-      Mount = {
-        Type = "fuse.sshfs";
-        What = "somasis@lacan.somas.is:/";
-        Where = "${home}/mnt/ssh/lacan.somas.is";
+        Mount = {
+          Type = "sshfs";
+          What = "somasis@genesis.whatbox.ca:";
+          Where = "${home}/mnt/ssh/genesis.whatbox.ca";
 
-        Options = [
-          "_netdev"
-          "compression=yes"
-          "dir_cache=yes"
-          "idmap=user"
-          "max_conns=4"
-          "transform_symlinks"
-        ];
+          Options = [
+            "_netdev"
+            "compression=yes"
+            "dir_cache=yes"
+            "idmap=user"
+            "max_conns=4"
+            "transform_symlinks"
+          ];
+        };
+      };
+
+      "home-somasis-mnt-ssh-lacan.somas.is" = {
+        Unit.PartOf = [ "sshfs.target" ];
+        Install.WantedBy = [ "sshfs.target" ];
+
+        Mount = {
+          Type = "sshfs";
+          What = "somasis@lacan.somas.is:/";
+          Where = "${home}/mnt/ssh/lacan.somas.is";
+
+          Options = [
+            "_netdev"
+            "compression=yes"
+            "dir_cache=yes"
+            "idmap=user"
+            "max_conns=4"
+            "transform_symlinks"
+          ];
+        };
+      };
+
+      "home-somasis-mnt-ssh-spinoza.7596ff.com" = {
+        Unit.PartOf = [ "sshfs.target" ];
+        Install.WantedBy = [ "sshfs.target" ];
+
+        Mount = {
+          Type = "sshfs";
+          What = "somasis@spinoza.7596ff.com:/";
+          Where = "${home}/mnt/ssh/spinoza.7596ff.com";
+
+          Options = [
+            "_netdev"
+            "compression=yes"
+            "dir_cache=yes"
+            "idmap=user"
+            "max_conns=4"
+            "transform_symlinks"
+          ];
+        };
+      };
+
+      "home-somasis-mnt-ssh-spinoza.7596ff.com_raid" = {
+        Unit.PartOf = [ "sshfs.target" ];
+        Install.WantedBy = [ "sshfs.target" ];
+
+        Mount = {
+          Type = "sshfs";
+          What = "somasis@spinoza.7596ff.com:/mnt/raid";
+          Where = "${home}/mnt/ssh/spinoza.7596ff.com_raid";
+
+          Options = [
+            "_netdev"
+            "compression=yes"
+            "dir_cache=yes"
+            "idmap=user"
+            "max_conns=4"
+            "transform_symlinks"
+          ];
+        };
       };
     };
 
-    "home-somasis-mnt-ssh-spinoza.7596ff.com" = {
-      Unit.PartOf = [ "mounts.target" ];
-      Install.WantedBy = [ "mounts.target" ];
+    services = {
+      "rclone@home-somasis-mnt-gdrive-personal" = {
+        Unit = {
+          Description = ''Mount rclone remote "gdrive-personal" at ${home}/mnt/gdrive/personal'';
+          PartOf = [ "gdrive.target" ];
+        };
+        Install.WantedBy = [ "gdrive.target" ];
 
-      Mount = {
-        Type = "fuse.sshfs";
-        What = "somasis@spinoza.7596ff.com:/";
-        Where = "${home}/mnt/ssh/spinoza.7596ff.com";
-
-        Options = [
-          "_netdev"
-          "compression=yes"
-          "dir_cache=yes"
-          "idmap=user"
-          "max_conns=4"
-          "transform_symlinks"
-        ];
+        Service = {
+          Type = "notify";
+          ExecStart = [
+            "${pkgs.rclone}/bin/rclone --poll-interval=30m --vfs-cache-mode=writes gdrive-personal: ${home}/mnt/gdrive/personal"
+          ];
+        };
       };
-    };
 
-    "home-somasis-mnt-ssh-spinoza.7596ff.com_raid" = {
-      Unit.PartOf = [ "mounts.target" ];
-      Install.WantedBy = [ "mounts.target" ];
+      "rclone@home-somasis-mnt-gdrive-appstate" = {
+        Unit = {
+          Description = ''Mount rclone remote "gdrive-appstate" at ${home}/mnt/gdrive/appstate'';
+          PartOf = [ "gdrive.target" ];
+        };
+        Install.WantedBy = [ "gdrive.target" ];
 
-      Mount = {
-        Type = "fuse.sshfs";
-        What = "somasis@spinoza.7596ff.com:/mnt/raid";
-        Where = "${home}/mnt/ssh/spinoza.7596ff.com_raid";
-
-        Options = [
-          "_netdev"
-          "compression=yes"
-          "dir_cache=yes"
-          "idmap=user"
-          "max_conns=4"
-          "transform_symlinks"
-        ];
+        Service = {
+          Type = "notify";
+          ExecStart = [
+            "${pkgs.rclone}/bin/rclone --poll-interval=30m --vfs-cache-mode=writes gdrive-appstate: ${home}/mnt/gdrive/appstate"
+          ];
+        };
       };
-    };
 
-    "home-somasis-mnt-gdrive-personal" = {
-      Unit.PartOf = [ "mounts.target" ];
-      Install.WantedBy = [ "mounts.target" ];
+      "rclone@home-somasis-mnt-gphotos-personal" = {
+        Unit = {
+          Description = ''Mount rclone remote "gphotos-personal" at ${home}/mnt/gphotos/personal'';
+          PartOf = [ "gphotos.target" ];
+        };
+        Install.WantedBy = [ "gphotos.target" ];
 
-      Mount = {
-        Type = "fuse.rclone";
-        What = "gdrive-personal:";
-        Where = "${home}/mnt/gdrive/personal";
-
-        Options = [
-          "_netdev"
-          "poll-interval=30m"
-          "vfs-cache-mode=writes"
-        ];
-      };
-    };
-
-    "home-somasis-mnt-gdrive-appstate" = {
-      Unit.PartOf = [ "mounts.target" ];
-      Install.WantedBy = [ "mounts.target" ];
-
-      Mount = {
-        Type = "fuse.rclone";
-        What = "gdrive-appstate:";
-        Where = "${home}/mnt/gdrive/appstate";
-
-        Options = [
-          "_netdev"
-          "poll-interval=30m"
-          "vfs-cache-mode=writes"
-        ];
-      };
-    };
-
-    "home-somasis-mnt-gphotos-personal" = {
-      Unit.PartOf = [ "mounts.target" ];
-      Install.WantedBy = [ "mounts.target" ];
-
-      Mount = {
-        Type = "fuse.rclone";
-        What = "gphotos-personal:";
-        Where = "${home}/mnt/gphotos/personal";
-
-        Options = [
-          "_netdev"
-          "poll-interval=30m"
-        ];
+        Service = {
+          Type = "notify";
+          ExecStart = [
+            "${pkgs.rclone}/bin/rclone gphotos-personal: ${home}/mnt/gphotos/personal"
+          ];
+        };
       };
     };
   };
