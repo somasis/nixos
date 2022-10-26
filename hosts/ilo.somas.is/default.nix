@@ -154,8 +154,6 @@
 
   system.stateVersion = "21.11";
 
-  # virtualisation.docker.enable = true;
-
   # services.xserver.desktopManager = {
   #   plasma5 = {
   #     enable = false;
