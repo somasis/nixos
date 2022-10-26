@@ -29,7 +29,7 @@
       "diary"
       "logs"
       "shared"
-      "src"
+      { directory = "src"; method = "symlink"; }
       "study"
       "tracks"
 
