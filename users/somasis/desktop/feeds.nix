@@ -62,11 +62,11 @@ in
 
     urls =
       let
-        curl = lib.escapeShellArgs [
-          "${pkgs.curl}/bin/curl"
-          (lib.optionalString (tor.enable && tor.client.enable) "-x socks5h://${tor.client.socksListenAddress.addr}:${toString tor.client.socksListenAddress.port}")
-          "-A \"${userAgent}\""
-        ];
+        curl = lib.escapeShellArgs (
+          [ "${pkgs.curl}/bin/curl" "-A" "${userAgent}" ]
+          ++ (lib.optionals (tor.enable && tor.client.enable) [ "-x" "socks5h://${tor.client.socksListenAddress.addr}:${toString tor.client.socksListenAddress.port}" ])
+        )
+        ;
 
         discardContent = pkgs.writeShellScript "discard-content" ''
           umask 0077
