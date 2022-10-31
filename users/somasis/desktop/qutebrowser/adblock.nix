@@ -1,4 +1,4 @@
-{ pkgs, config, ... }: {
+{ pkgs, config, inputs, ... }: {
   home.persistence."/cache${config.home.homeDirectory}".files = [
     "share/qutebrowser/adblock-cache.dat"
     "share/qutebrowser/blocked-hosts"
@@ -6,7 +6,7 @@
 
   programs.qutebrowser.settings.content.blocking =
     let
-      custom = pkgs.writeText "adblock" ''
+      custom = (pkgs.writeText "adblock" ''
         ! Disable all smooth scroll hijacking scripts
         /jquery.nicescroll*.js
         /jquery.smoothscroll*.js
@@ -19,7 +19,7 @@
         /mousewheel-smooth-scroll
         /surbma-smooth-scroll
         /dexp-smoothscroll.js
-      '';
+      '');
     in
     {
       enabled = true;
@@ -37,17 +37,41 @@
       #   "file://${custom}"
       # ];
       adblock.lists =
-        [ "file://${adblockCustom}" ]
-        ++ builtins.map (x: "file://${x}") [
-          inputs.adblockEasyList
-          inputs.adblockEasyListSpanish
-          inputs.adblockFanboyCookies
-          inputs.adblockFanboySocial
-          inputs.adblockAntiAdblock
-          inputs.adblockEasyPrivacy
-          inputs.uBlockUnbreak
-          inputs.uBlockPrivacy
-          inputs.uBlockResourceAbuse
+        builtins.map (x: "file://${x}") [
+          custom
+          (pkgs.runCommand "adblockEasyList" { } ''
+            exec > "$out"
+            cat \
+                "${inputs.adblockEasyList}"/easylist/*.txt \
+                "${inputs.adblockEasyList}"/easylist_adult/*.txt
+          '')
+          (pkgs.runCommand "adblockEasyPrivacy" { } ''
+            exec > "$out"
+            cat "${inputs.adblockEasyList}"/easyprivacy/*.txt
+          '')
+          (pkgs.runCommand "adblockEasyListSpanish" { } ''
+            exec > "$out"
+            cat \
+                "${inputs.adblockEasyListSpanish}"/easylistspanish/*.txt \
+                "${inputs.adblockEasyListSpanish}"/easylistspanish_adult/*.txt
+          '')
+          (pkgs.runCommand "adblockFanboyCookies" { } ''
+            exec > "$out"
+            cat "${inputs.adblockEasyList}"/easylist_cookie/*.txt
+          '')
+          (pkgs.runCommand "adblockFanboyCookies" { } ''
+            exec > "$out"
+            cat "${inputs.adblockEasyList}"/fanboy-addon/fanboy_social*.txt
+          '')
+          (pkgs.concatTextFile {
+            name = "adblockAntiAdblock";
+            files = [
+              "${inputs.adblockAntiAdblockFilters}/antiadblockfilters/antiadblock_english.txt"
+              "${inputs.adblockAntiAdblockFilters}/antiadblockfilters/antiadblock_spanish.txt"
+            ];
+          })
+          "${inputs.uBlock}/filters/privacy.txt"
+          "${inputs.uBlock}/filters/resource-abuse.txt"
         ];
 
       hosts.lists = builtins.map (x: "file://${x}") [
