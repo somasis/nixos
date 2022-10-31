@@ -45,7 +45,7 @@ in
         Install.WantedBy = [ "sshfs.target" ];
 
         Mount = {
-          Type = "sshfs";
+          Type = "fuse.sshfs";
           What = "somasis@genesis.whatbox.ca:";
           Where = "${home}/mnt/ssh/genesis.whatbox.ca";
 
@@ -65,7 +65,7 @@ in
         Install.WantedBy = [ "sshfs.target" ];
 
         Mount = {
-          Type = "sshfs";
+          Type = "fuse.sshfs";
           What = "somasis@lacan.somas.is:/";
           Where = "${home}/mnt/ssh/lacan.somas.is";
 
@@ -85,7 +85,7 @@ in
         Install.WantedBy = [ "sshfs.target" ];
 
         Mount = {
-          Type = "sshfs";
+          Type = "fuse.sshfs";
           What = "somasis@spinoza.7596ff.com:/";
           Where = "${home}/mnt/ssh/spinoza.7596ff.com";
 
@@ -105,7 +105,7 @@ in
         Install.WantedBy = [ "sshfs.target" ];
 
         Mount = {
-          Type = "sshfs";
+          Type = "fuse.sshfs";
           What = "somasis@spinoza.7596ff.com:/mnt/raid";
           Where = "${home}/mnt/ssh/spinoza.7596ff.com_raid";
 
