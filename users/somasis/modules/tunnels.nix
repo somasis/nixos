@@ -78,7 +78,7 @@ with lib;
 
           # We can't simply use %t/tunnel/${target}.sock or ${target}, because `ssh`
           # doesn't correctly parse colons in the instance name in -L's syntax
-          socket = "${tunnel.remote}-${toString tunnel.name}.sock";
+          socket = "tunnel-${tunnel.remote}-${toString tunnel.name}.sock";
         in
         units:
         lib.recursiveUpdate units {
@@ -122,7 +122,7 @@ with lib;
               ProtectSystem = true;
 
               ExecStart = [
-                "${pkgs.systemd}/lib/systemd/systemd-socket-proxyd --exit-idle-time=${tunnel.linger} %t/tunnel/${socket}"
+                "${pkgs.systemd}/lib/systemd/systemd-socket-proxyd --exit-idle-time=${tunnel.linger} %t/${socket}"
               ];
             };
           };
@@ -162,9 +162,9 @@ with lib;
                   "-k" # Don't forward GSSAPI credentials
 
                   # (if type == "dynamic" then
-                  #   "-D %t/tunnel/${socket}:${target.location}"
+                  #   "-D %t/${socket}:${target.location}"
                   # else # if type == "local" then
-                  "-L %t/tunnel/${socket}:localhost:${toString tunnel.remoteLocation}"
+                  "-L %t/${socket}:localhost:${toString tunnel.remoteLocation}"
                   # )
                 ];
               in
@@ -178,7 +178,7 @@ with lib;
 
                 ExecStartPre = [ "${pkgs.networkmanager}/bin/nm-online -q" ];
                 ExecStart = [ "-${ssh} ${tunnel.remote}" ];
-                ExecStopPost = [ "${pkgs.coreutils}/bin/rm -f %t/tunnel/${socket}" ];
+                ExecStopPost = [ "${pkgs.coreutils}/bin/rm -f %t/${socket}" ];
 
                 Restart = "on-failure";
               };
