@@ -236,6 +236,10 @@ in
           tags = [ "blog" "computer" "OpenBSD" "NixOS" ];
         }
         {
+          url = "https://determinate.systems/posts?format=rss";
+          tags = [ "computer" "NixOS" ];
+        }
+        {
           url = "https://flak.tedunangst.com/rss";
           title = "Ted Unangst: flak";
           tags = [ "blog" "computer" "OpenBSD" ];
@@ -318,6 +322,11 @@ in
           url = "https://tilde.news/rss";
           tags = [ "aggregators" ];
         }
+        {
+          url = "https://discourse.nixos.org/c/links/12.rss";
+          tags = [ "aggregators" "NixOS" ];
+        }
+
 
         # News
         {
