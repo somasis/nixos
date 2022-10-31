@@ -82,24 +82,28 @@
     repluggedThemeIrc.flake = false;
     repluggedThemeIrc.url = "github:somasis/discord-theme-irc";
 
-    adblockEasyList.flake = false;
-    adblockEasyList.url = "https://easylist.to/easylist/easylist.txt";
-    adblockEasyListSpanish.flake = false;
-    adblockEasyListSpanish.url = "https://easylist-downloads.adblockplus.org/easylistspanish.txt";
-    adblockFanboyCookies.flake = false;
-    adblockFanboyCookies.url = "https://secure.fanboy.co.nz/fanboy-cookiemonster.txt";
-    adblockFanboySocial.flake = false;
-    adblockFanboySocial.url = "https://easylist.to/easylist/fanboy-social.txt";
-    adblockAntiAdblock.flake = false;
-    adblockAntiAdblock.url = "https://easylist-downloads.adblockplus.org/antiadblockfilters.txt";
-    adblockEasyPrivacy.flake = false;
-    adblockEasyPrivacy.url = "https://easylist.to/easylist/easyprivacy.txt";
-    uBlockUnbreak.flake = false;
-    uBlockUnbreak.url = "https://raw.githubusercontent.com/uBlockOrigin/uAssets/master/filters/unbreak.txt";
-    uBlockPrivacy.flake = false;
-    uBlockPrivacy.url = "https://raw.githubusercontent.com/uBlockOrigin/uAssets/master/filters/privacy.txt";
-    uBlockResourceAbuse.flake = false;
-    uBlockResourceAbuse.url = "https://raw.githubusercontent.com/uBlockOrigin/uAssets/master/filters/resource-abuse.txt";
+    adblockEasyList = {
+      flake = false;
+      url = "github:easylist/easylist";
+    };
+
+    adblockEasyListSpanish = {
+      flake = false;
+      url = "github:easylist/easylistspanish";
+    };
+
+    adblockAntiAdblockFilters = {
+      flake = false;
+      url = "github:easylist/antiadblockfilters";
+    };
+
+    uBlock = {
+      flake = false;
+      url = "github:uBlockOrigin/uAssets";
+    };
+
+    adblockHosts.flake = false;
+    adblockHosts.url = "https://raw.githubusercontent.com/StevenBlack/hosts/master/hosts";
   };
 
   outputs = inputs@{ self, flake, ... }: flake.lib.mkFlake {

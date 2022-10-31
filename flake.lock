@@ -1,75 +1,63 @@
 {
   "nodes": {
-    "adblockAntiAdblock": {
+    "adblockAntiAdblockFilters": {
       "flake": false,
       "locked": {
-        "narHash": "sha256-I9QcfyXdd0SBSnRh0y0z60ZoBPG626wKwgbJOiO7jm8=",
-        "type": "file",
-        "url": "https://easylist-downloads.adblockplus.org/antiadblockfilters.txt"
+        "lastModified": 1667090132,
+        "narHash": "sha256-LRZHNaXediXWzjXDoTR4kJ/ZXkgpoVMrNf2PgepQ/Gc=",
+        "owner": "easylist",
+        "repo": "antiadblockfilters",
+        "rev": "3e077bf1d85981c7ecb1991ee8935c36da79045c",
+        "type": "github"
       },
       "original": {
-        "type": "file",
-        "url": "https://easylist-downloads.adblockplus.org/antiadblockfilters.txt"
+        "owner": "easylist",
+        "repo": "antiadblockfilters",
+        "type": "github"
       }
     },
     "adblockEasyList": {
       "flake": false,
       "locked": {
-        "narHash": "sha256-oBPL2lQA9lD/x17MjSnOn/NWdXgvryrrSaJLcAn30uw=",
-        "type": "file",
-        "url": "https://easylist.to/easylist/easylist.txt"
+        "lastModified": 1667238913,
+        "narHash": "sha256-HnXDpbyD+4rWor0Z3Lzw7M7bTPotXDlSfC8opv8Zd/s=",
+        "owner": "easylist",
+        "repo": "easylist",
+        "rev": "ddf5d066c9a70bcc7ce8137380bb59b55019970b",
+        "type": "github"
       },
       "original": {
-        "type": "file",
-        "url": "https://easylist.to/easylist/easylist.txt"
+        "owner": "easylist",
+        "repo": "easylist",
+        "type": "github"
       }
     },
     "adblockEasyListSpanish": {
       "flake": false,
       "locked": {
-        "narHash": "sha256-4qCe0Is70EWklY+T4xIaQIOGSg21LjBOc++Y7SGfTDI=",
-        "type": "file",
-        "url": "https://easylist-downloads.adblockplus.org/easylistspanish.txt"
+        "lastModified": 1667237150,
+        "narHash": "sha256-Au609nlrRhZGz+SMf9/1LNxfgsrBw7KGc2Nz85kt5yw=",
+        "owner": "easylist",
+        "repo": "easylistspanish",
+        "rev": "3c7ad8967cbee095a886571e946b143964d9580d",
+        "type": "github"
       },
       "original": {
-        "type": "file",
-        "url": "https://easylist-downloads.adblockplus.org/easylistspanish.txt"
+        "owner": "easylist",
+        "repo": "easylistspanish",
+        "type": "github"
       }
     },
-    "adblockEasyPrivacy": {
+    "adblockHosts": {
       "flake": false,
       "locked": {
-        "narHash": "sha256-bFcYtO0EZqV9ZVhwq1NErb+oqeX3qy7nctkMaDRuNcQ=",
+        "narHash": "sha256-8OhhOkE5f8XWB7pQe8OSTZqvwh/Ssn0QuljQhrwTCh8=",
         "type": "file",
-        "url": "https://easylist.to/easylist/easyprivacy.txt"
+        "url": "https://raw.githubusercontent.com/StevenBlack/hosts/master/hosts"
       },
       "original": {
         "type": "file",
-        "url": "https://easylist.to/easylist/easyprivacy.txt"
-      }
-    },
-    "adblockFanboyCookies": {
-      "flake": false,
-      "locked": {
-        "narHash": "sha256-uIMZwbLPHWc5VZq0fEpQDsy1d8Bys5n2BUN79YhatLU=",
-        "type": "file",
-        "url": "https://secure.fanboy.co.nz/fanboy-cookiemonster.txt"
-      },
-      "original": {
-        "type": "file",
-        "url": "https://secure.fanboy.co.nz/fanboy-cookiemonster.txt"
-      }
-    },
-    "adblockFanboySocial": {
-      "flake": false,
-      "locked": {
-        "narHash": "sha256-eEPN30QDhGtHvU413D8kuycjkiYGVAZGfNNLeR0j+qY=",
-        "type": "file",
-        "url": "https://easylist.to/easylist/fanboy-social.txt"
-      },
-      "original": {
-        "type": "file",
-        "url": "https://easylist.to/easylist/fanboy-social.txt"
+        "url": "https://raw.githubusercontent.com/StevenBlack/hosts/master/hosts"
       }
     },
     "avatarSomasis": {
@@ -175,11 +163,11 @@
         "utils": "utils"
       },
       "locked": {
-        "lastModified": 1666649150,
-        "narHash": "sha256-kINnLxC0KFalUk4tVO/H5hUU7FVAOYYcUSWrsBpnl+I=",
+        "lastModified": 1667234164,
+        "narHash": "sha256-oPMAvHZBDgamjmIQly5+sw2LtfKwY7qcWZZwKiwKQy8=",
         "owner": "nix-community",
         "repo": "home-manager",
-        "rev": "7dc4e4ebd71280842b4d30975439980baaac9db8",
+        "rev": "722e8d65d3aba6f527100cc2d1539e4ca04d066f",
         "type": "github"
       },
       "original": {
@@ -279,11 +267,11 @@
     },
     "nixos": {
       "locked": {
-        "lastModified": 1666703756,
-        "narHash": "sha256-GwpMJ1hT+z1fMAUkaGtvbvofJQwdVFDEGVhfE82+AUk=",
+        "lastModified": 1667142599,
+        "narHash": "sha256-OLJxsg9VqfKjFkerOxWtNIkibsCvxsv5A8wNWO1MeWk=",
         "owner": "nixos",
         "repo": "nixpkgs",
-        "rev": "f994293d1eb8812f032e8919e10a594567cf6ef7",
+        "rev": "412b9917cea092f3d39f9cd5dead4effd5bc4053",
         "type": "github"
       },
       "original": {
@@ -295,11 +283,11 @@
     },
     "nixosHardware": {
       "locked": {
-        "lastModified": 1665987993,
-        "narHash": "sha256-MvlaIYTRiqefG4dzI5p6vVCfl+9V8A1cPniUjcn6Ngc=",
+        "lastModified": 1667221253,
+        "narHash": "sha256-PGGT7D/qmi1E8D1Z32SLrzq7PJO5CajD64GfCCdslk0=",
         "owner": "nixos",
         "repo": "nixos-hardware",
-        "rev": "0e6593630071440eb89cd97a52921497482b22c6",
+        "rev": "d5bacd34f54328f31bef9237098fdeaad83074be",
         "type": "github"
       },
       "original": {
@@ -310,11 +298,11 @@
     },
     "nixosStable": {
       "locked": {
-        "lastModified": 1666610816,
-        "narHash": "sha256-q4F2VNe5bpxXOvp16DyLwE1SgNZMbNO29ZQJPIomedg=",
+        "lastModified": 1667125965,
+        "narHash": "sha256-z/OLvPwIhwdN9J+ED/0rPz/Wh/0sPuvczURwsiEENSQ=",
         "owner": "nixos",
         "repo": "nixpkgs",
-        "rev": "6107f97012a0c134c5848125b5aa1b149b76d2c9",
+        "rev": "26eb67abc9a7370a51fcb86ece18eaf19ae9207f",
         "type": "github"
       },
       "original": {
@@ -371,11 +359,11 @@
         "replugged": "replugged_2"
       },
       "locked": {
-        "lastModified": 1666743967,
-        "narHash": "sha256-g0QzOs0kXd92YliQ7ENA7M3vvdBu7vLZQKyVXZrGoiQ=",
+        "lastModified": 1667176102,
+        "narHash": "sha256-JI5OKRxhnjIW/Qz8HHTwgnJPLZ7E2ZpxHK9LWsJf64A=",
         "owner": "LunNova",
         "repo": "replugged-nix-flake",
-        "rev": "b919456df14e88a80a863afb374c5a86e1ac2801",
+        "rev": "50cc5139e31a171359b602cbf2ae78576c7d4c24",
         "type": "github"
       },
       "original": {
@@ -595,8 +583,8 @@
     "repluggedThemeCustom": {
       "flake": false,
       "locked": {
-        "lastModified": 1663077979,
-        "narHash": "sha256-Ta/GqlzjCT8z/uVXp54lPZ+6OYV08sMX8SCRVwH8X1M=",
+        "lastModified": 1667237258,
+        "narHash": "sha256-gYnYQZPEaIpGIAQK+/vyhgEcGqamC7FRJZ49FBNvzPg=",
         "path": "/home/somasis/src/discord-theme-custom",
         "type": "path"
       },
@@ -639,12 +627,10 @@
     },
     "root": {
       "inputs": {
-        "adblockAntiAdblock": "adblockAntiAdblock",
+        "adblockAntiAdblockFilters": "adblockAntiAdblockFilters",
         "adblockEasyList": "adblockEasyList",
         "adblockEasyListSpanish": "adblockEasyListSpanish",
-        "adblockEasyPrivacy": "adblockEasyPrivacy",
-        "adblockFanboyCookies": "adblockFanboyCookies",
-        "adblockFanboySocial": "adblockFanboySocial",
+        "adblockHosts": "adblockHosts",
         "avatarSomasis": "avatarSomasis",
         "catgirl": "catgirl",
         "disko": "disko",
@@ -675,9 +661,7 @@
         "repluggedThemeCustom": "repluggedThemeCustom",
         "repluggedThemeIrc": "repluggedThemeIrc",
         "sbase": "sbase",
-        "uBlockPrivacy": "uBlockPrivacy",
-        "uBlockResourceAbuse": "uBlockResourceAbuse",
-        "uBlockUnbreak": "uBlockUnbreak",
+        "uBlock": "uBlock",
         "ubase": "ubase"
       }
     },
@@ -697,40 +681,20 @@
         "url": "git://git.suckless.org/sbase"
       }
     },
-    "uBlockPrivacy": {
+    "uBlock": {
       "flake": false,
       "locked": {
-        "narHash": "sha256-skpfPTAirqUS1DV/Ojmroum9ud3q1YSWwaVwswZCifI=",
-        "type": "file",
-        "url": "https://raw.githubusercontent.com/uBlockOrigin/uAssets/master/filters/privacy.txt"
+        "lastModified": 1667236566,
+        "narHash": "sha256-+7UrQEANbF08TQqeyoef7VYAOGPTg5S/wlHrECPLI6w=",
+        "owner": "uBlockOrigin",
+        "repo": "uAssets",
+        "rev": "85be896edb8f715c9bd8ce17cd405d3a9fb14873",
+        "type": "github"
       },
       "original": {
-        "type": "file",
-        "url": "https://raw.githubusercontent.com/uBlockOrigin/uAssets/master/filters/privacy.txt"
-      }
-    },
-    "uBlockResourceAbuse": {
-      "flake": false,
-      "locked": {
-        "narHash": "sha256-wQ25+naaFwBDrluKmh9kWQ8jvKWYKjU0vjRN1QUkT7g=",
-        "type": "file",
-        "url": "https://raw.githubusercontent.com/uBlockOrigin/uAssets/master/filters/resource-abuse.txt"
-      },
-      "original": {
-        "type": "file",
-        "url": "https://raw.githubusercontent.com/uBlockOrigin/uAssets/master/filters/resource-abuse.txt"
-      }
-    },
-    "uBlockUnbreak": {
-      "flake": false,
-      "locked": {
-        "narHash": "sha256-WC0dnL0NL56TgNcPx03W0dn7acP3Nf+YazRzF1Q+mKg=",
-        "type": "file",
-        "url": "https://raw.githubusercontent.com/uBlockOrigin/uAssets/master/filters/unbreak.txt"
-      },
-      "original": {
-        "type": "file",
-        "url": "https://raw.githubusercontent.com/uBlockOrigin/uAssets/master/filters/unbreak.txt"
+        "owner": "uBlockOrigin",
+        "repo": "uAssets",
+        "type": "github"
       }
     },
     "ubase": {
@@ -751,11 +715,11 @@
     },
     "utils": {
       "locked": {
-        "lastModified": 1659877975,
-        "narHash": "sha256-zllb8aq3YO3h8B/U0/J1WBgAL8EX5yWf5pMj3G0NAmc=",
+        "lastModified": 1667077288,
+        "narHash": "sha256-bdC8sFNDpT0HK74u9fUkpbf1MEzVYJ+ka7NXCdgBoaA=",
         "owner": "numtide",
         "repo": "flake-utils",
-        "rev": "c0e246b9b83f637f4681389ecabcb2681b4f3af0",
+        "rev": "6ee9ebb6b1ee695d2cacc4faa053a7b9baa76817",
         "type": "github"
       },
       "original": {
