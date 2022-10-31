@@ -1,40 +1,52 @@
 { config
 , pkgs
+, lib
 , inputs
 , ...
 }:
 let
-  discord = inputs.replugged.lib.makeDiscordPlugged {
-    inherit pkgs;
+  # TODO Go back to using Replugged once <https://github.com/replugged-org/replugged/issues/205> is resolved
+  # discord = inputs.replugged.lib.makeDiscordPlugged {
+  #   inherit pkgs;
+  #   extraElectronArgs = "--disable-smooth-scrolling";
+  #   withOpenAsar = true;
+  #   plugins = {
+  #     inherit (inputs)
+  #       repluggedPluginBetterCodeblocks
+  #       repluggedPluginBotInfo
+  #       repluggedPluginCanaryLinks
+  #       repluggedPluginChannelTyping
+  #       repluggedPluginClickableEdits
+  #       repluggedPluginCutecord
+  #       repluggedPluginEmojiUtility
+  #       repluggedPluginPersistSettings
+  #       repluggedPluginSitelenPona
+  #       repluggedPluginThemeToggler
+  #       repluggedPluginTimestampSender
+  #       repluggedPluginTokiPona
+  #       repluggedPluginWordFilter
+  #       ;
+  #   };
+  #   themes = {
+  #     inherit (inputs)
+  #       repluggedThemeCustom
+  #       repluggedThemeIrc
+  #       ;
+  #   };
+  # };
 
-    extraElectronArgs = "--disable-smooth-scrolling";
+  camelCaseToSnakeCase = x:
+    if lib.toLower x == x then
+      x
+    else
+      lib.replaceStrings
+        (lib.upperChars ++ lib.lowerChars)
+        ((map (c: "_${c}") lib.upperChars) ++ lib.upperChars)
+        x
+  ;
 
-    withOpenAsar = true;
-
-    plugins = {
-      inherit (inputs)
-        repluggedPluginBetterCodeblocks
-        repluggedPluginBotInfo
-        repluggedPluginCanaryLinks
-        repluggedPluginChannelTyping
-        repluggedPluginClickableEdits
-        repluggedPluginCutecord
-        repluggedPluginEmojiUtility
-        repluggedPluginPersistSettings
-        repluggedPluginSitelenPona
-        repluggedPluginThemeToggler
-        repluggedPluginTimestampSender
-        repluggedPluginTokiPona
-        repluggedPluginWordFilter
-        ;
-    };
-
-    themes = {
-      inherit (inputs)
-        repluggedThemeCustom
-        repluggedThemeIrc
-        ;
-    };
+  discord = pkgs.discord.override {
+    withOpenASAR = true;
   };
 in
 {
@@ -55,12 +67,34 @@ in
 
   home.persistence."/persist${config.home.homeDirectory}".directories = [
     "etc/discord"
-    "etc/powercord"
+    # "etc/powercord"
   ];
 
-  home.persistence."/cache${config.home.homeDirectory}".directories = [
-    "var/cache/powercord"
-  ];
+  # home.persistence."/cache${config.home.homeDirectory}".directories = [
+  #   "var/cache/powercord"
+  # ];
+
+  xdg.configFile."discord/settings.json".text = (lib.generators.toJSON { }
+    # Convert all the attributes to SNAKE_CASE in the generated JSON
+    (lib.mapAttrs'
+      (name: value: { inherit value; name = camelCaseToSnakeCase name; })
+      {
+        dangerousEnableDevtoolsOnlyEnableIfYouKnowWhatYoureDoing = true;
+        skipHostUpdate = true;
+        openasar = {
+          setup = true;
+          quickstart = true;
+          css = (lib.fileContents (pkgs.concatTextFile {
+            name = "discord-css";
+            files = [
+              "${inputs.repluggedThemeCustom}/custom.css"
+              "${inputs.repluggedThemeIrc}/irc.css"
+            ];
+          }));
+        };
+      }
+    )
+  );
 
   services.mpd-discord-rpc = {
     enable = config.services.mpdris2.enable;
@@ -134,7 +168,8 @@ in
 
   systemd.user.services.discord = {
     Unit = {
-      Description = "Discord instant messaging client";
+      # Description = pkgs.replugged.meta.description;
+      Description = pkgs.discord.meta.description;
       PartOf = [ "graphical-session.target" ];
     };
     Install.WantedBy = [ "graphical-session.target" ];
@@ -143,8 +178,12 @@ in
       Type = "simple";
       ExecStart = "${discord}/bin/discord --start-minimized";
       Restart = "on-failure";
+
       StandardError = "null";
+
+      # It seems this is required because otherwise Discord moans about options.json being read-only
+      # in the journal every time I run `discord` to open the already-running client.
+      StandardOutput = "null";
     };
   };
-
 }
