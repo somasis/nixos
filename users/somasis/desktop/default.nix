@@ -80,6 +80,8 @@
     pkgs.bmake
     pkgs.poedit
 
+    pkgs.xmlstarlet
+
     pkgs.ffmpeg-full
   ];
 
