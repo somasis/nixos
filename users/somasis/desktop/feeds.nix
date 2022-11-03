@@ -231,6 +231,7 @@ in
         }
         {
           url = "https://determinate.systems/posts?format=rss";
+          title = "Determinate Systems";
           tags = [ "computer" "NixOS" ];
         }
         {
@@ -290,11 +291,6 @@ in
           tags = [ "blog" "computer" "OpenBSD" ];
         }
         {
-          url = "https://rnd.neocities.org/blog/main.rss";
-          title = "jan Lentan";
-          tags = [ "blog" "toki pona" ];
-        }
-        {
           url = "https://hisham.hm/?x=feed:rss2&category=1";
           title = "hisham.hm";
           tags = [ "blog" ];
@@ -318,9 +314,16 @@ in
         }
         {
           url = "https://discourse.nixos.org/c/links/12.rss";
+          title = "NixOS Discourse: links";
           tags = [ "aggregators" "NixOS" ];
         }
 
+        # Forums
+        {
+          url = "https://discourse.nixos.org/c/announcements/8.rss";
+          title = "NixOS Discourse: announcements";
+          tags = [ "NixOS" ];
+        }
 
         # News
         {
@@ -344,17 +347,17 @@ in
         {
           url = "https://www.wataugademocrat.com/search/?f=rss&t=article&c=news/asu_news&l=50&s=start_time&sd=desc";
           title = "Watauga Democrat: Appalachian State University news";
-          tags = [ "news" "Appalachian State University" "Boone, NC" ];
+          tags = [ "Appalachian State University" "Boone, NC" "news" ];
         }
         {
           url = "https://wataugaonline.com/feed/";
           title = "Watauga Online";
-          tags = [ "news" "Boone, NC" ];
+          tags = [ "Boone, NC" "news" ];
         }
         {
           url = "https://feeds.feedburner.com/HCPress";
           title = "High Country Press";
-          tags = [ "news" "Boone, NC" ];
+          tags = [ "Boone, NC" "news" ];
         }
 
         # Computers
@@ -445,16 +448,31 @@ in
         # YouTube
         {
           url = "https://www.youtube.com/feeds/videos.xml?channel_id=UCXnNibvR_YIdyPs8PZIBoEw";
-          title = "Cathode Ray Dude";
+          title = "YouTube: Cathode Ray Dude";
           tags = [ "YouTube" "tech" ];
         }
-        { url = "https://www.youtube.com/feeds/videos.xml?channel_id=UCqdUXv9yQiIhspWPYgp8_XA"; }
-        { url = "https://www.youtube.com/feeds/videos.xml?channel_id=UC18ju52OET36bdewLRHzPdQ"; }
-        { url = "https://www.youtube.com/feeds/videos.xml?channel_id=UCy0tKL1T7wFoYcxCe0xjN6Q"; }
-        { url = "https://www.youtube.com/feeds/videos.xml?channel_id=UClRwC5Vc8HrB6vGx6Ti-lhA"; }
-        { url = "https://www.youtube.com/feeds/videos.xml?channel_id=UCW5OrUZ4SeUYkUg1XqcjFYA"; }
+        {
+          title = "YouTube: Road Guy Rob";
+          url = "https://www.youtube.com/feeds/videos.xml?channel_id=UCqdUXv9yQiIhspWPYgp8_XA";
+          tags = [ "YouTube" "urbanism" ];
+        }
+        {
+          title = "YouTube: brutalmoose";
+          url = "https://www.youtube.com/feeds/videos.xml?channel_id=UC18ju52OET36bdewLRHzPdQ";
+          tags = [ "YouTube" ];
+        }
+        {
+          title = "YouTube: Technology Connections";
+          url = "https://www.youtube.com/feeds/videos.xml?channel_id=UCy0tKL1T7wFoYcxCe0xjN6Q";
+          tags = [ "YouTube" "technology" ];
+        }
+        {
+          title = "YouTube: GeoWizard";
+          url = "https://www.youtube.com/feeds/videos.xml?channel_id=UCW5OrUZ4SeUYkUg1XqcjFYA";
+          tags = [ "YouTube" "geography" ];
+        }
 
-        # Toki Pona
+        # toki pona
         {
           url = "https://feeds.redcircle.com/901407e0-53e9-4aa2-aa3d-509393d10783";
           title = "kalama sin";
@@ -462,6 +480,7 @@ in
         }
         {
           url = "https://jonathangabel.com/feed.xml";
+          title = "jan Josan";
           tags = [ "toki pona" "blog" ];
         }
         {
@@ -472,7 +491,7 @@ in
         {
           url = "https://kijetesantakalu-o.tumblr.com/rss";
           title = "kijetesantakalu o!";
-          tags = [ "toki pona" "blog" ];
+          tags = [ "toki pona" "blog" "comics" ];
         }
         {
           title = "GitHub: timeline";
