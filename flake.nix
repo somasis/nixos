@@ -18,10 +18,6 @@
     nixos.url = "github:nixos/nixpkgs?ref=nixos-unstable";
     nixosStable.url = "github:nixos/nixpkgs?ref=nixos-22.05";
     nixosHardware.url = "github:nixos/nixos-hardware";
-    # nixosInstaller = {
-    #   url = "https://channels.nixos.org/nixos-22.05/latest-nixos-plasma5-x86_64-linux.iso";
-    #   flake = false;
-    # };
 
     lollypops.url = "github:pinpox/lollypops";
     lollypops.inputs.nixpkgs.follows = "nixos";
@@ -41,8 +37,10 @@
 
     catgirl.flake = false;
     catgirl.url = "git+https://git.causal.agency/catgirl?ref=somasis/tokipona";
+    dmenu.flake = false;
+    dmenu.url = "github:bakkeby/dmenu-flexipatch";
     mblaze.flake = false;
-    mblaze.url = "git+https://git.vuxu.org/mblaze";
+    mblaze.url = "github:leahneukirchen/mblaze";
     sbase.flake = false;
     sbase.url = "git://git.suckless.org/sbase";
     ubase.flake = false;
@@ -103,7 +101,7 @@
     };
 
     adblockHosts.flake = false;
-    adblockHosts.url = "https://raw.githubusercontent.com/StevenBlack/hosts/master/hosts";
+    adblockHosts.url = "github:StevenBlack/hosts";
   };
 
   outputs = inputs@{ self, flake, ... }: flake.lib.mkFlake {

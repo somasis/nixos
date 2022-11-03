@@ -19,11 +19,11 @@
     "adblockEasyList": {
       "flake": false,
       "locked": {
-        "lastModified": 1667238913,
-        "narHash": "sha256-HnXDpbyD+4rWor0Z3Lzw7M7bTPotXDlSfC8opv8Zd/s=",
+        "lastModified": 1667274641,
+        "narHash": "sha256-4SDuEgXryq7aZXPdGElDi1tiuujbfgq8jDEfmvZVYag=",
         "owner": "easylist",
         "repo": "easylist",
-        "rev": "ddf5d066c9a70bcc7ce8137380bb59b55019970b",
+        "rev": "5383a066e97071e524cc9f403ce3c6569a8a503a",
         "type": "github"
       },
       "original": {
@@ -51,13 +51,17 @@
     "adblockHosts": {
       "flake": false,
       "locked": {
-        "narHash": "sha256-8OhhOkE5f8XWB7pQe8OSTZqvwh/Ssn0QuljQhrwTCh8=",
-        "type": "file",
-        "url": "https://raw.githubusercontent.com/StevenBlack/hosts/master/hosts"
+        "lastModified": 1667353268,
+        "narHash": "sha256-c1hxzRaGZgER/icyopI94XHnTyj0IGt0f4/0CG9naIc=",
+        "owner": "StevenBlack",
+        "repo": "hosts",
+        "rev": "e1bb5f08e6f9f4daef93cc327580a95f83959f38",
+        "type": "github"
       },
       "original": {
-        "type": "file",
-        "url": "https://raw.githubusercontent.com/StevenBlack/hosts/master/hosts"
+        "owner": "StevenBlack",
+        "repo": "hosts",
+        "type": "github"
       }
     },
     "avatarSomasis": {
@@ -104,6 +108,22 @@
       "original": {
         "owner": "nix-community",
         "repo": "disko",
+        "type": "github"
+      }
+    },
+    "dmenu": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1666771245,
+        "narHash": "sha256-6hGunum5+IBSpxJPvEOAgNmCkDNbm3R++RSTg8TL8Vo=",
+        "owner": "bakkeby",
+        "repo": "dmenu-flexipatch",
+        "rev": "05f5efc5e544fdb8e7744eb79a6a5d6f882b4d4c",
+        "type": "github"
+      },
+      "original": {
+        "owner": "bakkeby",
+        "repo": "dmenu-flexipatch",
         "type": "github"
       }
     },
@@ -217,15 +237,15 @@
       "locked": {
         "lastModified": 1661510170,
         "narHash": "sha256-pxtN5MsIXEV1vQtbGi616l1N84Gz+JfhZwRe6WozHKs=",
-        "ref": "refs/heads/master",
+        "owner": "leahneukirchen",
+        "repo": "mblaze",
         "rev": "9d66764434f640f8c36bbbf93a30d8f5d44ee6c9",
-        "revCount": 1138,
-        "type": "git",
-        "url": "https://git.vuxu.org/mblaze"
+        "type": "github"
       },
       "original": {
-        "type": "git",
-        "url": "https://git.vuxu.org/mblaze"
+        "owner": "leahneukirchen",
+        "repo": "mblaze",
+        "type": "github"
       }
     },
     "mcversions": {
@@ -359,11 +379,11 @@
         "replugged": "replugged_2"
       },
       "locked": {
-        "lastModified": 1667176102,
-        "narHash": "sha256-JI5OKRxhnjIW/Qz8HHTwgnJPLZ7E2ZpxHK9LWsJf64A=",
+        "lastModified": 1667262567,
+        "narHash": "sha256-t0cZXylKu05HoG+Sf4F8aZcholGseu/vCCDfyFwBwR8=",
         "owner": "LunNova",
         "repo": "replugged-nix-flake",
-        "rev": "50cc5139e31a171359b602cbf2ae78576c7d4c24",
+        "rev": "d431ed2e70d18749aafdf415dd26be728fe42331",
         "type": "github"
       },
       "original": {
@@ -634,6 +654,7 @@
         "avatarSomasis": "avatarSomasis",
         "catgirl": "catgirl",
         "disko": "disko",
+        "dmenu": "dmenu",
         "flake": "flake",
         "homeManager": "homeManager",
         "impermanence": "impermanence",
@@ -684,11 +705,11 @@
     "uBlock": {
       "flake": false,
       "locked": {
-        "lastModified": 1667236566,
-        "narHash": "sha256-+7UrQEANbF08TQqeyoef7VYAOGPTg5S/wlHrECPLI6w=",
+        "lastModified": 1667274447,
+        "narHash": "sha256-XYSdVs1aFNuKU0koNKejzNj0MR2liyAGDv6rNHqrt/0=",
         "owner": "uBlockOrigin",
         "repo": "uAssets",
-        "rev": "85be896edb8f715c9bd8ce17cd405d3a9fb14873",
+        "rev": "11ab108eaac590c2a72247d32028ed4da314dd8d",
         "type": "github"
       },
       "original": {
