@@ -296,13 +296,6 @@
     ]);
   };
 
-  programs.ssh.matchBlocks."spinoza.7596ff.com".remoteForwards = [
-    {
-      bind.address = "/run/user/${toString nixosConfig.users.users.${config.home.username}.uid}/gnupg/S.gpg-agent.extra";
-      host.address = "/run/user/${toString nixosConfig.users.users.${config.home.username}.uid}/gnupg/S.gpg-agent";
-    }
-  ];
-
   # TODO broken with dbus-next check failure
   # services.pass-secret-service.enable = true;
 
