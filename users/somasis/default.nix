@@ -1,5 +1,7 @@
 { config
 , pkgs
+, nixosConfig
+, lib
 , ...
 }:
 {
@@ -93,27 +95,24 @@
     pkgs.xz
     pkgs.zstd
 
+    pkgs.dateutils
+    pkgs.extrace
+    pkgs.file
     pkgs.jdupes
-    pkgs.strace
-    pkgs.xsv
-
+    pkgs.jq
     pkgs.lr
     pkgs.moreutils
-    pkgs.dateutils
-    pkgs.teip
-
     pkgs.nq
-    pkgs.snooze
-    pkgs.xe
-
-    # NOTE Not in NixOS 22.05
     pkgs.outils
-
-    pkgs.extrace
-    pkgs.uq
-    pkgs.ltrace
-    pkgs.file
     pkgs.pv
+    pkgs.snooze
+    pkgs.teip
+    pkgs.uq
+    pkgs.xe
+    pkgs.xsv
+
+    pkgs.strace
+    pkgs.ltrace
 
     pkgs.rsync
 
