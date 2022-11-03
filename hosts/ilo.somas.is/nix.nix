@@ -14,9 +14,11 @@
 
       auto-optimise-store = true;
 
-      experimental-features = [ "ca-derivations" ];
-      substituters = [ "https://cache.ngi0.nixos.org/" ];
-      trusted-public-keys = [ "cache.ngi0.nixos.org-1:KqH5CBLNSyX184S9BKZJo1LxrxJ9ltnY2uAs5c/f1MA=" ];
+      # TODO Use content-addressed derivations
+      # <https://discourse.nixos.org/t/content-addressed-nix-call-for-testers/12881#:~:text=Level%203%20%E2%80%94%20Raider%20of%20the%20unknown>
+      # experimental-features = [ "ca-derivations" ];
+      # substituters = [ "https://cache.ngi0.nixos.org/" ];
+      # trusted-public-keys = [ "cache.ngi0.nixos.org-1:KqH5CBLNSyX184S9BKZJo1LxrxJ9ltnY2uAs5c/f1MA=" ];
     };
 
     gc = {
