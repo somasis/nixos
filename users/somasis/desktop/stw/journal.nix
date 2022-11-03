@@ -31,14 +31,14 @@
 
       Service.Type = "simple";
       Service.ExecStart = ''
-        ${pkgs.stw}/bin/stw \
-        -F 'monospace:style=heavy:size=8' \
-        -f '${config.xresources.properties."*color3"}' \
-        -A 0 \
-        -x 0 -y -0 \
-        -B 24 \
-        -p -1 \
-        ${getJournal} 275 10
+        stw \
+            -F 'monospace:style=heavy:size=8' \
+            -f '${config.xresources.properties."*color3"}' \
+            -A 0 \
+            -x 0 -y -0 \
+            -B 24 \
+            -p -1 \
+            ${getJournal} 275 10
       '';
     };
 }
