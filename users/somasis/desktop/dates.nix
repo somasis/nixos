@@ -90,19 +90,19 @@ in
       ExecStart =
         let
           stw-dates = ''
-            ${dates}/bin/dates -L -f "%-10s%s\n" +"%Y-%m-%d %I:%M %p"
+            dates -L -f "%-10s%s\n" +"%Y-%m-%d %I:%M %p"
           '';
         in
         ''
-          ${pkgs.stw}/bin/stw \
-          -F "monospace:style=heavy:size=10" \
-          -b "${config.xresources.properties."*color4"}" \
-          -f "${config.xresources.properties."*darkForeground"}" \
-          -A .15 \
-          -x -24 -y 72 \
-          -B 12 \
-          -p 60 \
-          ${pkgs.writeShellScript "dates" stw-dates}
+          stw \
+              -F "monospace:style=heavy:size=10" \
+              -b "${config.xresources.properties."*color4"}" \
+              -f "${config.xresources.properties."*darkForeground"}" \
+              -A .15 \
+              -x -24 -y 72 \
+              -B 12 \
+              -p 60 \
+              ${pkgs.writeShellScript "dates" stw-dates}
         '';
     };
   };
