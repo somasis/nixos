@@ -73,6 +73,15 @@ in
   #       done
   # '';
 
+  home.packages = [
+    (pkgs.writeShellScriptBin "browser" ''
+      PATH=${lib.makeBinPath [ pkgs.coreutils pkgs.socat ]}:"$PATH"
+      exec ${config.programs.qutebrowser.package}/share/qutebrowser/scripts/open_url_in_instance.sh "$@"
+    '')
+  ];
+
+  home.sessionVariables."BROWSER" = "browser";
+
   programs.qutebrowser = {
     enable = true;
 
@@ -450,14 +459,7 @@ in
   xdg.desktopEntries.qutebrowser = {
     name = "qutebrowser";
     genericName = "ilo lukin";
-    exec =
-      let
-        qute = pkgs.writeShellScript "qutebrowser-open-url-in-instance" ''
-          PATH=${lib.makeBinPath [ pkgs.coreutils pkgs.socat ]}:"$PATH"
-          exec ${config.programs.qutebrowser.package}/share/qutebrowser/scripts/open_url_in_instance.sh
-        '';
-      in
-      "${qute} %U";
+    exec = "browser %U";
     categories = [ "Application" "Network" "WebBrowser" ];
     noDisplay = true;
     mimeType = [
