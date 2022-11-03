@@ -62,19 +62,13 @@ in
 
     urls =
       let
-        curl = lib.escapeShellArgs (
-          [ "${pkgs.curl}/bin/curl" "-A" "${userAgent}" ]
-          ++ (lib.optionals (tor.enable && tor.client.enable) [ "-x" "socks5h://${tor.client.socksListenAddress.addr}:${toString tor.client.socksListenAddress.port}" ])
-        )
-        ;
-
         discardContent = pkgs.writeShellScript "discard-content" ''
           umask 0077
 
           feed="$1"
           shift
 
-          ${curl} -Lf "''${feed}" \
+          autocurl -Lf "''${feed}" \
               | ${pkgs.xmlstarlet}/bin/xml ed \
                   -d '//channel/item/description' \
                   -d '//channel/item/content:encoded' \
@@ -90,7 +84,7 @@ in
         #   done
         #   url=${url%&}
 
-        #   ${pkgs.curl}/bin/curl \
+        #   autocurl \
         #         -K - \
         #         --noproxy "*" \
         #         -Lf \
@@ -107,7 +101,7 @@ in
           json=$(${pkgs.coreutils}/bin/mktemp)
           trap '${pkgs.coreutils}/bin/rm -f "''${json}"' EXIT
 
-          ${curl} -Lf -o "''${json}" "https://www.reddit.com/r/''${subreddit}/.json"
+          autocurl -Lf -o "''${json}" "https://www.reddit.com/r/''${subreddit}/.json"
 
           [[ -s "''${json}" ]] || exit 1
 
@@ -488,7 +482,7 @@ in
                 ${config.programs.password-store.package}/bin/pass \
                     www/github.com/somasis.private.atom \
                     | ${pkgs.coreutils}/bin/tr -d '\n' \
-                    | ${curl} -Lf -G --data-urlencode "token@-" "https://github.com/somasis.private.atom"
+                    | autocurl -Lf -G --data-urlencode "token@-" "https://github.com/somasis.private.atom"
               '';
             in
             "exec:${generate}";

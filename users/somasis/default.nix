@@ -125,6 +125,61 @@
     pkgs.s6-linux-utils
     pkgs.s6-portable-utils
 
+    # autocurl - curl for use by background/automatically running services
+    (
+      let
+        tor = nixosConfig.services.tor;
+
+        userAgent = [ "-A" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/97.0.4692.99 Safari/537.36" ];
+        proxy = (lib.optionals (tor.enable && tor.client.enable) (
+          let
+            proxyProtocol = (if tor.client.dns.enable then "socks5h" else "socks5");
+            proxyAddress = (if (builtins.substring 0 1 tor.client.socksListenAddress.addr) == "/" then
+              "${tor.client.socksListenAddress.addr}:${toString tor.client.socksListenAddress.port}"
+            else
+              "localhost/${tor.client.socksListenAddress.addr}"
+            );
+          in
+          [
+            "-x"
+            "${proxyProtocol}://${proxyAddress}"
+          ]
+        ));
+      in
+      pkgs.writeShellApplication {
+        name = "autocurl";
+        # name = "torcurl";
+        # "that's a real toe-curler"
+
+        runtimeInputs =
+          [ pkgs.curl ]
+          ++ lib.optional (nixosConfig.networking.networkmanager.enable) pkgs.networkmanager
+        ;
+
+        text = ''
+          set -eu
+
+          ${lib.optionalString nixosConfig.networking.networkmanager.enable "nm-online -t 60 || exit 7"}
+
+          exec curl ${lib.escapeShellArgs [
+            "--disable"
+            "--silent"
+            "--show-error"
+            "--globoff"
+            "--disallow-username-in-url"
+            "--connect-timeout" 60
+            "--max-time" 60
+            "--retry" 10
+            "--limit-rate" "512K"
+            "--parallel"
+            "--parallel-max" 4
+            userAgent
+            proxy
+          ]}
+        '';
+      }
+    )
+
     (pkgs.writeShellApplication {
       name = "stderred";
 
