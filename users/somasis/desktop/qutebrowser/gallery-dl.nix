@@ -10,9 +10,10 @@ let
   '';
 
   mpv = pkgs.writeShellScript "mpv" ''
-    ${config.programs.mpv.package}/bin/mpv \
-        --loop=inf \
-        $(${pkgs.gallery-dl}/bin/gallery-dl -G "$@")
+    ${pkgs.gallery-dl}/bin/gallery-dl -G "$@" \
+        | ${config.programs.mpv.package}/bin/mpv \
+            --loop=inf \
+            --playlist=-
   '';
 in
 {
