@@ -57,7 +57,10 @@
 
       log.abbrevCommit = false;
 
-      branch.autosetuprebase = "always";
+      branch = {
+        autoSetupRebase = "always";
+        autoSetupMerge = "simple";
+      };
 
       stash.showPatch = true;
       status.showStash = true;
