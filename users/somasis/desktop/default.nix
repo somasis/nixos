@@ -31,6 +31,7 @@
     ./mouse.nix
     ./music.nix
     ./notifications.nix
+    ./office.nix
     ./panel.nix
     ./pdf.nix
     ./phone-integration.nix
@@ -73,7 +74,6 @@
     pkgs.xorg.xinput
     pkgs.asciidoctor
     pkgs.bmake
-    pkgs.libreoffice
     pkgs.lowdown
     pkgs.patchutils
     pkgs.bc
@@ -83,10 +83,8 @@
     pkgs.ffmpeg-full
   ];
 
-  home.persistence."/persist${config.home.homeDirectory}".directories = [
-    "etc/poedit"
-    "etc/libreoffice"
-  ];
+
+  home.persistence."/persist${config.home.homeDirectory}".directories = [ "etc/poedit" ];
 
   home.file.".face".source = "${inputs.avatarSomasis}";
 
