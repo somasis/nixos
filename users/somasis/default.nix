@@ -186,7 +186,7 @@
       runtimeInputs = [ pkgs.stderred ];
 
       text = ''
-        export LD_PRELOAD=${pkgs.stderred}/lib/libstderred.so
+        export ${lib.toShellVar "LD_PRELOAD" "${pkgs.stderred}/lib/libstderred.so"}
         exec "$@"
       '';
     })
