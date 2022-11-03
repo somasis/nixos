@@ -1,3 +1,4 @@
+# { pkgs, ... }:
 {
   services.logind = {
     lidSwitch = "suspend";
