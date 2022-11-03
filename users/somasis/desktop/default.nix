@@ -91,7 +91,7 @@
   home.file.".face".source = "${inputs.avatarSomasis}";
 
   systemd.user.targets.root-windows = {
-    Unit.Description = "All windows that aren't movable";
+    Unit.Description = "All services that put information on the desktop";
     # Install.WantedBy = [ "graphical-session.target" ];
     # Unit.PartOf = [ "graphical-session.target" ];
   };
