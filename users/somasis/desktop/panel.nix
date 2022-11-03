@@ -64,14 +64,20 @@
   };
 
   systemd.user.services.panel = {
-    Unit.Description = "lemonbar(1) based panel";
+    Unit = {
+      Description = "lemonbar(1) based panel";
+      PartOf = [ "root-windows.target" ];
+    };
     Install.WantedBy = [ "root-windows.target" ];
-    Unit.PartOf = [ "root-windows.target" ];
-    Service.Type = "simple";
-    Service.ExecStart = "${config.home.homeDirectory}/bin/panel";
-    Service.ExecStartPost = "${pkgs.bspwm}/bin/bspc config -m primary top_padding 48";
-    Service.ExecStopPost = "${pkgs.bspwm}/bin/bspc config -m primary top_padding 0";
-    Unit.StartLimitInterval = 0;
+
+    Service = {
+      Type = "simple";
+      ExecStart = [ "${config.home.homeDirectory}/bin/panel" ];
+      ExecStartPost = [ "${pkgs.bspwm}/bin/bspc config -m primary top_padding 48" ];
+      ExecStopPost = [ "${pkgs.bspwm}/bin/bspc config -m primary top_padding 0" ];
+    };
+
     Service.Restart = "on-failure";
+    Unit.StartLimitInterval = 0;
   };
 }
