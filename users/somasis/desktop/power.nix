@@ -14,7 +14,7 @@
     Service = {
       Type = "simple";
       ExecStart = ''
-        ${pkgs.batsignal}/bin/batsignal \
+        batsignal \
           -e \
           -I "battery" \
           -D "${pkgs.systemd}/bin/systemctl suspend" \
