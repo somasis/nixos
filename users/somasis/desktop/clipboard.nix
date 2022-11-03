@@ -12,9 +12,6 @@
         exec xclip -selection clipboard -o "$@"
       '';
     })
-
-    # TODO switch from clipmenu to copyq
-    # pkgs.copyq
   ];
 
   services.clipmenu.enable = true;
