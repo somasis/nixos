@@ -404,55 +404,99 @@ in
     };
   };
 
-  systemd.user.timers.qutebrowser = {
-    Unit.Description = "Vacuum the qutebrowser database weekly";
-    Timer = {
-      OnCalendar = "weekly";
-      Persistent = true;
-      AccuracySec = "15m";
-      RandomizedDelaySec = "5m";
+  systemd.user = {
+    timers = {
+      qutebrowser-vacuum = {
+        Unit = {
+          Description = "${config.systemd.user.services.qutebrowser-vacuum.Unit.Description} every week";
+          PartOf = [ "timers.target" ];
+        };
+        Install.WantedBy = [ "timers.target" ];
+
+        Timer = {
+          OnCalendar = "weekly";
+          Persistent = true;
+          AccuracySec = "15m";
+          RandomizedDelaySec = "5m";
+        };
+      };
+
+      qutebrowser-greasemonkey = {
+        Unit = {
+          Description = "${config.systemd.user.services.qutebrowser-greasemonkey.Unit.Description} every week";
+          PartOf = [ "timers.target" ];
+        };
+        Install.WantedBy = [ "timers.target" ];
+
+        Timer = {
+          OnCalendar = "weekly";
+          Persistent = true;
+          AccuracySec = "15m";
+          RandomizedDelaySec = "5m";
+        };
+      };
     };
-    Unit.PartOf = [ "timers.target" ];
-    Install.WantedBy = [ "timers.target" ];
-  };
 
-  systemd.user.services.qutebrowser = {
-    Unit.Description = "Vacuum the qutebrowser database";
-    Service = {
-      Type = "oneshot";
-      ExecStart = [
-        "-${pkgs.sqlite}/bin/sqlite3 ${config.xdg.dataHome}/qutebrowser/history.sqlite"
-      ];
+    services = rec {
+      qutebrowser-vacuum = {
+        Unit.Description = "Vacuum the qutebrowser database";
 
-      Nice = 19;
-      CPUSchedulingPolicy = "idle";
-      IOSchedulingClass = "idle";
-      IOSchedulingPriority = 7;
-    };
-  };
+        Service = {
+          Type = "oneshot";
 
-  systemd.user.timers.qutebrowser-greasemonkey = {
-    Unit.Description = "Update qutebrowser's greasemonkey scripts weekly";
-    Timer = {
-      OnCalendar = "weekly";
-      Persistent = true;
-      AccuracySec = "15m";
-      RandomizedDelaySec = "5m";
-    };
-    Unit.PartOf = [ "timers.target" ];
-    Install.WantedBy = [ "timers.target" ];
-  };
+          # Use an ExecCondition to prevent from doing maintenance while
+          # qutebrowser is running.
+          #
+          # systemd.service(5):
+          # > The behavior is like an ExecStartPre= and condition check hybrid:
+          # > when an ExecCondition= command exits with exit code 1 through 254
+          # > (inclusive), the remaining commands are skipped and the unit is not
+          # > marked as failed. However, if an ExecCondition= command exits with
+          # > 255 or abnormally (e.g. timeout, killed by a signal, etc.), the
+          # > unit will be considered failed (and remaining commands will be
+          # > skipped). Exit code of 0 or those matching SuccessExitStatus= will
+          # > continue execution to the next command(s).
+          ExecCondition = builtins.toString (pkgs.writeShellScript "wait-for-qutebrowser" ''
+            set -eu
+            set -- $(${pkgs.procps}/bin/pgrep -u  "qutebrowser")
 
-  systemd.user.services.qutebrowser-greasemonkey = {
-    Unit.Description = "Update qutebrowser's greasemonkey scripts";
-    Service = {
-      Type = "oneshot";
-      ExecStart = [ "${config.home.homeDirectory}/bin/qutebrowser-greasemonkey" ];
+            [ "$#" -gt 0 ] || exit 0
+            ${pkgs.extrace}/bin/pwait "$@"
+          '');
 
-      Nice = 19;
-      CPUSchedulingPolicy = "idle";
-      IOSchedulingClass = "idle";
-      IOSchedulingPriority = 7;
+          ExecStart = builtins.toString (pkgs.writeShellScript "qutebrowser-vacuum" ''
+            set -eu
+
+            PATH="${lib.makeBinPath [ pkgs.sqlite pkgs.xe ]}:$PATH"
+
+            for db in ${lib.escapeShellArgs [ "${config.xdg.dataHome}/qutebrowser/history.sqlite" ]}; do
+                sqlite3 "$db" <<'EOF'
+            .timeout ${builtins.toString (60 * 1000)}
+            VACUUM;
+            EOF
+            done
+          '');
+
+          Nice = 19;
+          CPUSchedulingPolicy = "idle";
+          IOSchedulingClass = "idle";
+          IOSchedulingPriority = 7;
+        };
+      };
+
+      qutebrowser-greasemonkey = {
+        Unit.Description = "Update qutebrowser's greasemonkey scripts";
+
+        Service = {
+          Type = "oneshot";
+          ExecStart = [ "${config.home.homeDirectory}/bin/qutebrowser-greasemonkey" ];
+
+          Nice = 19;
+          CPUSchedulingPolicy = "idle";
+          IOSchedulingClass = "idle";
+          IOSchedulingPriority = 7;
+        };
+      };
     };
   };
 
