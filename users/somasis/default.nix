@@ -97,12 +97,12 @@
     pkgs.strace
     pkgs.xsv
 
+    pkgs.lr
     pkgs.moreutils
     pkgs.dateutils
     pkgs.teip
 
     pkgs.nq
-    pkgs.jq
     pkgs.snooze
     pkgs.xe
 
