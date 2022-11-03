@@ -54,7 +54,7 @@ in
 
       Service = {
         Type = "oneshot";
-        ExecStart = "${mess}/bin/mess";
+        ExecStart = "mess";
         ExecStartPost = [
           ''${pkgs.coreutils}/bin/mkdir -p "${config.home.homeDirectory}/mess/current/incoming"''
           ''${pkgs.coreutils}/bin/mkdir -p "${config.home.homeDirectory}/mess/current/src"''
