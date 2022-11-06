@@ -35,14 +35,15 @@ let
           pass www/musicbrainz.org/Somasis \
               | jq -Rc --arg user Somasis '{ musicbrainz: { user: $user, pass: . } }'
       )
+    ''
+    + (lib.optionalString nixosConfig.services.airsonic.enable ''
       json+=$(
           pass spinoza.7596ff.com/airsonic/somasis \
               | jq -Rc --arg user somasis '{ subsonic: { user: $user, pass: . } }'
       )
-
-      json=$(jq -sc 'add' <<<"$json")
-
-      yq -y <<<"$json"
+    '')
+    + ''
+      jq -sc 'add' <<<"$json" | yq -y
     '';
   });
 

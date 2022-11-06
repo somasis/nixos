@@ -1,9 +1,9 @@
 { config, pkgs, ... }:
 {
-  # imports = [
-  #   ../music/manage.nix
-  #   ../music/play.nix
-  # ];
+  imports = [
+    ../music/manage.nix
+    ../music/play.nix
+  ];
 
   xdg.userDirs.music = "${config.home.homeDirectory}/audio/library";
 
