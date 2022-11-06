@@ -28,7 +28,6 @@
   home.persistence."/persist${config.home.homeDirectory}" = {
     directories = [
       "bin"
-      "diary"
       "logs"
       "shared"
       { directory = "src"; method = "symlink"; }

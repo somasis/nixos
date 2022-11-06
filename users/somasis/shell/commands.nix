@@ -13,7 +13,6 @@
       # Quick text editing aliases
       note = ''$EDITOR "$(make -C ~/src/www/somas.is -s note-new)"'';
       rhizome = ''$EDITOR "$(make -C ~/src/www/somas.is -s rhizome-new)"'';
-      diary = ''$EDITOR "$HOME/diary/$(date +%Y/%m/%d.txt)"'';
 
       bc = "bc -q";
       diff = "diff --color";

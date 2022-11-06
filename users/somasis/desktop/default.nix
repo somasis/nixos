@@ -19,6 +19,7 @@
     ./bspwm.nix
     ./clipboard.nix
     ./dates.nix
+    ./diary.nix
     ./discord.nix
     ./dmenu.nix
     ./feeds.nix
