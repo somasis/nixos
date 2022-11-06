@@ -148,7 +148,9 @@
   # services.gvfs.enable = lib.mkForce false;
   programs.dconf.enable = true;
 
-  boot.kernelPackages = pkgs.linuxKernel.packages.linux_5_19;
+  # TODO: Remove boot.zfs.enableUnstable when pkgs.linuxKernel.packages.linux_6_0 is compatible
+  boot.kernelPackages = config.boot.zfs.package.latestCompatibleLinuxPackages;
+  boot.zfs.enableUnstable = true;
 
   services.udisks2.enable = true;
 
