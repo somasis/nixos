@@ -1,12 +1,14 @@
 { config
 , pkgs
+, lib
+, inputs
 , ...
 }:
 # let
 #   makel =
 #       (pkgs.stdenv.mkDerivation {
 #         pname = "makel";
-#         version = "20220124";
+#         version = "unstable-2022-01-24";
 
 #         src = pkgs.fetchFromGitHub rec {
 #           owner = "maandree";
@@ -18,7 +20,7 @@
 #         buildInputs = [
 #           (pkgs.stdenv.mkDerivation {
 #             pname = "libgrapheme";
-#             version = "20220301";
+#             version = "unstable-2022-03-01";
 
 #             src = pkgs.fetchgit rec {
 #               url = "git://git.suckless.org/libgrapheme";
@@ -394,7 +396,8 @@
   };
 
   home.persistence."/cache${config.home.homeDirectory}".directories = [ "share/kak/state-save" ];
-
+}
+  // (lib.optionalAttrs (lib.versionOlder (builtins.readFile "${inputs.homeManager}/.release") "22.05") {
   # NOTE: Not included in home-manager 22.05
   editorconfig = {
     enable = true;
@@ -419,25 +422,11 @@
         keep_padding = true;
       };
 
-      "*.json" = {
-        max_line_length = 0;
-      };
-
-      "{Makefile,*.mak,*.mk}" = {
-        indent_style = "tab";
-      };
-
-      "{*.scd,*.{0..9},*.{0-9}p}" = {
-        max_line_length = 72;
-      };
-
-      "{*.c,*.h,*.cpp,*.hpp" = {
-        indent_style = "tab";
-      };
-
-      "troff" = {
-        max_line_length = 72;
-      };
+      "troff".max_line_length = 72;
+      "*.json".max_line_length = 0;
+      "{Makefile,*.mak,*.mk}".indent_style = "tab";
+      "{*.scd,*.{0..9},*.{0-9}p}".max_line_length = 72;
+      "{*.c,*.h,*.cpp,*.hpp}".indent_style = "tab";
     };
   };
-}
+})
