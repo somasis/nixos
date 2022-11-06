@@ -10,11 +10,18 @@
       }
       {
         name = "syncthing";
-        location = 45435;
+        location = 45739;
 
         remote = "somasis@spinoza.7596ff.com";
+      }
+      {
+        name = "syncthing";
+        location = 45435;
+
+        remote = "tv@spinoza.7596ff.com";
         remoteLocation = 8384;
       }
+
       {
         name = "syncthing";
         location = 10730;
