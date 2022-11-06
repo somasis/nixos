@@ -88,7 +88,7 @@
 
   home.persistence."/persist${config.home.homeDirectory}".directories = [ "etc/poedit" ];
 
-  home.file.".face".source = "${inputs.avatarSomasis}";
+  # home.file.".face".source = "${inputs.avatarSomasis}";
 
   systemd.user.targets.root-windows = {
     Unit.Description = "All services that put information on the desktop";
