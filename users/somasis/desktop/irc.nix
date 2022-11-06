@@ -342,6 +342,165 @@ in
     catgirls-spoiler
   ];
 
+  xdg.configFile."tmux/catgirls.conf".text = ''
+    # tmux -L catgirls -f ~/etc/tmux/catgirls.conf attach-session
+    new-session -t catgirls
+
+    source "$XDG_CONFIG_HOME/tmux/tmux.conf"
+
+    # Don't allow 256-color palettes, as I don't like how dark some of the colors are.
+    set-option -g default-terminal "tmux"
+
+    # Match `catgirl`'s status style
+    set-option -g status           on
+    set-option -g status-position  top
+
+    set-option -g status-justify   left
+    set-option -g status-left      ""
+    set-option -g status-right     ""
+    set-option -g status-interval  5
+
+    set-option -g window-status-format         " #I #T "
+    set-option -g window-status-current-format " #I #T "
+    set-option -g window-status-separator      ""
+
+    # Default styles. `catgirls` will set per-window styles.
+    set-option -g status-style                 "bg=terminal,fg=terminal"
+    set-option -g status-left-style            "fg=magenta"
+    set-option -g status-right-style           "fg=magenta"
+    set-option -g window-status-style          "bg=terminal,fg=terminal"
+    set-option -g window-status-current-style  ""
+    set-option -g window-status-activity-style "bold"
+    set-option -g exit-empty                   on
+
+    # Ignore bells, only check for activity.
+    # Notifications from highlights are handled by `catgirls`.
+    set-option -g monitor-activity  on
+    set-option -g monitor-bell      on
+    set-option -g visual-activity   off
+    set-option -g visual-bell       off
+
+    set-option -g set-titles        on              # Refers to *terminal window title*.
+    set-option -g set-titles-string "catgirl - #T"
+
+    # Set window title rules.
+    set-option -g automatic-rename  off
+    set-option -g allow-rename      off
+    set-option -g renumber-windows  on
+
+    # Clients exit on network errors, restart them automatically
+    # (use `kill-pane'/`C-_ x' to destroy windows)
+    set-option -g remain-on-exit    on
+    set-hook -g   pane-died         respawn-pane
+
+    # Disable scrollback. `catgirl` has its own.
+    set-option -g history-limit     0
+
+    # Fix redrawing.
+    set-hook -g   client-resized    "send-keys C-l"
+
+    # Keybinds.
+
+    ## Disable menus.
+    unbind-key -T root MouseDown3Pane           # Right click is not useful since scrollback is off.
+    unbind-key -T root M-MouseDown3Pane
+
+    ## tmux // Prefix // control + b (C-_)
+    # unbind-key -T prefix C-b                    # Used by `catgirl` for formatting.
+    # set-option -g prefix                'C-b'
+
+    ## Text editing // Move to word left of cursor // meta + b control + left
+    ## Text editing // Move to word right of cursor // meta + f, control + right
+    ## Text editing // Delete word to left of cursor // control + w, control + h, control + backspace
+    ## Text editing // Delete word to right of cursor // meta + d, control + delete
+    bind-key -n     C-Left              send-keys M-b
+    bind-key -n     C-Right             send-keys M-f
+    bind-key -n     C-h                 send-keys C-w
+    bind-key -n     C-Delete            send-keys M-d
+
+    ## Text editing // Toggle bold // meta + z + b, meta + b
+    ## Text editing // Toggle italics // meta + z + i, meta + i
+    ## Text editing // Toggle underline // meta + z + u, meta + u
+    ## Text editing // Insert color marker // meta + c
+    bind-key -n     M-b                 send-keys C-z b
+    bind-key -n     M-i                 send-keys C-z i
+    bind-key -n     M-u                 send-keys C-z u
+    bind-key -n     M-c                 send-keys C-z c
+
+    ## Text editing // Toggle spoiler // meta + s
+    bind-key -n     M-s                 run-shell "catgirls-spoiler #W"
+    bind-key -n     M-S                 send-keys M-s
+
+    # Disarm Control-C
+    bind-key -n -N 'confirm interrupt'  -- C-c confirm-before -p 'Send ^C? (y/N)' -- 'send-keys -- C-c'
+
+    # add buffer scrolling via mouse (by two lines)
+    bind-key -n WheelUpPane     send-keys Up Up
+    bind-key -n WheelDownPane   send-keys Down Down
+
+    ## Windows // Switch to window [number] // control + [0-9]
+    bind-key -n C-0     select-window -t 0
+    bind-key -n C-1     select-window -t 1
+    bind-key -n C-2     select-window -t 2
+    bind-key -n C-4     select-window -t 4
+    bind-key -n C-5     select-window -t 5
+    bind-key -n C-6     select-window -t 6
+    bind-key -n C-7     select-window -t 7
+    bind-key -n C-8     select-window -t 8
+    bind-key -n C-9     select-window -t 9
+
+    ## Windows // Cycle through server windows // meta + tab
+    set-option -gw      xterm-keys on
+    bind-key -n M-Tab   next-window
+    bind-key -n M-S-Tab next-window
+
+    ## Windows // Move to {previous,next} channel window // meta + left, meta + right
+    bind-key -n M-Left  send-keys C-p
+    bind-key -n M-Right send-keys C-n
+
+    ## Commands // Execute /open // control + o
+    bind-key -n C-o { send-keys C-e C-u; send-keys -l "/open"; send-keys Enter; send-keys C-y; }
+
+    ## Commands // /query kylie // control + f
+    bind-key -n C-f { send-keys C-e C-u; send-keys -l "/query kylie"; send-keys Enter; send-keys C-y; }
+
+    ## Commands // Close current window // control + w
+    bind-key -n C-w { send-keys C-e C-u; send-keys -l "/close"; send-keys Enter; send-keys C-y; }
+
+    ## State // Quit all servers // control + q
+    bind-key -n C-q kill-session -t catgirls
+
+    ## State / Reconnect server // control + r
+    bind-key -n -N "reconnect network" -- C-r confirm-before -p 'reconnect network? (y/N)' -- 'respawn-pane -k'
+
+    # Networks.
+
+    new-window -n tilde --      catgirls -c tilde.pounce.somas.is.conf
+    set-option -a window-status-style "bg=terminal,fg=magenta"
+    set-option -a window-status-current-style "bg=terminal,fg=magenta,reverse"
+    set-option -a window-status-activity-style "bg=terminal,fg=magenta"
+
+    new-window -n libera --     catgirls -c libera.pounce.somas.is.conf
+    set-option -a window-status-style "bg=terminal,fg=blue"
+    set-option -a window-status-current-style "bg=terminal,fg=blue,reverse"
+    set-option -a window-status-activity-style "bg=terminal,fg=blue"
+
+    new-window -n oftc --       catgirls -c oftc.pounce.somas.is.conf
+    set-option -a window-status-style "bg=terminal,fg=yellow"
+    set-option -a window-status-current-style "bg=terminal,fg=yellow,reverse"
+    set-option -a window-status-activity-style "bg=terminal,fg=yellow"
+
+    # new-window -n bitlbee --    catgirls -c bitlbee.conf
+    # set-option -a window-status-style "bg=terminal,fg=green"
+    # set-option -a window-status-current-style "bg=terminal,fg=green,reverse"
+    # set-option -a window-status-activity-style "bg=terminal,fg=green"
+
+    # Delete the default shell window that is spawned by tmux.
+    kill-window -t 0
+
+    select-window -t 0
+  '';
+
   xdg.desktopEntries.catgirls-uri = {
     name = "catgirls-uri";
     genericName = "ilo toki IRC";
@@ -355,7 +514,6 @@ in
       "x-scheme-handler/ircs"
     ];
   };
-
 
   home.persistence."/persist${config.home.homeDirectory}".files = [
     "etc/catgirl/client-${nixosConfig.networking.fqdn}.crt"

@@ -169,5 +169,23 @@ in
 
   services.imapnotify.enable = true;
 
+  # xdg.configFile."tmux/mtui.conf".text = ''
+  #   source "$XDG_CONFIG_HOME/tmux/unobtrusive.conf"
+
+  #   set-option -g set-titles-string "mtui - #T"
+  #   set-option -g window-status-format          " #I #W "
+  #   set-option -g window-status-current-format  " #I #W "
+
+  #   set-option -g remain-on-exit on
+
+  #   # Binds.
+  #   bind-key -n C-q kill-server
+
+  #   set-option -g status-right ""
+  #   # set-option -g history-limit 10000
+
+  #   # set-hook -t 0.0 pane-exited "kill-session -t mtui"
+  # '';
+
   # home.packages = [ pkgs.mail-deduplicate ];
 }
