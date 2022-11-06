@@ -79,7 +79,7 @@ let
       # Use the spinfast319 fork, since it seems that upstream is inactive
       owner = "spinfast319";
       rev = version;
-      hash = "sha256-bFUadSJ8eV3y9I9udQsDukLk6kKKW610zn4aIYxhZ5w=";
+      hash = "sha256-+yMKnfG2f+A1/MxSBFLaHfpCgI2m968iXqt+2QanM/c=";
     };
 
     buildInputs = with pkgs.python3Packages; [ setuptools ];
