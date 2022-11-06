@@ -39,38 +39,37 @@
   home.keyboard.options = [ "compose:ralt" ];
 
   home.packages = [
-    pkgs.rlwrap
-
-    pkgs.pigz
-    pkgs.xz
-    pkgs.zstd
-
     pkgs.dateutils
+    pkgs.execline
     pkgs.extrace
     pkgs.file
     pkgs.jdupes
     pkgs.lr
+    pkgs.ltrace
     pkgs.moreutils
     pkgs.nq
+    pkgs.pigz
     pkgs.pv
-    pkgs.snooze
-    pkgs.uq
-    pkgs.xe
-    pkgs.xsv
-
-    pkgs.strace
-    pkgs.ltrace
-
+    pkgs.rlwrap
     pkgs.rsync
-
-    pkgs.execline
     pkgs.s6
-    pkgs.s6-rc
-    pkgs.s6-networking
     pkgs.s6-dns
     pkgs.s6-linux-init
     pkgs.s6-linux-utils
+    pkgs.s6-networking
     pkgs.s6-portable-utils
+    pkgs.s6-rc
+    pkgs.snooze
+    pkgs.strace
+    pkgs.uq
+    pkgs.xe
+    pkgs.xsv
+    pkgs.xz
+    pkgs.zstd
+
+    # TODO Re-add once NixOS 22.11
+    # pkgs.outils
+    # pkgs.teip
 
     # autocurl - curl for use by background/automatically running services
     (
@@ -137,12 +136,7 @@
         exec "$@"
       '';
     })
-  ]
-  ++ (lib.optionals (lib.versionOlder nixosConfig.system.nixos.release "22.05") [
-    pkgs.outils
-    pkgs.teip
-  ])
-  ;
+  ];
 
   programs.jq.enable = true;
 

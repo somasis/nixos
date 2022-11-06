@@ -1,10 +1,21 @@
 { pkgs
-, lib
-, nixosConfig
 , ...
 }: {
   home.packages = [
     pkgs.line-awesome
+
+    # TODO Disable for now until they're in nixpkgs
+    # # toki pona
+    # pkgs.nasin-nanpa
+    # pkgs.linja-sike
+    # pkgs.linja-pi-pu-lukin
+    # pkgs.linja-pona
+    # pkgs.linja-suwi
+    # pkgs.linja-pi-tomo-lipu
+    # pkgs.linja-wawa
+    # pkgs.linja-luka
+    # pkgs.linja-pimeja-pona
+    # pkgs.sitelen-seli-kiwen
 
     # Free replacements for pkgs.corefonts
     # # Arial, Times New Roman
@@ -22,21 +33,7 @@
 
     # pkgs.raleway
     # pkgs.roboto
-  ]
-  ++ (lib.optionals (lib.versionOlder nixosConfig.system.nixos.release "22.05") [
-    # toki pona
-    pkgs.nasin-nanpa
-    pkgs.linja-sike
-    pkgs.linja-pi-pu-lukin
-    pkgs.linja-pona
-    pkgs.linja-suwi
-    pkgs.linja-pi-tomo-lipu
-    pkgs.linja-wawa
-    pkgs.linja-luka
-    pkgs.linja-pimeja-pona
-    pkgs.sitelen-seli-kiwen
-  ])
-  ;
+  ];
 
   # See <configuration.nix> for actual font settings; this is just to make fontconfig
   # see the fonts installed by home-manager.

@@ -397,7 +397,7 @@
 
   home.persistence."/cache${config.home.homeDirectory}".directories = [ "share/kak/state-save" ];
 }
-  // (lib.optionalAttrs (lib.versionOlder (builtins.readFile "${inputs.homeManager}/.release") "22.05") {
+  // (lib.optionalAttrs (!(lib.versionOlder "22.05" (builtins.readFile "${inputs.homeManager}/.release"))) {
   # NOTE: Not included in home-manager 22.05
   editorconfig = {
     enable = true;
