@@ -7,8 +7,8 @@
 {
   imports = [
     ./commands
+    ./editor
     ./git
-    ./kakoune
     ./modules
     ./shell
 
