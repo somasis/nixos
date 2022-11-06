@@ -15,7 +15,6 @@
     ./htop.nix
     ./less.nix
     ./man.nix
-    ./mess.nix
     ./pass.nix
     ./skim.nix
     ./spell.nix
@@ -56,14 +55,11 @@
     pkgs.extrace
     pkgs.file
     pkgs.jdupes
-    pkgs.jq
     pkgs.lr
     pkgs.moreutils
     pkgs.nq
-    pkgs.outils
     pkgs.pv
     pkgs.snooze
-    pkgs.teip
     pkgs.uq
     pkgs.xe
     pkgs.xsv
@@ -110,7 +106,7 @@
 
         runtimeInputs =
           [ pkgs.curl ]
-          ++ lib.optional (nixosConfig.networking.networkmanager.enable) pkgs.networkmanager
+            ++ lib.optional (nixosConfig.networking.networkmanager.enable) pkgs.networkmanager
         ;
 
         text = ''
@@ -147,7 +143,12 @@
         exec "$@"
       '';
     })
-  ];
+  ]
+  ++ (lib.optionals (lib.versionOlder nixosConfig.system.nixos.release "22.05") [
+    pkgs.outils
+    pkgs.teip
+  ])
+  ;
 
   programs.jq.enable = true;
 

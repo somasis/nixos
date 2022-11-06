@@ -51,7 +51,6 @@
       sort_key = config.lib.htop.fields.PERCENT_CPU; # Sort by PID
 
       fields = with config.lib.htop.fields; [
-        ELAPSED
         USER
         PID
         STATE

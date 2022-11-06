@@ -169,5 +169,5 @@ in
 
   services.imapnotify.enable = true;
 
-  home.packages = [ pkgs.mail-deduplicate ];
+  # home.packages = [ pkgs.mail-deduplicate ];
 }

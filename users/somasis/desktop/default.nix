@@ -28,6 +28,7 @@
     ./irc.nix
     ./ledger.nix
     ./list.nix
+    ./mess.nix
     ./mounts.nix
     ./mouse.nix
     ./music.nix
