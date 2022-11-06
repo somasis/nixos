@@ -17,7 +17,6 @@
     ./automount.nix
     ./autorandr.nix
     ./bspwm.nix
-    ./catgirl.nix
     ./clipboard.nix
     ./dates.nix
     ./discord.nix
@@ -25,6 +24,7 @@
     ./feeds.nix
     ./file-manager.nix
     ./fonts.nix
+    ./irc.nix
     ./ledger.nix
     ./list.nix
     ./mounts.nix
