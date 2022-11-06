@@ -126,7 +126,7 @@ in
     # });
 
     settings = rec {
-      include = "${xdgRuntimeDir}/pass-beets/beets.yaml";
+      include = "${xdgRuntimeDir}/pass-beets.yaml";
 
       directory = "${musicLossless}";
       library = "${directory}/beets.db";
@@ -255,9 +255,9 @@ in
         RemainAfterExit = true;
 
         ExecStart = [ "${pass-beets}/bin/pass-beets" ];
-        ExecStop = [ "${pkgs.coreutils}/bin/rm -rf %t/pass-beets" ];
+        ExecStop = [ "${pkgs.coreutils}/bin/rm -f %t/pass-beets.conf" ];
 
-        StandardOutput = "file:${xdgRuntimeDir}/pass-beets/beets.yaml";
+        StandardOutput = "file:%t/pass-beets.yaml";
       };
     };
   } // (lib.optionalAttrs (builtins.elem "web" config.programs.beets.settings.plugins) {
