@@ -30,19 +30,25 @@ let
 
       : "''${XDG_CONFIG_HOME:=$HOME/.config}"
 
-      (
-          pass www/acoustid.org
-          pass www/musicbrainz.org/Somasis
-      ) \
-          | jq -R \
-              --arg musicbrainz_user Somasis \
-              '. as $acoustid_apikey
-                  | inputs as $musicbrainz_pass
-                  | {
-                    acoustid: { apikey: $acoustid_apikey },
-                    musicbrainz: { user: $musicbrainz_user, pass: $musicbrainz_pass }
-                  }' \
-          | yq -y
+      json_acoustid=$(pass www/acoustid.org | jq -Rc '{ acoustid: { apikey: . } }')
+      json_musicbrainz=$(
+          pass www/musicbrainz.org/Somasis \
+              | jq -Rc --arg user Somasis '{ musicbrainz: { user: $user, pass: . } }'
+      )
+      json_subsonic=$(
+          pass spinoza.7596ff.com/airsonic/somasis \
+              | jq -Rc --arg user somasis '{ subsonic: { user: $user, pass: . } }'
+      )
+
+      json=$(
+          jq -sc 'add' <<EOF
+      $json_acoustid
+      $json_musicbrainz
+      $json_subsonic
+      EOF
+      )
+
+      yq -y <<<"$json"
     '';
   });
 
@@ -111,13 +117,13 @@ in
 
   programs.beets = {
     enable = true;
-    package = (pkgs.beets.override {
-      pluginOverrides = {
-        # check = { enable = true; propagatedBuildInputs = [ pkgs.beetsPackages.check ]; };
-        barcode = { enable = true; propagatedBuildInputs = [ pkgs.beetsPackages.barcode ]; };
-        originquery = { enable = true; propagatedBuildInputs = [ pkgs.beetsPackages.originquery ]; };
-      };
-    });
+    # package = (pkgs.beets.override {
+    #   pluginOverrides = {
+    #     # TODO: submit to nixpkgs
+    #     # barcode = { enable = true; propagatedBuildInputs = [ pkgs.beetsPackages.barcode ]; };
+    #     # originquery = { enable = true; propagatedBuildInputs = [ pkgs.beetsPackages.originquery ]; };
+    #   };
+    # });
 
     settings = rec {
       include = "${xdgRuntimeDir}/pass-beets/beets.yaml";
@@ -129,8 +135,10 @@ in
 
       plugins = [
         # "check"
-        "barcode"
-        "originquery"
+
+        # TODO: submit to nixpkgs
+        # "barcode"
+        # "originquery"
 
         # acousticbrainz/acoustid: apikey comes from `pass-beets`
         "absubmit"
@@ -148,6 +156,7 @@ in
         "replaygain"
         "types"
       ]
+      ++ lib.optional nixosConfig.services.airsonic.enable "subsonicupdate"
       ++ lib.optional config.services.mopidy.enable "mpdupdate"
       ;
 
@@ -180,16 +189,16 @@ in
         };
       };
 
-      originquery = {
-        origin_file = "origin.yaml";
-        tag_patterns = {
-          media = ''$.Media'';
-          year = ''$."Edition year"'';
-          label = ''$."Record label"'';
-          catalognum = ''$."Catalog number"'';
-          albumdisambig = ''$.Edition'';
-        };
-      };
+      # originquery = {
+      #   origin_file = "origin.yaml";
+      #   tag_patterns = {
+      #     media = ''$.Media'';
+      #     year = ''$."Edition year"'';
+      #     label = ''$."Record label"'';
+      #     catalognum = ''$."Catalog number"'';
+      #     albumdisambig = ''$.Edition'';
+      #   };
+      # };
 
       import = {
         # Search
@@ -228,6 +237,7 @@ in
         "sample:true" = "_samples/$albumartist - $album%if{$original_year, ($original_year)}/$track - $artist - $title";
       };
     }
+    // lib.optionalAttrs nixosConfig.services.airsonic.enable { subsonic.url = nixosConfig.services.airsonic.virtualHost; }
     // lib.optionalAttrs config.services.mopidy.enable { mpd.host = config.services.mopidy.settings.mpd.hostname; }
     ;
   };
