@@ -2,20 +2,21 @@
 , nixosConfig
 , lib
 , pkgs
+, inputs
 , ...
 }:
 let
   dmenu-flexipatch = (
+    let
+      year = builtins.substring 0 4 (inputs.dmenu-flexipatch.lastModifiedDate);
+      month = builtins.substring 4 2 (inputs.dmenu-flexipatch.lastModifiedDate);
+      day = builtins.substring 6 2 (inputs.dmenu-flexipatch.lastModifiedDate);
+    in
     pkgs.stdenv.mkDerivation rec {
       pname = "dmenu-flexipatch";
-      version = "5.1.20220314";
+      version = "unstable-${year}-${month}-${day}";
 
-      src = pkgs.fetchFromGitHub {
-        owner = "bakkeby";
-        repo = "dmenu-flexipatch";
-        rev = "b210a99e318e6724b9823eb48149704c006d2282";
-        hash = "sha256-tTWm+AYJvc5xbXnR1mM2uThwqmUq0F3nUVi79XgZq88=";
-      };
+      src = inputs.dmenu-flexipatch;
 
       buildInputs = [
         pkgs.xorg.libX11
