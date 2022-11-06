@@ -64,18 +64,6 @@
         "type": "github"
       }
     },
-    "avatarSomasis": {
-      "flake": false,
-      "locked": {
-        "narHash": "sha256-Lmr7p4EzTf+bvr21AJ3wXPs3K+7XLbXIjdI2G811NT0=",
-        "type": "file",
-        "url": "https://www.gravatar.com/avatar/a187e38560bb56f5231cd19e45ad80f6?d=https:%2f%2favatars.githubusercontent.com%2fsomasis%3fsize=512&s=512"
-      },
-      "original": {
-        "type": "file",
-        "url": "https://www.gravatar.com/avatar/a187e38560bb56f5231cd19e45ad80f6?d=https:%2f%2favatars.githubusercontent.com%2fsomasis%3fsize=512&s=512"
-      }
-    },
     "catgirl": {
       "flake": false,
       "locked": {
@@ -651,7 +639,6 @@
         "adblockEasyList": "adblockEasyList",
         "adblockEasyListSpanish": "adblockEasyListSpanish",
         "adblockHosts": "adblockHosts",
-        "avatarSomasis": "avatarSomasis",
         "catgirl": "catgirl",
         "disko": "disko",
         "dmenu-flexipatch": "dmenu-flexipatch",
