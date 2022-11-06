@@ -17,16 +17,16 @@
       enable = true;
       createDirectories = false;
 
-      documents = "${config.home.homeDirectory}/study/current";
-      publicShare = "${config.home.homeDirectory}/shared/public";
       templates = "/var/empty";
 
       # Leave these disabled by default; they'll be enabled by their
       # corresponding files if necessary.
       desktop = lib.mkDefault "/var/empty";
+      documents = lib.mkDefault "/var/empty";
       download = lib.mkDefault "/var/empty";
       music = lib.mkDefault "/var/empty";
       pictures = lib.mkDefault "/var/empty";
+      publicShare = lib.mkDefault "/var/empty";
       videos = lib.mkDefault "/var/empty";
     };
   };

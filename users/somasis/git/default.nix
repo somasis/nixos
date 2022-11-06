@@ -109,6 +109,8 @@
     }
   ];
 
+  home.persistence."/persist${config.home.homeDirectory}".directories = [{ directory = "src"; method = "symlink"; }];
+
   home.packages = [
     pkgs.git-open
 

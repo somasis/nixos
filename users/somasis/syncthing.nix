@@ -9,7 +9,9 @@ in
     "etc/syncthing"
     "share/syncthing"
 
+    "shared"
     "sync"
+    "tracks"
   ];
 
   # Make syncthing more amicable to running while other programs are.

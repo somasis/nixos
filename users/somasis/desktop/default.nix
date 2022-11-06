@@ -39,10 +39,10 @@
     ./photo.nix
     ./picom.nix
     ./power.nix
-    ./pubs.nix
     ./screen-brightness.nix
     ./screen-locker.nix
     ./screen-temperature.nix
+    ./study.nix
     ./sxhkd.nix
     ./syncplay.nix
     ./terminal.nix
@@ -55,6 +55,34 @@
   ];
 
   home.packages = [
+    (pkgs.stdenv.mkDerivation rec {
+      pname = "execshell";
+      version = "20201101";
+
+      src = pkgs.fetchFromGitHub {
+        owner = "sysvinit";
+        repo = "execshell";
+        rev = "b0b41d50cdb09f26b7f31e960e078c0500c661f5";
+        hash = "sha256-TCk9U396NoZL1OvAddcMa2IFyvyDs/3daKv5IRxkRYE=";
+        fetchSubmodules = true;
+      };
+
+      buildInputs = [ pkgs.skalibs pkgs.execline ];
+
+      installPhase = ''
+        install -m0755 -D execshell $out/bin/execshell
+      '';
+
+      makeFlags = [ "CC:=$(CC)" ];
+
+      meta = with pkgs.lib; {
+        description = "Proof of concept execline interactive REPL";
+        license = with licenses; [ isc bsd2 ];
+        maintainers = with maintainers; [ somasis ];
+        platforms = platforms.all;
+      };
+    })
+
     (pkgs.writeShellScriptBin "ponymix-snap" ''
       snap=5
       [ "$FLOCKER" != "$0" ] \
@@ -67,23 +95,22 @@
       ${pkgs.ponymix}/bin/ponymix --short set-volume "$c" >/dev/null
     '')
 
-    pkgs.xdragon
-    pkgs.gnome.zenity
-
-    pkgs.xzoom
-    pkgs.xcolor
-    pkgs.xorg.xinput
     pkgs.asciidoctor
-    pkgs.bmake
-    pkgs.lowdown
-    pkgs.patchutils
     pkgs.bc
     pkgs.bmake
-    pkgs.poedit
-
-    pkgs.xmlstarlet
-
     pkgs.ffmpeg-full
+    pkgs.gnome.zenity
+    pkgs.lowdown
+    pkgs.mmutils
+    pkgs.patchutils
+    pkgs.poedit
+    pkgs.wmutils-core
+    pkgs.wmutils-opt
+    pkgs.xcolor
+    pkgs.xdragon
+    pkgs.xmlstarlet
+    pkgs.xorg.xinput
+    pkgs.xzoom
   ];
 
 

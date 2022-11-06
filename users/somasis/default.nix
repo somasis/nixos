@@ -29,12 +29,6 @@
     directories = [
       "bin"
       "logs"
-      "shared"
-      { directory = "src"; method = "symlink"; }
-      "study"
-      "tracks"
-
-      "etc/tmux"
     ];
 
     allowOther = true;
@@ -42,8 +36,6 @@
 
   home.persistence."/cache${config.home.homeDirectory}" = {
     directories = [
-      "etc/borg"
-
       "var/cache/nix"
       "var/cache/nix-index"
     ];
@@ -55,40 +47,6 @@
 
   home.packages = [
     pkgs.rlwrap
-
-    pkgs.wmutils-core
-    pkgs.wmutils-opt
-    pkgs.mmutils
-
-    (
-      pkgs.stdenv.mkDerivation rec {
-        pname = "execshell";
-        version = "20201101";
-
-        src = pkgs.fetchFromGitHub {
-          owner = "sysvinit";
-          repo = "execshell";
-          rev = "b0b41d50cdb09f26b7f31e960e078c0500c661f5";
-          hash = "sha256-TCk9U396NoZL1OvAddcMa2IFyvyDs/3daKv5IRxkRYE=";
-          fetchSubmodules = true;
-        };
-
-        buildInputs = [ pkgs.skalibs pkgs.execline ];
-
-        installPhase = ''
-          install -m0755 -D execshell $out/bin/execshell
-        '';
-
-        makeFlags = [ "CC:=$(CC)" ];
-
-        meta = with pkgs.lib; {
-          description = "Proof of concept execline interactive REPL";
-          license = with licenses; [ isc bsd2 ];
-          maintainers = with maintainers; [ somasis ];
-          platforms = platforms.all;
-        };
-      }
-    )
 
     pkgs.pigz
     pkgs.xz
