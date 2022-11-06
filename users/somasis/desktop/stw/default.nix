@@ -2,7 +2,7 @@
   imports = [
     # ./journal.nix
     ./sonapona.nix
-    ./wttr.nix
+    # ./wttr.nix
   ];
 
   systemd.user.targets.stw = {
