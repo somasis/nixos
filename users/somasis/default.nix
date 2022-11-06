@@ -25,19 +25,13 @@
   ];
 
   home.persistence."/persist${config.home.homeDirectory}" = {
-    directories = [
-      "bin"
-      "logs"
-    ];
+    directories = [ "bin" "logs" ];
 
     allowOther = true;
   };
 
   home.persistence."/cache${config.home.homeDirectory}" = {
-    directories = [
-      "var/cache/nix"
-      "var/cache/nix-index"
-    ];
+    directories = [ "var/cache/nix" "var/cache/nix-index" ];
 
     allowOther = true;
   };
