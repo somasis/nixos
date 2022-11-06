@@ -30,23 +30,17 @@ let
 
       : "''${XDG_CONFIG_HOME:=$HOME/.config}"
 
-      json_acoustid=$(pass www/acoustid.org | jq -Rc '{ acoustid: { apikey: . } }')
-      json_musicbrainz=$(
+      json=$(pass www/acoustid.org | jq -Rc '{ acoustid: { apikey: . } }')
+      json+=$(
           pass www/musicbrainz.org/Somasis \
               | jq -Rc --arg user Somasis '{ musicbrainz: { user: $user, pass: . } }'
       )
-      json_subsonic=$(
+      json+=$(
           pass spinoza.7596ff.com/airsonic/somasis \
               | jq -Rc --arg user somasis '{ subsonic: { user: $user, pass: . } }'
       )
 
-      json=$(
-          jq -sc 'add' <<EOF
-      $json_acoustid
-      $json_musicbrainz
-      $json_subsonic
-      EOF
-      )
+      json=$(jq -sc 'add' <<<"$json")
 
       yq -y <<<"$json"
     '';
