@@ -37,8 +37,8 @@
 
     catgirl.flake = false;
     catgirl.url = "git+https://git.causal.agency/catgirl?ref=somasis/tokipona";
-    dmenu.flake = false;
-    dmenu.url = "github:bakkeby/dmenu-flexipatch";
+    dmenu-flexipatch.flake = false;
+    dmenu-flexipatch.url = "github:bakkeby/dmenu-flexipatch";
     mblaze.flake = false;
     mblaze.url = "github:leahneukirchen/mblaze";
     sbase.flake = false;
