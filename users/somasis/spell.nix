@@ -6,7 +6,7 @@
     pkgs.hunspellDicts.es-any
     pkgs.hunspellDicts.es-es
     pkgs.hunspellDicts.es-mx
-    pkgs.hunspellDicts.tok
+    # pkgs.hunspellDicts.tok
 
     # aspell is still used by kakoune's spell.kak, unfortunately.
     pkgs.aspellDicts.en
