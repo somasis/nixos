@@ -22,6 +22,14 @@ in
   # TODO This really ought to be templated.
   systemd.user = {
     targets = {
+      mounts = {
+        Unit = {
+          Description = "All mounts";
+          PartOf = [ "default.target" ];
+        };
+        Install.WantedBy = [ "default.target" ];
+      };
+
       sshfs = {
         Unit = {
           Description = "All sshfs mounts";
