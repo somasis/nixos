@@ -149,6 +149,8 @@ in
     '')
 
     pass-beets
+
+    # TODO pkgs.whipper
   ];
 
   programs.beets = {
@@ -175,9 +177,9 @@ in
         "originquery"
 
         # acousticbrainz/acoustid: apikey comes from `pass-beets`
-        "absubmit"
-        "acousticbrainz"
-        "chroma"
+        # "absubmit"
+        # "acousticbrainz"
+        # "chroma"
 
         # mb*: musicbrainz user/password comes from `pass-beets`
         "mbcollection"
