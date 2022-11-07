@@ -278,7 +278,6 @@ in
         max_rec = {
           missing_tracks = "medium";
           unmatched_tracks = "medium";
-          tracks = "medium";
         };
       };
 
