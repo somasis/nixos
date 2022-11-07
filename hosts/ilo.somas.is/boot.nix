@@ -18,7 +18,7 @@
       enable = true;
       editor = false;
 
-      configurationLimit = 50;
+      configurationLimit = 25;
 
       netbootxyz.enable = true;
 
