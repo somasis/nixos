@@ -252,6 +252,9 @@ in
         };
       };
 
+      artist_credit = true;
+      original_date = true;
+
       import = {
         # Search
         languages = [ "tok" "en" "jp" ];
