@@ -11,7 +11,6 @@ let
       config.programs.password-store.package
       config.programs.gh.package
       pkgs.coreutils
-      pkgs.torsocks
     ];
 
     text = ''
@@ -28,20 +27,30 @@ let
       username="$1"; shift
       protocol="$1"; shift
 
-      [ -d "$runtime" ] || mkdir -m 700 "$runtime"
-      [ -d "$runtime/gh" ] || mkdir -m 700 "$runtime/gh"
-      cat "$XDG_CONFIG_HOME"/gh/config.yml > "$runtime"/gh/config.yml
+      entry="${nixosConfig.networking.fqdn}/gh/$hostname/$username"
 
-      pass "${nixosConfig.networking.fqdn}/gh/$hostname/$username" \
-          | XDG_CONFIG_HOME="$runtime" \
-              torsocks -i \
-                  gh auth login \
-                      --with-token \
-                      -h "$hostname" \
-                      -p "$protocol" 2>/dev/null
+      if pass=$(pass "$entry" 2>/dev/null); then
+          [[ -d "$runtime" ]] || mkdir -m 700 "$runtime"
+          [[ -d "$runtime/gh" ]] || mkdir -m 700 "$runtime/gh"
+          cat "$XDG_CONFIG_HOME"/gh/config.yml > "$runtime"/gh/config.yml
+
+          XDG_CONFIG_HOME="$runtime" \
+              gh auth login \
+                  --with-token \
+                  -h "$hostname" \
+                  -p "$protocol" \
+                  <<< "$pass"
+
+          e=0
+      else
+          printf 'pass-gh: "entry %s does not exist"\n' "$entry" > "$runtime"/gh/hosts.yml
+          e=1
+      fi
 
       ln -sf "$runtime"/gh/hosts.yml "$XDG_CONFIG_HOME"/gh/hosts.yml
       rm -f "$runtime"/gh/config.yml
+
+      exit "$e"
     '';
   });
 in
