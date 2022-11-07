@@ -62,11 +62,13 @@
     pkgs.aspell
 
     (pkgs.writeShellScriptBin "editor" ''
-      exec terminal kak "$@"
+      exec kak "$@"
     '')
   ];
 
-  # TODO: can remove on next Kakoune release, probably
+  home.sessionVariables."EDITOR" = "editor";
+
+  # TODO: can remove on next Kakoune release, maybe
   #       <https://github.com/mawww/kakoune/pull/4699>
   xdg.desktopEntries.kakoune = {
     name = "Kakoune";
@@ -80,8 +82,6 @@
     mimeType = [ "text/*" ];
     startupNotify = false;
   };
-
-  home.sessionVariables."EDITOR" = "editor";
 
   xdg.mimeApps.defaultApplications."text/*" = "kakoune.desktop";
 
