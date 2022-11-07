@@ -31,7 +31,7 @@ let
       done
       shift $((OPTIND - 1))
 
-      case "''${1}" in
+      case "''${1:-}" in
           +*)
               date_format="''${1}"
               shift
@@ -90,7 +90,7 @@ in
       ExecStart =
         let
           stw-dates = ''
-            dates -L -f "%-10s%s\n" +"%Y-%m-%d %I:%M %p"
+            ${dates}/bin/dates -L -f "%-10s%s\n" +"%Y-%m-%d %I:%M %p"
           '';
         in
         ''
