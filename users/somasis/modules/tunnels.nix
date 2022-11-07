@@ -1,4 +1,9 @@
-{ config, lib, pkgs, ... }:
+{ config
+, lib
+, nixosConfig
+, pkgs
+, ...
+}:
 with lib;
 {
   options = {
@@ -176,12 +181,11 @@ with lib;
 
                 ProtectSystem = true;
 
-                ExecStartPre = [ "${pkgs.networkmanager}/bin/nm-online -q" ];
                 ExecStart = [ "-${ssh} ${tunnel.remote}" ];
                 ExecStopPost = [ "${pkgs.coreutils}/bin/rm -f %t/${socket}" ];
 
                 Restart = "on-failure";
-              };
+              } // (lib.optionalAttrs (nixosConfig.networking.networkmanager.enable) { ExecStartPre = [ "${pkgs.networkmanager}/bin/nm-online -q" ]; });
           };
         }
       )

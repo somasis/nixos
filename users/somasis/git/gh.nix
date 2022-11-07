@@ -1,4 +1,5 @@
 { config
+, lib
 , nixosConfig
 , pkgs
 , ...
@@ -67,9 +68,8 @@ in
       Type = "oneshot";
       RemainAfterExit = true;
 
-      ExecStartPre = [ "${pkgs.networkmanager}/bin/nm-online -q" ];
       ExecStart = [ "${pass-gh}/bin/pass-gh github.com somasis ssh" ];
       ExecStop = [ "${pkgs.coreutils}/bin/rm -rf %t/pass-gh" ];
-    };
+    } // (lib.optionalAttrs (nixosConfig.networking.networkmanager.enable) { ExecStartPre = [ "${pkgs.networkmanager}/bin/nm-online -q" ]; });
   };
 }

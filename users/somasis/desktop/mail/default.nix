@@ -115,7 +115,6 @@ in
           Service = {
             Type = "oneshot";
 
-            ExecStartPre = [ "${pkgs.networkmanager}/bin/nm-online -q" ];
             ExecStart = [ "${pkgs.torsocks}/bin/torsocks ${pkgs.offlineimap}/bin/offlineimap -o -u syslog -a ${n}" ];
 
             SyslogIdentifier = "offlineimap";
@@ -124,7 +123,7 @@ in
             CPUSchedulingPolicy = "idle";
             IOSchedulingClass = "idle";
             IOSchedulingPriority = 7;
-          };
+          } // (lib.optionalAttrs (nixosConfig.networking.networkmanager.enable) { ExecStartPre = [ "${pkgs.networkmanager}/bin/nm-online -q" ]; });
         };
 
         timers."offlineimap-${systemdName n}" = {

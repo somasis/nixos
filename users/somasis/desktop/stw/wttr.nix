@@ -137,7 +137,6 @@ in
 
       Service = {
         Type = "simple";
-        ExecStartPre = [ "${pkgs.networkmanager}/bin/nm-online -q" ];
         ExecStart = [
           ''
             ${pkgs.stw}/bin/stw \
@@ -151,7 +150,7 @@ in
           ''
         ];
         ExecReload = [ "${pkgs.coreutils}/bin/kill -ALRM $MAINPID" ];
-      };
+      } // (lib.optionalAttrs (nixosConfig.networking.networkmanager.enable) { ExecStartPre = [ "${pkgs.networkmanager}/bin/nm-online -q" ]; });
     };
   };
 }
