@@ -91,7 +91,6 @@
       "genesis.whatbox.ca" = {
         host = "genesis.whatbox.ca whatbox genesis";
         hostname = "genesis.whatbox.ca";
-        dynamicForwards = [{ address = "localhost"; port = 6004; }];
       };
     };
   };
