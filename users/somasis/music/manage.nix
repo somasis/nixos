@@ -230,16 +230,16 @@ in
         };
       };
 
-      # originquery = {
-      #   origin_file = "origin.yaml";
-      #   tag_patterns = {
-      #     media = ''$.Media'';
-      #     year = ''$."Edition year"'';
-      #     label = ''$."Record label"'';
-      #     catalognum = ''$."Catalog number"'';
-      #     albumdisambig = ''$.Edition'';
-      #   };
-      # };
+      originquery = {
+        origin_file = "origin.yaml";
+        tag_patterns = {
+          media = ''$.Media'';
+          year = ''$."Edition year"'';
+          label = ''$."Record label"'';
+          catalognum = ''$."Catalog number"'';
+          albumdisambig = ''$.Edition'';
+        };
+      };
 
       import = {
         # Search
