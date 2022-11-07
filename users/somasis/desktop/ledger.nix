@@ -241,7 +241,6 @@ let
     name = "ledger-prices";
     runtimeInputs = [
       pkgs.coreutils
-      pkgs.curl
       pkgs.gnused
     ];
 
@@ -249,17 +248,13 @@ let
       set -eu
       set -o pipefail
 
-      curl() {
-          command curl ${lib.optionalString (tor.enable && tor.client.enable) lib.escapeShellArgs [ "-x" "socks5h://${tor.client.socksListenAddress.addr}:${toString tor.client.socksListenAddress.port}" ]} "$@"
-      }
-
       date=$(date +'%Y-%m-%d %H:%M:%S')
 
       sed '/^commodity\s*[A-Z]/!d; s/^commodity\s*//; s/\s.*//' "${ledgerAbsolute}"/commodities.ledger \
           | while read -r currency; do
               currency_to_usd=
               while [[ -z "''${currency_to_usd}" ]]; do
-                  currency_to_usd=$(curl -sf "https://usd.rate.sx/1''${currency}")
+                  currency_to_usd=$(autocurl -sf "https://usd.rate.sx/1''${currency}")
                   sleep 1
               done
 
