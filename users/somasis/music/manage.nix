@@ -189,6 +189,7 @@ in
         "lastgenre"
         "lyrics"
         "replaygain"
+        # "scrub"
         "types"
       ]
       ++ lib.optional nixosConfig.services.airsonic.enable "subsonicupdate"
@@ -248,7 +249,6 @@ in
         # Interactive mode
         bell = true;
         detail = true;
-        timid = true;
 
         # File manipulation
         write = true;
@@ -260,6 +260,9 @@ in
       };
 
       match = {
+        # Only automatically accept when >=98% accuracy.
+        strong_rec_tresh = 0.02;
+
         # distance_weights.barcode = 1.0;
 
         max_rec = {
@@ -282,6 +285,14 @@ in
     // lib.optionalAttrs config.services.mopidy.enable { mpd.host = config.services.mopidy.settings.mpd.hostname; }
     ;
   };
+
+  programs.bash.initExtra = ''
+    beet() {
+        trap ":" INT
+        command beet "$@"
+        trap "" INT
+    }
+  '';
 
   systemd.user = {
     services.pass-beets = {
