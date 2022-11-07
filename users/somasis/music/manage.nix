@@ -198,7 +198,15 @@ in
       ++ lib.optional config.services.mopidy.enable "mpdupdate"
       ;
 
-      badfiles.check_on_import = true;
+      badfiles = {
+        check_on_import = true;
+
+        commands = {
+          flac = "${pkgs.flac}/bin/flac -s -tw";
+          ogg = "${pkgs.liboggz}/bin/oggz-validate -M 0";
+          opus = "${pkgs.liboggz}/bin/oggz-validate -M 0";
+        };
+      };
 
       replaygain.backend = "ffmpeg";
 
