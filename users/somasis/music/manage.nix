@@ -107,6 +107,37 @@ let
       maintainers = with maintainers; [ somasis ];
     };
   });
+
+  beets-originquery = (pkgs.callPackage
+    ({ lib, fetchFromGitHub, beets, python3Packages }:
+      python3Packages.buildPythonApplication rec {
+        pname = "beets-originquery";
+        version = "1.0.2";
+
+        src = fetchFromGitHub {
+          repo = pname;
+          owner = "x1ppy";
+          rev = version;
+          hash = "sha256-32S8Ik6rzw6kx69o9G/v7rVsVzGA1qv5pHegYDmTW68=";
+        };
+
+        propagatedBuildInputs = with python3Packages; [
+          confuse
+          jsonpath_rw
+          pyyaml
+        ];
+
+        nativeBuildInputs = [ pkgs.beets ];
+
+        meta = with lib; {
+          description = "Integrates origin.txt metadata into beets' MusicBrainz queries";
+          homepage = "https://github.com/x1ppy/${pname}";
+          maintainers = with maintainers; [ somasis ];
+          license = licenses.unfree; # <https://github.com/x1ppy/beets-originquery/issues/3>
+        };
+      }
+    )
+    { beets = pkgs.beets-minimal; });
 in
 {
   home.packages = [
@@ -122,13 +153,13 @@ in
 
   programs.beets = {
     enable = true;
-    # package = (pkgs.beets.override {
-    #   pluginOverrides = {
-    #     # TODO: submit to nixpkgs
-    #     # barcode = { enable = true; propagatedBuildInputs = [ pkgs.beetsPackages.barcode ]; };
-    #     # originquery = { enable = true; propagatedBuildInputs = [ pkgs.beetsPackages.originquery ]; };
-    #   };
-    # });
+    package = (pkgs.beets.override {
+      pluginOverrides = {
+        # TODO: submit to nixpkgs
+        # barcode = { enable = true; propagatedBuildInputs = [ pkgs.beetsPackages.barcode ]; };
+        originquery = { enable = true; propagatedBuildInputs = [ beets-originquery ]; };
+      };
+    });
 
     settings = rec {
       include = [ "${xdgRuntimeDir}/pass-beets.yaml" ];
@@ -139,11 +170,9 @@ in
       sort_case_insensitive = false;
 
       plugins = [
-        # "check"
-
         # TODO: submit to nixpkgs
         # "barcode"
-        # "originquery"
+        "originquery"
 
         # acousticbrainz/acoustid: apikey comes from `pass-beets`
         "absubmit"
