@@ -179,7 +179,8 @@ in
         "acousticbrainz"
         "chroma"
 
-        # mbsubmit/mbsync: musicbrainz user/password comes from `pass-beets`
+        # mb*: musicbrainz user/password comes from `pass-beets`
+        "mbcollection"
         "mbsubmit"
         "mbsync"
 
@@ -201,6 +202,12 @@ in
       musicbrainz = {
         genres = true;
         extra_tags = [ "year" "catalognum" "country" "media" "label" ];
+      };
+
+      mbcollection = {
+        auto = true;
+        collection = "222377a0-7e41-4ccf-ba15-0748731106c4";
+        remove = true;
       };
 
       types = {
