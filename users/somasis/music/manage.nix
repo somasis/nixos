@@ -194,7 +194,7 @@ in
         # "scrub"
         "types"
       ]
-      ++ lib.optional nixosConfig.services.airsonic.enable "subsonicupdate"
+      # ++ lib.optional nixosConfig.services.airsonic.enable "subsonicupdate"
       ++ lib.optional config.services.mopidy.enable "mpdupdate"
       ;
 
@@ -293,7 +293,7 @@ in
         "sample:true" = "_samples/$albumartist - $album%if{$original_year, ($original_year)}/$track - $artist - $title";
       };
     }
-    // lib.optionalAttrs nixosConfig.services.airsonic.enable { subsonic.url = nixosConfig.services.airsonic.virtualHost; }
+    # // lib.optionalAttrs nixosConfig.services.airsonic.enable { subsonic.url = nixosConfig.services.airsonic.virtualHost; }
     // lib.optionalAttrs config.services.mopidy.enable { mpd.host = config.services.mopidy.settings.mpd.hostname; }
     ;
   };
