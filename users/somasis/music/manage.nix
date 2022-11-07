@@ -21,29 +21,39 @@ let
     ];
 
     text = ''
-      trap 'echo' EXIT
-
       set -eu
       set -o pipefail
 
       umask 0077
 
       : "''${XDG_CONFIG_HOME:=$HOME/.config}"
+      : "''${XDG_RUNTIME_DIR:=/run/user/$(id -un)}"
 
-      json=$(pass www/acoustid.org | jq -Rc '{ acoustid: { apikey: . } }')
-      json+=$(
+      fail() {
+          [[ "$1" -ne 0 ]] && printf 'pass-beets: "failed"\n' > "$XDG_RUNTIME_DIR/pass-beets.yaml"
+      }
+
+      trap 'fail $?' EXIT
+
+      output=$(pass www/acoustid.org | jq -Rc '{ acoustid: { apikey: . } }')
+      output+=$(
           pass www/musicbrainz.org/Somasis \
               | jq -Rc --arg user Somasis '{ musicbrainz: { user: $user, pass: . } }'
       )
     ''
-    + (lib.optionalString nixosConfig.services.airsonic.enable ''
-      json+=$(
+    + lib.optionalString nixosConfig.services.airsonic.enable ''
+      output+=$(
           pass spinoza.7596ff.com/airsonic/somasis \
               | jq -Rc --arg user somasis '{ subsonic: { user: $user, pass: . } }'
       )
-    '')
+    ''
     + ''
-      jq -sc 'add' <<<"$json" | yq -y
+      output=$(jq -sc 'add' <<<"$output")
+      output=$(yq -y <<<"$output")
+
+      cat > "$XDG_RUNTIME_DIR/pass-beets.yaml" <<EOF
+      $output
+      EOF
     '';
   });
 
@@ -121,7 +131,7 @@ in
     # });
 
     settings = rec {
-      include = "${xdgRuntimeDir}/pass-beets.yaml";
+      include = [ "${xdgRuntimeDir}/pass-beets.yaml" ];
 
       directory = "${musicLossless}";
       library = "${directory}/beets.db";
@@ -252,9 +262,7 @@ in
         RemainAfterExit = true;
 
         ExecStart = [ "${pass-beets}/bin/pass-beets" ];
-        ExecStop = [ "${pkgs.coreutils}/bin/rm -f %t/pass-beets.conf" ];
-
-        StandardOutput = "file:%t/pass-beets.yaml";
+        ExecStop = [ "${pkgs.coreutils}/bin/rm -f %t/pass-beets.yaml" ];
       };
     };
   } // (lib.optionalAttrs (builtins.elem "web" config.programs.beets.settings.plugins) {
