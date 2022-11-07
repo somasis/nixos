@@ -285,7 +285,7 @@ in
       paths = {
         default = "$albumartist - $album%if{$original_year, ($original_year)}/$track - $artist - $title";
         "singleton:true" = "_single/$artist/$title";
-        "comp:true" = "_compilation/$albumartist - $title/$track - $artist - $title";
+        "comp:true" = "_compilation/$albumartist - $album/$track - $artist - $title";
         "albumtype:soundtrack" = "_soundtracks/$albumartist - $album%if{$original_year, ($original_year)}/$track - $artist - $title";
 
         "sample:true" = "_samples/$albumartist - $album%if{$original_year, ($original_year)}/$track - $artist - $title";
