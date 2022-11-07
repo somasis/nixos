@@ -3,28 +3,27 @@
 , ...
 }:
 let
-  terminal =
-    (pkgs.writeShellScriptBin "terminal" ''
-      set -u
+  terminal = (pkgs.writeShellScriptBin "terminal" ''
+    set -u
 
-      case "''${1:-}" in
-          -c | -e | -x | --command | --)
-              shift
-              ;;
-      esac
+    case "''${1:-}" in
+        -c | -e | -x | --command | --)
+            shift
+            ;;
+    esac
 
-      if [ -t 0 ] || [ -t 1 ]; then
-          exec "$@"
-      fi
+    if [ -t 0 ] || [ -t 1 ]; then
+        exec "$@"
+    fi
 
-      if [ $# -eq 0 ]; then
-          exec ${config.programs.alacritty.package}/bin/alacritty
-      else
-          # HACK: I've not really figured out why this is needed to make some invocations start the
-          #       terminal properly...
-          exec ${config.programs.alacritty.package}/bin/alacritty -e "$@"
-      fi
-    '');
+    if [ $# -eq 0 ]; then
+        exec ${config.programs.alacritty.package}/bin/alacritty
+    else
+        # HACK: I've not really figured out why this is needed to make some invocations start the
+        #       terminal properly...
+        exec ${config.programs.alacritty.package}/bin/alacritty -e "$@"
+    fi
+  '');
   t = "${terminal}/bin/terminal";
 in
 {
