@@ -1,12 +1,8 @@
 { config
-, lib
-, nixosConfig
 , pkgs
 , ...
 }:
 let
-  tor = nixosConfig.services.tor;
-
   ledgerRelative = "ledger";
   ledgerAbsolute = "${config.home.homeDirectory}/${ledgerRelative}";
 
@@ -18,9 +14,6 @@ let
     ];
 
     text = ''
-      set -eu
-      set -o pipefail
-
       : "''${NO_COLOR:=}"
       [[ -z "''${NO_COLOR}" ]] && [[ -t 0 ]] && khal() { command khal --color "$@"; }
 
@@ -43,9 +36,6 @@ let
     ];
 
     text = ''
-      set -eu
-      set -o pipefail
-
       plot() {
           (
               cat <<EOF
@@ -133,6 +123,16 @@ let
     '';
   };
 
+  ledger-interactive = pkgs.writeShellApplication {
+    name = "ledger-interactive";
+
+    runtimeInputs = [ pkgs.tmux ];
+
+    text = ''
+      exec tmux -L ledger -f "''${XDG_CONFIG_HOME}"/tmux/ledger.conf attach-session
+    '';
+  };
+
   ledger-iwatch = pkgs.writeShellApplication {
     name = "ledger-iwatch";
 
@@ -143,7 +143,6 @@ let
     ];
 
     text = ''
-      shift
       ledger "$@"
       find -H "${ledgerAbsolute}" -type f \
           | rwc -p \
@@ -153,19 +152,55 @@ let
 
   ledger-new = pkgs.writeShellApplication {
     name = "ledger-new";
+
+    runtimeInputs = [
+      pkgs.gnused
+      pkgs.coreutils
+      pkgs.moreutils
+    ];
+
+    text = ''
+      [[ $# -eq 0 ]] && exec ledger edit
+
+      ledger entry "$@" >/dev/null || exit $?
+      entry=$(ledger entry "$@" | sed 's/\$-/-\$/')
+      while :; do
+          printf '%s\n' "''${entry}"
+          add=$(prompt "Add to transactions.ledger?" Y/n/e)
+          case "''${add}" in
+              [Ee])
+                  printf '\n' >&2
+                  entry=$(printf '%s\n' "''${entry}" | vipe --suffix=.ledger)
+                  ;;
+              [Yy] | "")
+                  [[ -n "$(tail -n1 "${ledgerAbsolute}"/transactions.ledger)" ]] && printf '\n' >>"${ledgerAbsolute}"/transactions.ledger
+                  printf '%s\n' "''${entry}" >>"${ledgerAbsolute}"/transactions.ledger
+                  break
+                  ;;
+              [Nn])
+                  break
+                  ;;
+              *)
+                  printf 'Invalid response.\n' >&2
+                  ;;
+          esac
+      done
+      led
+    '';
+  };
+
+  ledger-new-transaction = pkgs.writeShellApplication {
+    name = "ledger-new-transaction";
     runtimeInputs = [
       pkgs.coreutils
       pkgs.rlwrap
     ];
 
     text = ''
-      set -eu
-      set -o pipefail
-
       usage() {
           cat >&2 <<EOF
-      usage: ledger new [-{p,t}{i,c}] [-pr REGEX] [-pn NAME] [-td DATE]
-                        [-te DATE] [-tn NAME] posting[=prefill_amount]...
+      usage: ledger new-transaction [-{p,t}{i,c}] [-pr REGEX] [-pn NAME] [-td DATE]
+                                  [-te DATE] [-tn NAME] posting[=prefill_amount]...
       EOF
           exit 69
       }
@@ -237,6 +272,19 @@ let
     '';
   };
 
+  ledger-overview = pkgs.writeShellApplication {
+    name = "ledger-overview";
+
+    text = ''
+      ledger bal --flat --no-total "$@" ^assets: ^liabilities: ^job:
+      ledger bal --flat --no-total --pending "$@" ^income:
+      ledger bal --flat --no-total "$@" ^owed:
+      printf '\n'
+
+      ledger bills 1d
+    '';
+  };
+
   ledger-prices = pkgs.writeShellApplication {
     name = "ledger-prices";
     runtimeInputs = [
@@ -245,9 +293,6 @@ let
     ];
 
     text = ''
-      set -eu
-      set -o pipefail
-
       date=$(date +'%Y-%m-%d %H:%M:%S')
 
       sed '/^commodity\s*[A-Z]/!d; s/^commodity\s*//; s/\s.*//' "${ledgerAbsolute}"/commodities.ledger \
@@ -271,9 +316,6 @@ let
     ];
 
     text = ''
-      set -eu
-      set -o pipefail
-
       time="''${1:-now}"
 
       read -r s d t a p <<EOF
@@ -337,13 +379,18 @@ in
 
         ledger-bills
         ledger-charts
+        ledger-interactive
         ledger-iwatch
         ledger-new
+        ledger-new-transaction
+        ledger-overview
         ledger-prices
         ledger-timeclock
       ];
 
       text = ''
+        ledger() { "''${0}" "$@"; }
+
         : "''${XDG_CONFIG_HOME:=''${HOME}/.config}"
         : "''${LEDGER_FILE:="${ledgerAbsolute}/journal.ledger"}"
 
@@ -361,51 +408,14 @@ in
         }
 
         case "''${1:-}" in
-            new)
-                shift
-                [[ $# -eq 0 ]] && exec ledger edit
-                ledger entry "$@" >/dev/null || exit $?
-                entry=$(ledger entry "$@" | sed 's/\$-/-\$/')
-                while :; do
-                    printf '%s\n' "''${entry}"
-                    add=$(prompt "Add to transactions.ledger?" Y/n/e)
-                    case "''${add}" in
-                        [Ee])
-                            printf '\n' >&2
-                            entry=$(printf '%s\n' "''${entry}" | vipe --suffix=.ledger)
-                            ;;
-                        [Yy] | "")
-                            [[ -n "$(tail -n1 "${ledgerAbsolute}"/transactions.ledger)" ]] && printf '\n' >>"${ledgerAbsolute}"/transactions.ledger
-                            printf '%s\n' "''${entry}" >>"${ledgerAbsolute}"/transactions.ledger
-                            break
-                            ;;
-                        [Nn])
-                            break
-                            ;;
-                        *)
-                            printf 'Invalid response.\n' >&2
-                            ;;
-                    esac
-                done
-                led
-                ;;
-            repl)
-                shift
-                ledger "$@"
-                ;;
-            interactive | mux)
-                exec tmux -L ledger -f "''${XDG_CONFIG_HOME}"/tmux/ledger.conf attach-session
-                ;;
-            b)
-                shift
-                ledger bal --flat --no-total "$@" ^assets: ^liabilities: ^job:
-                ledger bal --flat --no-total --pending "$@" ^income:
-                ledger bal --flat --no-total "$@" ^owed:
-                ;;
             "")
-                ledger b
-                printf '\n'
-                ledger bills 1d
+                if command -v ledger-overview >/dev/null 2>&1; then
+                    # shellcheck disable=SC1090
+                    # don't try to follow source
+                    source "$(command -v ledger-overview)"
+                else
+                    exec ledger
+                fi
                 ;;
             *)
                 if command -v ledger-"$1" >/dev/null 2>&1; then
