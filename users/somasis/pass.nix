@@ -107,7 +107,7 @@
           done
           shift $(( OPTIND - 1 ))
 
-          [ "$#" -eq 1 ] && usage
+          [[ "$#" -eq 1 ]] && usage
 
           success=true
 
@@ -116,19 +116,18 @@
           }
 
           canonicalize_links_file() {
-              sort -t ' ' -k1 \
-                  | while IFS=" " read -r source targets; do
-                      [ -n "$targets" ] || continue
-                      for target in $targets; do
-                          printf '%s %s\n' "$source" "$target"
+              sort -t $'\t' -k1 \
+                  | while IFS=$'\t' read -r -a items; do
+                      for target in "''${items[@]:1}";do
+                          printf '%s\t%s\n' "''${items[0]}" "''${target}"
                       done
                   done \
                   | uniq
           }
 
           compress_canonicalized_links_file() {
-              awk '
-                  $1==last_source { printf " %s",$2; next }
+              awk -F $'\t' '
+                  $1==last_source { printf "\t%s",$2; next }
                   NR>1 { print ""; }
                   { last_source=$1; printf "%s",$0; }
                   END { print ""; }
@@ -142,8 +141,10 @@
                   source_path="$PASSWORD_STORE_DIR/$source"
                   target_path="$PASSWORD_STORE_DIR/$target"
 
-                  if [ -d "$PASSWORD_STORE_DIR/$source" ] && [ -d "$PASSWORD_STORE_DIR/$target" ]; then
+                  if [[ -d "$PASSWORD_STORE_DIR/$source" ]] && [[ -d "$PASSWORD_STORE_DIR/$target" ]]; then
                       rsync ''${dry_run:+--dry-run} -u -LKk --delay-updates -r --delete --delete-delay "$PASSWORD_STORE_DIR/$source"/ "$PASSWORD_STORE_DIR/$target"/
+                  elif [[ -d "$PASSWORD_STORE_DIR/$source" ]] && ! [[ -e "$PASSWORD_STORE_DIR/$target" ]]; then
+                      cp -fpR "$PASSWORD_STORE_DIR/$source"/ "$PASSWORD_STORE_DIR/$target"/
                   else
                       source_path="$source_path".gpg
                       target_path="$target_path".gpg
@@ -151,15 +152,15 @@
                       from_path="$source_path"
                       to_path="$target_path"
 
-                      if ! [ -e "$source_path" ]; then
+                      if ! [[ -e "$source_path" ]]; then
                           printf "error: '%s' does not exist\n" "$source" >&2
                           exit 1
-                      elif [ -e "$target_path" ]; then
-                          if [ "$(pass show "$target" | sha256sum -)" != "$(pass show "$source" | sha256sum -)" ]; then
+                      elif [[ -e "$target_path" ]]; then
+                          if [[ "$(pass show "$target" | sha256sum -)" != "$(pass show "$source" | sha256sum -)" ]]; then
                               if "$target_may_update_source"; then
                                   from_path="$target_path"
                                   to_path="$source_path"
-                              elif ! [ -e "$target_path" ]; then
+                              elif ! [[ -e "$target_path" ]]; then
                                   printf "warning: '%s' is newer than its source '%s', not overwriting\n" "$target" "$source" >&2
                                   success=false
                                   continue
@@ -169,22 +170,27 @@
 
                       cmp -s "$from_path" "$to_path" || $dry_run cp -f "$from_path" "$to_path"
                   fi
-                  printf '%s %s\n' "$source" "$target"
+                  printf '%s\t%s\n' "$source" "$target"
               done
           }
 
           check_sneaky_paths "$@"
 
+          items=()
+          targets=()
+
           (
               cat "$links"
 
-              if [ "$#" -ge 2 ]; then
+              if [[ "$#" -ge 2 ]]; then
                   arg_source="$1"; shift
-                  printf '%s %s\n' "$arg_source" "$*"
+                  printf '%s\t%s\n' "$arg_source" "$@"
               fi
           )   | canonicalize_links_file \
-              | while read -r source targets; do
-                  update_link "$source" $targets
+              | while IFS=$'\t' read -r -a items; do
+                  for target in "''${items[@]:1}";do
+                      update_link "''${items[0]}" "''${target}"
+                  done
               done \
               | compress_canonicalized_links_file \
               | sponge "$links"
@@ -226,7 +232,7 @@
           done
           shift $(( OPTIND - 1 ))
 
-          [ "$#" -ge 1 ] || usage
+          [[ "$#" -ge 1 ]] || usage
 
           success=true
 
@@ -235,19 +241,18 @@
           }
 
           canonicalize_links_file() {
-              sort -t ' ' -k1 \
-                  | while IFS=" " read -r source targets; do
-                      [ -n "$targets" ] || continue
-                      for target in $targets; do
-                          printf '%s %s\n' "$source" "$target"
+              sort -t $'\t' -k1 \
+                  | while IFS=$'\t' read -r -a items; do
+                      for target in "''${items[@]:1}";do
+                          printf '%s\t%s\n' "''${items[0]}" "''${target}"
                       done
                   done \
                   | uniq
           }
 
           compress_canonicalized_links_file() {
-              awk '
-                  $1==last_source { printf " %s",$2; next }
+              awk -F $'\t' '
+                  $1==last_source { printf "\t%s",$2; next }
                   NR>1 { print ""; }
                   { last_source=$1; printf "%s",$0; }
                   END { print ""; }
@@ -261,15 +266,15 @@
                   printf '%s' "$source"
 
                   remove_path="$PASSWORD_STORE_DIR/$remove"
-                  [ -d "$remove_path" ] || remove_path="$remove_path.gpg"
+                  [[ -d "$remove_path" ]] || remove_path="$remove_path.gpg"
 
                   found=false
                   for target in $targets; do
-                      if [ "$target" = "$remove" ]; then
+                      if [[ "$target" == "$remove" ]]; then
                           found=true
                           pass rm "$target" >&2
                       else
-                          printf ' %s' "$target"
+                          printf '\t%s' "$target"
                       fi
                   done
 
