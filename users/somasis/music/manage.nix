@@ -242,6 +242,8 @@ in
       Unit = {
         Description = "Authenticate `beets` using `pass`";
         PartOf = [ "default.target" ];
+
+        After = [ "gpg-agent.service" ];
       };
       Install.WantedBy = [ "default.target" ];
 
