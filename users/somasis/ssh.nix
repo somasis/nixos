@@ -1,4 +1,5 @@
 { config
+, pkgs
 , nixosConfig
 , ...
 }: {
@@ -94,4 +95,6 @@
       };
     };
   };
+
+  home.packages = [ pkgs.mosh ];
 }
