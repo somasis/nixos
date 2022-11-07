@@ -188,6 +188,7 @@ in
 
         "badfiles"
         "fromfilename"
+        "importadded"
         "lastgenre"
         "lyrics"
         "replaygain"
@@ -299,11 +300,13 @@ in
   };
 
   programs.bash.initExtra = ''
-    beet() {
+    beet() (
+        local e=0
         trap ":" INT
-        command beet "$@"
-        trap "" INT
-    }
+        command beet "$@"; e=$?
+        trap - INT
+        return $e
+    )
   '';
 
   systemd.user = {
