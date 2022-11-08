@@ -576,7 +576,7 @@ in
         OnCalendar = "daily";
         Persistent = true;
         AccuracySec = "15m";
-        RandomizedDelaySec = "5m";
+        RandomizedDelaySec = "15m";
       };
     };
   };
