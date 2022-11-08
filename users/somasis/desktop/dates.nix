@@ -80,10 +80,10 @@ in
   systemd.user.services.stw-dates = {
     Unit = {
       Description = "Show other timezones on desktop";
+      PartOf = [ "stw.target" ];
       StartLimitInterval = 0;
     };
     Install.WantedBy = [ "stw.target" ];
-    Unit.PartOf = [ "stw.target" ];
 
     Service = {
       Type = "simple";
@@ -94,7 +94,7 @@ in
           '';
         in
         ''
-          stw \
+          ${pkgs.stw}/bin/stw \
               -F "monospace:style=heavy:size=10" \
               -b "${config.xresources.properties."*color4"}" \
               -f "${config.xresources.properties."*darkForeground"}" \
