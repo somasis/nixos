@@ -274,15 +274,6 @@ in
         resume = false;
       };
 
-      match = {
-        # Only automatically accept when >=98% accuracy.
-        strong_rec_thresh = 0.02;
-
-        # distance_weights.barcode = 1.0;
-
-        max_rec.missing_tracks = "medium";
-      };
-
       paths = {
         default = "$albumartist - $album%if{$original_year, ($original_year)}/$track - $artist - $title";
         "singleton:true" = "_single/$artist/$title";
