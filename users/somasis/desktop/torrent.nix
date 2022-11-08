@@ -5,6 +5,22 @@
 }:
 let
   configFile = pkgs.writeText "transmission-remote-gtk-config" (lib.generators.toJSON { } {
+    # appearance
+    show-notebook = false;
+    show-state-selector = true;
+    filter-dirs = true;
+    directories-first = true;
+    filter-trackers = true;
+
+    # notifications
+    add-notify = true;
+    complete-notify = true;
+
+    # adding torrents
+    add-options-dialog = true;
+    start-paused = false;
+    delete-local-torrent = true;
+
     profiles = [
       rec {
         profile-name = "genesis.whatbox.ca";
@@ -18,29 +34,14 @@ let
         timeout = 60;
         retries = 3;
 
+        style = 0;
+
         update-active-only = true;
         update-interval = 2;
         min-update-interval = 60;
         session-update-interval = 300;
         activeonly-fullsync-enabled = true;
         activeonly-fullsync-every = 10;
-
-        # appearance
-        style = 0;
-        show-notebook = false;
-        show-state-selector = true;
-        filter-dirs = true;
-        directories-first = true;
-        filter-trackers = true;
-
-        # notifications
-        add-notify = false;
-        complete-notify = true;
-
-        # adding torrents
-        add-options-dialog = true;
-        start-paused = false;
-        delete-local-torrent = true;
 
         last-add-destination = "/home/somasis/files/audio/library/source/torrent";
 
