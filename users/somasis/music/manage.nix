@@ -150,8 +150,35 @@ in
 
     pass-beets
 
-    # TODO pkgs.whipper
+    pkgs.whipper
   ];
+
+  xdg.configFile."whipper/whipper.conf".text = lib.generators.toINI
+    {
+      mkKeyValue = key: value:
+        let
+          value' =
+            if lib.isBool value then
+              (if value then "True" else "False")
+            else
+              toString value;
+        in
+        "${key} = ${value'}";
+    }
+    {
+      "drive:HL-DT-ST%3ADVDRAM%20AP70NS50%20%3A1.01" = {
+        vendor = "HL-DT-ST";
+        model = "DVDRAM AP70NS50";
+        release = "1.01";
+        read_offset = 6;
+        defeats_cache = true;
+      };
+
+      "whipper.cd.rip" = {
+        track-template = "%A - %d (%y)/%t - %a - %n";
+        disc-template = "%A - %d (%y)/%A - %d (%y) (disc %N)";
+      };
+    };
 
   programs.beets = {
     enable = true;
