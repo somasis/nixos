@@ -127,7 +127,7 @@ let
           pyyaml
         ];
 
-        nativeBuildInputs = [ pkgs.beets ];
+        nativeBuildInputs = [ beets ];
 
         meta = with lib; {
           description = "Integrates origin.txt metadata into beets' MusicBrainz queries";
@@ -275,14 +275,11 @@ in
 
       match = {
         # Only automatically accept when >=98% accuracy.
-        strong_rec_tresh = 0.02;
+        strong_rec_thresh = 0.02;
 
         # distance_weights.barcode = 1.0;
 
-        max_rec = {
-          missing_tracks = "medium";
-          unmatched_tracks = "medium";
-        };
+        max_rec.missing_tracks = "medium";
       };
 
       paths = {
