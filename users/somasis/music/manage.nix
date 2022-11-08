@@ -137,7 +137,7 @@ let
         };
       }
     )
-    { beets = pkgs.beets-minimal; });
+    { beets = pkgs.beetsPackages.beets-minimal; });
 in
 {
   home.packages = [
@@ -251,6 +251,7 @@ in
           catalognum = ''$."Catalog number"'';
           albumdisambig = ''$.Edition'';
         };
+        use_origin_on_conflict = true;
       };
 
       artist_credit = true;
