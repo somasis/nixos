@@ -241,6 +241,8 @@ in
       musicbrainz = {
         genres = true;
         extra_tags = [ "year" "catalognum" "country" "media" "label" ];
+
+        searchlimit = 15;
       };
 
       mbcollection = {
@@ -271,6 +273,7 @@ in
 
       originquery = {
         origin_file = "origin.yaml";
+
         tag_patterns = {
           media = ''$.Media'';
           year = ''$."Edition year"'';
@@ -278,6 +281,7 @@ in
           catalognum = ''$."Catalog number"'';
           albumdisambig = ''$.Edition'';
         };
+
         use_origin_on_conflict = true;
       };
 
