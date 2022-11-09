@@ -264,10 +264,16 @@ in
         album_art_maxwidth = "1024";
 
         dest = "${musicLossy}";
+
         format = "opus";
         formats.opus = {
           command = "${pkgs.ffmpeg-full}/bin/ffmpeg -i $source -y -vn -acodec libopus -ab 96k -ar 48000 $dest";
           extension = "opus";
+        };
+
+        paths = {
+          default = "$mb_albumartistid/$mb_albumid/$mb_releasetrackid";
+          "singleton:true" = "$mb_artistid/$mb_trackid";
         };
       };
 
