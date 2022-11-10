@@ -199,21 +199,23 @@ in
       sort_case_insensitive = false;
 
       plugins = [
+        "badfiles"
+        "convert"
+
         # TODO: submit to nixpkgs
         # "barcode"
         "originquery"
 
         # acousticbrainz/acoustid: apikey comes from `pass-beets`
-        # "absubmit"
-        # "acousticbrainz"
-        # "chroma"
+        "absubmit"
+        "acousticbrainz"
+        "chroma"
 
         # mb*: musicbrainz user/password comes from `pass-beets`
         "mbcollection"
         "mbsubmit"
         "mbsync"
 
-        "badfiles"
         "fromfilename"
         "importadded"
         "lastgenre"
