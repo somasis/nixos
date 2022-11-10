@@ -201,6 +201,10 @@ in
       plugins = [
         "badfiles"
         "convert"
+        "fromfilename"
+        "fetchart"
+        "lyrics"
+        "replaygain"
 
         # TODO: submit to nixpkgs
         # "barcode"
@@ -216,11 +220,8 @@ in
         "mbsubmit"
         "mbsync"
 
-        "fromfilename"
         "importadded"
         "lastgenre"
-        "lyrics"
-        "replaygain"
         # "scrub"
         "types"
       ]
@@ -239,6 +240,12 @@ in
       };
 
       replaygain.backend = "ffmpeg";
+
+      fetchart = {
+        cautious = true;
+        high_resolution = true;
+      };
+
 
       musicbrainz = {
         genres = true;
