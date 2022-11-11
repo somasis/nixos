@@ -280,10 +280,7 @@ in
           extension = "opus";
         };
 
-        paths = {
-          default = "$mb_albumartistid/$mb_albumid/$mb_releasetrackid";
-          "singleton:true" = "$mb_artistid/$mb_trackid";
-        };
+        paths.default = "%if{$mb_albumartistid,$mb_albumartistid/}%if{$mb_albumid,$mb_albumid/}%ifdef{mb_releasetrackid,%ifdef{mb_trackid}}";
       };
 
       originquery = {
