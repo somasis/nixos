@@ -246,7 +246,6 @@ in
         high_resolution = true;
       };
 
-
       musicbrainz = {
         genres = true;
         extra_tags = [ "year" "catalognum" "country" "media" "label" ];
@@ -299,6 +298,7 @@ in
 
       artist_credit = true;
       original_date = true;
+      asciify_paths = true;
 
       import = {
         # Search
