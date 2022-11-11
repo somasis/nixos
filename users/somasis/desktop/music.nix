@@ -1,7 +1,7 @@
 { config, pkgs, ... }:
 {
   imports = [
-    ../music/manage.nix
+    ../music/manage
     ../music/play.nix
   ];
 
