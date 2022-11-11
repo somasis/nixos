@@ -11,8 +11,10 @@
 
   boot.cleanTmpDir = true;
   zramSwap.enable = true;
-  networking.hostName = "nixos";
-  networking.domain = "somas.is";
+  networking = {
+    hostName = "nixos";
+    domain = "somas.is";
+  };
 
   services.openssh.enable = true;
   users.users.root.openssh.authorizedKeys.keys = [
