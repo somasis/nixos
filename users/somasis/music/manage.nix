@@ -331,15 +331,19 @@ in
     ;
   };
 
-  programs.bash.initExtra = ''
-    beet() (
-        local e=0
-        trap ":" INT
-        command beet "$@"; e=$?
-        trap - INT
-        return $e
-    )
-  '';
+  programs.bash = {
+    shellAliases."beet-import-all" = "beet import --flat --timid ~/audio/library/source/*/*";
+
+    initExtra = ''
+      beet() (
+          local e=0
+          trap ":" INT
+          command beet "$@"; e=$?
+          trap - INT
+          return $e
+      )
+    '';
+  };
 
   systemd.user = {
     services.pass-beets = {
