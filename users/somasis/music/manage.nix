@@ -285,9 +285,9 @@ in
       hook.hooks =
         let
           hookConvertItemRemoved = (pkgs.writeShellScript "beet-hook-convert-item-removed" ''
-            ${lib.toShellVar path_converted convert.dest}
-            ${lib.toShellVar extension_converted convert.formats."${convert.format}".extension}
-            ${lib.toShellVar format_converted convert.paths.default}
+            ${lib.toShellVar "path_converted" convert.dest}
+            ${lib.toShellVar "extension_converted" convert.formats."${convert.format}".extension}
+            ${lib.toShellVar "format_converted" convert.paths.default}
 
             converted_path=$(beet list -f "$path_converted/$format_converted.$extension_converted" "path:$1")
             [[ -e "$converted_path" ]] && echo rm -f "$converted_path"
@@ -333,14 +333,18 @@ in
         resume = false;
       };
 
-      paths = {
-        default = "$albumartist - $album%if{$original_year, ($original_year)}/$track - $artist - $title";
-        "singleton:true" = "_single/$artist/$title";
-        "comp:true" = "_compilation/$albumartist - $album/$track - $artist - $title";
-        "albumtype:soundtrack" = "_soundtracks/$albumartist - $album%if{$original_year, ($original_year)}/$track - $artist - $title";
+      paths =
+        let
+          main = "$album%if{$year, ($year)}/$track - $artist - $title";
+        in
+        rec {
+          default = "$albumartist - ${main}";
+          "singleton:true" = "_single/$artist/$title%if{$year, ($year)}";
+          "comp:true" = "_compilation/${main}";
+          "albumtype:soundtrack" = "_soundtrack/${main}";
 
-        "sample:true" = "_samples/$albumartist - $album%if{$original_year, ($original_year)}/$track - $artist - $title";
-      };
+          "sample:true" = "_sample/${default}";
+        };
     }
     # // lib.optionalAttrs nixosConfig.services.airsonic.enable { subsonic.url = nixosConfig.services.airsonic.virtualHost; }
     // lib.optionalAttrs config.services.mopidy.enable { mpd.host = config.services.mopidy.settings.mpd.hostname; }
