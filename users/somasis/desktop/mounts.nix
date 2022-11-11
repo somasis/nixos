@@ -14,9 +14,9 @@ in
   home.persistence."/persist${config.home.homeDirectory}".directories = [ "etc/rclone" ];
 
   systemd.user.tmpfiles.rules = [
+    # "L+ ${home}/vault - - - - ${home}/mnt/ssh/spinoza.7596ff.com_raid/somasis/backup/vault"
     "L+ ${home}/audio/library/lossless - - - - ${home}/mnt/ssh/spinoza.7596ff.com_raid/somasis/audio/library/lossless"
     "L+ ${home}/audio/library/source - - - - ${home}/mnt/ssh/spinoza.7596ff.com_raid/somasis/audio/library/source"
-    # "L+ ${home}/vault - - - - ${home}/mnt/ssh/spinoza.7596ff.com_raid/somasis/backup/vault"
   ];
 
   # TODO This really ought to be templated.
