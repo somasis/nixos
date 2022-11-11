@@ -65,6 +65,7 @@
     pkgs.xe
     pkgs.xsv
     pkgs.xz
+    pkgs.yq
     pkgs.zstd
 
     # TODO Re-add once NixOS 22.11
@@ -99,7 +100,7 @@
 
         runtimeInputs =
           [ pkgs.curl ]
-            ++ lib.optional (nixosConfig.networking.networkmanager.enable) pkgs.networkmanager
+          ++ lib.optional (nixosConfig.networking.networkmanager.enable) pkgs.networkmanager
         ;
 
         text = ''
