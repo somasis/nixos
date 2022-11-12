@@ -242,8 +242,6 @@ in
       sort_case_insensitive = false;
       sort_item = "artist+ date+ album+ disc+ track+";
       sort_album = "artist+ date+ album+ disc+ track+";
-      format_item = "$added\t$artist\t$album\t$title%if{$date,\t$date}";
-      format_album = "$added\t$albumartist\t$album%if{$date,\t$date}";
 
       plugins = (lib.optional config.services.mopidy.enable "mpdupdate");
     }
