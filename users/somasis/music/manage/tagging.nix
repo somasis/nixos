@@ -1,4 +1,5 @@
 { pkgs
+, library
 , ...
 }: {
   programs.beets.settings = {
@@ -71,6 +72,8 @@
 
       incremental = true;
       resume = false;
+
+      log = "${library.lossless}/beets.log";
     };
 
     paths =
