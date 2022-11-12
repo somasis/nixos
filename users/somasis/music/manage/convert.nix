@@ -17,7 +17,7 @@
 
       format = "opus";
       formats.opus = {
-        command = "ffmpeg -i $source -y -vn -acodec libopus -ab 96k -ar 48000 $dest";
+        command = "${pkgs.ffmpeg-full}/bin/ffmpeg -i $source -y -vn -acodec libopus -ab 96k -ar 48000 $dest";
         extension = "opus";
       };
 
