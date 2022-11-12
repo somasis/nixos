@@ -5,16 +5,16 @@
 
     extrafiles = {
       patterns = {
-        # art = [
-        #   "*.[Gg][Ii][Ff]"
-        #   "*.[Jj][Pp][Ee][Gg]"
-        #   "*.[Jj][Pp][Gg]"
-        #   "*.[Pp][Nn][Gg]"
-        #   "*[Aa]rt/"
-        #   "*[Aa]rtwork/"
-        #   "*[Ss]can/"
-        #   "*[Ss]cans/"
-        # ];
+        art = [
+          "*.[Gg][Ii][Ff]"
+          "*.[Jj][Pp][Ee][Gg]"
+          "*.[Jj][Pp][Gg]"
+          "*.[Pp][Nn][Gg]"
+          "*[Aa]rt/"
+          "*[Aa]rtwork/"
+          "*[Ss]can/"
+          "*[Ss]cans/"
+        ];
 
         meta = [
           config.programs.beets.settings.originquery.origin_file
@@ -36,7 +36,7 @@
       };
 
       paths = {
-        # art = "$albumpath/art";
+        art = "$albumpath/art";
         meta = "$albumpath/meta";
       };
     };
