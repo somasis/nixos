@@ -13,9 +13,6 @@
       # Check for corruption during importing
       "badfiles"
 
-      # Allow for using barcodes (for when I have physical media)
-      "barcode"
-
       # Fetch release artwork
       "fetchart"
 

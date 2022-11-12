@@ -1,5 +1,5 @@
 # Copy over and organize extra files of all sorts
-{
+{ config, ... }: {
   programs.beets.settings = {
     plugins = [ "extrafiles" ];
 
@@ -17,7 +17,7 @@
         # ];
 
         meta = [
-          originquery.origin_file
+          config.programs.beets.settings.originquery.origin_file
           "*.[Aa][Cc][Cc][Uu][Rr][Ii][Pp]"
           "*.[Cc][Uu][Ee]"
           "*.[Ff][Ff][Pp]"

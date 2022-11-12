@@ -97,36 +97,6 @@ let
     };
   });
 
-  beets-barcode = (pkgs.callPackage
-    ({ lib, fetchFromGitHub, beets, python3Packages }:
-      python3Packages.buildPythonApplication rec {
-        pname = "beets-barcode";
-        version = "unstable-2019-01-24";
-
-        src = fetchFromGitHub {
-          repo = pname;
-          owner = "8h2a";
-          rev = "ad18cace04873157a96c34a48e714874825db724";
-          hash = "sha256-US34U8j+OefMXFSn91MW32FA2fAZLMcABbHW9R4EuU0=";
-        };
-
-        propagatedBuildInputs = with python3Packages; [
-          pillow
-          pyzbar
-        ];
-
-        nativeBuildInputs = [ beets ];
-
-        meta = with lib; {
-          description = "Use barcodes for album tagging";
-          homepage = "https://github.com/8h2a/beets-barcode";
-          license = licenses.mit;
-          maintainers = with maintainers; [ somasis ];
-        };
-      })
-    { beets = pkgs.beetsPackages.beets-minimal; }
-  );
-
   beets-fetchartist = (pkgs.callPackage
     ({ lib, fetchFromGitHub, beets, python3Packages }:
       python3Packages.buildPythonApplication rec {
@@ -205,9 +175,8 @@ in
   _module.args = { inherit library; };
 
   imports = [
-    # ./extrafiles.nix
-    # ./originquery.nix
     ./convert.nix
+    ./extrafiles.nix
     ./ripping.nix
     ./tagging.nix
   ];
@@ -225,7 +194,6 @@ in
     enable = true;
     package = (pkgs.beets.override {
       pluginOverrides = {
-        barcode = { enable = true; propagatedBuildInputs = [ beets-barcode ]; };
         extrafiles = { enable = true; propagatedBuildInputs = [ pkgs.beetsPackages.extrafiles ]; };
         fetchartist = { enable = true; propagatedBuildInputs = [ beets-fetchartist ]; };
         originquery = { enable = true; propagatedBuildInputs = [ beets-originquery ]; };
