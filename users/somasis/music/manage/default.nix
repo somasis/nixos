@@ -175,8 +175,8 @@ in
   _module.args = { inherit library; };
 
   imports = [
+    # ./extrafiles.nix
     ./convert.nix
-    ./extrafiles.nix
     ./ripping.nix
     ./tagging.nix
   ];
