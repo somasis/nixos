@@ -54,7 +54,7 @@ let
           [
             {
               cmd = ''
-                ${to} -d ${config.home.homeDirectory}/mnt/ssh/%{profile-name} -D "s|^${config.home.homeDirectory}||" %{id}[ ]
+                ${to} -d ${config.home.homeDirectory}/mnt/sftp/%{profile-name} -D "s|^${config.home.homeDirectory}||" %{id}[ ]
               '';
               label = "Open _directory";
             }
@@ -64,7 +64,7 @@ let
             }
             {
               cmd = ''
-                ${tp} -d ${config.home.homeDirectory}/mnt/ssh/spinoza.7596ff.com/audio/library/source/torrent %{id}[ ]
+                ${tp} -d ${config.home.homeDirectory}/mnt/sftp/spinoza.7596ff.com/audio/library/source/torrent %{id}[ ]
               '';
               label = "Download to @_spinoza/audio/library/source/torrent";
             }
