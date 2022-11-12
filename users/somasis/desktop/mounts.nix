@@ -87,6 +87,8 @@ in
               "idmap=user"
               "max_conns=4"
               "transform_symlinks"
+              "delay_connect"
+              "reconnect"
             ];
           };
         };
@@ -114,6 +116,8 @@ in
               "idmap=user"
               "max_conns=4"
               "transform_symlinks"
+              "delay_connect"
+              "reconnect"
             ];
           };
         };
@@ -141,6 +145,8 @@ in
               "idmap=user"
               "max_conns=4"
               "transform_symlinks"
+              "delay_connect"
+              "reconnect"
             ];
           };
         };
@@ -168,6 +174,8 @@ in
               "idmap=user"
               "max_conns=4"
               "transform_symlinks"
+              "delay_connect"
+              "reconnect"
             ];
           };
         };
