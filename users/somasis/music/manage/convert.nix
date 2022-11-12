@@ -7,7 +7,7 @@
   programs.beets.settings = rec {
     plugins = [ "convert" ];
     convert = {
-      # auto = true;
+      auto = true;
 
       copy_album_art = true;
       embed = false;
