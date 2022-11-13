@@ -85,6 +85,9 @@
         "sample:true" = "_sample/${default}";
       };
 
+    # Don't rate media that differs from our guess highly
+    match.max_rec.media = "medium";
+
     musicbrainz = {
       genres = true;
       extra_tags = [
