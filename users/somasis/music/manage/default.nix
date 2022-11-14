@@ -147,7 +147,7 @@ let
         src = fetchFromGitLab {
           repo = pname;
           owner = "tiago.dias";
-          rev = version;
+          rev = "v${version}";
           hash = "sha256-7N7LiOdDZD/JIEwx7Dfl58bxk4NEOmUe6jziS8EHNcQ=";
         };
 
