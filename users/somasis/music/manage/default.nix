@@ -269,22 +269,12 @@ in
 
         [[ -n "$unit" ]] && systemctl --user start "$unit"
 
-        # Feed pass-beets info via a FIFO so it never hits the disk.
-        umask=$(umask)
-        umask 0077
-        fifo=$(mktemp)
-        mkfifo "$fifo.fifo"
-        mv "$fifo.fifo" "$fifo"
-        umask "$(umask)"
-        unset umask
-
-        pass-beets > "$fifo" &
-
-        trap 'rm -f "$fifo"' EXIT
-
         e=0
         trap : INT
-        beet -c "$fifo" "$@" || e=$?
+
+        # Feed pass-beets info via a FIFO so it never hits the disk.
+        beet -c <(pass-beets) "$@" || e=$?
+
         trap - INT
         exit $?
         EOF
