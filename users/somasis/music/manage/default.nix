@@ -193,6 +193,14 @@ let
       })
     { beets = pkgs.beetsPackages.beets-minimal; });
 
+  beets = (pkgs.beets.override {
+    pluginOverrides = {
+      extrafiles = { enable = true; propagatedBuildInputs = [ pkgs.beetsPackages.extrafiles ]; };
+      fetchartist = { enable = true; propagatedBuildInputs = [ beets-fetchartist ]; };
+      noimport = { enable = true; propagatedBuildInputs = [ beets-noimport ]; };
+      originquery = { enable = true; propagatedBuildInputs = [ beets-originquery ]; };
+    };
+  });
 in
 {
   _module.args = { inherit music; };
@@ -220,14 +228,42 @@ in
 
   programs.beets = {
     enable = true;
-    package = (pkgs.beets.override {
-      pluginOverrides = {
-        extrafiles = { enable = true; propagatedBuildInputs = [ pkgs.beetsPackages.extrafiles ]; };
-        fetchartist = { enable = true; propagatedBuildInputs = [ beets-fetchartist ]; };
-        noimport = { enable = true; propagatedBuildInputs = [ beets-noimport ]; };
-        originquery = { enable = true; propagatedBuildInputs = [ beets-originquery ]; };
-      };
-    });
+    package =
+      # Provide a wrapper for the actual `beet` program, so that we can perform some
+      # pre-command-initialization actions.
+      (pkgs.writeShellScriptBin "beet" ''
+        export ${lib.toShellVar "PATH" (lib.makeBinPath [ beets pkgs.coreutils pkgs.systemd ])}":$PATH"
+
+        ${lib.toShellVar "p" config.programs.beets.settings.directory}
+        p=$(readlink -m "$p")
+        p_escaped=$(systemd-escape -p "$p")
+
+        user_mount_units=$(systemctl --user --plain --full --all --no-legend list-units -t mount | cut -d' ' -f1)
+
+        # Work through the parts of the escaped path and find the longest
+        # unit name prefix match.
+        # 1. Split apart the escaped path
+        # 2. Accumulate parts for each run of the `for` loop
+        # 3. Read in the list of user mount units
+        # The longest matching one will be the final line.
+        unit=$(
+            p_acc=
+            IFS=-
+            for p_part in $p_escaped; do
+                p_acc="''${p_acc:+$p_acc-}$p_part"
+
+                while IFS="" read -r unit; do
+                    case "$unit" in
+                        "$p_acc"*.mount) printf '%s\n' "$unit"; break ;;
+                    esac
+                done <<< "$user_mount_units"
+            done | tail -n1
+        )
+
+        [[ -n "$unit" ]] && systemctl --user start "$unit"
+
+        exec beet "$@"
+      '');
 
     settings = let inherit music; in rec {
       include = [ "${xdgRuntimeDir}/pass-beets.yaml" ];
