@@ -11,8 +11,6 @@ let
     lossy = "${config.xdg.userDirs.music}/lossy";
   };
 
-  xdgRuntimeDir = "/run/user/${toString nixosConfig.users.users.${config.home.username}.uid}";
-
   pass-beets = (pkgs.writeShellApplication {
     name = "pass-beets";
     runtimeInputs = [
@@ -202,11 +200,20 @@ in
   ];
 
   home.packages = [
-    (pkgs.writeShellScriptBin "gazelle-origin" ''
-      export ORIGIN_TRACKER="RED"
-      export RED_API_KEY=$(pass ${nixosConfig.networking.fqdn}/gazelle-origin/redacted.ch)
-      ${gazelle-origin}/bin/gazelle-origin "$@"
-    '')
+    (pkgs.symlinkJoin {
+      name = "gazelle-origin-final";
+
+      buildInputs = [ pkgs.makeWrapper ];
+      paths = [ gazelle-origin ];
+
+      postBuild = ''
+        wrapProgram $out/bin/gazelle-origin \
+            --set-default "ORIGIN_TRACKER" "RED" \
+            --run ': "''${RED_API_KEY:=$(${config.programs.password-store.package}/bin/pass ${nixosConfig.networking.fqdn}/gazelle-origin/redacted.ch)}"' \
+            --run 'export RED_API_KEY'
+      '';
+    })
+
     pass-beets
   ];
 
@@ -220,16 +227,23 @@ in
     package =
       # Provide a wrapper for the actual `beet` program, so that we can perform some
       # pre-command-initialization actions.
-      (pkgs.writeShellScriptBin "beet" ''
-        export ${lib.toShellVar "PATH" (lib.makeBinPath [ beets pkgs.coreutils pkgs.systemd ])}":$PATH"
+      # <https://nixos.wiki/wiki/Nix_Cookbook#Wrapping_packages>
+      (pkgs.runCommand "beets-final" { } ''
+        mkdir $out
+        ln -s ${beets}/* $out
+        rm $out/bin
 
-        # Ensure we have any necessary authentication settings.
-        systemctl --user start pass-beets.service
+        mkdir $out/bin
+        touch $out/bin/beet
+        chmod +x $out/bin/beet
 
-        # Manage any required mount units
-        ${lib.toShellVar "p" config.programs.beets.settings.directory}
-        p=$(readlink -m "$p")
-        p_escaped=$(systemd-escape -p "$p")
+        cat > $out/bin/beet <<'EOF'
+        export ${lib.toShellVar "PATH" (lib.makeBinPath [ beets pass-beets pkgs.coreutils pkgs.systemd ])}":$PATH"
+
+        # Mount any required mount units
+        ${lib.toShellVar "directory" config.programs.beets.settings.directory}
+        directory=$(readlink -m "$directory")
+        directory_escaped=$(systemd-escape -p "$directory")
 
         user_mount_units=$(systemctl --user --plain --full --all --no-legend list-units -t mount | cut -d' ' -f1)
 
@@ -240,14 +254,14 @@ in
         # 3. Read in the list of user mount units
         # The longest matching one will be the final line.
         unit=$(
-            p_acc=
+            directory_acc=
             IFS=-
-            for p_part in $p_escaped; do
-                p_acc="''${p_acc:+$p_acc-}$p_part"
+            for directory_part in $directory_escaped; do
+                directory_acc="''${directory_acc:+$directory_acc-}$directory_part"
 
                 while IFS="" read -r unit; do
                     case "$unit" in
-                        "$p_acc"*.mount) printf '%s\n' "$unit"; break ;;
+                        "$directory_acc"*.mount) printf '%s\n' "$unit"; break ;;
                     esac
                 done <<< "$user_mount_units"
             done | tail -n1
@@ -255,16 +269,28 @@ in
 
         [[ -n "$unit" ]] && systemctl --user start "$unit"
 
+        # Feed pass-beets info via a FIFO so it never hits the disk.
+        umask=$(umask)
+        umask 0077
+        fifo=$(mktemp)
+        mkfifo "$fifo.fifo"
+        mv "$fifo.fifo" "$fifo"
+        umask "$(umask)"
+        unset umask
+
+        pass-beets > "$fifo" &
+
+        trap 'rm -f "$fifo"' EXIT
+
         e=0
         trap : INT
-        beet "$@" || e=$?
+        beet -c "$fifo" "$@" || e=$?
         trap - INT
         exit $?
+        EOF
       '');
 
     settings = let inherit music; in rec {
-      include = [ "${xdgRuntimeDir}/pass-beets.yaml" ];
-
       directory = "${music.lossless}";
       library = "${music.lossless}/beets.db";
 
@@ -281,25 +307,4 @@ in
   };
 
   programs.bash.shellAliases."beet-import-all" = "beet import --flat --timid ${lib.escapeShellArg music.source}/*/*";
-
-  systemd.user.services.pass-beets = {
-    Unit = {
-      Description = "Authenticate `beets` using `pass`";
-      After = [ "gpg-agent.service" ];
-      PartOf = [ "default.target" ];
-    };
-    Install.WantedBy = [ "default.target" ];
-
-    Service = {
-      Type = "oneshot";
-      RemainAfterExit = true;
-
-      ExecStart = [ "${pass-beets}/bin/pass-beets" ];
-      ExecStop = [ "${pkgs.coreutils}/bin/rm -f %t/pass-beets.yaml" ];
-
-      UMask = 0077;
-      StandardOutput = "file:%t/pass-beets.yaml";
-      StandardError = "journal";
-    };
-  };
 }
