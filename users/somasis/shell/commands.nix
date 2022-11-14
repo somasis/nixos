@@ -50,6 +50,8 @@
       #                     -e '/^
       # }
 
+      edo() { printf '+ %s\n' "$*" >&2; "$@"; }
+
       mount() {
           if [ "$#" -eq 0 ] && [ -t 1 ]; then
               # TODO: fuse is hidden because home-manager impermanence mounts are mounted as just "fuse", not as "bindfs" or whatever

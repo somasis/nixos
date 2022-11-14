@@ -17,7 +17,6 @@
   home.shellAliases = { };
 
   # TODO: this doesn't work :(
-  #
   # home.packages = [
   #   pkgs.complete-alias
   # ];
@@ -27,7 +26,6 @@
   '';
 
   # TODO: integrate system clipboard into bash readline yank/paste
-  #
   # programs.bash.initExtra =
   #   let
   #     clip = "${pkgs.xclip}/bin/xclip -selection clipboard";
