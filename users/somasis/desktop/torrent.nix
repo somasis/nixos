@@ -142,9 +142,6 @@ let
     ];
 
     text = ''
-      set -eu
-      set -o pipefail
-
       umask 0077
 
       : "''${XDG_CONFIG_HOME:=$HOME/.config}"
@@ -332,9 +329,6 @@ let
       #     -H seedbox.nsa.gov \
       #     -d /mnt/seedbox/files/completed \
       #     %{id}[ ]
-
-      set -eu
-      set -o pipefail
 
       usage() {
           cat >&2 <<EOF

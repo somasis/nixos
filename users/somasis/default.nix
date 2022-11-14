@@ -104,8 +104,6 @@
         ;
 
         text = ''
-          set -eu
-
           ${lib.optionalString nixosConfig.networking.networkmanager.enable "nm-online -t 60 || exit 7"}
 
           exec curl ${lib.escapeShellArgs [

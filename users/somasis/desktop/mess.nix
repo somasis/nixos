@@ -7,9 +7,6 @@ let
     runtimeInputs = [ pkgs.coreutils ];
 
     text = ''
-      set -eu
-      set -o pipefail
-
       usage() {
           printf 'usage: %s\n' "''${0##*/}" >&2
           exit 69

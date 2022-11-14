@@ -17,9 +17,6 @@ let
     ];
 
     text = ''
-      set -eu
-      set -o pipefail
-
       umask 0077
 
       : "''${XDG_CONFIG_HOME:=$HOME/.config}"
