@@ -466,7 +466,7 @@ in
 
   home.packages = [ dmenu dmenu-run ]
     ++ lib.optional config.xsession.windowManager.bspwm.enable dmenu-session
-    ++ lib.optional (nixosConfig.fonts.fontconfig.defaultFonts.emoji ? null) dmenu-emoji
+    ++ lib.optional (nixosConfig.fonts.fontconfig.defaultFonts.emoji != [ ]) dmenu-emoji
     ++ lib.optional config.programs.password-store.enable dmenu-pass
   ;
 }
