@@ -32,7 +32,7 @@ let
           [[ "$1" -ne 0 ]] && printf 'pass-beets: "failed"\n' > "$XDG_RUNTIME_DIR/pass-beets.yaml"
       }
 
-      trap 'fail $?' EXIT
+      trap 'fail $?' ERR
 
       output=$(pass www/acoustid.org | jq -Rc '{ acoustid: { apikey: . } }')
       output+=$(
