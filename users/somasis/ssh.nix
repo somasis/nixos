@@ -3,15 +3,24 @@
 , nixosConfig
 , ...
 }: {
-  home.persistence."/persist${config.home.homeDirectory}".directories = [ ".ssh" ];
-  home.persistence."/cache${config.home.homeDirectory}".directories = [ "var/cache/ssh" ];
+  home.persistence = {
+    "/persist${config.home.homeDirectory}" = {
+      directories = [ ".ssh" ];
+      # files = (map (x: ".ssh/${x}") [ "authorized_keys" "id_ed25519" "id_ed25519.pub" ]);
+    };
+
+    # "/cache${config.home.homeDirectory}".files = [ ".ssh/known_hosts" ];
+  };
+
+  # # HACK Need this symlink because otherwise ssh replaces the file atomically.
+  # home.file.".ssh/known_hosts".source = config.lib.file.mkOutOfStoreSymlink "${config.xdg.cacheHome}/ssh/known_hosts";
 
   programs.ssh = {
     enable = true;
 
     # compression = true;
-    hashKnownHosts = true;
-    userKnownHostsFile = "${config.xdg.cacheHome}/ssh/known_hosts";
+    # hashKnownHosts = true;
+    # userKnownHostsFile = "${config.xdg.cacheHome}/ssh/known_hosts";
 
     controlPersist = "5m";
 
@@ -31,10 +40,10 @@
 
         extraOptions = {
           # Can be spoofed, and dies over short connection route failures
-          "TCPKeepAlive" = "no";
+          TCPKeepAlive = "no";
 
           # Accept unknown keys for unfamiliar hosts, yell when known hosts change their key.
-          "StrictHostKeyChecking" = "accept-new";
+          StrictHostKeyChecking = "accept-new";
         };
       };
 
