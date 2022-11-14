@@ -1,4 +1,7 @@
-{ config, pkgs, ... }:
+{ config
+, pkgs
+, ...
+}:
 {
   imports = [
     ../music/manage
@@ -7,9 +10,7 @@
 
   xdg.userDirs.music = "${config.home.homeDirectory}/audio/library";
 
-  home.persistence."/persist${config.home.homeDirectory}".directories = [
-    { directory = "audio"; method = "symlink"; }
-  ];
+  home.persistence."/persist${config.home.homeDirectory}".directories = [{ directory = "audio"; method = "symlink"; }];
 
   home.packages = [
     # pkgs.mpd
