@@ -18,18 +18,12 @@ let
     runtimeInputs = [
       config.programs.jq.package
       config.programs.password-store.package
-      pkgs.coreutils
       pkgs.yq
     ];
 
     text = ''
-      umask 0077
-
-      : "''${XDG_CONFIG_HOME:=$HOME/.config}"
-      : "''${XDG_RUNTIME_DIR:=/run/user/$(id -un)}"
-
       fail() {
-          [[ "$1" -ne 0 ]] && printf 'pass-beets: "failed"\n' > "$XDG_RUNTIME_DIR/pass-beets.yaml"
+          [[ "$1" -ne 0 ]] && printf 'pass-beets: "failed"\n'
       }
 
       trap 'fail $?' ERR
@@ -40,12 +34,7 @@ let
               | jq -Rc --arg user Somasis '{ musicbrainz: { user: $user, pass: . } }'
       )
 
-      output=$(jq -sc 'add' <<<"$output")
-      output=$(yq -y <<<"$output")
-
-      cat > "$XDG_RUNTIME_DIR/pass-beets.yaml" <<EOF
-      $output
-      EOF
+      jq -sc 'add' <<<"$output" | yq -y
     '';
   });
 
@@ -234,6 +223,10 @@ in
       (pkgs.writeShellScriptBin "beet" ''
         export ${lib.toShellVar "PATH" (lib.makeBinPath [ beets pkgs.coreutils pkgs.systemd ])}":$PATH"
 
+        # Ensure we have any necessary authentication settings.
+        systemctl --user start pass-beets.service
+
+        # Manage any required mount units
         ${lib.toShellVar "p" config.programs.beets.settings.directory}
         p=$(readlink -m "$p")
         p_escaped=$(systemd-escape -p "$p")
@@ -262,7 +255,11 @@ in
 
         [[ -n "$unit" ]] && systemctl --user start "$unit"
 
-        exec beet "$@"
+        e=0
+        trap : INT
+        beet "$@" || e=$?
+        trap - INT
+        exit $?
       '');
 
     settings = let inherit music; in rec {
@@ -283,19 +280,7 @@ in
     ;
   };
 
-  programs.bash = {
-    shellAliases."beet-import-all" = "beet import --flat --timid ${lib.escapeShellArg music.source}/*/*";
-
-    initExtra = ''
-      beet() (
-          local e=0
-          trap ":" INT
-          command beet "$@"; e=$?
-          trap - INT
-          return $e
-      )
-    '';
-  };
+  programs.bash.shellAliases."beet-import-all" = "beet import --flat --timid ${lib.escapeShellArg music.source}/*/*";
 
   systemd.user.services.pass-beets = {
     Unit = {
@@ -311,6 +296,9 @@ in
 
       ExecStart = [ "${pass-beets}/bin/pass-beets" ];
       ExecStop = [ "${pkgs.coreutils}/bin/rm -f %t/pass-beets.yaml" ];
+
+      UMask = 0077;
+      StandardOutput = "file:%t/pass-beets.yaml";
     };
   };
 }
