@@ -106,4 +106,5 @@
   };
 
   home.packages = [ pkgs.mosh ];
+  home.sessionVariables."MOSH_TITLE_NOPREFIX" = true; # Disable prepending "[mosh]" to terminal title
 }
