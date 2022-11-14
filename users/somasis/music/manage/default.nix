@@ -138,6 +138,31 @@ let
     { }
   );
 
+  beets-noimport = (pkgs.callPackage
+    ({ lib, fetchFromGitLab, beets, python3Packages }:
+      python3Packages.buildPythonApplication rec {
+        pname = "beets-noimport";
+        version = "0.1.0b5";
+
+        src = fetchFromGitLab {
+          repo = pname;
+          owner = "tiago.dias";
+          rev = version;
+          hash = "sha256-7N7LiOdDZD/JIEwx7Dfl58bxk4NEOmUe6jziS8EHNcQ=";
+        };
+
+        nativeBuildInputs = [ beets ];
+
+        meta = with lib; {
+          description = ''Add directories to the incremental import "do not import" list'';
+          homepage = "https://gitlab.com/tiago.dias/beets-noimport";
+          maintainers = with maintainers; [ somasis ];
+          license = licenses.mit;
+        };
+      })
+    { beets = pkgs.beetsPackages.beets-minimal; });
+
+
   beets-originquery = (pkgs.callPackage
     ({ lib, fetchFromGitHub, beets, python3Packages }:
       python3Packages.buildPythonApplication rec {
@@ -199,6 +224,7 @@ in
       pluginOverrides = {
         extrafiles = { enable = true; propagatedBuildInputs = [ pkgs.beetsPackages.extrafiles ]; };
         fetchartist = { enable = true; propagatedBuildInputs = [ beets-fetchartist ]; };
+        noimport = { enable = true; propagatedBuildInputs = [ beets-noimport ]; };
         originquery = { enable = true; propagatedBuildInputs = [ beets-originquery ]; };
       };
     });
@@ -214,7 +240,8 @@ in
       sort_item = "artist+ date+ album+ disc+ track+";
       sort_album = "artist+ date+ album+ disc+ track+";
 
-      plugins = (lib.optional config.services.mopidy.enable "mpdupdate");
+      plugins = [ "noimport" ]
+        ++ lib.optional config.services.mopidy.enable "mpdupdate";
     }
     // lib.optionalAttrs config.services.mopidy.enable { mpd.host = config.services.mopidy.settings.mpd.hostname; };
   };
