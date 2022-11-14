@@ -2,7 +2,6 @@
   imports = [
     ./cd.nix
     ./commands.nix
-    ./git.nix
     ./history.nix
     ./prompt.nix
   ];
