@@ -1,6 +1,6 @@
 { pkgs
 , lib
-, library
+, music
 , ...
 }:
 {
@@ -31,7 +31,7 @@
       };
 
       "whipper.cd.rip" = {
-        working_directory = "${library.source}/rip";
+        working_directories = "${music.source}/rip";
 
         track_template = "%A - %d (%y)/%t - %a - %n";
         disc_template = "%A - %d (%y)/%A - %d (%y) (disc %N)";

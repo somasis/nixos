@@ -1,7 +1,7 @@
 # Convert to Opus for other devices
 { lib
 , pkgs
-, library
+, music
 , ...
 }: {
   programs.beets.settings = rec {
@@ -13,7 +13,7 @@
       embed = false;
       album_art_maxwidth = "1024";
 
-      dest = "${library.lossy}";
+      dest = "${music.lossy}";
 
       format = "opus";
       formats.opus = {

@@ -5,6 +5,12 @@
 , ...
 }:
 let
+  music = {
+    source = "${config.xdg.userDirs.music}/source";
+    lossless = "${config.xdg.userDirs.music}/lossless";
+    lossy = "${config.xdg.userDirs.music}/lossy";
+  };
+
   xdgRuntimeDir = "/run/user/${toString nixosConfig.users.users.${config.home.username}.uid}";
 
   pass-beets = (pkgs.writeShellApplication {
@@ -162,14 +168,9 @@ let
       })
     { beets = pkgs.beetsPackages.beets-minimal; });
 
-  library = {
-    source = "${config.xdg.userDirs.music}/source";
-    lossless = "${config.xdg.userDirs.music}/lossless";
-    lossy = "${config.xdg.userDirs.music}/lossy";
-  };
 in
 {
-  _module.args = { inherit library; };
+  _module.args = { inherit music; };
 
   imports = [
     # ./extrafiles.nix
@@ -197,11 +198,11 @@ in
       };
     });
 
-    settings = {
+    settings = let inherit music; in rec {
       include = [ "${xdgRuntimeDir}/pass-beets.yaml" ];
 
-      directory = "${library.lossless}";
-      library = "${library.lossless}/beets.db";
+      directory = "${music.lossless}";
+      library = "${music.lossless}/beets.db";
 
       # Default `beet list` options
       sort_case_insensitive = false;
@@ -214,7 +215,7 @@ in
   };
 
   programs.bash = {
-    shellAliases."beet-import-all" = "beet import --flat --timid ${lib.escapeShellArg library.source}/*/*";
+    shellAliases."beet-import-all" = "beet import --flat --timid ${lib.escapeShellArg music.source}/*/*";
 
     initExtra = ''
       beet() (
