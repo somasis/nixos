@@ -299,6 +299,7 @@ in
 
       UMask = 0077;
       StandardOutput = "file:%t/pass-beets.yaml";
+      StandardError = "journal";
     };
   };
 }
