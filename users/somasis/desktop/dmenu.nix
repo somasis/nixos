@@ -458,7 +458,7 @@ in
 
   services.sxhkd.keybindings = { "{super + grave, super + Return, alt + F2}" = "dmenu-run"; }
     // lib.optionalAttrs config.xsession.windowManager.bspwm.enable { "super + Escape" = "dmenu-session"; }
-    // lib.optionalAttrs (nixosConfig.fonts.fontconfig.defaultFonts.emoji ? null) { "super + e" = "dmenu-emoji -c"; }
+    // lib.optionalAttrs (nixosConfig.fonts.fontconfig.defaultFonts.emoji != [ ]) { "super + e" = "dmenu-emoji -c"; }
     // lib.optionalAttrs config.programs.password-store.enable { "super + shift + p" = "dmenu-pass -cn"; }
   ;
 
