@@ -101,7 +101,7 @@
         "year"
       ];
 
-      searchlimit = 15;
+      searchlimit = 10;
     };
 
     absubmit = {
@@ -120,7 +120,6 @@
     };
 
     bandcamp = {
-      search_max = 5;
       art = true;
       genre.mode = "progressive";
     };
