@@ -6,7 +6,7 @@
         # stty -echo >&2
         local _before_command_command="''${BASH_COMMAND%% *}"
         case "$_before_command_command" in
-            'doas '*|'sudo '*)
+            'doas '*|'sudo '*|'edo '*)
                 _before_command_command="''${_before_command_command#* }"
                 ;;
             '$'*)
@@ -16,7 +16,7 @@
             _*) return ;;
         esac
 
-        printf '\e]0%s\a' "''${SSH_CONNECTION:+$USER@$HOSTNAME: }''${BASH_COMMAND%% *}"
+        printf '\e]0%s\a' "''${SSH_CONNECTION:+$USER@$HOSTNAME: }''${_before_command_command}"
         # stty echo >&2
     }
 
