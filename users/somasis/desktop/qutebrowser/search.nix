@@ -1,4 +1,7 @@
-{
+{ config
+, pkgs
+, ...
+}: {
   programs.qutebrowser.searchEngines = {
     "DEFAULT" = "https://duckduckgo.com/?q={}";
     "!" = "https://duckduckgo.com/?q=!+{}";
@@ -43,10 +46,12 @@
 
     "!hmopts" = "https://mipmip.github.io/home-manager-option-search/?{unquoted}";
 
-    "!nix" = "https://nixos.org/manual/nix/unstable/?search={}";
+    "!nix" = "file://${config.nix.package.doc}/share/doc/nix/manual/index.html?search={}";
     "!nixopts" = "https://search.nixos.org/options?channel=unstable&sort=alpha_asc&query={}";
     "!nixpkgs" = "https://search.nixos.org/packages?channel=unstable&sort=alpha_asc&query={}";
     "!nixwiki" = "https://nixos.wiki/index.php?go=Go&search={}";
+
+    "!beets" = "https://beets.readthedocs.io/en/v${pkgs.beetsPackages.beets-minimal.src.rev}/search.html?q={}";
 
     "!mdn" = "https://developer.mozilla.org/en-US/search?q={}";
 
