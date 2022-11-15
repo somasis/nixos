@@ -102,7 +102,7 @@ let
                         "$0" send-keys M-0 End C-u
                         "$0" send-keys -l "/window $chat"
                         "$0" send-keys Enter C-y
-                        raise "^catgirl - .+$" terminal "$0"
+                        raise "^catgirl: .+$" terminal "$0"
                         ;;
                 esac
 
@@ -381,7 +381,7 @@ in
     set-option -g visual-bell       off
 
     set-option -g set-titles        on              # Refers to *terminal window title*.
-    set-option -g set-titles-string "catgirl - #T"
+    set-option -g set-titles-string "catgirl: #T"
 
     # Set window title rules.
     set-option -g automatic-rename  off
@@ -598,5 +598,5 @@ in
     };
   };
 
-  services.sxhkd.keybindings."super + c" = "${config.home.homeDirectory}/bin/raise \"^catgirl - .+$\" terminal catgirls";
+  services.sxhkd.keybindings."super + c" = "${config.home.homeDirectory}/bin/raise \"^catgirl: .+$\" terminal catgirls";
 }

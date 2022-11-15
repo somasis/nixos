@@ -16,7 +16,7 @@
             _*) return ;;
         esac
 
-        printf '\e]0%s\a' "''${SSH_CONNECTION:+ssh [$USER@$HOSTNAME]: }''${BASH_COMMAND%% *}"
+        printf '\e]0%s\a' "''${SSH_CONNECTION:+$USER@$HOSTNAME: }''${BASH_COMMAND%% *}"
         # stty echo >&2
     }
 
@@ -29,7 +29,7 @@
         PS1='\[\e[0m\e[34m\]\u'
 
         # Set terminal title.
-        PS1="$PS1"'\[$(printf %b "\e]0;''${SSH_CONNECTION:+ssh [$USER@$HOSTNAME]: }$PWD\a")\]'
+        PS1="$PS1"'\[$(printf %b "\e]0;''${SSH_CONNECTION:+$USER@$HOSTNAME: }''${BASH##*/}: $PWD\a")\]'
 
         # Show hostname only over ssh(1) connections or chroots.
         [ -n "$SSH_CONNECTION" ] && PS1="$PS1"'@\[\e[0;35m\]\h\[\e[0m\]'

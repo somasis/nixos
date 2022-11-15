@@ -24,7 +24,7 @@
 
       ## Set terminal (client) titles appropriately.
       set-option -g set-titles on
-      set-option -g set-titles-string "tmux - #T"
+      set-option -g set-titles-string "tmux: #T"
 
       ## Don't make Esc usage have a delay (which is annoying when using kak(1)).
       set-option -g escape-time 25
