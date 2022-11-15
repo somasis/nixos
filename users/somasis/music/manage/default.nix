@@ -193,8 +193,8 @@ in
   _module.args = { inherit music; };
 
   imports = [
-    # ./extrafiles.nix
     ./convert.nix
+    ./extrafiles.nix
     ./ripping.nix
     ./tagging.nix
   ];
