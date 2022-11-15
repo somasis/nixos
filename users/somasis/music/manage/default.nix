@@ -129,6 +129,52 @@ let
     };
   });
 
+  beetcamp = (pkgs.callPackage
+    ({ lib, fetchFromGitHub, beets, python3Packages }:
+      python3Packages.buildPythonApplication rec {
+        pname = "beetcamp";
+        version = "0.16.0";
+
+        format = "pyproject";
+
+        src = fetchFromGitHub {
+          repo = pname;
+          owner = "snejus";
+          rev = version;
+          hash = "sha256-AX5Z6MODr28dWF9NrT394F+fmW5btRBQvb0E8WmDa70=";
+        };
+
+        propagatedBuildInputs = with python3Packages; [
+          cached-property
+          ordered-set
+          poetry-core
+          pycountry
+          python-dateutil
+          requests
+        ];
+
+        # checkInputs = with python3Packages; [
+        #   pytest
+        #   pytest-cov
+        #   pytest-randomly
+        #   pytest-clarify
+        #   pytest-lazy-fixture
+        #   rich
+        # ];
+
+        # doCheck = true;
+
+        nativeBuildInputs = [ beets ];
+
+        meta = with lib; {
+          description = "Use Bandcamp as a autotagger source for beets";
+          homepage = "https://github.com/snejus/beetcamp";
+          maintainers = with maintainers; [ somasis ];
+          license = licenses.gpl2;
+        };
+      })
+    { beets = pkgs.beetsPackages.beets-minimal; });
+
   beets-fetchartist = (pkgs.callPackage
     ({ lib, fetchFromGitHub, beets, python3Packages }:
       python3Packages.buildPythonApplication rec {
@@ -164,8 +210,7 @@ let
           license = licenses.mit;
         };
       })
-    { }
-  );
+    { beets = pkgs.beetsPackages.beets-minimal; });
 
   beets-noimport = (pkgs.callPackage
     ({ lib, fetchFromGitLab, beets, python3Packages }:
@@ -190,7 +235,6 @@ let
         };
       })
     { beets = pkgs.beetsPackages.beets-minimal; });
-
 
   beets-originquery = (pkgs.callPackage
     ({ lib, fetchFromGitHub, beets, python3Packages }:
@@ -224,6 +268,7 @@ let
 
   beets = (pkgs.beets.override {
     pluginOverrides = {
+      beetcamp = { enable = true; propagatedBuildInputs = [ beetcamp ]; };
       extrafiles = { enable = true; propagatedBuildInputs = [ pkgs.beetsPackages.extrafiles ]; };
       fetchartist = { enable = true; propagatedBuildInputs = [ beets-fetchartist ]; };
       noimport = { enable = true; propagatedBuildInputs = [ beets-noimport ]; };

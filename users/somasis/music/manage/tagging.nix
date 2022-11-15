@@ -13,6 +13,9 @@
       # Check for corruption during importing
       "badfiles"
 
+      # Allow for using bandcamp as an autotagger source
+      "bandcamp"
+
       # Fetch release artwork
       "fetchart"
 
@@ -116,6 +119,12 @@
       };
     };
 
+    bandcamp = {
+      search_max = 5;
+      art = true;
+      genre.mode = "progressive";
+    };
+
     fetchartist.filename = "poster";
 
     fetchart = {
@@ -127,6 +136,7 @@
 
       sources = [
         "filesystem"
+        "bandcamp"
         { coverart = "release releasegroup"; }
         "itunes"
         "amazon"
