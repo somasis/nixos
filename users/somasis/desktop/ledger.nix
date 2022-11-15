@@ -72,7 +72,7 @@ let
   };
 
   ledger-edit = pkgs.writeShellApplication {
-    name = "edit";
+    name = "ledger-edit";
 
     runtimeInputs = [
       pkgs.coreutils
@@ -81,8 +81,10 @@ let
 
     text = ''
       while :; do
+          # shellcheck disable=SC2046
           ''${EDITOR:-vi} \
               "${ledgerAbsolute}"/transactions.ledger \
+              "+$edit_line" \
               $(
                   find -H "${ledgerAbsolute}"// \
                       -type f \
@@ -371,66 +373,79 @@ in
       --time-colon
     '';
 
-    package = (pkgs.writeShellApplication {
-      name = "ledger";
-      runtimeInputs = [
-        pkgs.ledger
-        pkgs.moreutils
+    package = (pkgs.symlinkJoin {
+      name = "ledger-final";
 
-        ledger-bills
-        ledger-charts
-        ledger-interactive
-        ledger-iwatch
-        ledger-new
-        ledger-new-transaction
-        ledger-overview
-        ledger-prices
-        ledger-timeclock
+      paths = [
+        (pkgs.buildEnv {
+          name = "ledger-doc";
+          paths = [ pkgs.ledger ];
+          pathsToLink = [ "/share/man" ];
+        })
+
+        (pkgs.writeShellApplication {
+          name = "ledger";
+          runtimeInputs = [
+            pkgs.ledger
+            pkgs.moreutils
+
+            ledger-bills
+            ledger-charts
+            ledger-edit
+            ledger-interactive
+            ledger-iwatch
+            ledger-new
+            ledger-new-transaction
+            ledger-overview
+            ledger-prices
+            ledger-timeclock
+          ];
+
+          text = ''
+            ledger() { "''${0}" "$@"; }
+
+            : "''${XDG_CONFIG_HOME:=''${HOME}/.config}"
+            : "''${LEDGER_FILE:="${ledgerAbsolute}/journal.ledger"}"
+
+            export LEDGER_FILE
+
+            prompt() {
+                if [[ $# -eq 1 ]]; then
+                    printf '%s: ' "$1" >&2
+                else
+                    printf '%s [%s]: ' "$1" "$2" >&2
+                fi
+                read -r prompt
+                [[ $# -gt 1 ]] && [[ -z "''${prompt}" ]] && prompt="''${2}"
+                printf '%s' "''${prompt}"
+            }
+
+            case "''${1:-}" in
+                "")
+                    if command -v ledger-overview >/dev/null 2>&1; then
+                        # shellcheck disable=SC1090
+                        # don't try to follow source
+                        source "$(command -v ledger-overview)"
+                    else
+                        exec ledger
+                    fi
+                    ;;
+                *)
+                    if command -v ledger-"$1" >/dev/null 2>&1; then
+                        c="$1"
+                        shift
+
+                        # shellcheck disable=SC1090
+                        # don't try to follow source
+                        source "$(command -v ledger-"''${c}")"
+                    else
+                        exec ledger "$@"
+                    fi
+                    ;;
+            esac
+          '';
+        })
       ];
-
-      text = ''
-        ledger() { "''${0}" "$@"; }
-
-        : "''${XDG_CONFIG_HOME:=''${HOME}/.config}"
-        : "''${LEDGER_FILE:="${ledgerAbsolute}/journal.ledger"}"
-
-        export LEDGER_FILE
-
-        prompt() {
-            if [[ $# -eq 1 ]]; then
-                printf '%s: ' "$1" >&2
-            else
-                printf '%s [%s]: ' "$1" "$2" >&2
-            fi
-            read -r prompt
-            [[ $# -gt 1 ]] && [[ -z "''${prompt}" ]] && prompt="''${2}"
-            printf '%s' "''${prompt}"
-        }
-
-        case "''${1:-}" in
-            "")
-                if command -v ledger-overview >/dev/null 2>&1; then
-                    # shellcheck disable=SC1090
-                    # don't try to follow source
-                    source "$(command -v ledger-overview)"
-                else
-                    exec ledger
-                fi
-                ;;
-            *)
-                if command -v ledger-"$1" >/dev/null 2>&1; then
-                    c="$1"
-                    shift
-
-                    # shellcheck disable=SC1090
-                    # don't try to follow source
-                    source "$(command -v ledger-"''${c}")"
-                else
-                    exec ledger "$@"
-                fi
-                ;;
-        esac
-      '';
     });
   };
 }
