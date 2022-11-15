@@ -173,9 +173,9 @@
       "rclone@home-somasis-mnt-gdrive-personal" = {
         Unit = {
           Description = ''Mount rclone remote "gdrive-personal:" at ${config.home.homeDirectory}/mnt/gdrive/personal'';
-          PartOf = [ "rclone-gdrive.target" ];
+          PartOf = [ "gdrive.target" ];
         };
-        Install.WantedBy = [ "rclone-gdrive.target" ];
+        Install.WantedBy = [ "gdrive.target" ];
 
         Service = {
           Type = "notify";
@@ -190,9 +190,9 @@
       "rclone@home-somasis-mnt-gdrive-appstate" = {
         Unit = {
           Description = ''Mount rclone remote "gdrive-appstate:" at ${config.home.homeDirectory}/mnt/gdrive/appstate'';
-          PartOf = [ "rclone-gdrive.target" ];
+          PartOf = [ "gdrive.target" ];
         };
-        Install.WantedBy = [ "rclone-gdrive.target" ];
+        Install.WantedBy = [ "gdrive.target" ];
 
         Service = {
           Type = "notify";
@@ -207,9 +207,9 @@
       "rclone@home-somasis-mnt-gphotos-personal" = {
         Unit = {
           Description = ''Mount rclone remote "gphotos-personal:" at ${config.home.homeDirectory}/mnt/gphotos/personal'';
-          PartOf = [ "rclone-gphotos.target" ];
+          PartOf = [ "gphotos.target" ];
         };
-        Install.WantedBy = [ "rclone-gphotos.target" ];
+        Install.WantedBy = [ "gphotos.target" ];
 
         Service = {
           Type = "notify";
