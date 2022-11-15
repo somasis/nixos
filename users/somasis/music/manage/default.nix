@@ -268,7 +268,7 @@ let
 
   beets = (pkgs.beets.override {
     pluginOverrides = {
-      beetcamp = { enable = true; propagatedBuildInputs = [ beetcamp ]; };
+      # beetcamp = { enable = true; propagatedBuildInputs = [ beetcamp ]; };
       extrafiles = { enable = true; propagatedBuildInputs = [ pkgs.beetsPackages.extrafiles ]; };
       fetchartist = { enable = true; propagatedBuildInputs = [ beets-fetchartist ]; };
       noimport = { enable = true; propagatedBuildInputs = [ beets-noimport ]; };

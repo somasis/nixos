@@ -13,8 +13,8 @@
       # Check for corruption during importing
       "badfiles"
 
-      # Allow for using bandcamp as an autotagger source
-      "bandcamp"
+      # # Allow for using bandcamp as an autotagger source
+      # "bandcamp"
 
       # Fetch release artwork
       "fetchart"
