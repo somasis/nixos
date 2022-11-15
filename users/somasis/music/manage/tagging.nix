@@ -143,6 +143,8 @@
       ];
     };
 
+    importadded.preserve_mtimes = true;
+
     lastgenre = {
       count = 5;
       prefer_specific = true;
