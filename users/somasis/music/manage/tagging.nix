@@ -51,6 +51,9 @@
 
       # Add custom fields
       "types"
+
+      # Remove particular fields from imported files (used for ensuring no embedded art)
+      "zero"
     ];
 
     artist_credit = true;
@@ -178,6 +181,13 @@
     types = {
       rating = "float";
       sample = "bool";
+    };
+
+    # Ensure there is never art left embedded in imported files.
+    zero = {
+      auto = true;
+      fields = [ "images" ];
+      update_database = true;
     };
   };
 }
