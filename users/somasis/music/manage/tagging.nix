@@ -88,8 +88,11 @@
         "sample:true" = "_sample/${default}";
       };
 
-    # Don't rate media that differs from our guess highly
-    match.max_rec.media = "medium";
+    match.max_rec = {
+      # Don't rate media that differs from our guess with anymore than medium confidence
+      media = "medium";
+      unmatched_tracks = "medium";
+    };
 
     musicbrainz = {
       genres = true;
