@@ -23,7 +23,10 @@
     lollypops.inputs.nixpkgs.follows = "nixos";
 
     impermanence.url = "github:nix-community/impermanence";
-    disko.url = "github:nix-community/disko";
+    disko = {
+      url = "github:nix-community/disko";
+      inputs.nixpkgs.follows = "nixos";
+    };
 
     homeManager.url = "github:nix-community/home-manager";
     homeManager.inputs.nixpkgs.follows = "nixos";
@@ -181,6 +184,8 @@
           nixosHardware.nixosModules.framework
 
           ./hosts/ilo.somas.is
+
+          disko.nixosModules.disko
 
           homeManager.nixosModules.home-manager
           {
