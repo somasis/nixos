@@ -17,16 +17,18 @@
       set-option -g history-limit 20000
 
       ## Send xterm(1) focus events to windows running under the server.
-      set-option -g focus-events on
+      set-option -s focus-events on
+      set-option -s extended-keys on
 
-      ## Inform tmux that alacritty can do 24-bit color
-      set -ga terminal-overrides ',alacritty:Tc'
+      ## Inform tmux of alacritty's features
+      set-option -sa terminal-overrides 'alacritty:Tc'
+      set-option -sa terminal-features 'alacritty:extKeys'
 
       ## Set terminal (client) titles appropriately.
       set-option -g set-titles on
       set-option -g set-titles-string "tmux: #T"
 
-      ## Don't make Esc usage have a delay (which is annoying when using kak(1)).
+      ## Don't make Esc usage have a long delay (which is annoying when using kak(1)).
       set-option -g escape-time 25
 
       # Style

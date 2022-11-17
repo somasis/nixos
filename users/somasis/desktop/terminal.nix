@@ -88,7 +88,11 @@ in
           };
         };
 
-        scrolling.multiplier = 2;
+        scrolling = {
+          multiplier = 2;
+          history = 20000;
+        };
+
         selections.save_to_clipboard = true;
       };
   };
