@@ -35,51 +35,62 @@ in
   programs.alacritty = {
     enable = true;
 
-    settings = {
-      cursor = {
-        style = {
-          shape = "Beam";
-          blinking = "On";
+    settings =
+      let
+        alacrittyExtendedKeys = (pkgs.fetchFromGitHub {
+          owner = "alexherbo2";
+          repo = "alacritty-extended-keys";
+          rev = "acbdcb765550b8d52eb77a5e47f5d2a0ff7a2337";
+          hash = "sha256-KKzJWZ1PEKHVl7vBiRuZg8TyhE0nWohDNWxkP53amZ8=";
+        });
+      in
+      {
+        include = [ "${alacrittyExtendedKeys}/keys.yml" ];
+
+        cursor = {
+          style = {
+            shape = "Beam";
+            blinking = "On";
+          };
+          unfocused_hollow = false;
+          thickness = 0.25;
+          blink_interval = 750;
         };
-        unfocused_hollow = false;
-        thickness = 0.25;
-        blink_interval = 750;
+
+        font.size = 10.0;
+
+        colors = {
+          primary = {
+            foreground = "${config.xresources.properties."*foreground"}";
+            background = "${config.xresources.properties."*background"}";
+          };
+
+          normal = {
+            black = "${config.xresources.properties."*color0"}";
+            red = "${config.xresources.properties."*color1"}";
+            green = "${config.xresources.properties."*color2"}";
+            yellow = "${config.xresources.properties."*color3"}";
+            blue = "${config.xresources.properties."*color4"}";
+            magenta = "${config.xresources.properties."*color5"}";
+            cyan = "${config.xresources.properties."*color6"}";
+            white = "${config.xresources.properties."*color7"}";
+          };
+
+          bright = {
+            black = "${config.xresources.properties."*color8"}";
+            red = "${config.xresources.properties."*color9"}";
+            green = "${config.xresources.properties."*color10"}";
+            yellow = "${config.xresources.properties."*color11"}";
+            blue = "${config.xresources.properties."*color12"}";
+            magenta = "${config.xresources.properties."*color13"}";
+            cyan = "${config.xresources.properties."*color14"}";
+            white = "${config.xresources.properties."*color15"}";
+          };
+        };
+
+        scrolling.multiplier = 2;
+        selections.save_to_clipboard = true;
       };
-
-      font.size = 10.0;
-
-      colors = {
-        primary = {
-          foreground = "${config.xresources.properties."*foreground"}";
-          background = "${config.xresources.properties."*background"}";
-        };
-
-        normal = {
-          black = "${config.xresources.properties."*color0"}";
-          red = "${config.xresources.properties."*color1"}";
-          green = "${config.xresources.properties."*color2"}";
-          yellow = "${config.xresources.properties."*color3"}";
-          blue = "${config.xresources.properties."*color4"}";
-          magenta = "${config.xresources.properties."*color5"}";
-          cyan = "${config.xresources.properties."*color6"}";
-          white = "${config.xresources.properties."*color7"}";
-        };
-
-        bright = {
-          black = "${config.xresources.properties."*color8"}";
-          red = "${config.xresources.properties."*color9"}";
-          green = "${config.xresources.properties."*color10"}";
-          yellow = "${config.xresources.properties."*color11"}";
-          blue = "${config.xresources.properties."*color12"}";
-          magenta = "${config.xresources.properties."*color13"}";
-          cyan = "${config.xresources.properties."*color14"}";
-          white = "${config.xresources.properties."*color15"}";
-        };
-      };
-
-      scrolling.multiplier = 2;
-      selections.save_to_clipboard = true;
-    };
   };
 
   home.packages = [
