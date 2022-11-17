@@ -128,67 +128,70 @@ in
           '
         '';
 
-        generateNews = pkgs.writeShellApplication {
-          name = "generate-news";
+        generateHomeManagerNews = pkgs.writeShellApplication {
+          name = "generate-home-manager-news";
 
           runtimeInputs = [
             config.programs.jq.package
-            pkgs.coreutils
-            pkgs.pandoc
+            pkgs.yq
           ];
 
-          text = ''
-            umask 0077
+          text =
+            let
+              jqFilterNews = (pkgs.writeScript "jq-filter-news" ''
+                #!${config.programs.jq.package}/bin/jq -f
+                map(select(.condition == true))
+                    | sort_by(.time)
+                    | map(
+                        . + {
+                        # Generate titles for feed items
+                        #   1. Strip any ending punctuation (for when it's a short message)
+                        #   2. Crudely un-hardwrap the first line of the message
+                        #   3. Keep only the first line of the message
+                        #   4. Remove any remaining ending punctuation
+                          title: (
+                              .message
+                                  | sub("\\.?\n$|:\n.*"; ""; "p")
+                                  | sub(
+                                      "(?<pre>[^\\s]+)\n(?<suf>[^\n]+).*";
+                                      "\(.pre) \(.suf)";
+                                      "pg"
+                                  )
+                                  | rtrimstr(".")
+                          )
+                        }
+                    )
+                    | map_values(.id = (.time + .message | @base64))
+                    # Now, shape our input in terms that yq can output as xml, and that
+                    | {
+                        feed: {
+                          "@xmlns": "http://www.w3.org/2005/Atom",
+                          title: "home-manager",
+                          updated: (map(.time) | sort | last),
+                          entry: map(
+                            {
+                              id,
+                              updated: .time,
+                              title: { "@text": "text", "#text": .title },
+                              content: { "@type": "text/plain", "#text": .message }
+                            }
+                          )
+                        }
+                    }
+              '');
+            in
+            ''
+              umask 0077
 
-            # shellcheck disable=SC2016
-            # don't lint the json declaration
-            ${lib.toShellVar "json" (builtins.toJSON config.news.entries)}
+              # don't lint the json declaration
+              # shellcheck disable=all
+              {
+                  ${lib.toShellVar "json" (builtins.toJSON config.news.entries)}
+                  ${lib.toShellVar "jqFilterNews" jqFilterNews}
+              }
 
-            cat <<EOF
-            <?xml version="1.0" encoding="utf-8"?>
-            <feed xmlns="http://www.w3.org/2005/Atom">
-            <title>home-manager</title>
-            EOF
-
-            # Convert to TSV (from <https://stackoverflow.com/a/51929863>)
-            <<< "$json" \
-                jq -r '
-                    [ [ paths(scalars)[1:] | tojson ] | unique[] | fromjson ] as $p
-                        | [
-                            (
-                                $p[]
-                                | map(if type=="number" then "[\(.)]" else ".\(.)" end)
-                                | join("")
-                            )
-                        ],
-                        (.[] | [getpath($p[])]) | @tsv
-                ' \
-                | tail -n +2 \
-                | while IFS=$(printf '\t') read -r condition id content date; do
-                    # shellcheck disable=SC2001
-                    content=$(sed 's/\\t/\t/g; s/\\n/\n/g' <<< "''${content}")
-                    title=$(pandoc -f markdown-raw_html+smart -t plain --wrap=none <<< "''${content}" | sed 's/[\.:]$//' | head -n1 | tr -d '\n' | base64 -w0)
-                    content=$(pandoc -f markdown-raw_html+smart -t html --wrap=none <<< "''${content}" | base64 -w0)
-
-                    printf '%s\t%s\t%s\t%s\t%s\n' "$title" "$date" "$condition" "$id" "$content"
-                done \
-                | sort -t $'\t' -k2 \
-                | jq -rRs '
-                    split("\n")[:-1]
-                        | map(
-                            [ split("\t") ][]
-                                | { title: (.[0] | @base64d), date: .[1], condition: .[2], id: .[3], content: (.[4] | @base64d) }
-                        )
-                ' \
-                | jq -r '
-                    sort_by(.date)
-                        | map("<entry><title type=\"html\">\(.title)</title><id>\(.id)</id><updated>\(.date)</updated><content type=\"html\">\(.content | @html)</content></entry>")[]
-                '
-
-            cat <<EOF
-            </feed>
-            EOF
-          '';
+              jq -f "$jqFilterNews" <<<"$json" | yq --xml-output | xq --xml-output --xml-dtd
+            '';
         };
       in
       [
@@ -443,7 +446,7 @@ in
 
         # System
         { url = "https://nixos.org/blog/announcements-rss.xml"; tags = [ "computer" "NixOS" ]; }
-        { url = "exec:${generateNews}/bin/generate-news"; tags = [ "computer" "NixOS" ]; }
+        { url = "exec:${generateHomeManagerNews}/bin/generate-home-manager-news"; tags = [ "computer" "NixOS" ]; }
 
         # YouTube
         {
