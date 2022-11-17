@@ -83,10 +83,10 @@
       let stem = "$album%if{$year, ($year)}/$track - $artist - $title"; in
       rec {
         default = "$albumartist - ${stem}";
-        "comp:true" = "_compilation/${stem}";
-        "albumtype:soundtrack" = "_soundtrack/${stem}";
+        "comp" = "_compilation/${stem}";
+        "singleton" = "_single/$artist/$title%if{$year, ($year)}";
 
-        "singleton:true" = "_single/$artist/$title%if{$year, ($year)}";
+        "albumtype:soundtrack" = "_soundtrack/${stem}";
 
         "sample:true" = "_sample/${default}";
       };
