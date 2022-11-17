@@ -590,18 +590,21 @@ in
         : "''${QUTE_FIFO:?}"
         : "''${QUTE_HTML:?}"
 
-        <"$QUTE_HTML" \
-            ${pkgs.sfeed}/bin/sfeed_web "$1" \
-            | dmenu -p "qutebrowser [feeds]:" \
+        feeds=$(${pkgs.sfeed}/bin/sfeed_web "$1" <"$QUTE_HTML")
+
+        [ -n "$feeds" ] ||
+              printf 'message-warning "%s"\n' \
+                  "feeds: No feeds were found." \
+                  > "''${QUTE_FIFO}"
+
+        dmenu -p "qutebrowser [feeds]:" \
             | cut -f1 \
             | ${pkgs.xclip}/bin/xclip -i -selection clipboard
 
-        ${pkgs.libnotify}/bin/notify-send \
-            -a qute-feeds \
-            -i application-rss+xml \
-            -u low \
-            qute-feeds \
-            "Copied feed to clipboard."
+        [ -n "$feeds" ] ||
+              printf 'message-info "%s"\n' \
+                  "feeds: Copied feed to clipboard." \
+                  > "''${QUTE_FIFO}"
       '';
     in
     "spawn -u ${quteFeeds} {url:domain}";
