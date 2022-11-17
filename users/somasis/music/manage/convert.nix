@@ -11,7 +11,7 @@
 
       copy_album_art = true;
       embed = false;
-      album_art_maxwidth = "1024";
+      album_art_maxwidth = 2048;
 
       dest = "${music.lossy}";
 
