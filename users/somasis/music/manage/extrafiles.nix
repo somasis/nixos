@@ -8,6 +8,7 @@
         origin = [
           config.programs.beets.settings.originquery.origin_file
           "*.[Aa][Cc][Cc][Uu][Rr][Ii][Pp]"
+          "*.[Cc][Uu][Ee]"
           "*.[Ff][Ff][Pp]"
           "*.[Ll][Oo][Gg]"
           "*.[Mm][Dd]5"
@@ -15,17 +16,15 @@
         ];
 
         art = [
-          "*[Aa]rt*/"
-          "*[Ss]can*/"
+          "[Aa]rt*/*"
+          "[Ss]can*/*"
         ];
 
         misc = [
-          "*.[Cc][Uu][Ee]"
-          "*.[Tt][Oo][Cc]"
-
           "*.[Hh][Tt][Mm][Ll]"
           "*.[Pp][Dd][Ff]"
           "*.[Rr][Tt][Ff]"
+          "*.[Tt][Oo][Cc]"
           "*.[Tt][Xx][Tt]"
         ];
       };
