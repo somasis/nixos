@@ -19,8 +19,8 @@
       ## Send xterm(1) focus events to windows running under the server.
       set-option -g focus-events on
 
-      ## Indicate modifiers like shift/alt/ctrl using xterm(1) sequences.
-      set-option -g xterm-keys on
+      ## Inform tmux that alacritty can do 24-bit color
+      set -ga terminal-overrides ',alacritty:Tc'
 
       ## Set terminal (client) titles appropriately.
       set-option -g set-titles on
