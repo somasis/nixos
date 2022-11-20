@@ -24,4 +24,7 @@
       });
     '';
   };
+
+  # Always automatically recover from kernel panics by rebooting in 60 seconds
+  boot.kernelParams = [ "panic=60" ];
 }
