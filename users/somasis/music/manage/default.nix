@@ -408,5 +408,5 @@ in
   };
 
   programs.bash.shellAliases."beet-import-all" = "beet import --flat --timid ${lib.escapeShellArg music.source}/*/*";
-  programs.qutebrowser.searchEngines."!beets" = "https://beets.readthedocs.io/en/${config.programs.beets.package.src.rev}/search.html?q={}";
+  programs.qutebrowser.searchEngines."!beets" = "file:///${config.programs.beets.package.doc}/share/doc/beets/html/search.html?q={}";
 }
