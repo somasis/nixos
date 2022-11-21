@@ -325,7 +325,7 @@ in
           pkgs.systemd
         ];
 
-        postInstall = oldAttrs.postInstall + ''
+        postInstall = oldAttrs.postInstall or "" + ''
           mv $out/bin/beet $out/bin/.beet-wrapped
 
           touch $out/bin/beet
