@@ -32,7 +32,7 @@ let
         #   hash = "sha256-uvfpTFt92mp4msm06Y/1Ynwx6+DiE+bR8O2dntTzj9I=";
         # };
 
-        jar = "${placeholder "out"}/lib/bandcamp-collection-downloader/bandcamp-collection-downloader.jar";
+        jar = "${placeholder "out"}/lib/bandcamp-collection-downloader.jar";
 
         buildPhase = ''
           install -D -m 0755 $src $jar
