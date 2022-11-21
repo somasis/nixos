@@ -11,7 +11,7 @@
   services.picom = {
     enable = true;
 
-    backend = "xr_glx_hybrid";
+    backend = "xrender";
     vSync = true;
 
     shadow = false;
