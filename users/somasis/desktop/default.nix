@@ -1,4 +1,9 @@
-{ inputs, pkgs, config, lib, ... }: {
+{ inputs
+, pkgs
+, config
+, lib
+, ...
+}: {
   imports = [
     # ./cinnamon.nix
     # ./gnome.nix
@@ -18,6 +23,7 @@
     ./autorandr.nix
     ./bspwm.nix
     ./clipboard.nix
+    ./compositing.nix
     ./dates.nix
     ./diary.nix
     ./discord.nix
