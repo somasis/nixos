@@ -113,7 +113,6 @@
     # Prevent any aliases from being set by default.
     shellAliases = lib.mkForce { };
 
-    extraOutputsToInstall = [ "doc" "devdoc" ];
     systemPackages = [
       # Necessary for `nixos-rebuild`'s git stuff
       pkgs.git

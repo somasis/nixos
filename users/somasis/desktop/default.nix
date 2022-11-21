@@ -61,6 +61,8 @@
     ./wine.nix
   ];
 
+  home.extraOutputsToInstall = [ "doc" "devdoc" "man" ];
+
   home.packages = [
     (pkgs.stdenv.mkDerivation rec {
       pname = "execshell";
