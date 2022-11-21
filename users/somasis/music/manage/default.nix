@@ -321,6 +321,7 @@ in
         runtimeInputs = oldAttrs.runtimeInputs or [ ] ++ [
           pass-beets
           pkgs.coreutils
+          pkgs.utillinux
           pkgs.systemd
         ];
 
@@ -336,12 +337,11 @@ in
           set -o pipefail
 
           ${lib.toShellVar "PATH" (lib.makeBinPath runtimeInputs)}":${placeholder "out"}:$PATH"
+          directory=$(readlink -m ${lib.escapeShellArg config.programs.beets.settings.directory})
+          BEETS_LOCK="$directory/beets.lock"
 
           # Mount any required mount units
-          ${lib.toShellVar "directory" config.programs.beets.settings.directory}
-          directory=$(readlink -m "$directory")
           directory_escaped=$(systemd-escape -p "$directory")
-
           user_mount_units=$(systemctl --user --plain --full --all --no-legend list-units -t mount | cut -d' ' -f1)
 
           # Work through the parts of the escaped path and find the longest
@@ -366,11 +366,21 @@ in
 
           [[ -n "$unit" ]] && systemctl --user start "$unit"
 
+          # Maintain a cross-device lock, so that we don't conflict if the directory is
+          # over a network device of some sort (sshfs)
+          [[ -e "$BEETS_LOCK" ]] && printf 'Lock "%s" is currently held, sleeping until free...\n' "$BEETS_LOCK" >&2
+          while [[ -e "$BEETS_LOCK" ]]; do
+              sleep 5
+          done
+          touch "$BEETS_LOCK"
+
+          # Trap Ctrl-C, since it seems really problematic for database health
           e=0
           trap : INT
+          trap 'rm -f "$BEETS_LOCK"' EXIT
 
           # Feed pass-beets info via a FIFO so it never hits the disk.
-          (exec -a beet ${placeholder "out"}/bin/.beet-wrapped -c <(pass-beets) "$@") || e=$?
+          ${placeholder "out"}/bin/.beet-wrapped -c <(pass-beets) "$@" || e=$?
 
           trap - INT
           exit $?
