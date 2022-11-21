@@ -314,76 +314,89 @@ in
   programs.beets = {
     enable = true;
     package =
-      # Provide a wrapper for the actual `beet` program, so that we can perform some
-      # pre-command-initialization actions.
-      # <https://nixos.wiki/wiki/Nix_Cookbook#Wrapping_packages>
-      (pkgs.runCommand "beets-final" { } ''
-        mkdir $out
-        ln -s ${beets}/* $out
-        rm $out/bin
+      (beets.overrideAttrs (oldAttrs: rec {
+        # Provide a wrapper for the actual `beet` program, so that we can perform some
+        # pre-command-initialization actions.
+        # <https://nixos.wiki/wiki/Nix_Cookbook#Wrapping_packages>
+        runtimeInputs = oldAttrs.runtimeInputs or [ ] ++ [
+          pass-beets
+          pkgs.coreutils
+          pkgs.systemd
+        ];
 
-        mkdir $out/bin
-        touch $out/bin/beet
-        chmod +x $out/bin/beet
+        postInstall = oldAttrs.postInstall + ''
+          mv $out/bin/beet $out/bin/.beet-wrapped
 
-        cat > $out/bin/beet <<'EOF'
-        export ${lib.toShellVar "PATH" (lib.makeBinPath [ beets pass-beets pkgs.coreutils pkgs.systemd ])}":$PATH"
+          touch $out/bin/beet
+          chmod +x $out/bin/beet
 
-        # Mount any required mount units
-        ${lib.toShellVar "directory" config.programs.beets.settings.directory}
-        directory=$(readlink -m "$directory")
-        directory_escaped=$(systemd-escape -p "$directory")
+          cat > $out/bin/beet <<'EOF'
+          #! ${pkgs.runtimeShell}
+          set -eu
+          set -o pipefail
 
-        user_mount_units=$(systemctl --user --plain --full --all --no-legend list-units -t mount | cut -d' ' -f1)
+          ${lib.toShellVar "PATH" (lib.makeBinPath runtimeInputs)}":${placeholder "out"}:$PATH"
 
-        # Work through the parts of the escaped path and find the longest
-        # unit name prefix match.
-        # 1. Split apart the escaped path
-        # 2. Accumulate parts for each run of the `for` loop
-        # 3. Read in the list of user mount units
-        # The longest matching one will be the final line.
-        unit=$(
-            directory_acc=
-            IFS=-
-            for directory_part in $directory_escaped; do
-                directory_acc="''${directory_acc:+$directory_acc-}$directory_part"
+          # Mount any required mount units
+          ${lib.toShellVar "directory" config.programs.beets.settings.directory}
+          directory=$(readlink -m "$directory")
+          directory_escaped=$(systemd-escape -p "$directory")
 
-                while IFS="" read -r unit; do
-                    case "$unit" in
-                        "$directory_acc"*.mount) printf '%s\n' "$unit"; break ;;
-                    esac
-                done <<< "$user_mount_units"
-            done | tail -n1
-        )
+          user_mount_units=$(systemctl --user --plain --full --all --no-legend list-units -t mount | cut -d' ' -f1)
 
-        [[ -n "$unit" ]] && systemctl --user start "$unit"
+          # Work through the parts of the escaped path and find the longest
+          # unit name prefix match.
+          # 1. Split apart the escaped path
+          # 2. Accumulate parts for each run of the `for` loop
+          # 3. Read in the list of user mount units
+          # The longest matching one will be the final line.
+          unit=$(
+              directory_acc=
+              IFS=-
+              for directory_part in $directory_escaped; do
+                  directory_acc="''${directory_acc:+$directory_acc-}$directory_part"
 
-        e=0
-        trap : INT
+                  while IFS="" read -r unit; do
+                      case "$unit" in
+                          "$directory_acc"*.mount) printf '%s\n' "$unit"; break ;;
+                      esac
+                  done <<< "$user_mount_units"
+              done | tail -n1
+          )
 
-        # Feed pass-beets info via a FIFO so it never hits the disk.
-        beet -c <(pass-beets) "$@" || e=$?
+          [[ -n "$unit" ]] && systemctl --user start "$unit"
 
-        trap - INT
-        exit $?
-        EOF
-      '');
+          e=0
+          trap : INT
 
-    settings = let inherit music; in rec {
-      directory = "${music.lossless}";
-      library = "${music.lossless}/beets.db";
+          # Feed pass-beets info via a FIFO so it never hits the disk.
+          (exec -a beet ${placeholder "out"}/bin/.beet-wrapped -c <(pass-beets) "$@") || e=$?
 
-      # Default `beet list` options
-      sort_case_insensitive = false;
-      sort_item = "artist+ date+ album+ disc+ track+";
-      sort_album = "artist+ date+ album+ disc+ track+";
+          trap - INT
+          exit $?
+          EOF
+        '';
+      })
+      );
 
-      plugins = [ "noimport" ]
-        ++ lib.optional config.services.mopidy.enable "mpdupdate";
-    }
-    // lib.optionalAttrs config.services.mopidy.enable { mpd.host = config.services.mopidy.settings.mpd.hostname; }
+    settings =
+      let inherit music;
+      in {
+        directory = "${music.lossless}";
+        library = "${music.lossless}/beets.db";
+
+        # Default `beet list` options
+        sort_case_insensitive = false;
+        sort_item = "artist+ date+ album+ disc+ track+";
+        sort_album = "artist+ date+ album+ disc+ track+";
+
+        plugins = [ "noimport" ]
+          ++ lib.optional config.services.mopidy.enable "mpdupdate";
+      }
+      // lib.optionalAttrs config.services.mopidy.enable { mpd.host = config.services.mopidy.settings.mpd.hostname; }
     ;
   };
 
   programs.bash.shellAliases."beet-import-all" = "beet import --flat --timid ${lib.escapeShellArg music.source}/*/*";
+  programs.qutebrowser.searchEngines."!beets" = "https://beets.readthedocs.io/en/${config.programs.beets.package.src.rev}/search.html?q={}";
 }
