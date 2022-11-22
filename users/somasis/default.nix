@@ -105,22 +105,19 @@
 
         text = ''
           ${lib.optionalString nixosConfig.networking.networkmanager.enable "nm-online -t 60 || exit 7"}
-
-          exec curl ${lib.escapeShellArgs [
-            "--disable"
-            "--silent"
-            "--show-error"
-            "--globoff"
-            "--disallow-username-in-url"
-            "--connect-timeout" 60
-            "--max-time" 60
-            "--retry" 10
-            "--limit-rate" "512K"
-            "--parallel"
-            "--parallel-max" 4
-            userAgent
-            proxy
-          ]}
+          exec curl \
+              --disable \
+              --silent \
+              --show-error \
+              --globoff \
+              --disallow-username-in-url \
+              --connect-timeout 60 \
+              --max-time 60 \
+              --retry 10 \
+              --limit-rate 512K \
+              --parallel \
+              --parallel-max 4 \
+              ${lib.escapeShellArgs [ userAgent proxy ]} "$@"
         '';
       }
     )
