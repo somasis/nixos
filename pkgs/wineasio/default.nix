@@ -55,9 +55,6 @@ multiStdenv.mkDerivation rec {
   '';
 
   installPhase = ''
-    ls -CFl
-    ls -CFl build*
-
     # Install 64-bit drivers
     install -D -m755 build64/wineasio.dll    $out/lib/wine/x86_64-windows/wineasio.dll
     install -D -m755 build64/wineasio.dll.so $out/lib/wine/x86_64-unix/wineasio.dll.so
