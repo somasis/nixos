@@ -130,74 +130,6 @@ let
     };
   });
 
-  # HACK: Workaround transmission-remote-gtk not being able to run commands to
-  #       obtain the authentication information by generating a configuration file.
-  pass-transmission-remote-gtk = (pkgs.writeShellApplication {
-    name = "pass-transmission-remote-gtk";
-    runtimeInputs = [
-      config.programs.jq.package
-      config.programs.password-store.package
-      pkgs.coreutils
-      pkgs.moreutils
-    ];
-
-    text = ''
-      umask 0077
-
-      : "''${XDG_CONFIG_HOME:=$HOME/.config}"
-      : "''${XDG_RUNTIME_DIR:=/run/user/$(id -un)}"
-
-      runtime="$XDG_RUNTIME_DIR"/pass-transmission-remote-gtk
-      [ -d "$runtime" ] || mkdir -m 700 "$runtime"
-
-      rm -f "$runtime"/config.json
-      cat ${configFile} >"$runtime"/config.json
-
-      while [ $# -ge 2 ]; do
-          profile="$1"; shift
-          entry="$1"; shift
-
-          pass "$entry" \
-              | jq -R '
-                  {
-                      profiles: [
-                          {
-                              "profile-name": $profile,
-                              username: ($entry | split("/")[-1]),
-                              password: .
-                          }
-                      ]
-                  }' \
-                  --arg profile "$profile" \
-                  --arg entry "$entry" \
-              | jq -s '
-                  .[1].profiles[] as $profile
-                      | $profile."profile-name" as $wantedProfile
-                      | (
-                          .[0]
-                              | .profiles
-                              |= map(
-                                  select(."profile-name" == $wantedProfile)
-                                      + $profile
-                              )
-                      )
-                  ' \
-                  "$runtime"/config.json \
-                  - \
-                  > "$runtime"/config.json.tmp
-
-          mv "$runtime"/config.json.tmp "$runtime"/config.json
-      done
-
-      [ -d "$XDG_CONFIG_HOME"/transmission-remote-gtk ] \
-          || mkdir -m 700 "$XDG_CONFIG_HOME"/transmission-remote-gtk
-
-      chmod u-w "$runtime"/config.json
-
-      ln -sf "$runtime"/config.json "$XDG_CONFIG_HOME"/transmission-remote-gtk/config.json
-    '';
-  });
-
   tpull = (pkgs.writeShellApplication {
     name = "tpull";
 
@@ -391,9 +323,71 @@ in
 {
   home.packages = [
     pkgs.transmission
-    pkgs.transmission-remote-gtk
 
-    pass-transmission-remote-gtk
+    (pkgs.symlinkJoin {
+      name = "transmission-remote-gtk-with-pass";
+
+      paths = [ pkgs.transmission-remote-gtk ];
+
+      postBuild = ''
+        mv $out/bin/transmission-remote-gtk $out/bin/.transmission-remote-gtk-wrapped
+
+        touch $out/bin/transmission-remote-gtk
+        chmod +x $out/bin/transmission-remote-gtk
+
+        cat > $out/bin/transmission-remote-gtk <<'EOF'
+        #! ${pkgs.runtimeShell}
+        set -eu
+        set -o pipefail
+
+        mkdir -m 700 -p "''${XDG_CONFIG_HOME:=$HOME/.config}"/transmission-remote-gtk
+        rm -f "$XDG_CONFIG_HOME"/transmission-remote-gtk/config.json
+        mkfifo "$XDG_CONFIG_HOME"/transmission-remote-gtk/config.json
+
+        (
+            config=
+            profile="genesis.whatbox.ca"
+            entry="www/whatbox.ca/somasis"
+
+            ${config.programs.password-store.package}/bin/pass "$entry" \
+                | ${config.programs.jq.package}/bin/jq -R \
+                      --arg profile "$profile" \
+                      --arg entry "$entry" \
+                      '
+                        {
+                          profiles: [
+                            {
+                              "profile-name": $profile,
+                              "username": ($entry | split("/")[-1]),
+                              "password": .
+                            }
+                          ]
+                        }
+                      ' \
+                | ${config.programs.jq.package}/bin/jq -s '
+                    .[1].profiles[] as $profile
+                      | $profile."profile-name" as $wantedProfile
+                      | (
+                        .[0]
+                          | .profiles
+                          |= map(
+                            select(."profile-name" == $wantedProfile)
+                              + $profile
+                          )
+                        )
+                    ' \
+                    ${configFile} \
+                    -
+        ) > "$XDG_CONFIG_HOME"/transmission-remote-gtk/config.json &
+
+        ${pkgs.rwc}/bin/rwc -p "$XDG_CONFIG_HOME"/transmission-remote-gtk/config.json \
+            | ${pkgs.xe}/bin/xe -s 'rm -f "$XDG_CONFIG_HOME"/transmission-remote-gtk/config.json' &
+
+        (exec -a transmission-remote-gtk ${placeholder "out"}/bin/.transmission-remote-gtk-wrapped "$@")
+        kill $(jobs -p)
+        EOF
+      '';
+    })
 
     tpull
     topen
@@ -403,27 +397,4 @@ in
     "application/x-bittorrent" = "io.github.TransmissionRemoteGtk.desktop";
     "x-scheme-handler/magnet" = "io.github.TransmissionRemoteGtk.desktop";
   };
-
-  systemd.user.services."pass-transmission-remote-gtk" = {
-    Unit = {
-      Description = "Authenticate `transmission-remote-gtk` using `pass`";
-      PartOf = [ "default.target" ];
-
-      After = [ "gpg-agent.service" ];
-    };
-    Install.WantedBy = [ "default.target" ];
-
-    Service = {
-      Type = "oneshot";
-      RemainAfterExit = true;
-
-      ExecStart = [
-        "${pass-transmission-remote-gtk}/bin/pass-transmission-remote-gtk genesis.whatbox.ca www/whatbox.ca/somasis"
-      ];
-      ExecStop = [
-        "${pkgs.coreutils}/bin/rm -rf %t/pass-transmission-remote-gtk"
-      ];
-    };
-  };
 }
-
