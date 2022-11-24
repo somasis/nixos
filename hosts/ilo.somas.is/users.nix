@@ -9,6 +9,7 @@
         isNormalUser = true;
         description = "Kylie McClain";
         uid = 1000;
+
         extraGroups = [
           # ./security.nix: doas, polkit
           # ./nix.nix: trusted-users
@@ -25,7 +26,6 @@
           "input"
         ];
 
-        createHome = true;
         hashedPassword = "$6$VfKdDqJkx4JrErSl$eJhjdLheyvqDO0hbWE87WKfr6q7qA6pvtmK.EnP.s5wPL7IBZOl1n6YFyrZdpG98HovE7D6X55B0.6c3NYj600";
 
         openssh.authorizedKeys.keys = [
