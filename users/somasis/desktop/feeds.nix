@@ -195,6 +195,19 @@ in
         };
       in
       [
+        # Academia
+        {
+          url = "https://www.cambridge.org/core/rss/product/id/F3D70AB528A9726BC052F1AEB771A611";
+          title = "Hypatia";
+          tags = [ "academia" "philosophy" ];
+        }
+        {
+          url = "https://feministkilljoys.com/feed";
+          title = "feministkilljoys";
+          tags = [ "academia" "philosophy" ];
+        }
+        # TODO: Does Duke University Press have a feed for Transgender Studies Quarterly?
+
         # Blogs
         {
           url = "https://leahneukirchen.org/blog/index.atom";
@@ -218,15 +231,7 @@ in
         }
         {
           url = "https://www.uninformativ.de/blog/feeds/en.atom";
-          tags = [ "blog" "computer" ];
-        }
-        {
-          url = "https://maxice8.github.io/rss.xml";
-          tags = [ "blog" "computer" ];
-        }
-        {
-          url = "https://waldon.blog/feed";
-          tags = [ "blog" "computer" ];
+          tags = [ "blog" "development" "computer" ];
         }
         {
           url = "https://dataswamp.org/~solene/rss.xml";
@@ -240,31 +245,14 @@ in
         {
           url = "https://flak.tedunangst.com/rss";
           title = "Ted Unangst: flak";
-          tags = [ "blog" "computer" "OpenBSD" ];
+          tags = [ "blog" "OpenBSD" ];
         }
         {
-          url = "https://apenwarr.ca/log/rss.php";
+          url = ''"exec:${generateReddit} \"oilshell\" \".is_self == false\""'';
+          title = "Oil Shell";
           tags = [ "blog" "computer" ];
         }
-        {
-          title = "Oil Shell";
-          url = ''"exec:${generateReddit} \"oilshell\" \".is_self == false\""'';
-          tags = [ "blog" "computer" "programming" ];
-        }
-        {
-          title = "Reddit: toki pona";
-          url = ''"exec:${generateReddit} \"tokipona+tokiponataso+mi_lon+sitelen_musi\""'';
-          tags = [ "reddit" "toki pona" ];
-        }
-        {
-          title = "Reddit: sitelen musi pi toki pona";
-          url = ''"exec:${generateReddit} \"mi_lon+sitelen_musi\""'';
-          tags = [ "reddit" "toki pona" ];
-        }
-        {
-          url = "https://one-button.org/feeds/articles.atom.xml";
-          tags = [ "blog" ];
-        }
+
         {
           url = "https://mforney.org/blog/atom.xml";
           tags = [ "blog" "computer" ];
@@ -282,21 +270,13 @@ in
           tags = [ "blog" "computer" ];
         }
         {
-          url = "http://john.ankarstrom.se/desktop/feed/";
-          tags = [ "blog" "computer" ];
-        }
-        {
-          url = "http://john.ankarstrom.se/articles.xml";
-          tags = [ "blog" "computer" ];
-        }
-        {
           url = "https://jcs.org/rss";
           tags = [ "blog" "computer" "OpenBSD" ];
         }
         {
           url = "https://hisham.hm/?x=feed:rss2&category=1";
           title = "hisham.hm";
-          tags = [ "blog" ];
+          tags = [ "blog" "computer" ];
         }
 
         # Tumblr
@@ -315,6 +295,17 @@ in
           url = "https://tilde.news/rss";
           tags = [ "aggregators" ];
         }
+        {
+          url = ''"exec:${generateReddit} \"tokipona+tokiponataso+mi_lon+sitelen_musi\""'';
+          title = "Reddit: toki pona";
+          tags = [ "reddit" "toki pona" ];
+        }
+        {
+          url = ''"exec:${generateReddit} \"mi_lon+sitelen_musi\""'';
+          title = "Reddit: sitelen musi pi toki pona";
+          tags = [ "reddit" "toki pona" ];
+        }
+
         {
           url = "https://discourse.nixos.org/c/links/12.rss";
           title = "NixOS Discourse: links";
@@ -422,7 +413,7 @@ in
         }
         {
           url = "https://osmand.net/rss.xml";
-          tags = [ "OpenStreetMap" ];
+          tags = [ "development" "OpenStreetMap" ];
         }
 
         # Comics
@@ -436,14 +427,6 @@ in
           tags = [ "comics" ];
         }
 
-        # Journals
-        {
-          url = "https://www.cambridge.org/core/rss/product/id/F3D70AB528A9726BC052F1AEB771A611";
-          title = "Hypatia";
-          tags = [ "journal" "philosophy" ];
-        }
-        # TODO: Does Duke University Press have a feed for Transgender Studies Quarterly?
-
         # System
         { url = "https://nixos.org/blog/announcements-rss.xml"; tags = [ "computer" "NixOS" ]; }
         { url = "exec:${generateHomeManagerNews}/bin/generate-home-manager-news"; tags = [ "computer" "NixOS" ]; }
@@ -455,23 +438,23 @@ in
           tags = [ "YouTube" "tech" ];
         }
         {
-          title = "YouTube: Road Guy Rob";
           url = "https://www.youtube.com/feeds/videos.xml?channel_id=UCqdUXv9yQiIhspWPYgp8_XA";
+          title = "YouTube: Road Guy Rob";
           tags = [ "YouTube" "urbanism" ];
         }
         {
-          title = "YouTube: brutalmoose";
           url = "https://www.youtube.com/feeds/videos.xml?channel_id=UC18ju52OET36bdewLRHzPdQ";
+          title = "YouTube: brutalmoose";
           tags = [ "YouTube" ];
         }
         {
-          title = "YouTube: Technology Connections";
           url = "https://www.youtube.com/feeds/videos.xml?channel_id=UCy0tKL1T7wFoYcxCe0xjN6Q";
+          title = "YouTube: Technology Connections";
           tags = [ "YouTube" "technology" ];
         }
         {
-          title = "YouTube: GeoWizard";
           url = "https://www.youtube.com/feeds/videos.xml?channel_id=UCW5OrUZ4SeUYkUg1XqcjFYA";
+          title = "YouTube: GeoWizard";
           tags = [ "YouTube" "geography" ];
         }
 
@@ -479,7 +462,7 @@ in
         {
           url = "https://feeds.redcircle.com/901407e0-53e9-4aa2-aa3d-509393d10783";
           title = "kalama sin";
-          tags = [ "podcast" "toki pona" ];
+          tags = [ "toki pona" "podcast" ];
         }
         {
           url = "https://jonathangabel.com/feed.xml";
@@ -497,7 +480,6 @@ in
           tags = [ "toki pona" "blog" "comics" ];
         }
         {
-          title = "GitHub: timeline";
           url =
             let
               generate = pkgs.writeShellScript "generate" ''
@@ -508,6 +490,7 @@ in
               '';
             in
             "exec:${generate}";
+          title = "GitHub: timeline";
           tags = [ "notification" ];
         }
         # {
@@ -528,7 +511,7 @@ in
         {
           url = "https://www.townofboone.net/RSSFeed.aspx?ModID=63&CID=All-0";
           title = "Town of Boone: alerts";
-          tags = [ "notification" ];
+          tags = [ "Boone, NC" "notification" ];
         }
         {
           url = "https://www.exploreboone.com/event/rss/";
