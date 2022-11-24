@@ -1,17 +1,20 @@
 { config
 , pkgs
+, nixosConfig
+, inputs
 , ...
 }:
-# let
-#   wineasio = pkgs.callPackage ../../pkgs/wineasio { };
-# in
+let
+  # wineasio = pkgs.callPackage ../../pkgs/wineasio { };
+  # flstudio = pkgs.callPackage ../../../pkgs/flstudio {
+  #   mkWindowsApp = inputs.erosanix.lib.${nixosConfig.nixpkgs.system}.mkWindowsApp;
+  #   wine = pkgs.wineWowPackages.stableFull;
+  # };
+in
 {
   home.packages = [
-    # Necessary for FL Studio
-    pkgs.wineWowPackages.stableFull
-    # pkgs.wineWowPackages.waylandFull
     pkgs.winetricks
-    # wineasio
+    pkgs.wineWowPackages.stableFull
   ];
 
   # Disable Wine's fixme messages.
@@ -29,5 +32,8 @@
   home.persistence."/persist${config.home.homeDirectory}".directories = [
     "etc/wine"
     "share/wine"
+
+    # "etc/mkWindowsApp"
+    # "share/flstudio"
   ];
 }
