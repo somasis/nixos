@@ -13,14 +13,8 @@
       # Check for corruption during importing
       "badfiles"
 
-      # # Allow for using bandcamp as an autotagger source
-      # "bandcamp"
-
       # Fetch release artwork
       "fetchart"
-
-      # Fetch artist artwork
-      "fetchartist"
 
       # Use filenames as hint for importer
       "fromfilename"
@@ -54,6 +48,10 @@
 
       # Remove particular fields from imported files (used for ensuring no embedded art)
       "zero"
+
+      # FIXME: broken plugins
+      # "bandcamp" # Allow for using bandcamp as an autotagger source
+      # "fetchartist" # Fetch artist artwork
     ];
 
     artist_credit = true;
