@@ -34,8 +34,8 @@
     nixMinecraft.url = "github:12Boti/nix-minecraft";
     nixMinecraft.inputs.nixpkgs.follows = "nixos";
 
-    erosanix.url = "github:emmanuelrosa/erosanix";
-    erosanix.inputs.nixpkgs.follows = "nixos";
+    # erosanix.url = "github:emmanuelrosa/erosanix";
+    # erosanix.inputs.nixpkgs.follows = "nixos";
 
     plasmaManager.url = "github:pjones/plasma-manager";
     plasmaManager.inputs.nixpkgs.follows = "nixos";
