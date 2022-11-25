@@ -59,19 +59,19 @@
     original_date = true;
 
     import = {
-      # Search
       languages = [ "tok" "en" "jp" ];
 
       # Interactive mode
       bell = true;
-      detail = true;
+      detail = true; # Always show release details during import
 
       # File manipulation
-      write = true;
-      copy = true;
-      move = false;
+      write = true; # write tags to the files when they're updated
+      copy = true; # copy files to the library during importing
 
       incremental = true;
+
+      # Always start over imports of half-imported releases
       resume = false;
 
       log = "${music.lossless}/beets.log";
@@ -96,7 +96,8 @@
     };
 
     musicbrainz = {
-      genres = true;
+      # NOTE: conflicts with lastgenre
+      # genres = true;
       extra_tags = [
         "catalognum"
         "country"
@@ -131,6 +132,8 @@
     fetchartist.filename = "poster";
 
     fetchart = {
+      auto = true;
+
       cautious = true;
       high_resolution = true;
       store_source = true;
@@ -149,6 +152,8 @@
     importadded.preserve_mtimes = true;
 
     lastgenre = {
+      auto = true;
+
       count = 5;
       prefer_specific = true;
       title_case = false;
@@ -156,6 +161,7 @@
 
     mbcollection = {
       auto = true;
+
       collection = "222377a0-7e41-4ccf-ba15-0748731106c4";
       remove = true;
     };
@@ -174,7 +180,11 @@
       use_origin_on_conflict = true;
     };
 
-    replaygain.backend = "ffmpeg";
+    replaygain = {
+      auto = true;
+
+      backend = "ffmpeg";
+    };
 
     types = {
       rating = "float";
@@ -184,7 +194,11 @@
     # Ensure there is never art left embedded in imported files.
     zero = {
       auto = true;
-      fields = [ "images" ];
+
+      fields = [
+        "images"
+        "genre"
+      ];
       update_database = true;
     };
   };
