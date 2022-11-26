@@ -15,7 +15,9 @@
             if lib.isBool value then
               (if value then "True" else "False")
             else
-              toString value;
+              lib.concatStrings (
+                builtins.map (x: if x == "%" then "%${x}" else "${x}") (lib.stringToCharacters (toString value))
+              );
         in
         "${key} = ${value'}";
     }
