@@ -203,14 +203,6 @@ in
 
         "super + i " = "${pkgs.xrandr-invert-colors}/bin/xrandr-invert-colors";
 
-        # Music: {play/pause, stop, previous track, next track}
-        # "XF86Audio{Play,Stop,Prev,Next}" = "{${bin}/mpc-toggle,${pkgs.mpc-cli}/bin/mpc stop,${pkgs.mpc-cli}/bin/mpc cdprev,${pkgs.mpc-cli}/bin/mpc next}";
-
-        # Music: toggle {consume, random} mode
-        # "super + XF86Audio{Prev,Play}" = "${pkgs.mpc-cli}/bin/mpc {consume,random}";
-
-        # "ctrl + alt + {0,1,2,3,4,5}" = "${bin}/mpc-star {0,1,2,3,4,5}";
-
         # Take screenshot of window/selection
         "Print" = "${screenshot} -us -b 6 -p -6 -l -c 0.7686,0.9137,0.4705,.5";
 

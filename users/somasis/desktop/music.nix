@@ -19,12 +19,4 @@
     pkgs.mpc-cli
     pkgs.cantata
   ];
-
-  services.mpdris2 = {
-    enable = config.services.mopidy.enable;
-    mpd = {
-      host = config.services.mopidy.settings.mpd.hostname;
-      musicDirectory = config.services.mopidy.settings.file.media_dirs;
-    };
-  };
 }

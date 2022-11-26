@@ -97,9 +97,9 @@ in
   );
 
   services.mpd-discord-rpc = {
-    enable = config.services.mpdris2.enable;
+    enable = config.services.mpd.enable;
     settings = {
-      hosts = [ config.services.mopidy.settings.mpd.hostname ];
+      hosts = [ config.services.mpd.network.listenAddress ];
       format = {
         details = "$title";
         state = "$artist - $title ($album)";

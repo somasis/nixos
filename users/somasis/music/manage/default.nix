@@ -397,7 +397,7 @@ in
         plugins = [ "noimport" ]
           ++ lib.optional config.services.mopidy.enable "mpdupdate";
       }
-      // lib.optionalAttrs config.services.mopidy.enable { mpd.host = config.services.mopidy.settings.mpd.hostname; }
+      // lib.optionalAttrs config.services.mopidy.enable { mpd.host = config.services.mpd.network.listenAddress; }
     ;
   };
 
