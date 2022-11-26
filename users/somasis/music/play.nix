@@ -47,8 +47,8 @@ in
 
       file = {
         enabled = true;
-        media_dirs = config.xdg.userDirs.music;
-        # album_art_files = [ "cover" ]
+        media_dirs = music.lossy;
+        album_art_files = [ "cover" ];
 
         excluded_file_extensions = [
           ".html"

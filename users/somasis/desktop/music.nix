@@ -4,6 +4,7 @@
 }:
 {
   imports = [
+    ../music
     ../music/manage
     ../music/play.nix
   ];

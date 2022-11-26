@@ -2,15 +2,10 @@
 , lib
 , config
 , nixosConfig
+, music
 , ...
 }:
 let
-  music = {
-    source = "${config.xdg.userDirs.music}/source";
-    lossless = "${config.xdg.userDirs.music}/lossless";
-    lossy = "${config.xdg.userDirs.music}/lossy";
-  };
-
   bandcamp-collection-downloader = (pkgs.callPackage
     ({ lib, stdenvNoCC, fetchurl, jre, makeWrapper }:
       stdenvNoCC.mkDerivation rec {
@@ -278,8 +273,6 @@ let
   });
 in
 {
-  _module.args = { inherit music; };
-
   imports = [
     ./convert.nix
     ./extrafiles.nix
