@@ -54,6 +54,11 @@ in
     playlistDirectory = "${music.lossy}/_playlists";
   };
 
+  home.persistence = {
+    "/cache${config.home.homeDirectory}".directories = [ "var/cache/mpdscribble" ];
+    "/persist${config.home.homeDirectory}".directories = [ "share/mpd" ];
+  };
+
   home.sessionVariables.MPD_HOST = config.services.mpd.network.listenAddress;
 
   home.packages = [ mpdscribble ];
