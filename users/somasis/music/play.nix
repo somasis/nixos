@@ -48,10 +48,10 @@ in
   services.mpd = {
     enable = true;
 
-    musicDirectory = music.lossy;
     network.listenAddress = "${xdgRuntimeDir}/mpd/socket";
 
-    playlistDirectory = "${music.lossy}/_playlists";
+    musicDirectory = music.lossy;
+    playlistDirectory = music.playlists;
   };
 
   home.persistence = {
