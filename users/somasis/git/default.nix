@@ -34,9 +34,6 @@
     };
 
     extraConfig = {
-      # Don't show "a/" and "b/" prefixes in patches
-      diff.noprefix = true;
-
       rerere.enabled = true;
 
       sendemail = {
