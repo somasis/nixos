@@ -120,6 +120,7 @@
     pkgs.xmlstarlet
     pkgs.xorg.xinput
     pkgs.xzoom
+    pkgs.hyperfine
   ];
 
 
