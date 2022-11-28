@@ -160,6 +160,8 @@
       title_case = false;
     };
 
+    lyrics.sources = [ "musixmatch" "genius" ];
+
     mbcollection = {
       auto = true;
 
