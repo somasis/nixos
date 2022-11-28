@@ -300,11 +300,6 @@ in
     pass-beets
   ];
 
-  systemd.user.tmpfiles.rules = [
-    "L+ ${music.source} - - - - ${config.home.homeDirectory}/mnt/sftp/spinoza.7596ff.com/audio/library/source"
-    "L+ ${music.lossless} - - - - ${config.home.homeDirectory}/mnt/sftp/spinoza.7596ff.com/audio/library/lossless"
-  ];
-
   programs.beets = {
     enable = true;
     package =
