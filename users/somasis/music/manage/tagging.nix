@@ -1,4 +1,5 @@
-{ pkgs
+{ config
+, pkgs
 , music
 , ...
 }: {
@@ -74,7 +75,7 @@
       # Always start over imports of half-imported releases
       resume = false;
 
-      log = "${music.lossless}/beets.log";
+      log = "${config.xdg.userDirs.music}/lossless/beets.log";
     };
 
     paths =

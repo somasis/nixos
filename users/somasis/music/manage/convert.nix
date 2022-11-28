@@ -1,5 +1,6 @@
 # Convert to Opus for other devices
 { lib
+, config
 , pkgs
 , music
 , ...
@@ -13,7 +14,7 @@
       embed = false;
       album_art_maxwidth = 2048;
 
-      dest = "${music.lossy}";
+      dest = "${config.xdg.userDirs.music}/lossy";
 
       format = "opus";
       formats.opus = {

@@ -1,5 +1,5 @@
 { nixosConfig
-, music
+, lib
 , pkgs
 , config
 , ...
@@ -45,13 +45,15 @@ let
   };
 in
 {
+  xdg.userDirs.music = "${config.home.homeDirectory}/audio/library";
+
   services.mpd = {
     enable = true;
 
     network.listenAddress = "${xdgRuntimeDir}/mpd/socket";
 
-    musicDirectory = music.lossy;
-    playlistDirectory = music.playlists;
+    musicDirectory = "${config.xdg.userDirs.music}/lossy";
+    playlistDirectory = "${config.xdg.userDirs.music}/playlists";
   };
 
   home.persistence = {

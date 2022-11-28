@@ -2,7 +2,6 @@
 , lib
 , config
 , nixosConfig
-, music
 , ...
 }:
 let
@@ -280,6 +279,13 @@ in
     ./tagging.nix
   ];
 
+  xdg.userDirs.music = "${config.home.homeDirectory}/audio/library";
+
+  systemd.user.tmpfiles.rules = lib.optionals (nixosConfig.networking.fqdn != "spinoza.7596ff.com") [
+    "L+ ${config.xdg.userDirs.music}/source - - - - ${config.home.homeDirectory}/mnt/sftp/spinoza.7596ff.com/audio/library/source"
+    "L+ ${config.xdg.userDirs.music}/lossless - - - - ${config.home.homeDirectory}/mnt/sftp/spinoza.7596ff.com/audio/library/lossless"
+  ];
+
   home.packages = [
     bandcamp-collection-downloader
 
@@ -378,24 +384,22 @@ in
       })
       );
 
-    settings =
-      let inherit music;
-      in {
-        directory = "${music.lossless}";
-        library = "${music.lossless}/beets.db";
+    settings = {
+      directory = "${config.xdg.userDirs.music}/lossless";
+      library = "${config.xdg.userDirs.music}/lossless/beets.db";
 
-        # Default `beet list` options
-        sort_case_insensitive = false;
-        sort_item = "artist+ date+ album+ disc+ track+";
-        sort_album = "artist+ date+ album+ disc+ track+";
+      # Default `beet list` options
+      sort_case_insensitive = false;
+      sort_item = "artist+ date+ album+ disc+ track+";
+      sort_album = "artist+ date+ album+ disc+ track+";
 
-        plugins = [ "noimport" ]
-          ++ lib.optional config.services.mopidy.enable "mpdupdate";
-      }
-      // lib.optionalAttrs config.services.mopidy.enable { mpd.host = config.services.mpd.network.listenAddress; }
+      plugins = [ "noimport" ]
+        ++ lib.optional config.services.mpd.enable "mpdupdate";
+    }
+    // lib.optionalAttrs config.services.mpd.enable { mpd.host = config.services.mpd.network.listenAddress; }
     ;
   };
 
-  programs.bash.shellAliases."beet-import-all" = "beet import --flat --timid ${lib.escapeShellArg music.source}/*/*";
+  programs.bash.shellAliases."beet-import-all" = "beet import --flat --timid ${lib.escapeShellArg config.xdg.userDirs.music}/source/*/*";
   programs.qutebrowser.searchEngines."!beets" = "file:///${config.programs.beets.package.doc}/share/doc/beets/html/search.html?q={}";
 }
