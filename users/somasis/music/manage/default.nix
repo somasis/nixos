@@ -62,10 +62,19 @@ let
 
       trap 'fail $?' ERR
 
-      output=$(pass www/acoustid.org | jq -Rc '{ acoustid: { apikey: . } }')
+      output=$(
+          pass ${nixosConfig.networking.fqdn}/beets/acoustid \
+              | jq -Rc '{ acoustid: { apikey: . } }'
+      )
       output+=$(
-          pass www/musicbrainz.org/Somasis \
-              | jq -Rc --arg user Somasis '{ musicbrainz: { user: $user, pass: . } }'
+          pass ${nixosConfig.networking.fqdn}/beets/musicbrainz \
+              | jq -Rc \
+                  --arg user Somasis \
+                  '{ musicbrainz: { user: $user, pass: . } }'
+      )
+      output+=$(
+          pass ${nixosConfig.networking.fqdn}/beets/google \
+              | jq -Rc '{ lyrics: { google_API_key: . } }'
       )
 
       jq -sc 'add' <<<"$output" | yq -y
