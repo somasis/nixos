@@ -142,8 +142,9 @@
                   target_path="$PASSWORD_STORE_DIR/$target"
 
                   if [[ -d "$PASSWORD_STORE_DIR/$source" ]] && [[ -d "$PASSWORD_STORE_DIR/$target" ]]; then
-                      rsync ''${dry_run:+--dry-run} -u -LKk --delay-updates -r --delete --delete-delay "$PASSWORD_STORE_DIR/$source"/ "$PASSWORD_STORE_DIR/$target"/
+                      rsync ''${dry_run:+--dry-run} -u -LKk --delay-updates -r --mkpath --delete --delete-delay "$PASSWORD_STORE_DIR/$source"/ "$PASSWORD_STORE_DIR/$target"/
                   elif [[ -d "$PASSWORD_STORE_DIR/$source" ]] && ! [[ -e "$PASSWORD_STORE_DIR/$target" ]]; then
+                      mkdir -p "$PASSWORD_STORE_DIR/''${target%/*}"
                       cp -fpR "$PASSWORD_STORE_DIR/$source"/ "$PASSWORD_STORE_DIR/$target"/
                   else
                       source_path="$source_path".gpg
