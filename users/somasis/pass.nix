@@ -29,32 +29,6 @@
       pass-checkup
       pass-update
 
-      (pkgs.stdenvNoCC.mkDerivation rec {
-        name = "pass-extension-meta";
-
-        src = pkgs.fetchFromGitHub {
-          repo = "pass-extension-meta";
-          owner = "rjekker";
-          rev = "2942bff7bc088422e780a96e5b1139db8508f386";
-          hash = "sha256-O/YatXOA4EiGnGkemmGd6pVCNVwrtDeLoDq9PRSlGY4=";
-        };
-
-        preInstall = ''
-          mkdir -p $out/bin
-        '';
-
-        makeFlags = [
-          "PREFIX=$(out)"
-          "BINDIR=$(PREFIX)/bin"
-          "BASHCOMPDIR=$(PREFIX)/share/bash-completion/completions"
-        ];
-
-        postFixup = ''
-          substituteInPlace $out/lib/password-store/extensions/meta.bash \
-            --replace " perl " " ${pkgs.perl}/bin/perl "
-        '';
-      })
-
       pass-otp
       (pkgs.stdenvNoCC.mkDerivation rec {
         name = "pass-botp";
@@ -68,6 +42,74 @@
 
         installPhase = ''
           install -D -m755 $src/src/botp.bash $out/lib/password-store/extensions/botp.bash
+        '';
+      })
+
+      (pkgs.writeTextFile {
+        name = "pass-meta";
+        executable = true;
+        destination = "/lib/password-store/extensions/meta.bash";
+
+        text = ''
+          #!${pkgs.bash}
+
+          export PATH="${lib.makeBinPath [ pkgs.coreutils pkgs.gawk ]}:$PATH"
+
+          usage() {
+              cat >&2 <<EOF
+          usage: pass meta [-a] STORE FIELD
+          EOF
+              exit 69
+          }
+
+          meta() {
+              pass show "$1" \
+                  | awk \
+                      -F ":" \
+                      -v entry="$1" \
+                      -v key="$2" \
+                      -v one="$one" '
+                          NR==1 { next }
+                          $1 ~ key {
+                              if ($key ~ ".*://|:$") {
+                                  print $0
+                              } else {
+                                  $1=""
+                                  print substr($0, 3)
+                              }
+
+                              if ($one) { exit }
+                          }
+                      '
+          }
+
+          set -eu
+          set -o pipefail
+
+          : "''${PASSWORD_STORE_DIR:=$HOME/.password-store}"
+
+          one=0
+          while getopts :a arg >/dev/null 2>&1; do
+              case "$arg" in
+                  a) one=1 ;;
+                  *) usage ;;
+              esac
+          done
+          shift $(( OPTIND - 1 ))
+
+          [[ "$#" -ge 1 ]] || usage
+
+          check_sneaky_paths "$1"
+
+          case "''${2:-}" in
+              "") pass show "$1" | tail -n +2 | cut -d: -f1 ;;
+              login|user|username)
+                  username=$(meta "$1" "login|user|username")
+                  [[ -z "$username" ]] && exec basename "$1"
+                  printf '%s\n' "$username"
+                  ;;
+              *) meta "$@" ;;
+          esac
         '';
       })
 
