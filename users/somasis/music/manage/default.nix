@@ -318,80 +318,76 @@ in
   programs.beets = {
     enable = true;
     package =
-      (beets.overrideAttrs (oldAttrs: rec {
-        # Provide a wrapper for the actual `beet` program, so that we can perform some
-        # pre-command-initialization actions.
-        # <https://nixos.wiki/wiki/Nix_Cookbook#Wrapping_packages>
-        runtimeInputs = oldAttrs.runtimeInputs or [ ] ++ [
+      (pkgs.symlinkJoin {
+        name = "beets-final";
+
+        paths = [
+          # Provide a wrapper for the actual `beet` program, so that we can perform some
+          # pre-command-initialization actions.
+          # <https://nixos.wiki/wiki/Nix_Cookbook#Wrapping_packages>
+          (pkgs.writeShellScriptBin "beet" ''
+            #! ${pkgs.runtimeShell}
+            set -eu
+            set -o pipefail
+
+            ${lib.toShellVar "PATH" (lib.makeBinPath [ pkgs.coreutils pkgs.utillinux pkgs.systemd ])}":${placeholder "out"}:$PATH"
+            directory=$(readlink -m ${lib.escapeShellArg config.programs.beets.settings.directory})
+            BEETS_LOCK="$directory/beets.lock"
+
+            # Mount any required mount units
+            directory_escaped=$(systemd-escape -p "$directory")
+            user_mount_units=$(systemctl --user --plain --full --all --no-legend list-units -t mount | cut -d' ' -f1)
+
+            # Work through the parts of the escaped path and find the longest
+            # unit name prefix match.
+            # 1. Split apart the escaped path
+            # 2. Accumulate parts for each run of the `for` loop
+            # 3. Read in the list of user mount units
+            # The longest matching one will be the final line.
+            unit=$(
+                directory_acc=
+                IFS=-
+                for directory_part in $directory_escaped; do
+                    directory_acc="''${directory_acc:+$directory_acc-}$directory_part"
+
+                    while IFS="" read -r unit; do
+                        case "$unit" in
+                            "$directory_acc"*.mount) printf '%s\n' "$unit"; break ;;
+                        esac
+                    done <<< "$user_mount_units"
+                done | tail -n1
+            )
+
+            [[ -n "$unit" ]] && systemctl --user start "$unit"
+
+            # Maintain a cross-device lock, so that we don't conflict if the directory is
+            # over a network device of some sort (sshfs)
+            [[ -e "$BEETS_LOCK" ]] && printf 'Lock "%s" is currently held, sleeping until free...\n' "$BEETS_LOCK" >&2
+            while [[ -e "$BEETS_LOCK" ]]; do
+                sleep 5
+            done
+            touch "$BEETS_LOCK"
+
+            # Trap Ctrl-C, since it seems really problematic for database health
+            e=0
+            trap : INT
+            trap 'rm -f "$BEETS_LOCK"' EXIT
+
+            # Feed pass-beets info via a FIFO so it never hits the disk.
+            ${beets}/bin/beet -c <(pass-beets) "$@" || e=$?
+
+            trap - INT
+            exit $?
+            EOF
+          '')
+
           pass-beets
-          pkgs.coreutils
-          pkgs.utillinux
-          pkgs.systemd
+
+          beets.man
+          beets.doc
+          beets
         ];
-
-        postInstall = oldAttrs.postInstall or "" + ''
-          mv $out/bin/beet $out/bin/.beet-wrapped
-
-          touch $out/bin/beet
-          chmod +x $out/bin/beet
-
-          cat > $out/bin/beet <<'EOF'
-          #! ${pkgs.runtimeShell}
-          set -eu
-          set -o pipefail
-
-          ${lib.toShellVar "PATH" (lib.makeBinPath runtimeInputs)}":${placeholder "out"}:$PATH"
-          directory=$(readlink -m ${lib.escapeShellArg config.programs.beets.settings.directory})
-          BEETS_LOCK="$directory/beets.lock"
-
-          # Mount any required mount units
-          directory_escaped=$(systemd-escape -p "$directory")
-          user_mount_units=$(systemctl --user --plain --full --all --no-legend list-units -t mount | cut -d' ' -f1)
-
-          # Work through the parts of the escaped path and find the longest
-          # unit name prefix match.
-          # 1. Split apart the escaped path
-          # 2. Accumulate parts for each run of the `for` loop
-          # 3. Read in the list of user mount units
-          # The longest matching one will be the final line.
-          unit=$(
-              directory_acc=
-              IFS=-
-              for directory_part in $directory_escaped; do
-                  directory_acc="''${directory_acc:+$directory_acc-}$directory_part"
-
-                  while IFS="" read -r unit; do
-                      case "$unit" in
-                          "$directory_acc"*.mount) printf '%s\n' "$unit"; break ;;
-                      esac
-                  done <<< "$user_mount_units"
-              done | tail -n1
-          )
-
-          [[ -n "$unit" ]] && systemctl --user start "$unit"
-
-          # Maintain a cross-device lock, so that we don't conflict if the directory is
-          # over a network device of some sort (sshfs)
-          [[ -e "$BEETS_LOCK" ]] && printf 'Lock "%s" is currently held, sleeping until free...\n' "$BEETS_LOCK" >&2
-          while [[ -e "$BEETS_LOCK" ]]; do
-              sleep 5
-          done
-          touch "$BEETS_LOCK"
-
-          # Trap Ctrl-C, since it seems really problematic for database health
-          e=0
-          trap : INT
-          trap 'rm -f "$BEETS_LOCK"' EXIT
-
-          # Feed pass-beets info via a FIFO so it never hits the disk.
-          ${placeholder "out"}/bin/.beet-wrapped -c <(pass-beets) "$@" || e=$?
-
-          trap - INT
-          exit $?
-          EOF
-        '';
-      })
-      );
+      });
 
     settings = {
       directory = "${config.xdg.userDirs.music}/lossless";
@@ -410,5 +406,5 @@ in
   };
 
   programs.bash.shellAliases."beet-import-all" = "beet import --flat --timid ${lib.escapeShellArg config.xdg.userDirs.music}/source/*/*";
-  programs.qutebrowser.searchEngines."!beets" = "file:///${config.programs.beets.package.doc}/share/doc/beets/html/search.html?q={}";
+  programs.qutebrowser.searchEngines."!beets" = "file:///${beets.doc}/share/doc/beets/html/search.html?q={}";
 }
