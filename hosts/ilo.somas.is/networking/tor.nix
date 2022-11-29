@@ -13,6 +13,6 @@
   };
 
   powerManagement.resumeCommands = ''
-    ${pkgs.systemd}/bin/systemctl reload tor.service
+    ${pkgs.systemd}/bin/systemctl restart tor.service
   '';
 }
