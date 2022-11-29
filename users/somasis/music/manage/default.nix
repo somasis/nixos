@@ -35,7 +35,7 @@ let
         installPhase = ''
           makeWrapper ${jre}/bin/java $out/bin/bandcamp-collection-downloader \
               --argv0 bandcamp-collection-downloader \
-              --add-flags "-jar $jar" \
+              --add-flags "-jar $jar"
         '';
 
         meta = with lib; {
@@ -81,57 +81,6 @@ let
     '';
   });
 
-  bencoder = (pkgs.python3Packages.buildPythonPackage rec {
-    pname = "bencoder";
-    version = "0.2.0";
-
-    src = pkgs.python3Packages.fetchPypi {
-      inherit pname version;
-      hash = "sha256-rENvM/3X51stkFdJHSq+77VjHvsTyBNAPbCtsRq1L8I=";
-    };
-
-    buildInputs = with pkgs.python3Packages; [ setuptools ];
-
-    meta = with pkgs.lib; {
-      description = "A simple bencode decoder/encoder library in pure Python";
-      homepage = "https://github.com/utdemir/${pname}";
-      license = licenses.gpl2;
-      maintainers = with maintainers; [ somasis ];
-    };
-  });
-
-  gazelle-origin = (pkgs.python3Packages.buildPythonApplication rec {
-    pname = "gazelle-origin";
-    version = "3.0.0";
-
-    src = pkgs.fetchFromGitHub {
-      repo = pname;
-
-      # owner = "x1ppy";
-      # rev = "4bfffa575ace819b02d576e9f0b79d20335c03c5";
-      # hash = "sha256-2FazeqwpRHVuvb5IuFUAvxh7541/xg965kw8dzCsRCI=";
-
-      # Use the spinfast319 fork, since it seems that upstream is inactive
-      owner = "spinfast319";
-      rev = version;
-      hash = "sha256-+yMKnfG2f+A1/MxSBFLaHfpCgI2m968iXqt+2QanM/c=";
-    };
-
-    buildInputs = with pkgs.python3Packages; [ setuptools ];
-    propagatedBuildInputs = with pkgs.python3Packages; [
-      bencoder
-      pyyaml
-      requests
-    ];
-
-    meta = with pkgs.lib; {
-      description = "Gazelle origin.yaml generator";
-      homepage = "https://github.com/spinfast319/gazelle-origin";
-      license = licenses.unfree; # TODO <https://github.com/x1ppy/beets-originquery/issues/3>
-      maintainers = with maintainers; [ somasis ];
-    };
-  });
-
   beets-noimport = (pkgs.callPackage
     ({ lib, fetchFromGitLab, beets, python3Packages }:
       python3Packages.buildPythonApplication rec {
@@ -152,36 +101,6 @@ let
           homepage = "https://gitlab.com/tiago.dias/beets-noimport";
           maintainers = with maintainers; [ somasis ];
           license = licenses.mit;
-        };
-      })
-    { beets = pkgs.beetsPackages.beets-minimal; });
-
-  beets-originquery = (pkgs.callPackage
-    ({ lib, fetchFromGitHub, beets, python3Packages }:
-      python3Packages.buildPythonApplication rec {
-        pname = "beets-originquery";
-        version = "1.0.2";
-
-        src = fetchFromGitHub {
-          repo = pname;
-          owner = "x1ppy";
-          rev = version;
-          hash = "sha256-32S8Ik6rzw6kx69o9G/v7rVsVzGA1qv5pHegYDmTW68=";
-        };
-
-        propagatedBuildInputs = with python3Packages; [
-          confuse
-          jsonpath_rw
-          pyyaml
-        ];
-
-        nativeBuildInputs = [ beets ];
-
-        meta = with lib; {
-          description = "Integrates origin.txt metadata into beets' MusicBrainz queries";
-          homepage = "https://github.com/x1ppy/beets-originquery";
-          maintainers = with maintainers; [ somasis ];
-          license = licenses.unfree; # <https://github.com/x1ppy/beets-originquery/issues/3>
         };
       })
     { beets = pkgs.beetsPackages.beets-minimal; });
@@ -276,7 +195,7 @@ let
       # fetchartist = { enable = true; propagatedBuildInputs = [ beets-fetchartist ]; };
       extrafiles = { enable = true; propagatedBuildInputs = [ pkgs.beetsPackages.extrafiles ]; };
       noimport = { enable = true; propagatedBuildInputs = [ beets-noimport ]; };
-      originquery = { enable = true; propagatedBuildInputs = [ beets-originquery ]; };
+      originquery = { enable = true; propagatedBuildInputs = [ pkgs.beetsPackages.originquery ]; };
     };
   });
 in
@@ -302,7 +221,7 @@ in
       name = "gazelle-origin-final";
 
       buildInputs = [ pkgs.makeWrapper ];
-      paths = [ gazelle-origin ];
+      paths = [ pkgs.gazelle-origin ];
 
       postBuild = ''
         wrapProgram $out/bin/gazelle-origin \
