@@ -327,66 +327,61 @@ in
     (pkgs.symlinkJoin {
       name = "transmission-remote-gtk-with-pass";
 
-      paths = [ pkgs.transmission-remote-gtk ];
+      paths = [
+        (pkgs.writeShellScriptBin "transmission-remote-gtk" ''
+          set -eu
+          set -o pipefail
 
-      postBuild = ''
-        mv $out/bin/transmission-remote-gtk $out/bin/.transmission-remote-gtk-wrapped
+          mkdir -m 700 -p "''${XDG_CONFIG_HOME:=$HOME/.config}"/transmission-remote-gtk
+          rm -f "$XDG_CONFIG_HOME"/transmission-remote-gtk/config.json
+          mkfifo "$XDG_CONFIG_HOME"/transmission-remote-gtk/config.json
 
-        touch $out/bin/transmission-remote-gtk
-        chmod +x $out/bin/transmission-remote-gtk
+          (
+              config=
+              profile="genesis.whatbox.ca"
+              entry="www/whatbox.ca/somasis"
 
-        cat > $out/bin/transmission-remote-gtk <<'EOF'
-        #! ${pkgs.runtimeShell}
-        set -eu
-        set -o pipefail
-
-        mkdir -m 700 -p "''${XDG_CONFIG_HOME:=$HOME/.config}"/transmission-remote-gtk
-        rm -f "$XDG_CONFIG_HOME"/transmission-remote-gtk/config.json
-        mkfifo "$XDG_CONFIG_HOME"/transmission-remote-gtk/config.json
-
-        (
-            config=
-            profile="genesis.whatbox.ca"
-            entry="www/whatbox.ca/somasis"
-
-            ${config.programs.password-store.package}/bin/pass "$entry" \
-                | ${config.programs.jq.package}/bin/jq -R \
-                      --arg profile "$profile" \
-                      --arg entry "$entry" \
-                      '
-                        {
-                          profiles: [
-                            {
-                              "profile-name": $profile,
-                              "username": ($entry | split("/")[-1]),
-                              "password": .
-                            }
-                          ]
-                        }
-                      ' \
-                | ${config.programs.jq.package}/bin/jq -s '
-                    .[1].profiles[] as $profile
-                      | $profile."profile-name" as $wantedProfile
-                      | (
-                        .[0]
-                          | .profiles
-                          |= map(
-                            select(."profile-name" == $wantedProfile)
-                              + $profile
+              ${config.programs.password-store.package}/bin/pass "$entry" \
+                  | ${config.programs.jq.package}/bin/jq -R \
+                        --arg profile "$profile" \
+                        --arg entry "$entry" \
+                        '
+                          {
+                            profiles: [
+                              {
+                                "profile-name": $profile,
+                                "username": ($entry | split("/")[-1]),
+                                "password": .
+                              }
+                            ]
+                          }
+                        ' \
+                  | ${config.programs.jq.package}/bin/jq -s '
+                      .[1].profiles[] as $profile
+                        | $profile."profile-name" as $wantedProfile
+                        | (
+                          .[0]
+                            | .profiles
+                            |= map(
+                              select(."profile-name" == $wantedProfile)
+                                + $profile
+                            )
                           )
-                        )
-                    ' \
-                    ${configFile} \
-                    -
-        ) > "$XDG_CONFIG_HOME"/transmission-remote-gtk/config.json &
+                      ' \
+                      ${configFile} \
+                      -
+          ) > "$XDG_CONFIG_HOME"/transmission-remote-gtk/config.json &
 
-        ${pkgs.rwc}/bin/rwc -p "$XDG_CONFIG_HOME"/transmission-remote-gtk/config.json \
-            | ${pkgs.xe}/bin/xe -s 'rm -f "$XDG_CONFIG_HOME"/transmission-remote-gtk/config.json' &
+          ${pkgs.rwc}/bin/rwc -p "$XDG_CONFIG_HOME"/transmission-remote-gtk/config.json \
+              | ${pkgs.xe}/bin/xe -s 'rm -f "$XDG_CONFIG_HOME"/transmission-remote-gtk/config.json' &
 
-        (exec -a transmission-remote-gtk ${placeholder "out"}/bin/.transmission-remote-gtk-wrapped "$@")
-        kill $(jobs -p)
-        EOF
-      '';
+          e=0
+          (exec -a transmission-remote-gtk ${pkgs.transmission-remote-gtk}/bin/transmission-remote-gtk "$@") || e=$?
+          kill $(jobs -p)
+          exit "$e"
+        '')
+        pkgs.transmission-remote-gtk
+      ];
     })
 
     tpull
