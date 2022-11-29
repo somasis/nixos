@@ -27,19 +27,45 @@
 
     hook.hooks =
       let
-        # Remove files from the converted library when they're removed from the library
-        hookConvertItemRemoved = (pkgs.writeShellScript "beet-hook-convert-item-removed" ''
+        # Propagate item changes in the main library to the converted library
+        hookPushItemToConverted = (pkgs.writeShellScript "beet-hook-push-item-to-converted" ''
           ${lib.toShellVar "path_converted" convert.dest}
           ${lib.toShellVar "extension_converted" convert.formats."${convert.format}".extension}
           ${lib.toShellVar "format_converted" convert.paths.default}
 
           converted_path=$(beet list -f "$path_converted/$format_converted.$extension_converted" "path:$1")
-          [[ -e "$converted_path" ]] && echo rm -f "$converted_path"
-          echo find "$converted_path" -type d -empty
+          converted_album_path=$(dirname "$converted_path")
+
+          rm -f "$converted_path"
+          find "$converted_album_path" -name 'cover.*' -delete
+          beet convert -ay "path:$1"
+        '');
+
+        # Remove items from the converted library when they're removed from the main library
+        hookRemoveItemFromConverted = (pkgs.writeShellScript "beet-hook-remove-item-from-converted" ''
+          ${lib.toShellVar "path_converted" convert.dest}
+          ${lib.toShellVar "extension_converted" convert.formats."${convert.format}".extension}
+          ${lib.toShellVar "format_converted" convert.paths.default}
+
+          converted_path=$(beet list -f "$path_converted/$format_converted.$extension_converted" "path:$1")
+          rm -f "$converted_path"
+        '');
+
+        # Remove albums from the converted library when they're removed from the main library
+        hookRemoveAlbumFromConverted = (pkgs.writeShellScript "beet-hook-remove-album-from-converted" ''
+          ${lib.toShellVar "path_converted" convert.dest}
+          ${lib.toShellVar "extension_converted" convert.formats."${convert.format}".extension}
+          ${lib.toShellVar "format_converted" convert.paths.default}
+
+          converted_path=$(beet list -f "$path_converted/$format_converted.$extension_converted" "path:$1")
+          converted_album_path=$(dirname "$converted_path")
+          rm -r "$converted_album_path"
         '');
       in
       [
-        { event = "item_removed"; command = "${hookConvertItemRemoved} {item.path}"; }
+        { event = "after_write"; command = "${hookPushItemToConverted} {item.path}"; }
+        { event = "item_removed"; command = "${hookRemoveItemFromConverted} {item.path}"; }
+        { event = "album_removed"; command = "${hookRemoveAlbumFromConverted} {album.path}"; }
       ];
   };
 }
