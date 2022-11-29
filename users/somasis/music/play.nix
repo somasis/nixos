@@ -1,5 +1,4 @@
 { nixosConfig
-, lib
 , pkgs
 , config
 , ...
@@ -16,7 +15,7 @@ let
     text = ''
       cat <<EOF
       log = -
-      host = ${xdgRuntimeDir}/mpd/socket
+      host = ${config.services.mpd.network.listenAddress}
       verbose = 2
 
       [last.fm]
