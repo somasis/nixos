@@ -53,6 +53,39 @@ in
 
     musicDirectory = "${config.xdg.userDirs.music}/lossy";
     playlistDirectory = "${config.xdg.userDirs.music}/playlists";
+
+    extraConfig =
+      let
+        tags = [
+          "title"
+          "track"
+          "album"
+          "artist"
+          "performer"
+          "composer"
+          "date"
+          "genre"
+          "label"
+          "disc"
+          "musicbrainz_artistid"
+          "musicbrainz_albumid"
+          "musicbrainz_albumartistid"
+          "musicbrainz_trackid"
+          "musicbrainz_releasetrackid"
+          "musicbrainz_workid"
+        ];
+      in
+      ''
+        metadata_to_use "${lib.concatStringsSep "," tags}"
+
+        audio_output {
+          type "pulse"
+          name "PulseAudio"
+          format "48000:24:2"
+          replay_gain_handler "mixer"
+          mixer_type "hardware"
+        }
+      '';
   };
 
   home.persistence = {
