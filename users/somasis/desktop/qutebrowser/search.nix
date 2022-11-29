@@ -1,5 +1,4 @@
 { config
-, pkgs
 , ...
 }: {
   programs.qutebrowser.searchEngines = {
@@ -11,7 +10,7 @@
     "!gi" = "https://www.google.com/search?tbm=isch&source=hp&q={}";
     "!yt" = "https://www.youtube.com/results?search_query={}";
 
-    "!libgen" = "https://libgen.li/index.php?req={}";
+    "!libgen" = "http://libgen.rs/index.php?req={}";
     "!bookfinder" = "https://www.bookfinder.com/search/?keywords={}";
     "!library" = "https://openlibrary.org/search?q={}";
     "!abebooks" = "https://www.abebooks.com/servlet/SearchResults?kn={}";
