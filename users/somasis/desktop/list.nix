@@ -20,10 +20,10 @@ in
     task-add = "todo-add -l task";
     task = "task-query -U";
 
-    # School list.
-    school-query = "todo-query -l school";
-    school-add = "todo-add -l school";
-    school = "school-query -U";
+    # University list.
+    uni-query = "todo-query -l uni";
+    uni-add = "todo-add -l uni";
+    uni = "uni-query -U";
 
     # Grocery list.
     grocery-query = "todo-query -l grocery";
