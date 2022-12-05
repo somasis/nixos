@@ -139,6 +139,8 @@
       high_resolution = true;
       store_source = true;
 
+      enforce_ratio = "0.5%";
+
       cover_names = [ "cover" "front" "art" "album" "folder" ];
 
       sources = [
