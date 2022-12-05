@@ -18,18 +18,20 @@
     # pkgs.sitelen-seli-kiwen
 
     # Free replacements for pkgs.corefonts
-    # # Arial, Times New Roman
-    # pkgs.arkpandora_ttf
+    # Arial, Times New Roman
+    pkgs.noto-fonts-extra
     # # Cambria
-    # pkgs.caladea
+    pkgs.caladea
     # # Calibri
-    # pkgs.carlito
+    pkgs.carlito
+    # Comic Sans MS
+    pkgs.comic-relief
     # # Georgia
-    # pkgs.gelasio
-    # # Arial Narrow
-    # pkgs.liberation-sans-narrow
-    # # Arial, Helvetica, Times New Roman, Courier New
-    # pkgs.liberation_ttf
+    pkgs.gelasio
+    # Arial Narrow
+    pkgs.liberation-sans-narrow
+    # Arial, Helvetica, Times New Roman, Courier New
+    pkgs.liberation_ttf
 
     # pkgs.raleway
     # pkgs.roboto
