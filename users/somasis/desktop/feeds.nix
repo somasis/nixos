@@ -380,6 +380,12 @@ in
           tags = [ "computer" ];
         }
 
+        # Music
+        {
+          url = "https://constantlyhating.substack.com/feed";
+          tags = [ "music" ];
+        }
+
         # OpenStreetMap
         {
           url = "\"exec:${discardContent} https://www.weeklyosm.eu/feed\"";
