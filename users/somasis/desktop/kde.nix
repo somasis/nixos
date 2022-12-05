@@ -77,12 +77,4 @@
   #     "share/RecentDocuments"
   #   ];
   # };
-
-  # Disable on Wayland
-  systemd.user.services.clipmenu.Unit.ConditionEnvironment = [ "!WAYLAND_DISPLAY" ];
-  systemd.user.services.dunst.Unit.ConditionEnvironment = [ "!WAYLAND_DISPLAY" ];
-  systemd.user.services.picom.Unit.ConditionEnvironment = [ "!WAYLAND_DISPLAY" ];
-  systemd.user.services.xbanish.Unit.ConditionEnvironment = [ "!WAYLAND_DISPLAY" ];
-  systemd.user.services.xidlehook.Unit.ConditionEnvironment = [ "!WAYLAND_DISPLAY" ];
-  systemd.user.services.xss-lock.Unit.ConditionEnvironment = [ "!WAYLAND_DISPLAY" ];
 }
