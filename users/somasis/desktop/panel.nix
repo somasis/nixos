@@ -5,15 +5,10 @@
   home.packages = [
     # panel
     pkgs.lemonbar-xft
-    pkgs.bspwm
     pkgs.procps
-
-    # panel-bspwm
-    pkgs.bspwm
 
     # panel-title
     pkgs.xtitle
-    pkgs.bspwm
     pkgs.xdotool
 
     # panel-music
@@ -70,14 +65,28 @@
     };
     Install.WantedBy = [ "root-windows.target" ];
 
-    Service = {
-      Type = "simple";
-      ExecStart = [ "${config.home.homeDirectory}/bin/panel" ];
-      ExecStartPost = [ "${pkgs.bspwm}/bin/bspc config -m primary top_padding 48" ];
-      ExecStopPost = [ "${pkgs.bspwm}/bin/bspc config -m primary top_padding 0" ];
-    };
+    Service =
+      let
+        bspc = "${config.xsession.windowManager.bspwm.package}/bin/bspc";
+        settings = config.xsession.windowManager.bspwm.settings;
+      in
+      {
+        Type = "simple";
+        ExecStart = [ "${config.home.homeDirectory}/bin/panel" ];
+        ExecStartPost = [
+          "${bspc} config top_padding ${builtins.toString settings.top_padding}"
+          "${bspc} config border_width ${builtins.toString settings.border_width}"
+          "${bspc} config window_gap ${builtins.toString settings.window_gap}"
+        ];
+        ExecStopPost = [
+          "${bspc} config top_padding 0"
+          "${bspc} config border_width 0"
+          "${bspc} config window_gap 0"
+        ];
 
-    Service.Restart = "on-failure";
+        Restart = "on-failure";
+      };
+
     Unit.StartLimitInterval = 0;
   };
 }
