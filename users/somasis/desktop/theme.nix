@@ -169,17 +169,20 @@
   home.sessionVariables = {
     QT_AUTO_SCREEN_SCALE_FACTOR = 0;
     QT_AUTO_SCREEN_SCALE_FACTORS = 1.5;
+
+    QT_STYLE_OVERRIDE = "${config.qt.style.name}"; # TODO: why is this necessary
+
     # QT_QPA_PLATFORMTHEME = "qt5ct";
-    #   QT_SCALE_FACTOR = "1.5";
-    #   QT_FONT_DPI = config.xresources.properties."Xft.dpi";
-    #   QT_AUTO_SCREEN_SCALE_FACTOR=0 QT_SCALE_FACTOR= QT_SCREEN_SCALE_FACTORS=1.5 QT_FONT_DPI=
+    # QT_SCALE_FACTOR = "1.5";
+    # QT_FONT_DPI = config.xresources.properties."Xft.dpi";
+    # QT_AUTO_SCREEN_SCALE_FACTOR=0 QT_SCALE_FACTOR= QT_SCREEN_SCALE_FACTORS=1.5 QT_FONT_DPI=
   };
 
   qt = {
     enable = true;
-
-    #   platformTheme = "gtk";
-    style.name = "kvantum";
-    style.package = pkgs.libsForQt5.kvantum;
+    style = {
+      name = "kvantum";
+      package = pkgs.libsForQt5.kvantum;
+    };
   };
 }

@@ -23,6 +23,9 @@
       "argb"
       "focused"
       "n:e:stw"
+
+      # Kvantum
+      "(_NET_WM_WINDOW_TYPE@:a *= 'MENU' || _NET_WM_WINDOW_TYPE@:a *= 'COMBO')"
     ];
 
     settings = {
@@ -46,6 +49,9 @@
         notification = { redir-ignore = true; };
         dock = { clip-shadow-above = false; };
       };
+
+      # Kvantum
+      blur-background-exclude = [ "(_NET_WM_WINDOW_TYPE@:a *= 'MENU' || _NET_WM_WINDOW_TYPE@:a *= 'COMBO')" ];
     };
   };
 
