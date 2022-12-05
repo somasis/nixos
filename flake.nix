@@ -16,7 +16,7 @@
     flake.url = "github:gytis-ivaskevicius/flake-utils-plus";
 
     nixos.url = "github:nixos/nixpkgs?ref=nixos-unstable";
-    nixosStable.url = "github:nixos/nixpkgs?ref=nixos-22.05";
+    nixosStable.url = "github:nixos/nixpkgs?ref=nixos-22.11";
     nixosHardware.url = "github:nixos/nixos-hardware";
 
     lollypops.url = "github:pinpox/lollypops";
@@ -85,6 +85,10 @@
     repluggedThemeCustom.url = "path:/home/somasis/src/discord-theme-custom";
     repluggedThemeIrc.flake = false;
     repluggedThemeIrc.url = "github:somasis/discord-theme-irc";
+
+    hyprland.flake = true;
+    hyprland.url = "github:hyprwm/Hyprland";
+    hyprland.inputs.nixpkgs.follows = "nixos";
 
     adblockEasyList = {
       flake = false;
@@ -193,10 +197,11 @@
           homeManager.nixosModules.home-manager
           {
             home-manager = {
-              # sharedModules = with inputs; [
-              #   # plasmaManager.homeManagerModules.plasma-manager
-              #   # nixMinecraft.nixosModules.home-manager.minecraft
-              # ];
+              sharedModules = with inputs; [
+                # plasmaManager.homeManagerModules.plasma-manager
+                # nixMinecraft.nixosModules.home-manager.minecraft
+                hyprland.homeManagerModules.default
+              ];
 
               verbose = true;
 
