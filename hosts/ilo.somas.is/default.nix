@@ -153,7 +153,7 @@
 
   services.udisks2.enable = true;
 
-  system.stateVersion = "21.11";
+  system.stateVersion = "22.11";
 
   # services.xserver.desktopManager = {
   #   plasma5 = {
