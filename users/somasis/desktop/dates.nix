@@ -77,34 +77,21 @@ in
 
   home.packages = [ dates ];
 
-  systemd.user.services.stw-dates = {
-    Unit = {
-      Description = "Show other timezones on desktop";
-      PartOf = [ "stw.target" ];
-      StartLimitInterval = 0;
-    };
-    Install.WantedBy = [ "stw.target" ];
+  somasis.chrome.stw.widgets = [
+    {
+      command = ''
+        ${dates}/bin/dates -L -f "%-10s%s\n" +"%Y-%m-%d %I:%M %p"
+      '';
 
-    Service = {
-      Type = "simple";
-      ExecStart =
-        let
-          stw-dates = ''
-            ${dates}/bin/dates -L -f "%-10s%s\n" +"%Y-%m-%d %I:%M %p"
-          '';
-        in
-        ''
-          ${pkgs.stw}/bin/stw \
-              -F "monospace:style=heavy:size=10" \
-              -b "${config.xresources.properties."*color4"}" \
-              -f "${config.xresources.properties."*darkForeground"}" \
-              -A .15 \
-              -x -24 -y 72 \
-              -B 12 \
-              -p 60 \
-              ${pkgs.writeShellScript "dates" stw-dates}
-        '';
-    };
-  };
+      text.font = "monospace:style=heavy:size=10";
+      window.color = config.xresources.properties."*color4";
+      text.color = config.xresources.properties."*darkForeground";
+      window.opacity = 0.15;
+      window.position.x = -24;
+      window.position.y = 72;
+      window.padding = 12;
+      update = 60;
+    }
+  ];
 }
 

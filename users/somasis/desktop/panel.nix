@@ -61,9 +61,9 @@
   systemd.user.services.panel = {
     Unit = {
       Description = "lemonbar(1) based panel";
-      PartOf = [ "root-windows.target" ];
+      PartOf = [ "chrome.target" ];
     };
-    Install.WantedBy = [ "root-windows.target" ];
+    Install.WantedBy = [ "chrome.target" ];
 
     Service =
       let

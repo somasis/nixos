@@ -1,5 +1,6 @@
 {
   imports = [
+    ./chrome
     ./tunnels.nix
   ];
 }

@@ -107,9 +107,11 @@ in
       Service = {
         Type = "oneshot";
         ExecStart = [ "${wttr}/bin/wttr" ];
-        ExecStopPost = [ "-${pkgs.systemd}/bin/systemctl reload --user stw-wttr.service" ];
+        ExecStopPost = [ "-${pkgs.systemd}/bin/systemctl reload --user stw@wttr.service" ];
         StandardOutput = "null";
-      };
+      }
+      // (lib.optionalAttrs (nixosConfig.networking.networkmanager.enable) { ExecStartPre = [ "${pkgs.networkmanager}/bin/nm-online -q" ]; })
+      ;
     };
 
     timers.wttr = {
@@ -126,31 +128,30 @@ in
         Persistent = true;
       };
     };
-
-    services.stw-wttr = {
-      Unit = {
-        Description = "Display weather at the current location on the desktop";
-        StartLimitInterval = 0;
-      };
-      Install.WantedBy = [ "stw.target" ];
-      Unit.PartOf = [ "stw.target" ];
-
-      Service = {
-        Type = "simple";
-        ExecStart = [
-          ''
-            ${pkgs.stw}/bin/stw \
-              -F 'monospace:style=heavy:size=10' \
-              -f "${config.xresources.properties."*darkForeground"}" \
-              -A 0 \
-              -x 24 -y 72 \
-              -B 12 \
-              -p 60 \
-              cat "%C/wttr/forecast.txt"
-          ''
-        ];
-        ExecReload = [ "${pkgs.coreutils}/bin/kill -ALRM $MAINPID" ];
-      } // (lib.optionalAttrs (nixosConfig.networking.networkmanager.enable) { ExecStartPre = [ "${pkgs.networkmanager}/bin/nm-online -q" ]; });
-    };
   };
+
+  somasis.chrome.widgets.stw = [
+    {
+      name = "wttr";
+
+      text = {
+        font = "monospace:style=heavy:size=10";
+        color = config.xresources.properties."*darkForeground";
+      };
+
+      window = {
+        opacity = 0;
+        position = {
+          x = 24;
+          y = 72;
+        };
+
+        padding = 12;
+      };
+
+      update = 60;
+
+      command = "${pkgs.coreutils}/bin/cat %C/wttr/forecast.txt";
+    }
+  ];
 }
