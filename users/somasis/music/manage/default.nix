@@ -320,7 +320,12 @@ in
       plugins = [ "noimport" ]
         ++ lib.optional config.services.mpd.enable "mpdupdate";
     }
-    // lib.optionalAttrs config.services.mpd.enable { mpd.host = config.services.mpd.network.listenAddress; }
+    // lib.optionalAttrs config.services.mpd.enable {
+      mpd = {
+        host = config.services.mpd.network.listenAddress;
+        port = config.services.mpd.network.port;
+      };
+    }
     ;
   };
 

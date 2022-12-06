@@ -99,7 +99,7 @@ in
   services.mpd-discord-rpc = {
     enable = config.services.mpd.enable;
     settings = {
-      hosts = [ config.services.mpd.network.listenAddress ];
+      hosts = [ "${config.services.mpd.network.listenAddress}:${builtins.toString config.services.mpd.network.port}" ];
       format = {
         details = "$title";
         state = "$artist - $title ($album)";

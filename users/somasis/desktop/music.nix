@@ -39,6 +39,7 @@ let
 
       # Collection
       Connection.host = config.services.mpd.network.listenAddress;
+      Connection.port = config.services.mpd.network.port;
       Connection.dir = config.services.mpd.musicDirectory;
 
       Connection.allowLocalStreaming = true; # Local file playback: "via-in-built HTTP server"

@@ -16,6 +16,7 @@ let
       cat <<EOF
       log = -
       host = ${config.services.mpd.network.listenAddress}
+      port = ${builtins.toString config.services.mpd.network.port}
       verbose = 2
 
       [last.fm]
@@ -49,7 +50,7 @@ in
   services.mpd = {
     enable = true;
 
-    network.listenAddress = "${xdgRuntimeDir}/mpd/socket";
+    network.startWhenNeeded = true;
 
     musicDirectory = "${config.xdg.userDirs.music}/lossy";
     playlistDirectory = "${config.xdg.userDirs.music}/playlists";
@@ -93,7 +94,10 @@ in
     "/persist${config.home.homeDirectory}".directories = [ "share/mpd" ];
   };
 
-  home.sessionVariables.MPD_HOST = config.services.mpd.network.listenAddress;
+  home.sessionVariables = {
+    MPD_HOST = config.services.mpd.network.listenAddress;
+    MPD_PORT = config.services.mpd.network.port;
+  };
 
   home.packages = [ mpdscribble ];
 
