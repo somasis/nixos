@@ -12,26 +12,40 @@ let
       config.programs.password-store.package
     ];
 
-    text = ''
-      cat <<EOF
-      log = -
-      host = ${config.services.mpd.network.listenAddress}
-      port = ${builtins.toString config.services.mpd.network.port}
-      verbose = 2
+    text =
+      let
+        mpdscribbleConf = lib.generators.toINIWithGlobalSection { } {
+          globalSection = {
+            log = "-";
+            host = config.services.mpd.network.listenAddress;
+            port = builtins.toString config.services.mpd.network.port;
+            verbose = 2;
+          };
 
-      [last.fm]
-      url = https://post.audioscrobbler.com/
-      username = kyliesomasis
-      password = $(pass www/last.fm/kyliesomasis | tr -d '\n' | md5sum - | cut -d' ' -f1)
-      journal = ${config.xdg.cacheHome}/mpdscribble/last.fm.journal
+          sections = {
+            "last.fm" = {
+              journal = "${config.xdg.cacheHome}/mpdscribble/last.fm.journal";
+              url = "https://post.audioscrobbler.com/";
 
-      [listenbrainz]
-      url = http://proxy.listenbrainz.org
-      username = Somasis
-      password = $(pass ${nixosConfig.networking.fqdn}/mpdscribble/listenbrainz.org)
-      journal = ${config.xdg.cacheHome}/mpdscribble/listenbrainz.journal
-      EOF
-    '';
+              username = "kyliesomasis";
+              password = "$(pass www/last.fm/kyliesomasis | tr -d '\n' | md5sum - | cut -d' ' -f1)";
+            };
+
+            "listenbrainz" = {
+              journal = "${config.xdg.cacheHome}/mpdscribble/listenbrainz.journal";
+              url = "http://proxy.listenbrainz.org";
+
+              username = "Somasis";
+              password = "$(pass ${nixosConfig.networking.fqdn}/mpdscribble/listenbrainz.org)";
+            };
+          };
+        };
+      in
+      ''
+        cat <<EOF
+        ${mpdscribbleConf}
+        EOF
+      '';
   };
 
   mpdscribble = pkgs.symlinkJoin {
