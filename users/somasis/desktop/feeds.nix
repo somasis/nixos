@@ -75,21 +75,36 @@ in
                   -d '//feed/entry/content'
         '';
 
-        # generateRedacted = pkgs.writeShellScript "generate-redacted" ''
-        #   entry=www/redacted.ch
+        generateRedacted = pkgs.writeShellScript "generate-redacted" ''
+          PATH=${lib.makeBinPath [ pkgs.curl config.programs.password-store.package ]}:"$PATH"
 
-        #   url="$1?"
-        #   for k in uid auth passkey authkey; do
-        #       url="$k=$(${config.programs.password-store.package}/bin/pass meta "$entry" "$k")&"
-        #   done
-        #   url=${url%&}
+          unset http_proxy HTTPS_PROXY ALL_PROXY
 
-        #   autocurl \
-        #         -K - \
-        #         --noproxy "*" \
-        #         -Lf \
-        #         <<< "$url"
-        # '';
+          entry=www/redacted.ch
+
+          url="$1"
+          url+="&user=$(pass meta "$entry" uid)"
+          url+="&auth=$(pass meta "$entry" auth)"
+          url+="&passkey=$(pass meta "$entry" passkey)"
+          url+="&authkey=$(pass meta "$entry" authkey)"
+
+          curl \
+              --disable \
+              --silent \
+              --show-error \
+              --fail \
+              --globoff \
+              --disallow-username-in-url \
+              --connect-timeout 60 \
+              --max-time 60 \
+              --retry 10 \
+              --limit-rate 512K \
+              --parallel \
+              --parallel-max 4 \
+              --noproxy '*' \
+              -K - \
+              <<< "url = $url"
+        '';
 
         generateReddit = pkgs.writeShellScript "generate-reddit" ''
           umask 0077
@@ -279,17 +294,6 @@ in
           tags = [ "blog" "computer" ];
         }
 
-        # Tumblr
-        {
-          url = "https://phidica.tumblr.com/rss";
-          title = "Phidica";
-          tags = [ "blog" "friends" "tumblr" ];
-        }
-        {
-          url = "https://control--panel.com/rss";
-          tags = [ "blog" "computer" "tumblr" ];
-        }
-
         # Aggregators
         {
           url = "https://tilde.news/rss";
@@ -312,46 +316,15 @@ in
           tags = [ "aggregators" "NixOS" ];
         }
 
-        # Forums
+        # Comics
         {
-          url = "https://discourse.nixos.org/c/announcements/8.rss";
-          title = "NixOS Discourse: announcements";
-          tags = [ "NixOS" ];
-        }
-
-        # News
-        {
-          url = "https://lwn.net/headlines/newrss";
-          tags = [ "news" "computer" ];
+          url = "https://xkcd.com/atom.xml";
+          tags = [ "comics" ];
         }
         {
-          url = "https://www.currentaffairs.org/feed";
-          tags = [ "news" ];
-        }
-        {
-          url = "https://theappalachianonline.com/feed/";
-          title = "The Appalachian";
-          tags = [ "news" "Appalachian State University" "Boone, NC" ];
-        }
-        {
-          url = "https://www.wataugademocrat.com/search/?f=rss&t=article&c=news/local&l=50&s=start_time&sd=desc";
-          title = "Watauga Democrat: local news";
-          tags = [ "news" "Boone, NC" ];
-        }
-        {
-          url = "https://www.wataugademocrat.com/search/?f=rss&t=article&c=news/asu_news&l=50&s=start_time&sd=desc";
-          title = "Watauga Democrat: Appalachian State University news";
-          tags = [ "Appalachian State University" "Boone, NC" "news" ];
-        }
-        {
-          url = "https://wataugaonline.com/feed/";
-          title = "Watauga Online";
-          tags = [ "Boone, NC" "news" ];
-        }
-        {
-          url = "https://feeds.feedburner.com/HCPress";
-          title = "High Country Press";
-          tags = [ "Boone, NC" "news" ];
+          url = "https://rakhim.org/honestly-undefined/index.xml";
+          title = "Honestly Undefined";
+          tags = [ "comics" ];
         }
 
         # Computers
@@ -380,10 +353,97 @@ in
           tags = [ "computer" ];
         }
 
+        # Forums
+        {
+          url = "https://discourse.nixos.org/c/announcements/8.rss";
+          title = "NixOS Discourse: announcements";
+          tags = [ "NixOS" ];
+        }
+
         # Music
         {
           url = "https://constantlyhating.substack.com/feed";
           tags = [ "music" ];
+        }
+        {
+          url = ''"exec:${generateRedacted} https://redacted.ch/feeds.php?feed=feed_news"'';
+          title = "Redacted: news";
+          tags = [ "music" "redacted" ];
+        }
+        {
+          url = ''"exec:${generateRedacted} https://redacted.ch/feeds.php?feed=feed_blog"'';
+          title = "Redacted: blog";
+          tags = [ "music" "redacted" ];
+        }
+
+        # News
+        {
+          url = "https://lwn.net/headlines/newrss";
+          tags = [ "news" "computer" ];
+        }
+        {
+          url = "https://www.democracynow.org/democracynow.rss";
+          tags = [ "news" ];
+        }
+        {
+          url = "https://www.currentaffairs.org/feed";
+          tags = [ "news" ];
+        }
+        {
+          url = "https://theappalachianonline.com/feed/";
+          title = "The Appalachian";
+          tags = [ "news" "Appalachian State University" "Boone, NC" ];
+        }
+        {
+          url = "https://www.townofboone.net/RSSFeed.aspx?ModID=63&CID=All-0";
+          title = "Town of Boone: alerts";
+          tags = [ "Boone, NC" "notification" ];
+        }
+        {
+          url = "https://www.exploreboone.com/event/rss/";
+          title = "Explore Boone: events";
+          tags = [ "Boone, NC" ];
+        }
+        {
+          url = "https://www.wataugademocrat.com/search/?f=rss&t=article&c=news/local&l=50&s=start_time&sd=desc";
+          title = "Watauga Democrat: local news";
+          tags = [ "news" "Boone, NC" ];
+        }
+        {
+          url = "https://www.wataugademocrat.com/classifieds/?f=rss&s=start_time&sd=asc";
+          title = "Watauga Democrat: classifieds";
+          tags = [ "Boone, NC" ];
+        }
+        {
+          url = "https://www.wataugademocrat.com/search/?f=rss&t=article&c=news/asu_news&l=50&s=start_time&sd=desc";
+          title = "Watauga Democrat: Appalachian State University news";
+          tags = [ "Appalachian State University" "Boone, NC" "news" ];
+        }
+        {
+          url = "https://wataugaonline.com/feed/";
+          title = "Watauga Online";
+          tags = [ "Boone, NC" "news" ];
+        }
+        {
+          url = "https://feeds.feedburner.com/HCPress";
+          title = "High Country Press";
+          tags = [ "Boone, NC" "news" ];
+        }
+
+        # Notifications
+        {
+          url =
+            let
+              generate = pkgs.writeShellScript "generate" ''
+                ${config.programs.password-store.package}/bin/pass \
+                    www/github.com/somasis.private.atom \
+                    | ${pkgs.coreutils}/bin/tr -d '\n' \
+                    | autocurl -Lf -G --data-urlencode "token@-" "https://github.com/somasis.private.atom"
+              '';
+            in
+            "exec:${generate}";
+          title = "GitHub: timeline";
+          tags = [ "notification" ];
         }
 
         # OpenStreetMap
@@ -422,15 +482,15 @@ in
           tags = [ "development" "OpenStreetMap" ];
         }
 
-        # Comics
+        # Tumblr
         {
-          url = "https://xkcd.com/atom.xml";
-          tags = [ "comics" ];
+          url = "https://phidica.tumblr.com/rss";
+          title = "Phidica";
+          tags = [ "blog" "friends" "tumblr" ];
         }
         {
-          url = "https://rakhim.org/honestly-undefined/index.xml";
-          title = "Honestly Undefined";
-          tags = [ "comics" ];
+          url = "https://control--panel.com/rss";
+          tags = [ "blog" "computer" "tumblr" ];
         }
 
         # System
@@ -485,45 +545,7 @@ in
           title = "kijetesantakalu o!";
           tags = [ "toki pona" "blog" "comics" ];
         }
-        {
-          url =
-            let
-              generate = pkgs.writeShellScript "generate" ''
-                ${config.programs.password-store.package}/bin/pass \
-                    www/github.com/somasis.private.atom \
-                    | ${pkgs.coreutils}/bin/tr -d '\n' \
-                    | autocurl -Lf -G --data-urlencode "token@-" "https://github.com/somasis.private.atom"
-              '';
-            in
-            "exec:${generate}";
-          title = "GitHub: timeline";
-          tags = [ "notification" ];
-        }
-        # {
-        #   url = ''"exec:${generateRedacted} https://redacted.ch/feeds.php?feed=feed_news"'';
-        #   title = "Redacted: news";
-        #   tags = [ "redacted" ];
-        # }
-        # {
-        #   url = ''"exec:${generateRedacted} https://redacted.ch/feeds.php?feed=feed_blog"'';
-        #   title = "Redacted: blog";
-        #   tags = [ "redacted" ];
-        # }
-        {
-          url = "https://www.wataugademocrat.com/classifieds/?f=rss&s=start_time&sd=asc";
-          title = "Watauga Democrat: classifieds";
-          tags = [ "Boone, NC" ];
-        }
-        {
-          url = "https://www.townofboone.net/RSSFeed.aspx?ModID=63&CID=All-0";
-          title = "Town of Boone: alerts";
-          tags = [ "Boone, NC" "notification" ];
-        }
-        {
-          url = "https://www.exploreboone.com/event/rss/";
-          title = "Explore Boone: events";
-          tags = [ "Boone, NC" ];
-        }
+
       ];
   };
 
