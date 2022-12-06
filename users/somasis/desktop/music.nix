@@ -24,13 +24,124 @@ let
       ;
     }
     {
-      # # TODO this in setting particular should be functionalized, this is annoying
-      # CustomActions = {
-      #   # %f file list, %d directory list, else list of files is appended to command
-      #   count = 1;
-      #   0_name = "Open lossless";
-      #   0_cmd = "${beet-show-lossless} %d";
-      # };
+      # TODO this in setting particular should be functionalized, this is annoying
+      CustomActions =
+        let
+          envtag = pkgs.writeShellScript "envtag" ''
+            ${pkgs.ffmpeg-full}/bin/ffprobe -loglevel -32 \
+                -of json \
+                -select_streams a \
+                -show_format \
+                -show_entries stream_tags \
+                -i "$1" \
+                | ${config.programs.jq.package}/bin/jq -Sr '
+                    .format.tags
+                        + {
+                            "format": .format.format_name,
+                            "filename": .format.filename,
+                            "size": (.format.size | tonumber),
+                            "duration": (.format.duration | tonumber),
+                            "bit_rate": (.format.bit_rate | tonumber)
+                        }
+                        + (.streams | map(.tags) | add)
+                        | with_entries(
+                            .key |= (ascii_downcase | gsub(" "; "_"))
+                                | (.value | (tonumber? // .)) as $value
+                                | .value = $value
+                        )
+                        | keys[] as $k
+                        | ("export " + ("\($k)=\(."\($k)")" | @sh))
+                '
+          '';
+
+          deleteCoverArt = pkgs.writeShellScript "cantata-delete-cover-art" ''
+            ${pkgs.findutils}/bin/find "$@" -name 'cover.*' -delete
+            ${pkgs.coreutils}/bin/rm -rf "''${XDG_CACHE_HOME:=$HOME/.cache}/cantata/covers-scaled"
+          '';
+
+          beetsOpen = pkgs.writeShellScript "cantata-beets-open" ''
+            set -eu -o pipefail
+
+            {
+                eval "$(${envtag} "$1")"
+
+                for a in \
+                    beet list -f '$path' -a \
+                        "mb_albumartistid:$musicbrainz_albumartistid" \
+                        "mb_albumid:$musicbrainz_albumid"; do
+                        printf '%s ' "$(${pkgs.s6-portable-utils}/bin/s6-quote -d "'" -- "$a")"
+                done
+                printf '\n'
+            } \
+                | ${pkgs.openssh}/bin/ssh spinoza sh -l - \
+                | ${pkgs.xe}/bin/xe -N1 ${pkgs.xdg-utils}/bin/xdg-open
+          '';
+
+          musicbrainzOpen = pkgs.writeShellScript "cantata-musicbrainz-open" ''i
+            set -eu -o pipefail
+
+            tag_type="$1"
+            url="$1"
+            case "$1" in
+                albumartist) url=artist; set -- "$1" "$2" ;;
+                recording) tag_type=track ;;
+                release) tag_type=album; set -- "$1" "$2" ;;
+                releasegroup) url=release-group; set -- "$1" "$2" ;;
+                releasetrack) url=track ;;
+            esac
+
+            shift
+
+            urls=()
+
+            for f; do
+                eval "$(${envtag} "$f")"
+                eval "id=\"\$musicbrainz_''${tag_type}id\""
+
+                urls+=( "https://musicbrainz.org/$url/$id" )
+            done
+
+            printf '%s\0' "''${urls[@]}" | ${pkgs.xe}/bin/xe -0 -N1 ${pkgs.xdg-utils}/bin/xdg-open
+          '';
+
+          youtubeSearchTrack = pkgs.writeShellScript "cantata-youtube-search-track" ''
+            set -eu -o pipefail
+
+            eval "$(${envtag} "$1")"
+            url=$(
+                ${config.programs.jq.package}/bin/jq -n '
+                    ("\(env.artist_credit // env.artist) \(env.title)") as $query
+                        | "https://www.youtube.com/results?search_query=\($query | @uri)"
+                '
+            )
+            ${pkgs.xdg-utils}/bin/xdg-open "$url"
+          '';
+        in
+        {
+          # %f file list, %d directory list, else list of files is appended to command
+          "0_cmd" = "${deleteCoverArt} %d";
+          "0_name" = "Delete cover art";
+          "1_cmd" = "${beetsOpen} %f";
+          "1_name" = "beets: open in library";
+          "2_cmd" = "${musicbrainzOpen} albumartist %f";
+          "2_name" = "MusicBrainz: album artist";
+          "3_cmd" = "${musicbrainzOpen} artist %f";
+          "3_name" = "MusicBrainz: artist";
+          "4_cmd" = "${musicbrainzOpen} recording %f";
+          "4_name" = "MusicBrainz: recording";
+          "5_cmd" = "${musicbrainzOpen} releasegroup %f";
+          "5_name" = "MusicBrainz: release group";
+          "6_cmd" = "${musicbrainzOpen} releasetrack %f";
+          "6_name" = "MusicBrainz: release track";
+          "7_cmd" = "${musicbrainzOpen} release %f";
+          "7_name" = "MusicBrainz: release";
+          "8_cmd" = "${musicbrainzOpen} work %f";
+          "8_name" = "MusicBrainz: work";
+          "9_cmd" = "${youtubeSearchTrack} %f";
+          "9_name" = "YouTube: search for track";
+
+          count = 8;
+        };
 
       General.version = pkgs.cantata.version; # necessary to avoid the first-start dialog
 
@@ -146,7 +257,9 @@ let
     });
 
   cantata = pkgs.cantata.override {
+    # Required for custom actions functionality
     withTaglib = false;
+
     withReplaygain = false;
     withMtp = false;
     withOnlineServices = false;
