@@ -48,6 +48,7 @@
     pkgs.ltrace
     pkgs.moreutils
     pkgs.nq
+    pkgs.outils
     pkgs.pigz
     pkgs.pv
     pkgs.rlwrap
@@ -61,16 +62,13 @@
     pkgs.s6-rc
     pkgs.snooze
     pkgs.strace
+    pkgs.teip
     pkgs.uq
     pkgs.xe
     pkgs.xsv
     pkgs.xz
     pkgs.yq
     pkgs.zstd
-
-    # TODO Re-add once NixOS 22.11
-    # pkgs.outils
-    # pkgs.teip
 
     # autocurl - curl for use by background/automatically running services
     (
