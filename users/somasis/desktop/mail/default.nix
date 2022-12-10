@@ -127,12 +127,11 @@ in
         };
 
         timers."offlineimap-${systemdName n}" = {
-          Unit.Description = "Synchronize IMAP boxes for account ${n} every hour and fifteen minutes after startup";
+          Unit.Description = "Synchronize IMAP boxes for account ${n} every two hours, and fifteen minutes after startup";
           Timer = {
-            OnCalendar = "hourly";
+            OnCalendar = "1/2:00:00";
             OnStartupSec = "900";
             Persistent = true;
-            AccuracySec = "5m";
             RandomizedDelaySec = "1m";
           };
 
