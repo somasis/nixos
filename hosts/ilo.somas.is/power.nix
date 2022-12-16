@@ -1,4 +1,4 @@
-# { pkgs, ... }:
+{ pkgs, ... }:
 {
   services.logind = {
     lidSwitch = "suspend";
@@ -32,11 +32,9 @@
   # Automatically `nice` programs for better performance.
   services.ananicy = {
     enable = true;
-
-    # TODO Use the fast C++ reimplementation of ananicy.
-    # package = pkgs.ananicy-cpp;
+    package = pkgs.ananicy-cpp;
   };
 
   # ananicy spams the log constantly
-  # systemd.services.ananicy-cpp.serviceConfig.StandardOutput = "null";
+  systemd.services.ananicy-cpp.serviceConfig.StandardOutput = "null";
 }
