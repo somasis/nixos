@@ -141,7 +141,7 @@
 
       "home-somasis-mnt-sftp-spinoza.7596ff.com_raid" =
         let
-          What = "somasis@spinoza.7596ff.com:/mnt/raid/somasis";
+          What = "somasis@spinoza.7596ff.com:/mnt/raid";
           Where = "${config.home.homeDirectory}/mnt/sftp/spinoza.7596ff.com_raid";
         in
         {
