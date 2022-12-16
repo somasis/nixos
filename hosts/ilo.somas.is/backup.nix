@@ -43,6 +43,14 @@ let
 
     extraArgs = "--lock-wait 600";
     extraCreateArgs = "--stats --exclude-if-present '.stfolder' --exclude-if-present '.stversions'";
+
+    # Force borg's CPU usage to remain low.
+    preHook = ''
+      borg() {
+          command ${pkgs.limitcpu}/bin/cpulimit -qf -l 50 -- borg "$@"
+      }
+    '';
+
     paths = [ "/persist" "/log" ];
     persistentTimer = true;
 
