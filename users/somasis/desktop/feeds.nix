@@ -62,20 +62,17 @@ in
 
     urls =
       let
-        discardContent = pkgs.writeShellScript "discard-content" ''
-          umask 0077
+        discardContent = f: ''"filter:''
+          + builtins.toString (pkgs.writeShellScript "discard-content" ''
+          ${pkgs.xmlstarlet}/bin/xml ed \
+            -d '//channel/item/description' \
+            -d '//channel/item/content:encoded' \
+            -d '//feed/entry/content'
+        '')
+          + '':${f}"'';
 
-          feed="$1"
-          shift
-
-          autocurl -Lf "''${feed}" \
-              | ${pkgs.xmlstarlet}/bin/xml ed \
-                  -d '//channel/item/description' \
-                  -d '//channel/item/content:encoded' \
-                  -d '//feed/entry/content'
-        '';
-
-        generateRedacted = pkgs.writeShellScript "generate-redacted" ''
+        feedRedacted = f: ''"exec:''
+          + builtins.toString (pkgs.writeShellScript "generate-redacted" ''
           PATH=${lib.makeBinPath [ pkgs.curl config.programs.password-store.package ]}:"$PATH"
 
           unset http_proxy HTTPS_PROXY ALL_PROXY
@@ -104,7 +101,8 @@ in
               --noproxy '*' \
               -K - \
               <<< "url = $url"
-        '';
+        '')
+          + '' https://redacted.ch/feeds.php?feed=${f}"'';
 
         generateReddit = pkgs.writeShellScript "generate-reddit" ''
           umask 0077
@@ -143,70 +141,10 @@ in
           '
         '';
 
-        generateHomeManagerNews = pkgs.writeShellApplication {
-          name = "generate-home-manager-news";
-
-          runtimeInputs = [
-            config.programs.jq.package
-            pkgs.yq
-          ];
-
-          text =
-            let
-              jqFilterNews = (pkgs.writeScript "jq-filter-news" ''
-                #!${config.programs.jq.package}/bin/jq -f
-                map(select(.condition == true))
-                    | sort_by(.time)
-                    | map(
-                        . + {
-                        # Generate titles for feed items
-                        #   1. Strip any ending punctuation (for when it's a short message)
-                        #   2. Crudely un-hardwrap the first line of the message
-                        #   3. Keep only the first line of the message
-                        #   4. Remove any remaining ending punctuation
-                          title: (
-                              .message
-                                  | sub("\\.?\n$|:\n.*"; ""; "p")
-                                  | sub(
-                                      "(?<pre>[^\\s]+)\n(?<suf>[^\n]+).*";
-                                      "\(.pre) \(.suf)";
-                                      "pg"
-                                  )
-                                  | rtrimstr(".")
-                          )
-                        }
-                    )
-                    | map_values(.id = (.time + .message | @base64))
-                    # Now, shape our input in terms that yq can output as xml, and that
-                    | {
-                        feed: {
-                          "@xmlns": "http://www.w3.org/2005/Atom",
-                          title: "home-manager",
-                          updated: (map(.time) | sort | last),
-                          entry: map(
-                            {
-                              id,
-                              updated: .time,
-                              title: { "@text": "text", "#text": .title },
-                              content: { "@type": "text/plain", "#text": .message }
-                            }
-                          )
-                        }
-                    }
-              '');
-            in
-            ''
-              umask 0077
-
-              # don't lint the json declaration
-              # shellcheck disable=all
-              {
-                  ${lib.toShellVar "json" (builtins.toJSON config.news.entries)}
-                  ${lib.toShellVar "jqFilterNews" jqFilterNews}
-              }
-
-              jq -f "$jqFilterNews" <<<"$json" | yq --xml-output | xq --xml-output --xml-dtd
-            '';
+        feedReddit = { subreddit, tags ? [ ] }: {
+          url = "https://www.reddit.com/r/${subreddit}/.rss";
+          title = "Reddit: /r/${subreddit}";
+          tags = [ "reddit" ] ++ tags;
         };
       in
       [
@@ -299,16 +237,6 @@ in
           url = "https://tilde.news/rss";
           tags = [ "aggregators" ];
         }
-        {
-          url = ''"exec:${generateReddit} \"tokipona+tokiponataso+mi_lon+sitelen_musi\""'';
-          title = "Reddit: toki pona";
-          tags = [ "reddit" "toki pona" ];
-        }
-        {
-          url = ''"exec:${generateReddit} \"mi_lon+sitelen_musi\""'';
-          title = "Reddit: sitelen musi pi toki pona";
-          tags = [ "reddit" "toki pona" ];
-        }
 
         {
           url = "https://discourse.nixos.org/c/links/12.rss";
@@ -366,12 +294,12 @@ in
           tags = [ "music" ];
         }
         {
-          url = ''"exec:${generateRedacted} https://redacted.ch/feeds.php?feed=feed_news"'';
+          url = feedRedacted "feed_news";
           title = "Redacted: news";
           tags = [ "music" "redacted" ];
         }
         {
-          url = ''"exec:${generateRedacted} https://redacted.ch/feeds.php?feed=feed_blog"'';
+          url = feedRedacted "feed_blog";
           title = "Redacted: blog";
           tags = [ "music" "redacted" ];
         }
@@ -448,7 +376,7 @@ in
 
         # OpenStreetMap
         {
-          url = "\"exec:${discardContent} https://www.weeklyosm.eu/feed\"";
+          url = discardContent "https://www.weeklyosm.eu/feed";
           title = "weeklyOSM";
           tags = [ "news" "OpenStreetMap" ];
         }
@@ -495,7 +423,7 @@ in
 
         # System
         { url = "https://nixos.org/blog/announcements-rss.xml"; tags = [ "computer" "NixOS" ]; }
-        { url = "exec:${generateHomeManagerNews}/bin/generate-home-manager-news"; tags = [ "computer" "NixOS" ]; }
+        { url = "file://${config.xdg.cacheHome}/newsboat/home-manager-news.atom"; tags = [ "computer" "NixOS" ]; title = "Home Manager"; }
 
         # YouTube
         {
@@ -546,8 +474,80 @@ in
           tags = [ "toki pona" "blog" "comics" ];
         }
 
+        (feedReddit { subreddit = "tokipona"; tags = [ "toki pona" ]; })
+        (feedReddit { subreddit = "tokiponataso"; tags = [ "toki pona" ]; })
+        (feedReddit { subreddit = "mi_lon"; tags = [ "toki pona" ]; })
+        (feedReddit { subreddit = "sitelen_musi"; tags = [ "toki pona" ]; })
       ];
   };
+
+  home.activation =
+    let
+      jqFilterNews = (pkgs.writeScript "jq-filter-news" ''
+        #!${config.programs.jq.package}/bin/jq -f
+        map(select(.condition == true))
+            | sort_by(.time)
+            | map(
+                . + {
+                # Generate titles for feed items
+                #   1. Strip any ending punctuation (for when it's a short message)
+                #   2. Crudely un-hardwrap the first line of the message
+                #   3. Keep only the first line of the message
+                #   4. Remove any remaining ending punctuation
+                  title: (
+                      .message
+                          | sub("\\.?\n$|:\n.*"; ""; "p")
+                          | sub(
+                              "(?<pre>[^\\s]+)\n(?<suf>[^\n]+).*";
+                              "\(.pre) \(.suf)";
+                              "pg"
+                          )
+                          | rtrimstr(".")
+                  )
+                }
+            )
+            | map_values(.id = (.time + .message | @base64))
+            # Now, shape our input in terms that yq can output as xml, and that
+            | {
+                feed: {
+                  "@xmlns": "http://www.w3.org/2005/Atom",
+                  title: "home-manager",
+                  updated: (map(.time) | sort | last),
+                  entry: map(
+                    {
+                      id,
+                      updated: .time,
+                      title: { "@text": "text", "#text": .title },
+                      content: { "@type": "text/plain", "#text": .message }
+                    }
+                  )
+                }
+            }
+      '');
+    in
+    {
+      generateHomeManagerNews = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
+        export PATH=${lib.makeBinPath [ config.programs.jq.package pkgs.yq ]}:"$PATH"
+        umask 0077
+
+        # don't lint the json declaration
+        # shellcheck disable=all
+        {
+            ${lib.toShellVar "json" (builtins.toJSON config.news.entries)}
+            ${lib.toShellVar "jqFilterNews" jqFilterNews}
+        }
+
+        [ -n "''${VERBOSE:-}" ] && set -x
+        [ -n "''${DRY_RUN:-}" ] && set -nv
+
+        jq -f "$jqFilterNews" <<<"$json" \
+            | yq --xml-output \
+            | xq --xml-output --xml-dtd \
+            > "${config.xdg.cacheHome}/newsboat/home-manager-news.atom"
+        touch "${config.xdg.cacheHome}/newsboat/home-manager-news.atom"
+      '';
+    };
+
 
   home.persistence."/cache${config.home.homeDirectory}".directories = [ "var/cache/newsboat" ];
 
