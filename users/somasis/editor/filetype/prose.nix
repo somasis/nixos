@@ -23,7 +23,9 @@ in
     {
       name = "WinSetOption";
       option = "filetype=(asciidoc|git-commit|mail|markdown)";
-      commands = ''set-option window lintcmd "${lint}"'';
+      commands = ''
+        set-option window lintcmd "${lint}"
+      '';
     }
   ];
 

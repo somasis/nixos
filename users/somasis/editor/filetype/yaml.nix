@@ -10,7 +10,9 @@ in
     {
       name = "WinSetOption";
       option = "filetype=yaml";
-      commands = ''set-option window lintcmd "${lint}"'';
+      commands = ''
+        set-option window lintcmd "${lint}"
+      '';
     }
   ];
 }

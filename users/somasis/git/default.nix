@@ -167,7 +167,9 @@
     {
       name = "WinSetOption";
       option = "filetype=git-.*";
-      commands = "set-option window autowrap_column 72";
+      commands = ''
+        set-option window autowrap_column 72
+      '';
     }
   ];
 

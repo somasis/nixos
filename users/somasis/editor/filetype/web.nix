@@ -39,7 +39,9 @@ in
     {
       name = "WinSetOption";
       option = "filetype=(javascript|yaml)";
-      commands = "set-option window formatcmd '${format}'";
+      commands = ''
+        set-option window formatcmd "${format}"
+      '';
     }
 
     # CSS
@@ -47,7 +49,7 @@ in
       name = "WinSetOption";
       option = "filetype=css";
       commands = ''
-        set-option window formatcmd '${format}'
+        set-option window formatcmd "${format}"
       '';
     }
 
@@ -55,7 +57,9 @@ in
     {
       name = "WinSetOption";
       option = "filetype=javascript";
-      commands = "set-option window lintcmd '${lintJavaScript}'";
+      commands = ''
+        set-option window lintcmd "${lintJavaScript}"
+      '';
     }
 
     # JSON
@@ -64,8 +68,8 @@ in
       option = "filetype=json";
       commands = ''
         set-option window tabstop 2
-        set-option window formatcmd '${formatJSON}'
-        set-option window lintcmd '${lintJSON}'
+        set-option window formatcmd "${formatJSON}"
+        set-option window lintcmd "${lintJSON}"
       '';
     }
   ];
