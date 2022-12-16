@@ -21,7 +21,6 @@
     ./audacity.nix
     ./automount.nix
     ./autorandr.nix
-    ./bspwm.nix
     ./clipboard.nix
     ./compositing.nix
     ./dates.nix
@@ -58,6 +57,7 @@
     ./tunnels.nix
     ./video.nix
     ./wallpaper.nix
+    ./window-manager.nix
     ./wine.nix
   ];
 
