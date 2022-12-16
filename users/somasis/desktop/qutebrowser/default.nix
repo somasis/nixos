@@ -88,6 +88,9 @@ in
     loadAutoconfig = true;
 
     settings = rec {
+      # Clear default aliases
+      aliases = { };
+
       # Always restore open sites when qutebrowser is reopened.
       # Equivalent of Firefox's "Restore previous session" setting.
       auto_save.session = true;
