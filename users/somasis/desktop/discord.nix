@@ -45,9 +45,11 @@ let
         x
   ;
 
-  discord = pkgs.discord.override {
-    withOpenASAR = true;
-  };
+  discord = pkgs.discord-canary;
+  discordProgram = "${discord}/bin/${discord.meta.mainProgram}";
+  # discord = pkgs.discord.override {
+  #   withOpenASAR = true;
+  # };
 in
 {
   home.packages = [
@@ -74,27 +76,27 @@ in
   #   "var/cache/powercord"
   # ];
 
-  xdg.configFile."discord/settings.json".text = (lib.generators.toJSON { }
-    # Convert all the attributes to SNAKE_CASE in the generated JSON
-    (lib.mapAttrs'
-      (name: value: { inherit value; name = camelCaseToSnakeCase name; })
-      {
-        dangerousEnableDevtoolsOnlyEnableIfYouKnowWhatYoureDoing = true;
-        skipHostUpdate = true;
-        openasar = {
-          setup = true;
-          quickstart = true;
-          css = (lib.fileContents (pkgs.concatTextFile {
-            name = "discord-css";
-            files = [
-              "${inputs.repluggedThemeCustom}/custom.css"
-              "${inputs.repluggedThemeIrc}/irc.css"
-            ];
-          }));
-        };
-      }
-    )
-  );
+  # xdg.configFile."discord/settings.json".text = (lib.generators.toJSON { }
+  #   # Convert all the attributes to SNAKE_CASE in the generated JSON
+  #   (lib.mapAttrs'
+  #     (name: value: { inherit value; name = camelCaseToSnakeCase name; })
+  #     {
+  #       dangerousEnableDevtoolsOnlyEnableIfYouKnowWhatYoureDoing = true;
+  #       skipHostUpdate = true;
+  #       openasar = {
+  #         setup = true;
+  #         quickstart = true;
+  #         css = (lib.fileContents (pkgs.concatTextFile {
+  #           name = "discord-css";
+  #           files = [
+  #             "${inputs.repluggedThemeCustom}/custom.css"
+  #             "${inputs.repluggedThemeIrc}/irc.css"
+  #           ];
+  #         }));
+  #       };
+  #     }
+  #   )
+  # );
 
   services.mpd-discord-rpc = {
     enable = config.services.mpd.enable;
@@ -168,15 +170,15 @@ in
 
   systemd.user.services.discord = {
     Unit = {
-      # Description = pkgs.replugged.meta.description;
-      Description = pkgs.discord.meta.description;
+      # Description = replugged.meta.description;
+      Description = discord.meta.description;
       PartOf = [ "graphical-session.target" ];
     };
     Install.WantedBy = [ "graphical-session.target" ];
 
     Service = {
       Type = "simple";
-      ExecStart = "${discord}/bin/discord --start-minimized";
+      ExecStart = "${discordProgram} --start-minimized";
       Restart = "on-failure";
 
       StandardError = "null";
