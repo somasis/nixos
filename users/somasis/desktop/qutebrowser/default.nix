@@ -113,12 +113,6 @@ in
       # I seem to have better performance with process-per-site rather than process-per-site-instance...
       qt.chromium.process_model = "process-per-site";
 
-      # Don't use pdf.js, I prefer the system application.
-      content.pdfjs = false;
-
-      # Use system proxy settings.
-      content.proxy = "system";
-
       # hints.selectors["username"] = "input[type='text']:first-of-type"
       # hints.selectors['password'] = 'input[type="password"]'
       # hints.selectors["username"] = [
@@ -127,68 +121,122 @@ in
       # ]
       # hints.selectors["password"] = ['input[type="password"]']
 
-      # Shrink the completion menu to the amount of items.
-      completion.shrink = true;
+      completion = {
+        # Shrink the completion menu to the amount of items.
+        shrink = true;
 
-      # Width (in pixels) of the scrollbar in the completion window.
-      completion.scrollbar.width = 16;
+        scrollbar = {
+          width = 16;
+          padding = 4;
+        };
+      };
 
-      # Padding (in pixels) of the scrollbar handle in the completion window.
-      completion.scrollbar.padding = 4;
+      content = {
+        # Use system proxy settings.
+        proxy = "system";
 
-      # Request websites to minimize non-essential animations and motion.
-      content.prefers_reduced_motion = true;
+        # Don't use pdf.js, I prefer the system application.
+        pdfjs = false;
 
-      # Allow JavaScript to read from or write to the clipboard.
-      content.javascript.can_access_clipboard = true;
-      content.javascript.can_open_tabs_automatically = true;
+        # Allow JavaScript to read from or write to the clipboard.
+        javascript = {
+          can_access_clipboard = true;
+          can_open_tabs_automatically = true;
+        };
 
-      # Draw the background color and images also when the page is printed.
-      content.print_element_backgrounds = false;
+        # Draw the background color and images also when the page is printed.
+        print_element_backgrounds = false;
 
-      # List of user stylesheet filenames to use.
-      content.user_stylesheets =
-        let qute = "${config.xdg.configHome}/qutebrowser"; in [
-          "${qute}/userstyles/global-fonts.css"
-          "${qute}/userstyles/global-highlight-anchors.css"
+        # Request that websites minimize non-essential animations and motion.
+        prefers_reduced_motion = true;
+
+        # List of user stylesheet filenames to use. These apply globally.
+        user_stylesheets = builtins.map (builtins.toString) [
+          (pkgs.writeText "fonts.user.css" ''
+            @font-face {
+                font-family: ui-sans-serif;
+                src: local(sans-serif);
+            }
+
+            @font-face {
+                font-family: ui-serif;
+                src: local(serif);
+            }
+
+            @font-face {
+                font-family: ui-monospace;
+                src: local(monospace);
+            }
+
+            @font-family {
+                font-family: -apple-system;
+                src: local(sans-serif);
+            }
+
+            @font-family {
+                font-family: BlinkMacSystemFont;
+                src: local(sans-serif);
+            }
+          '')
+
+          (pkgs.writeText "highlight-anchors.user.css" ''
+            h1:target,h2:target,h3:target,h4:target,h5:target,h6:target {
+                background-color: #ffff00;
+            }
+          '')
         ];
+      };
 
       # Languages preferences.
       spellcheck.languages = [ "en-US" "en-AU" "en-GB" "es-ES" ];
-      content.headers.accept_language = "tok,en-US,en;q=0.9";
+      content.headers.accept_language = lib.concatStringsSep "," [ "tok" "en-US" "en;q=0.9" ];
 
       zoom = {
-        default = "150%";
-        # Allow for more precise zooming increments.
-        mouse_divider = 2048;
+        # This will be unnecessary if I ever start using Wayland and don't
+        # need to think about monitor DPI stuff anymore.
+        default = "${builtins.toString ((144 / 96) * 100)}%";
+        mouse_divider = 2048; # Allow for more precise zooming increments.
       };
 
       qt.highdpi = true;
 
       # Fonts.
-      fonts.default_family = "sans-serif";
-      fonts.default_size = "11pt";
-      fonts.completion.entry = "default_size monospace";
-      fonts.completion.category = "bold default_size sans-serif";
-      fonts.statusbar = "default_size monospace";
-      fonts.keyhint = "default_size monospace";
+      fonts = {
+        default_family = "sans-serif";
+        default_size = "11pt";
 
-      fonts.web.family.sans_serif = "sans-serif";
-      fonts.web.family.serif = "serif";
-      fonts.web.family.fixed = "monospace";
-      fonts.web.family.standard = "${fonts.web.family.serif}";
-      fonts.web.size.default_fixed = 14;
+        web = {
+          family = rec {
+            sans_serif = "sans-serif";
+            serif = "serif";
+            fixed = "monospace";
+            standard = serif;
+          };
 
-      fonts.messages.error = "default_size monospace";
-      fonts.messages.info = "default_size monospace";
-      fonts.messages.warning = "default_size monospace";
+          size.default_fixed = 14;
+        };
+
+        completion = {
+          entry = "default_size monospace";
+          category = "bold default_size sans-serif";
+        };
+
+        statusbar = "default_size monospace";
+        keyhint = "default_size monospace";
+
+        messages = {
+          error = "default_size monospace";
+          info = "default_size monospace";
+          warning = "default_size monospace";
+        };
+      };
 
       # Downloads bar.
       downloads.position = "bottom";
-      colors.downloads.start.bg = "${config.xresources.properties."*darkBackground"}";
-      colors.downloads.stop.bg = "${config.xresources.properties."*color2"}";
-      colors.downloads.error.bg = "${config.xresources.properties."*color1"}";
-      colors.downloads.bar.bg = "${config.xresources.properties."*darkBackground"}";
+      colors.downloads.start.bg = config.xresources.properties."*darkBackground";
+      colors.downloads.stop.bg = config.xresources.properties."*color2";
+      colors.downloads.error.bg = config.xresources.properties."*color1";
+      colors.downloads.bar.bg = config.xresources.properties."*darkBackground";
 
       # Statusbar.
       statusbar.position = "top";
@@ -201,48 +249,48 @@ in
         "filesystem"
       ];
 
-      colors.statusbar.command.bg = "${config.xresources.properties."*lightBackground"}";
-      colors.statusbar.command.fg = "${config.xresources.properties."*lightForeground"}";
-      colors.statusbar.insert.bg = "${config.xresources.properties."*color2"}";
-      colors.statusbar.insert.fg = "${config.xresources.properties."*foreground"}";
-      colors.statusbar.normal.bg = "${config.xresources.properties."*background"}";
-      colors.statusbar.normal.fg = "${config.xresources.properties."*foreground"}";
-      colors.statusbar.passthrough.bg = "${config.xresources.properties."*color4"}";
-      colors.statusbar.passthrough.fg = "${config.xresources.properties."*foreground"}";
-      colors.statusbar.private.bg = "${config.xresources.properties."*color5"}";
-      colors.statusbar.private.fg = "${config.xresources.properties."*foreground"}";
-      colors.statusbar.progress.bg = "${config.xresources.properties."*color2"}";
-      colors.statusbar.url.error.fg = "${config.xresources.properties."*color9"}";
-      colors.statusbar.url.fg = "${config.xresources.properties."*color4"}";
-      colors.statusbar.url.hover.fg = "${config.xresources.properties."*color4"}";
-      colors.statusbar.url.success.http.fg = "${config.xresources.properties."*color4"}";
-      colors.statusbar.url.success.https.fg = "${config.xresources.properties."*color4"}";
-      colors.statusbar.url.warn.fg = "${config.xresources.properties."*color3"}";
+      colors.statusbar.command.bg = config.xresources.properties."*lightBackground";
+      colors.statusbar.command.fg = config.xresources.properties."*lightForeground";
+      colors.statusbar.insert.bg = config.xresources.properties."*color2";
+      colors.statusbar.insert.fg = config.xresources.properties."*foreground";
+      colors.statusbar.normal.bg = config.xresources.properties."*background";
+      colors.statusbar.normal.fg = config.xresources.properties."*foreground";
+      colors.statusbar.passthrough.bg = config.xresources.properties."*color4";
+      colors.statusbar.passthrough.fg = config.xresources.properties."*foreground";
+      colors.statusbar.private.bg = config.xresources.properties."*color5";
+      colors.statusbar.private.fg = config.xresources.properties."*foreground";
+      colors.statusbar.progress.bg = config.xresources.properties."*color2";
+      colors.statusbar.url.error.fg = config.xresources.properties."*color9";
+      colors.statusbar.url.fg = config.xresources.properties."*color4";
+      colors.statusbar.url.hover.fg = config.xresources.properties."*color4";
+      colors.statusbar.url.success.http.fg = config.xresources.properties."*color4";
+      colors.statusbar.url.success.https.fg = config.xresources.properties."*color4";
+      colors.statusbar.url.warn.fg = config.xresources.properties."*color3";
 
       # Prompts.
 
-      colors.prompts.bg = "${config.xresources.properties."*lightBackground"}";
-      colors.prompts.fg = "${config.xresources.properties."*lightForeground"}";
+      colors.prompts.bg = config.xresources.properties."*lightBackground";
+      colors.prompts.fg = config.xresources.properties."*lightForeground";
       colors.prompts.border = "1px solid ${config.xresources.properties."*lightBorderColor"}";
-      colors.prompts.selected.bg = "${config.xresources.properties."*colorAccent"}";
-      colors.prompts.selected.fg = "${config.xresources.properties."*foreground"}";
+      colors.prompts.selected.bg = config.xresources.properties."*colorAccent";
+      colors.prompts.selected.fg = config.xresources.properties."*foreground";
 
       # Completion.
 
-      colors.completion.category.bg = "${config.xresources.properties."*lightBackground"}";
-      colors.completion.category.fg = "${config.xresources.properties."*lightForeground"}";
-      colors.completion.category.border.bottom = "${config.xresources.properties."*lightBackground"}";
-      colors.completion.category.border.top = "${config.xresources.properties."*lightBackground"}";
-      colors.completion.even.bg = "${config.xresources.properties."*lightBackground"}";
-      colors.completion.odd.bg = "${config.xresources.properties."*lightBackground"}";
-      colors.completion.fg = "${config.xresources.properties."*lightForeground"}";
-      colors.completion.item.selected.bg = "${config.xresources.properties."*colorAccent"}";
-      colors.completion.item.selected.border.bottom = "${config.xresources.properties."*colorAccent"}";
-      colors.completion.item.selected.border.top = "${config.xresources.properties."*colorAccent"}";
-      colors.completion.item.selected.fg = "${config.xresources.properties."*foreground"}";
-      colors.completion.item.selected.match.fg = "${config.xresources.properties."*foreground"}";
-      colors.completion.scrollbar.bg = "${config.xresources.properties."*lightBackground"}";
-      colors.completion.scrollbar.fg = "${config.xresources.properties."*darkBackground"}";
+      colors.completion.category.bg = config.xresources.properties."*lightBackground";
+      colors.completion.category.fg = config.xresources.properties."*lightForeground";
+      colors.completion.category.border.bottom = config.xresources.properties."*lightBackground";
+      colors.completion.category.border.top = config.xresources.properties."*lightBackground";
+      colors.completion.even.bg = config.xresources.properties."*lightBackground";
+      colors.completion.odd.bg = config.xresources.properties."*lightBackground";
+      colors.completion.fg = config.xresources.properties."*lightForeground";
+      colors.completion.item.selected.bg = config.xresources.properties."*colorAccent";
+      colors.completion.item.selected.border.bottom = config.xresources.properties."*colorAccent";
+      colors.completion.item.selected.border.top = config.xresources.properties."*colorAccent";
+      colors.completion.item.selected.fg = config.xresources.properties."*foreground";
+      colors.completion.item.selected.match.fg = config.xresources.properties."*foreground";
+      colors.completion.scrollbar.bg = config.xresources.properties."*lightBackground";
+      colors.completion.scrollbar.fg = config.xresources.properties."*darkBackground";
 
       # Tabs.
       tabs.position = "left";
@@ -267,21 +315,21 @@ in
       colors.tabs.odd.bg = "#353946";
       colors.tabs.even.bg = "#353946";
 
-      # colors.tabs.even.fg = "${config.xresources.properties.'*background'}";
-      # colors.tabs.odd.fg = "${config.xresources.properties.'*background'}";
-      # colors.tabs.selected.even.fg = "${config.xresources.properties.'*foreground'}";
-      # colors.tabs.selected.odd.fg = "${config.xresources.properties.'*foreground'}";
-      colors.tabs.even.fg = "${config.xresources.properties."*foreground"}";
-      colors.tabs.odd.fg = "${config.xresources.properties."*foreground"}";
-      colors.tabs.selected.even.fg = "${config.xresources.properties."*foreground"}";
-      colors.tabs.selected.odd.fg = "${config.xresources.properties."*foreground"}";
+      # colors.tabs.even.fg = config.xresources.properties."*background";
+      # colors.tabs.odd.fg = config.xresources.properties."*background";
+      # colors.tabs.selected.even.fg = config.xresources.properties."*foreground";
+      # colors.tabs.selected.odd.fg = config.xresources.properties."*foreground";
+      colors.tabs.even.fg = config.xresources.properties."*foreground";
+      colors.tabs.odd.fg = config.xresources.properties."*foreground";
+      colors.tabs.selected.even.fg = config.xresources.properties."*foreground";
+      colors.tabs.selected.odd.fg = config.xresources.properties."*foreground";
 
-      colors.tabs.pinned.even.bg = "${config.xresources.properties."*background"}";
-      colors.tabs.pinned.odd.bg = "${config.xresources.properties."*background"}";
-      colors.tabs.pinned.selected.even.bg = "${config.xresources.properties."*colorAccent"}";
-      colors.tabs.pinned.selected.odd.bg = "${config.xresources.properties."*colorAccent"}";
-      colors.tabs.selected.even.bg = "${config.xresources.properties."*colorAccent"}";
-      colors.tabs.selected.odd.bg = "${config.xresources.properties."*colorAccent"}";
+      colors.tabs.pinned.even.bg = config.xresources.properties."*background";
+      colors.tabs.pinned.odd.bg = config.xresources.properties."*background";
+      colors.tabs.pinned.selected.even.bg = config.xresources.properties."*colorAccent";
+      colors.tabs.pinned.selected.odd.bg = config.xresources.properties."*colorAccent";
+      colors.tabs.selected.even.bg = config.xresources.properties."*colorAccent";
+      colors.tabs.selected.odd.bg = config.xresources.properties."*colorAccent";
 
       # Window.
       window.title_format = "qutebrowser{title_sep}{current_title}";
@@ -290,9 +338,13 @@ in
       messages.timeout = 5000;
 
       # Interacting with page elements.
-      input.insert_mode.auto_enter = false;
-      input.insert_mode.auto_leave = false;
-      input.insert_mode.leave_on_load = false;
+      input = {
+        insert_mode = {
+          auto_enter = false;
+          auto_leave = false;
+          leave_on_load = false;
+        };
+      };
 
       url.open_base_url = true;
     };
@@ -461,7 +513,7 @@ in
           # > continue execution to the next command(s).
           ExecCondition = builtins.toString (pkgs.writeShellScript "wait-for-qutebrowser" ''
             set -eu
-            set -- $(${pkgs.procps}/bin/pgrep -u  "qutebrowser")
+            set -- $(${pkgs.procps}/bin/pgrep -u "''${USER:-$(${pkgs.coreutils}/bin/id -un)}" "qutebrowser")
 
             [ "$#" -gt 0 ] || exit 0
             ${pkgs.extrace}/bin/pwait "$@"

@@ -1,13 +1,14 @@
 { config
+, lib
 , ...
 }: {
-  programs.qutebrowser.searchEngines = {
+  programs.qutebrowser.searchEngines = rec {
     "DEFAULT" = "https://duckduckgo.com/?q={}";
     "!" = "https://duckduckgo.com/?q=!+{}";
     "!i" = "https://duckduckgo.com/?q={}&ia=images&iax=images";
 
     "!g" = "https://google.com/search?q={}";
-    "!gi" = "https://www.google.com/search?tbm=isch&source=hp&q={}";
+    "!gi" = "https://google.com/search?tbm=isch&source=hp&q={}";
     "!yt" = "https://www.youtube.com/results?search_query={}";
 
     "!libgen" = "http://libgen.rs/index.php?req={}";
@@ -67,6 +68,9 @@
     "!es" = "https://en.wiktionary.org/wiki/{}#Spanish";
     "!tok" = "https://wikipesija.org/wiki/nimi:{}";
     "!linku" = "https://lipu-linku.github.io/?q={}";
+
+    "!plato" = "https://plato.stanford.edu/search/searcher.py?query={}";
+    "!iep" = lib.replaceStrings [ "{}" ] [ "site:https://iep.utm.edu+{}" ] DEFAULT;
 
     "!archman" = "https://man.archlinux.org/search?q={}";
     "!archpkgs" = "https://archlinux.org/packages/?sort=&q={}";

@@ -14,7 +14,7 @@ let
   #               # Roughly implement qutebrowser's required-script-filename modification logic.
   #               finalName = (
   #                 if name == null then
-  #                   builtins.replaceStrings [ ".user.js" ".js" ] [ "" "" ] (builtins.split "\." script.name)
+  #                   lib.replaceStrings [ ".user.js" ".js" ] [ "" "" ] (builtins.split "\." script.name)
   #                 else
   #                   name
   #               );
