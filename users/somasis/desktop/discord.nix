@@ -8,8 +8,10 @@ let
   # TODO Go back to using Replugged once <https://github.com/replugged-org/replugged/issues/205> is resolved
   # discord = inputs.replugged.lib.makeDiscordPlugged {
   #   inherit pkgs;
+
   #   extraElectronArgs = "--disable-smooth-scrolling";
   #   withOpenAsar = true;
+
   #   plugins = {
   #     inherit (inputs)
   #       repluggedPluginBetterCodeblocks
@@ -45,7 +47,10 @@ let
         x
   ;
 
-  discord = pkgs.discord-canary;
+  discord = pkgs.discord-canary.override {
+    withOpenASAR = true;
+  };
+  discordDescription = discord.meta.description;
   discordProgram = "${discord}/bin/${discord.meta.mainProgram}";
   # discord = pkgs.discord.override {
   #   withOpenASAR = true;
@@ -68,35 +73,39 @@ in
   ];
 
   home.persistence."/persist${config.home.homeDirectory}".directories = [
-    "etc/discord"
-    # "etc/powercord"
+    # "etc/discord"
+    "etc/powercord"
   ];
 
-  # home.persistence."/cache${config.home.homeDirectory}".directories = [
-  #   "var/cache/powercord"
-  # ];
+  home.persistence."/cache${config.home.homeDirectory}".directories = [
+    "var/cache/powercord"
+  ];
 
-  # xdg.configFile."discord/settings.json".text = (lib.generators.toJSON { }
-  #   # Convert all the attributes to SNAKE_CASE in the generated JSON
-  #   (lib.mapAttrs'
-  #     (name: value: { inherit value; name = camelCaseToSnakeCase name; })
-  #     {
-  #       dangerousEnableDevtoolsOnlyEnableIfYouKnowWhatYoureDoing = true;
-  #       skipHostUpdate = true;
-  #       openasar = {
-  #         setup = true;
-  #         quickstart = true;
-  #         css = (lib.fileContents (pkgs.concatTextFile {
-  #           name = "discord-css";
-  #           files = [
-  #             "${inputs.repluggedThemeCustom}/custom.css"
-  #             "${inputs.repluggedThemeIrc}/irc.css"
-  #           ];
-  #         }));
-  #       };
-  #     }
-  #   )
-  # );
+  xdg.configFile."discordcanary/settings.json".text = (lib.generators.toJSON { }
+    # Convert all the attributes to SNAKE_CASE in the generated JSON
+    (lib.mapAttrs'
+      (name: value: { inherit value; name = camelCaseToSnakeCase name; })
+      {
+        dangerousEnableDevtoolsOnlyEnableIfYouKnowWhatYoureDoing = true;
+        skipHostUpdate = true;
+
+        openasar = {
+          setup = true;
+          cmdPreset = "balanced";
+          themeSync = true;
+          quickstart = true;
+
+          css = (lib.fileContents (pkgs.concatTextFile {
+            name = "discord-css";
+            files = [
+              "${inputs.repluggedThemeCustom}/custom.css"
+              "${inputs.repluggedThemeIrc}/irc.css"
+            ];
+          }));
+        };
+      }
+    )
+  );
 
   services.mpd-discord-rpc = {
     enable = config.services.mpd.enable;
@@ -154,24 +163,23 @@ in
     };
   };
 
-  services.sxhkd.keybindings."super + d" = "${
+  services.sxhkd.keybindings."super + d" = builtins.toString (
     pkgs.writeShellScript "discord" ''
       if ! ${config.home.homeDirectory}/bin/raise -V '^(.+ - Discord|Discord)$';then
           if ${pkgs.systemd}/bin/systemctl --user is-active -q discord.service; then
-              exec ${discord}/bin/discord >/dev/null 2>&1
+              exec ${discordProgram} >/dev/null 2>&1
           else
               ${pkgs.systemd}/bin/systemctl --user start discord.service \
                   && sleep 2 \
-                  && exec ${discord}/bin/discord >/dev/null 2>&1
+                  && exec ${discordProgram} >/dev/null 2>&1
           fi
       fi
     ''
-  }";
+  );
 
   systemd.user.services.discord = {
     Unit = {
-      # Description = replugged.meta.description;
-      Description = discord.meta.description;
+      Description = discordDescription;
       PartOf = [ "graphical-session.target" ];
     };
     Install.WantedBy = [ "graphical-session.target" ];
