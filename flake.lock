@@ -130,21 +130,6 @@
         "type": "github"
       }
     },
-    "flake-utils_2": {
-      "locked": {
-        "lastModified": 1667395993,
-        "narHash": "sha256-nuEHfE/LcWyuSWnS8t12N1wc105Qtau+/OdUAjtQ0rA=",
-        "owner": "numtide",
-        "repo": "flake-utils",
-        "rev": "5aed5285a952e0b949eb3ba02c12fa4fcfef535f",
-        "type": "github"
-      },
-      "original": {
-        "owner": "numtide",
-        "repo": "flake-utils",
-        "type": "github"
-      }
-    },
     "homeManager": {
       "inputs": {
         "nixpkgs": [
@@ -233,27 +218,6 @@
       "original": {
         "owner": "nix-community",
         "repo": "impermanence",
-        "type": "github"
-      }
-    },
-    "lollypops": {
-      "inputs": {
-        "flake-utils": "flake-utils_2",
-        "nixpkgs": [
-          "nixos"
-        ]
-      },
-      "locked": {
-        "lastModified": 1672918527,
-        "narHash": "sha256-pzOKmPMiEH32xb7hz9ztmeNSXsf47nGfmz8o2Os6hUs=",
-        "owner": "pinpox",
-        "repo": "lollypops",
-        "rev": "4a211f494721dba036c9ce8f9c505683f58de95b",
-        "type": "github"
-      },
-      "original": {
-        "owner": "pinpox",
-        "repo": "lollypops",
         "type": "github"
       }
     },

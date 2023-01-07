@@ -16,16 +16,17 @@ let
   #   rm -f "$t"
   # '';
   format = "${pkgs.nixpkgs-fmt}/bin/nixpkgs-fmt";
-  lint = pkgs.writeShellScript "lint" ''
-    ${pkgs.nix-linter}/bin/nix-linter -j "$1" \
-        | ${config.programs.jq.package}/bin/jq -r '
-            . | (
-                .file + ":" +
-                (.pos.spanBegin | (.sourceLine | tostring) + ":" + (.sourceColumn | tostring)) +
-                ": warning: " + .description
-            )
-        '
-  '';
+  # TODO nix-linter is broken
+  # lint = pkgs.writeShellScript "lint" ''
+  #   ${pkgs.nix-linter}/bin/nix-linter -j "$1" \
+  #       | ${config.programs.jq.package}/bin/jq -r '
+  #           . | (
+  #               .file + ":" +
+  #               (.pos.spanBegin | (.sourceLine | tostring) + ":" + (.sourceColumn | tostring)) +
+  #               ": warning: " + .description
+  #           )
+  #       '
+  # '';
 in
 {
   programs.kakoune.config.hooks = [
@@ -38,8 +39,9 @@ in
           set-option window indentwidth 2
 
           set-option window formatcmd "${format}"
-          set-option window lintcmd "${lint}"
         '';
+      # TODO nix-linter is broken
+      # set-option window lintcmd "${lint}"
     }
   ];
 }

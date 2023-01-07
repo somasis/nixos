@@ -30,7 +30,7 @@ let
           # >        - 1: All files successfully scanned with some issues.
           # >
           # >        - 2: Some files could not be processed (e.g.  file not found).
-          if [ ''${e:-0} -gt 1 ]; then
+          if [ "''${e:-0}" -gt 1 ]; then
               cat "$f"
               continue
           fi

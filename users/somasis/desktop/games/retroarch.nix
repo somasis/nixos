@@ -16,7 +16,7 @@
         melonds # Nintendo - Nintendo DS
         mesen # Nintendo - Nintendo Entertainment System / Nintendo - Family Computer Disk System
         snes9x # Nintendo - Super Nintendo Entertainment System
-        picodrive # Sega - 32X
+        # picodrive # Sega - 32X # TODO broken
         flycast # Sega - Dreamcast
         genesis-plus-gx # Sega - Mega-Drive - Genesis
         beetle-saturn # Sega - Saturn
