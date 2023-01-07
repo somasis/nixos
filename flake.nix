@@ -19,8 +19,8 @@
     nixosStable.url = "github:nixos/nixpkgs?ref=nixos-22.11";
     nixosHardware.url = "github:nixos/nixos-hardware";
 
-    lollypops.url = "github:pinpox/lollypops";
-    lollypops.inputs.nixpkgs.follows = "nixos";
+    # lollypops.url = "github:pinpox/lollypops";
+    # lollypops.inputs.nixpkgs.follows = "nixos";
 
     impermanence.url = "github:nix-community/impermanence";
     # disko = {
@@ -131,7 +131,7 @@
       modules = with inputs; [
         { nix.registry.nixpkgs.flake = inputs.nixosStable; }
 
-        lollypops.nixosModules.lollypops
+        # lollypops.nixosModules.lollypops
 
         impermanence.nixosModules.impermanence
 
@@ -235,6 +235,6 @@
       };
     };
 
-    apps."x86_64-linux".default = inputs.lollypops.apps."x86_64-linux".default { configFlake = self; };
+    # apps."x86_64-linux".default = inputs.lollypops.apps."x86_64-linux".default { configFlake = self; };
   };
 }

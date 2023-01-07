@@ -25,16 +25,6 @@
     ./wine.nix
   ];
 
-  lollypops = {
-    deployment.host = "${config.networking.fqdn}";
-
-    secrets = {
-      default-cmd = "${pkgs.pass}/bin/pass";
-      cmd-name-prefix = "${config.networking.fqdn}/";
-      default-dir = "/var/cache/lollypops/secrets";
-    };
-  };
-
   environment.persistence."/persist" = {
     hideMounts = true;
     directories = [
