@@ -6,82 +6,82 @@
 , ...
 }:
 let
-  dmenu-flexipatch = (
-    let
-      year = builtins.substring 0 4 (inputs.dmenu-flexipatch.lastModifiedDate);
-      month = builtins.substring 4 2 (inputs.dmenu-flexipatch.lastModifiedDate);
-      day = builtins.substring 6 2 (inputs.dmenu-flexipatch.lastModifiedDate);
-    in
-    pkgs.stdenv.mkDerivation rec {
-      pname = "dmenu-flexipatch";
-      version = "unstable-${year}-${month}-${day}";
+  dmenu-flexipatch = (pkgs.stdenv.mkDerivation rec {
+    pname = "dmenu-flexipatch";
+    version =
+      let
+        year = builtins.substring 0 4 (inputs.dmenu-flexipatch.lastModifiedDate);
+        month = builtins.substring 4 2 (inputs.dmenu-flexipatch.lastModifiedDate);
+        day = builtins.substring 6 2 (inputs.dmenu-flexipatch.lastModifiedDate);
+      in
+      "unstable-${year}-${month}-${day}";
 
-      src = inputs.dmenu-flexipatch;
+    src = inputs.dmenu-flexipatch;
 
-      buildInputs = [
-        pkgs.xorg.libX11
-        pkgs.xorg.libXinerama
-        pkgs.zlib
+    buildInputs = [
+      pkgs.xorg.libX11
+      pkgs.xorg.libXinerama
+      pkgs.zlib
 
-        pkgs.pango
-      ];
+      pkgs.pango
+    ];
 
-      nativeBuildInputs = [ pkgs.pkg-config ];
+    nativeBuildInputs = [ pkgs.pkg-config ];
 
-      postPatch = ''
-        sed -ri -e 's!\<(dmenu|dmenu_path|stest)\>!'"$out/bin"'/&!g' dmenu_run
-        sed -ri -e 's!\<stest\>!'"$out/bin"'/&!g' dmenu_path
-      '';
+    postPatch = ''
+      sed -ri -e 's!\<(dmenu|dmenu_path|stest)\>!'"$out/bin"'/&!g' dmenu_run
+      sed -ri -e 's!\<stest\>!'"$out/bin"'/&!g' dmenu_path
+    '';
 
-      preConfigure = ''
-        sed -i \
-          -e "s@PREFIX = /usr/local@PREFIX = $out@g" \
-          -e "s@^#PANGO@PANGO@" \
-          config.mk
-          # -e 's@"monospace:size=10"@"monospace:size=11", "emoji:size=11"@' \
+    preConfigure = ''
+      sed -i \
+        -e "s@PREFIX = /usr/local@PREFIX = $out@g" \
+        -e "s@^#PANGO@PANGO@" \
+        config.mk
+        # -e 's@"monospace:size=10"@"monospace:size=11", "emoji:size=11"@' \
 
-        cat > patches.h <<EOF
-        #define ALPHA_PATCH            1
-        #define COLOR_EMOJI_PATCH      1
-        #define CTRL_V_TO_PASTE_PATCH  1
-        #define GRIDNAV_PATCH          1
-        #define GRID_PATCH             1
-        #define HIGHLIGHT_PATCH        1
-        #define INITIALTEXT_PATCH      1
-        #define INSTANT_PATCH          1
-        #define LINE_HEIGHT_PATCH      1
-        #define MOUSE_SUPPORT_PATCH    1
-        #define NO_SORT_PATCH          1
-        #define PANGO_PATCH            1
-        #define PLAIN_PROMPT_PATCH     1
-        #define VERTFULL_PATCH         1
-        #define WMTYPE_PATCH           1
-        // #define DYNAMIC_OPTIONS_PATCH  1
-        // #define FUZZYHIGHLIGHT_PATCH   1
-        // #define FUZZYMATCH_PATCH       1
-        // #define MANAGED_PATCH          1
-        // #define NUMBERS_PATCH          1
-        // #define PASSWORD_PATCH         1
-        // #define PREFIXCOMPLETION_PATCH 1
-        // #define PRESELECT_PATCH        1
-        // #define PRINTINDEX_PATCH       1
-        // #define REJECTNOMATCH_PATCH    1
-        // #define RESTRICT_RETURN_PATCH  1
-        // #define TSV_PATCH              1
-        // #define WMTYPE_PATCH           1
-        // #define XRESOURCES_PATCH       1
-        EOF
-      '';
+      cat > patches.h <<EOF
+      #define ALPHA_PATCH            1
+      #define COLOR_EMOJI_PATCH      1
+      #define CTRL_V_TO_PASTE_PATCH  1
+      #define GRIDNAV_PATCH          1
+      #define GRID_PATCH             1
+      #define HIGHLIGHT_PATCH        1
+      #define INITIALTEXT_PATCH      1
+      #define INSTANT_PATCH          1
+      #define LINE_HEIGHT_PATCH      1
+      #define MOUSE_SUPPORT_PATCH    1
+      #define NO_SORT_PATCH          1
+      #define PANGO_PATCH            1
+      #define PLAIN_PROMPT_PATCH     1
+      #define VERTFULL_PATCH         1
+      #define WMTYPE_PATCH           1
+      // #define DYNAMIC_OPTIONS_PATCH  1
+      // #define FUZZYHIGHLIGHT_PATCH   1
+      // #define FUZZYMATCH_PATCH       1
+      // #define MANAGED_PATCH          1
+      // #define NUMBERS_PATCH          1
+      // #define PASSWORD_PATCH         1
+      // #define PREFIXCOMPLETION_PATCH 1
+      // #define PRESELECT_PATCH        1
+      // #define PRINTINDEX_PATCH       1
+      // #define REJECTNOMATCH_PATCH    1
+      // #define RESTRICT_RETURN_PATCH  1
+      // #define TSV_PATCH              1
+      // #define WMTYPE_PATCH           1
+      // #define XRESOURCES_PATCH       1
+      EOF
+    '';
 
-      makeFlags = [ "CC:=$(CC)" "PKG_CONFIG:=$(PKG_CONFIG)" ];
+    makeFlags = [ "CC:=$(CC)" "PKG_CONFIG:=$(PKG_CONFIG)" ];
 
-      meta = with pkgs.lib; {
-        description = "A generic, highly customizable, and efficient menu for the X Window System";
-        license = with licenses; [ mit ];
-        maintainers = with maintainers; [ somasis ];
-        platforms = platforms.all;
-      };
-    }
+    meta = with pkgs.lib; {
+      description = "A generic, highly customizable, and efficient menu for the X Window System";
+      license = with licenses; [ mit ];
+      maintainers = with maintainers; [ somasis ];
+      platforms = platforms.all;
+    };
+  }
   );
 
   dmenu = (pkgs.writeShellApplication {
@@ -105,151 +105,154 @@ let
     '';
   });
 
-  dmenu-emoji = (
-    pkgs.writeShellApplication {
-      name = "dmenu-emoji";
+  dmenu-emoji = (pkgs.writeShellApplication {
+    name = "dmenu-emoji";
 
-      runtimeInputs = [
-        dmenu
-        pkgs.coreutils
-        pkgs.gnused
-        pkgs.moreutils
-        pkgs.unicode-emoji
-        pkgs.uq
-        pkgs.xclip
-        pkgs.xdotool
-      ];
+    runtimeInputs = [
+      dmenu
+      pkgs.coreutils
+      pkgs.gnugrep
+      pkgs.gnused
+      pkgs.moreutils
+      pkgs.unicode-emoji
+      pkgs.uq
+      pkgs.xclip
+      pkgs.xdotool
+    ];
 
-      text = ''
-        : "''${DMENU_EMOJI_LIST:=${pkgs.unicode-emoji}/share/unicode/emoji/emoji-test.txt}"
-        : "''${DMENU_EMOJI_RECENT:=''${XDG_CACHE_HOME:=~/.cache}/dmenu/dmenu-emoji.cache}"
+    text = ''
+      : "''${DMENU_EMOJI_LIST:=${pkgs.unicode-emoji}/share/unicode/emoji/emoji-test.txt}"
+      : "''${DMENU_EMOJI_RECENT:=''${XDG_CACHE_HOME:=~/.cache}/dmenu/dmenu-emoji.cache}"
 
-        usage() {
-            cat >&2 <<EOF
-        usage: dmenu-emoji [-clt]
-        EOF
-            exit 69
-        }
+      usage() {
+          cat >&2 <<EOF
+      usage: dmenu-emoji [-clt]
+      EOF
+          exit 69
+      }
 
-        list() {
-            {
-                cat "$DMENU_EMOJI_RECENT" 2>/dev/null
-                sed -E \
-                    -e '/; fully-qualified/!d' \
-                    -e 's/.* # //' \
-                    -e 's/E[0-9]+\.[0-9]+ //' \
-                    -e 's/&/\&amp;/' \
-                    "$DMENU_EMOJI_LIST" \
-                    | sort
-            } | uq
-        }
+      list() {
+          {
+              cat "$DMENU_EMOJI_RECENT" 2>/dev/null
+              sed -E \
+                  -e '/; fully-qualified/!d' \
+                  -e 's/.* # //' \
+                  -e 's/E[0-9]+\.[0-9]+ //' \
+                  -e 's/&/\&amp;/' \
+                  "$DMENU_EMOJI_LIST" \
+                  | sort
+          } | uq
+      }
 
-        clip=false
-        list=false
-        type=false
+      clip=false
+      list=false
+      type=false
 
-        while getopts :clt arg >/dev/null 2>&1; do
-            case "$arg" in
-                c) clip=true ;;
-                l) list=true ;;
-                t) type=true ;;
-                ?)
-                    printf 'unknown argument -- %s\n' "$OPTARG" >&2
-                    usage
-                    ;;
-            esac
-        done
-        shift $((OPTIND - 1))
+      while getopts :clt arg >/dev/null 2>&1; do
+          case "$arg" in
+              c) clip=true ;;
+              l) list=true ;;
+              t) type=true ;;
+              ?)
+                  printf 'unknown argument -- %s\n' "$OPTARG" >&2
+                  usage
+                  ;;
+          esac
+      done
+      shift $((OPTIND - 1))
 
-        mkdir -p "''${DMENU_EMOJI_RECENT%/*}"
+      mkdir -p "''${DMENU_EMOJI_RECENT%/*}"
 
-        if "$list"; then
-            list
-            exit
-        fi
+      if "$list"; then
+          list
+          exit
+      fi
 
-        list \
-            | ''${DMENU:-dmenu -fn "sans 20px" -l 8 -g 8} -S -i -p "emoji" \
-            | while read -r emoji line; do
-                "$clip" \
-                    && printf '%s' "$emoji" \
-                    | xclip -i -selection clipboard \
-                    && xclip -o -selection clipboard
+      list \
+          | ''${DMENU:-dmenu -fn "sans 20px" -l 8 -g 8} -S -i -p "emoji" \
+          | while read -r emoji line; do
+              "$clip" \
+                  && printf '%s' "$emoji" \
+                  | xclip -i -selection clipboard \
+                  && xclip -o -selection clipboard
 
-                "$type" \
-                    && xdotool key "$(printf '%s ' "$emoji")"
+              "$type" \
+                  && xdotool key "$(printf '%s ' "$emoji")"
 
-                {
-                    "$clip" || "$type"
-                } || printf '%s\n' "$emoji"
+              {
+                  "$clip" || "$type"
+              } || printf '%s\n' "$emoji"
 
-                printf '%s %s\n' "$emoji" "$line" >>"$DMENU_EMOJI_RECENT"
-            done
+              printf '%s %s\n' "$emoji" "$line" >>"$DMENU_EMOJI_RECENT"
+          done
 
-        head -n 64 "$DMENU_EMOJI_RECENT" \
-            | uq \
-            | sponge "$DMENU_EMOJI_RECENT"
-      '';
-    });
+      head -n 64 "$DMENU_EMOJI_RECENT" \
+          | grep -v '^$' \
+          | uq \
+          | sponge "$DMENU_EMOJI_RECENT"
+    '';
+  });
 
-  dmenu-run = (
-    pkgs.writeShellApplication {
-      name = "dmenu-run";
+  dmenu-run = (pkgs.writeShellApplication {
+    name = "dmenu-run";
 
-      runtimeInputs = [
-        dmenu
-        pkgs.coreutils
-        pkgs.findutils
-        pkgs.uq
-        pkgs.bfs
-        pkgs.gnused
-        pkgs.gnugrep
-      ];
+    runtimeInputs = [
+      dmenu
+      pkgs.bfs
+      pkgs.coreutils
+      pkgs.findutils
+      pkgs.gnugrep
+      pkgs.gnused
+      pkgs.libnotify
+      pkgs.uq
+    ];
 
-      text = ''
-        h="''${XDG_CACHE_HOME:=$HOME/.cache}"/dmenu/dmenu-run.cache
+    text = ''
+      h="''${XDG_CACHE_HOME:=$HOME/.cache}"/dmenu/dmenu-run.cache
 
-        mkdir -p "''${h%/*}"
+      mkdir -p "''${h%/*}"
 
-        c=$(
-            {
-                IFS=:
-                # We want the $PATH to be split here.
-                # shellcheck disable=SC2086
-                find $PATH ! -type d -executable 2>/dev/null \
-                    | sed 's@.*/@@' \
-                    | sort "$h" - \
-                    | cat "$h" - 2>/dev/null
-                unset IFS
-            }   | uq \
-                | ''${DMENU:-dmenu -g 4 -l 16} \
-                    -S \
-                    -p "run" \
-                    "$@"
-        )
+      c=$(
+          {
+              IFS=:
+              # We want the $PATH to be split here.
+              # shellcheck disable=SC2086
+              find $PATH ! -type d -executable 2>/dev/null \
+                  | sed 's@.*/@@' \
+                  | sort "$h" - \
+                  | cat "$h" - 2>/dev/null
+              unset IFS
+          }   | uq \
+              | ''${DMENU:-dmenu -g 4 -l 16} \
+                  -S \
+                  -p "run" \
+                  "$@"
+      )
 
-        [ -n "$c" ] || exit 0
+      [[ -n "$c" ]] || exit 0
 
-        touch "$h"
-        printf '%s\n' "$c" | ''${SHELL:-sh} -x - &
-        t=$(mktemp)
+      touch "$h"
+      printf '%s\n' "$c" | ''${SHELL:-sh} -x - &
+      trap 'rm -f "$t"' EXIT
+      t=$(mktemp)
 
-        {
-            cat - "$h" <<EOF
-        $c
-        EOF
-        }   | head -n 24 \
-            | grep -v "^\s*$" \
-            | uq \
-            | while read -r line; do
-                command -v "''${line%% *}" >/dev/null 2>&1
-                printf "%s\n" "$line"
-            done \
-            | sponge "$t"
+      cat - "$h" <<<"$c" \
+          | head -n 24 \
+          | grep -v "^\s*$" \
+          | uq \
+          | while read -r line; do
+              base=''${line%% *}
+              if command -v "$base" >/dev/null 2>&1; then
+                  printf "%s\n" "$line"
+              else
+                  notify-send -a dmenu-run "run" "'$base' is not a valid command."
+              fi
+          done \
+          | sponge "$t"
 
-        mv -f "$t" "$h"
-      '';
-    });
+      mv -f "$t" "$h"
+    '';
+  });
 
   dmenu-pass = (pkgs.writeShellApplication {
     name = "dmenu-pass";
@@ -265,6 +268,7 @@ let
       pkgs.uq
       pkgs.xclip
     ];
+
     text = ''
       usage() {
           cat >&2 <<EOF
@@ -379,11 +383,8 @@ let
 
       t=$(mktemp)
 
-      {
-          cat - "''${h}" <<EOF
-      $c
-      EOF
-      }   | head -n 24 \
+      cat - "''${h}" <<<"$c" \
+          | head -n 24 \
           | grep -v "^\s*$" \
           | uq \
           | sponge "''${t}"
