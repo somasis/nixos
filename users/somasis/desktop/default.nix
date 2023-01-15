@@ -139,5 +139,18 @@
   xresources.path = "${config.xdg.configHome}/xorg/xresources";
   xsession.profilePath = "etc/xorg/xprofile";
 
+  services.xsuspender = {
+    enable = true;
+    debug = true;
+
+    # Basically disable xsuspender by default; only enable for certain programs.
+    defaults = {
+      resumeEvery = 0;
+      suspendDelay = 0;
+      onlyOnBattery = false;
+      autoSuspendOnBattery = false;
+    };
+  };
+
   somasis.chrome.stw.enable = true;
 }
