@@ -148,14 +148,28 @@ in
           ${pkgs.maim}/bin/maim "$@" \
               | ${pkgs.moreutils}/bin/sponge "${screenshots}/$d"
 
-          ${pkgs.xclip}/bin/xclip \
-              -i \
-              -selection clipboard \
-              -t image/png \
-              < "${screenshots}/$d"
+          if qr=$(${pkgs.zbar}/bin/zbarimg -1q -- "${screenshots}/$d"); then
+              qr="''${qr##QR-Code:}"
+
+              ${pkgs.libnotify}/bin/notify-send \
+                  -a screenshot \
+                  "screenshot" \
+                  "Scanned QR code to clipboard: \"$qr\""
+
+              ${pkgs.xclip}/bin/xclip -i \
+                  -selection clipboard \
+                  <<<"$qr"
+          else
+              ${pkgs.xclip}/bin/xclip \
+                  -i \
+                  -selection clipboard \
+                  -t image/png \
+                  < "${screenshots}/$d"
+          fi
 
           rm -r "$TMPDIR"
         '';
+
         getMonitorDimensions = pkgs.writeShellScript "get-monitor-dimensions" ''
           # TODO: This is an absolutely disgusting solution. I hate this. Isn't there a better way?
           #       Better yet, why doesn't maim(1) just handle displays in a way that makes sense???
