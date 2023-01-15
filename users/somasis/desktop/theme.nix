@@ -122,8 +122,10 @@
   };
 
   home.pointerCursor = {
-    name = "Hackneyed";
-    package = pkgs.hackneyed;
+    name = "macOS-BigSur-White";
+    # name = "Hackneyed";
+    # package = pkgs.hackneyed;
+    package = pkgs.apple-cursor;
     size = 32;
 
     x11.enable = true;
