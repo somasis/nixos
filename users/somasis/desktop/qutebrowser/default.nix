@@ -189,12 +189,13 @@ in
 
       # Languages preferences.
       spellcheck.languages = [ "en-US" "en-AU" "en-GB" "es-ES" ];
-      content.headers.accept_language = lib.concatStringsSep "," [ "tok" "en-US" "en;q=0.9" ];
+      content.headers.accept_language = lib.concatStringsSep "," (lib.flatten [ "tok" spellcheck.languages "en;q=0.9" ]);
 
       zoom = {
         # This will be unnecessary if I ever start using Wayland and don't
         # need to think about monitor DPI stuff anymore.
         default = "${builtins.toString ((144 / 96) * 100)}%";
+
         mouse_divider = 2048; # Allow for more precise zooming increments.
       };
 
@@ -224,6 +225,8 @@ in
         statusbar = "default_size monospace";
         keyhint = "default_size monospace";
 
+        downloads = "11pt monospace";
+
         messages = {
           error = "default_size monospace";
           info = "default_size monospace";
@@ -232,7 +235,7 @@ in
       };
 
       # Downloads bar.
-      downloads.position = "bottom";
+      downloads.position = "top";
       colors.downloads.start.bg = config.xresources.properties."*darkBackground";
       colors.downloads.stop.bg = config.xresources.properties."*color2";
       colors.downloads.error.bg = config.xresources.properties."*color1";
