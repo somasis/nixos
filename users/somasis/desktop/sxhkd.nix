@@ -143,7 +143,7 @@ in
           mkdir -p "${screenshots}"
 
           export TMPDIR=$(mktemp -d "${screenshots}"/.tmp.XXXXXX)
-          d=$(TZ=UTC date +"%Y-%m-%dT%H:%M:%S.png")
+          d=$(TZ=UTC date +"%Y-%m-%dT%H:%M:%SZ.png")
 
           ${pkgs.maim}/bin/maim "$@" \
               | ${pkgs.moreutils}/bin/sponge "${screenshots}/$d"

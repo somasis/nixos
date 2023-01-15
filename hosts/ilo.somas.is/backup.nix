@@ -7,7 +7,7 @@ let
 
   defaults = {
     archiveBaseName = "${config.networking.fqdn}";
-    dateFormat = "-u +%Y-%m-%dT%H:%M:%S";
+    dateFormat = "-u +%Y-%m-%dT%H:%M:%SZ";
     doInit = false;
 
     encryption = {
@@ -107,7 +107,7 @@ in
 
         [ "$#" -ge 1 ] || usage
 
-        date=$(TZ=UTC date +%Y-%m-%dT%H:%M:%S)
+        date=$(TZ=UTC date +%Y-%m-%dT%H:%M:%SZ)
 
         files=()
         for f; do
@@ -124,9 +124,9 @@ in
         )
 
         d=$(
-            date \
-                --date="@$(stat -c %Y "$t"/payload-0.json)" \
-                +%Y-%m-%dT%H:%M:%S
+            TZ=UTC date \
+                --date="@$(TZ=UTC stat -c %Y "$t"/payload-0.json)" \
+                +%Y-%m-%dT%H:%M:%SZ
         )
 
         rm -r "$t"
@@ -179,7 +179,7 @@ in
 
         [ "$#" -ge 1 ] || usage
 
-        date=$(TZ=UTC date +%Y-%m-%dT%H:%M:%S)
+        date=$(TZ=UTC date +%Y-%m-%dT%H:%M:%SZ)
 
         files=()
         for f; do
@@ -249,7 +249,7 @@ in
 
         [[ "$#" -ge 1 ]] || usage
 
-        date=$(TZ=UTC date +%Y-%m-%dT%H:%M:%S)
+        date=$(TZ=UTC date +%Y-%m-%dT%H:%M:%SZ)
 
         d=''${1##*/}
         d=''${d%.tgz}
