@@ -123,7 +123,6 @@
     pkgs.hyperfine
   ];
 
-
   home.persistence."/persist${config.home.homeDirectory}".directories = [ "etc/poedit" ];
 
   # home.file.".face".source = "${inputs.avatarSomasis}";
