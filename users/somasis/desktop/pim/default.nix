@@ -127,8 +127,8 @@ in
       # }";
 
       ExecStart = [
-        "${pkgs.torsocks}/bin/torsocks ${pkgs.vdirsyncer}/bin/vdirsyncer metasync"
-        "${pkgs.torsocks}/bin/torsocks ${pkgs.vdirsyncer}/bin/vdirsyncer sync"
+        "${pkgs.torsocks}/bin/torsocks ${pkgs.limitcpu}/bin/cpulimit -qf -l 50 -- ${pkgs.vdirsyncer}/bin/vdirsyncer metasync"
+        "${pkgs.torsocks}/bin/torsocks ${pkgs.limitcpu}/bin/cpulimit -qf -l 50 -- ${pkgs.vdirsyncer}/bin/vdirsyncer sync"
       ];
 
       SyslogIdentifier = "vdirsyncer";
