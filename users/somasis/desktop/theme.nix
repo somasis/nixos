@@ -126,7 +126,7 @@
     # name = "Hackneyed";
     # package = pkgs.hackneyed;
     package = pkgs.apple-cursor;
-    size = 32;
+    size = 40;
 
     x11.enable = true;
     gtk.enable = true;
