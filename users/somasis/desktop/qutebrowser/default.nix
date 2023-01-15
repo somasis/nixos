@@ -194,7 +194,7 @@ in
       zoom = {
         # This will be unnecessary if I ever start using Wayland and don't
         # need to think about monitor DPI stuff anymore.
-        default = "${builtins.toString ((144 / 96) * 100)}%";
+        default = "150%";
 
         mouse_divider = 2048; # Allow for more precise zooming increments.
       };
