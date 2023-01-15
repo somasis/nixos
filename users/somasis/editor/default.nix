@@ -362,12 +362,12 @@
       # Find and replace across buffers.
       (pkgs.kakouneUtils.buildKakounePluginFrom2Nix rec {
         pname = "kakoune-find";
-        version = "unstable-2022-03-22";
+        version = "unstable-2022-09-25";
         src = pkgs.fetchFromGitHub {
           owner = "occivink";
           repo = pname;
-          rev = "3cd043b25688fc447eadd9b8ae254e3224391a01";
-          hash = "sha256-jSKKKvyk5PyIo5OxzxjSQK1G5D+z9yBs4PJB1TJKCrY=";
+          rev = "09afcc8520d4c92928fe69da4c370b9979aa90d3";
+          hash = "sha256-AyG0AbQOTFDQ/jrhtyb5ajWlvWO+h0JDe5SEtTyTkfQ=";
         };
       })
 
