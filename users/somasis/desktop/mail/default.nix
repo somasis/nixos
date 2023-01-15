@@ -10,7 +10,7 @@ let
     local.nametrans = "lambda f: '[Gmail]/' + f if f in ['Drafts', 'Starred', 'Important', 'Spam', 'Trash', 'All Mail', 'Sent Mail'] else f";
   };
 
-  systemdName = lib.replaceChars [ "@" ":" "\\" "[" "]" ] [ "-" "-" "-" "" "" ];
+  systemdName = lib.replaceStrings [ "@" ":" "\\" "[" "]" ] [ "-" "-" "-" "" "" ];
 
   passCmd = "${config.programs.password-store.package}/bin/pass";
   systemctl = "${pkgs.systemd}/bin/systemctl --user";
