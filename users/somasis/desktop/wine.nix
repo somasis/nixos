@@ -25,7 +25,7 @@ in
 
   home.persistence."/persist${config.home.homeDirectory}".directories = [
     "etc/wine"
-    "share/wine"
+    { directory = "share/wine"; method = "symlink"; }
 
     # "etc/mkWindowsApp"
     # "share/flstudio"
