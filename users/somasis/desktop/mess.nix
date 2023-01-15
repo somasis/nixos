@@ -1,6 +1,8 @@
 # mess - Set up `mess` integration.
 { config, pkgs, ... }:
 let
+  messDir = "${config.home.homeDirectory}/mess";
+
   mess = pkgs.writeShellApplication {
     name = "mess";
 
@@ -41,8 +43,8 @@ in
   home.persistence."/persist${config.home.homeDirectory}".directories = [ "mess" ];
 
   xdg.userDirs = {
-    desktop = "${config.home.homeDirectory}/mess/current";
-    download = "${config.home.homeDirectory}/mess/current/incoming";
+    desktop = "${messDir}/current";
+    download = "${messDir}/current/incoming";
   };
 
   systemd.user = {
@@ -53,9 +55,9 @@ in
         Type = "oneshot";
         ExecStart = "${mess}/bin/mess";
         ExecStartPost = [
-          ''${pkgs.coreutils}/bin/mkdir -p "${config.home.homeDirectory}/mess/current/incoming"''
-          ''${pkgs.coreutils}/bin/mkdir -p "${config.home.homeDirectory}/mess/current/src"''
-          ''${pkgs.coreutils}/bin/mkdir -p "${config.home.homeDirectory}/mess/current/screenshots"''
+          ''${pkgs.coreutils}/bin/mkdir -p "${messDir}/current/incoming"''
+          ''${pkgs.coreutils}/bin/mkdir -p "${messDir}/current/src"''
+          ''${pkgs.coreutils}/bin/mkdir -p "${messDir}/current/screenshots"''
         ];
 
         StandardOutput = "null";
@@ -88,9 +90,11 @@ in
     }
 
     src() {
-        CDPATH="$HOME/mess/current/src:$HOME/src:$HOME/src/nix:$HOME/src/discord" cd "''${@:-}"
+        CDPATH="${messDir}/current/src:$HOME/src:$HOME/src/nix:$HOME/src/discord" cd "''${@:-}"
     }
 
-    CDPATH="''${CDPATH:+$CDPATH:}$HOME/mess:$HOME/mess/current"
+    CDPATH="''${CDPATH:+$CDPATH:}${messDir}:${messDir}/current"
   '';
+
+  programs.mpv.config.screenshot-directory = "${messDir}/current/screenshots";
 }
