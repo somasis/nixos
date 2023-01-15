@@ -33,5 +33,7 @@
     monitor = "primary";
   };
 
-  home.persistence."/persist${config.home.homeDirectory}".directories = [ "etc/retroarch" ];
+  home.persistence."/persist${config.home.homeDirectory}".directories = [
+    { directory = "etc/retroarch"; method = "symlink"; }
+  ];
 }
