@@ -121,6 +121,8 @@
     pkgs.xorg.xinput
     pkgs.xzoom
     pkgs.hyperfine
+
+    (pkgs.callPackage ../../../pkgs/youplot { })
   ];
 
   home.persistence."/persist${config.home.homeDirectory}".directories = [ "etc/poedit" ];
