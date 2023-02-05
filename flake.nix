@@ -19,9 +19,6 @@
     nixosStable.url = "github:nixos/nixpkgs?ref=nixos-22.11";
     nixosHardware.url = "github:nixos/nixos-hardware";
 
-    # lollypops.url = "github:pinpox/lollypops";
-    # lollypops.inputs.nixpkgs.follows = "nixos";
-
     impermanence.url = "github:nix-community/impermanence";
     # disko = {
     #   url = "github:nix-community/disko";
@@ -31,8 +28,8 @@
     homeManager.url = "github:nix-community/home-manager";
     homeManager.inputs.nixpkgs.follows = "nixos";
 
-    nixMinecraft.url = "github:12Boti/nix-minecraft";
-    nixMinecraft.inputs.nixpkgs.follows = "nixos";
+    # nixMinecraft.url = "github:12Boti/nix-minecraft";
+    # nixMinecraft.inputs.nixpkgs.follows = "nixos";
 
     # erosanix.url = "github:emmanuelrosa/erosanix";
     # erosanix.inputs.nixpkgs.follows = "nixos";
@@ -130,8 +127,6 @@
 
       modules = with inputs; [
         { nix.registry.nixpkgs.flake = inputs.nixosStable; }
-
-        # lollypops.nixosModules.lollypops
 
         impermanence.nixosModules.impermanence
 
@@ -234,7 +229,5 @@
         ];
       };
     };
-
-    # apps."x86_64-linux".default = inputs.lollypops.apps."x86_64-linux".default { configFlake = self; };
   };
 }

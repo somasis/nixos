@@ -386,10 +386,6 @@ in
       nixos-diff "$_nixos_old_system" "$_nixos_new_system"
     '')
 
-    (pkgs.writeShellScriptBin "lolly" ''
-      exec ${nix} run /etc/nixos -- "''${@:---list-all}"
-    '')
-
     # (pkgs.writeShellScriptBin "nixos-watch" ''
     #   nixos "$@"
     #   # nixos-local-sources \

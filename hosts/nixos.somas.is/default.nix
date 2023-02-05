@@ -4,11 +4,6 @@
     ./networking.nix # generated at runtime by nixos-infect
   ];
 
-  lollypops.deployment = {
-    host = "${config.networking.fqdn}";
-    config-dir = "/etc/nixos";
-  };
-
   boot.cleanTmpDir = true;
   zramSwap.enable = true;
   networking = {

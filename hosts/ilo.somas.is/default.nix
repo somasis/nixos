@@ -38,13 +38,6 @@
       "/var/lib/systemd/timers"
       "/var/lib/systemd/timesync"
       "/var/lib/systemd/backlight"
-
-      # {
-      #   directory = "${config.lollypops.secrets.default-dir}";
-      #   user = "root";
-      #   group = "root";
-      #   mode = "0700";
-      # }
     ];
     files = [
       "/var/lib/systemd/random-seed"
