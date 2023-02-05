@@ -9,12 +9,7 @@
   programs.bash = {
     enable = true;
     enableVteIntegration = true;
-
-    # Disable all default aliases
-    shellAliases = { };
   };
-
-  home.shellAliases = { };
 
   # TODO: this doesn't work :(
   # home.packages = [

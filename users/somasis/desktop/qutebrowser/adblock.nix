@@ -39,27 +39,27 @@
       adblock.lists =
         builtins.map (x: "file://${x}") [
           custom
-          (pkgs.runCommand "adblockEasyList" { } ''
+          (pkgs.runCommandLocal "adblockEasyList" { } ''
             exec > "$out"
             cat \
                 "${inputs.adblockEasyList}"/easylist/*.txt \
                 "${inputs.adblockEasyList}"/easylist_adult/*.txt
           '')
-          (pkgs.runCommand "adblockEasyPrivacy" { } ''
+          (pkgs.runCommandLocal "adblockEasyPrivacy" { } ''
             exec > "$out"
             cat "${inputs.adblockEasyList}"/easyprivacy/*.txt
           '')
-          (pkgs.runCommand "adblockEasyListSpanish" { } ''
+          (pkgs.runCommandLocal "adblockEasyListSpanish" { } ''
             exec > "$out"
             cat \
                 "${inputs.adblockEasyListSpanish}"/easylistspanish/*.txt \
                 "${inputs.adblockEasyListSpanish}"/easylistspanish_adult/*.txt
           '')
-          (pkgs.runCommand "adblockFanboyCookies" { } ''
+          (pkgs.runCommandLocal "adblockFanboyCookies" { } ''
             exec > "$out"
             cat "${inputs.adblockEasyList}"/easylist_cookie/*.txt
           '')
-          (pkgs.runCommand "adblockFanboyCookies" { } ''
+          (pkgs.runCommandLocal "adblockFanboyCookies" { } ''
             exec > "$out"
             cat "${inputs.adblockEasyList}"/fanboy-addon/fanboy_social*.txt
           '')

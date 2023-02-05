@@ -1,13 +1,13 @@
-{
+{ config, ... }: {
   services.openssh = {
     enable = true;
     forwardX11 = true;
-    passwordAuthentication = false;
-    permitRootLogin = "no";
+    settings = {
+      permitRootLogin = "no";
+      passwordAuthentication = false;
+    };
 
-    hostKeys = [
-      { path = "/etc/ssh/ssh_host_ed25519_key"; type = "ed25519"; }
-    ];
+    hostKeys = [{ path = "/etc/ssh/host_ed25519"; type = "ed25519"; }];
   };
 
   programs.ssh = {
@@ -22,8 +22,15 @@
     '';
   };
 
-  environment.persistence."/persist".files = [
-    "/etc/ssh/ssh_host_ed25519_key"
-    "/etc/ssh/ssh_host_ed25519_key.pub"
-  ];
+  environment.persistence."/persist" = {
+    files = [
+      "/etc/ssh/host_ed25519"
+      "/etc/ssh/host_ed25519.pub"
+    ];
+
+    users.root = {
+      home = "/root";
+      directories = [{ directory = ".ssh"; mode = "0700"; }];
+    };
+  };
 }

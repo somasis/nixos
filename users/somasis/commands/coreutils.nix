@@ -15,7 +15,7 @@ let
     name = "bfs";
     paths = [
       pkgs.bfs
-      (pkgs.runCommand "find" { } ''
+      (pkgs.runCommandLocal "find" { } ''
         mkdir -p $out/bin
         ln -s ${pkgs.bfs}/bin/bfs $out/bin/find
       '')
@@ -26,7 +26,7 @@ let
     name = "libarchive-utils";
     paths = [
       pkgs.libarchive
-      (pkgs.runCommand "bsdarchive" { } ''
+      (pkgs.runCommandLocal "bsdarchive" { } ''
         mkdir -p $out/bin
         ln -s ${pkgs.libarchive}/bin/bsdcpio $out/bin/cpio
         ln -s ${pkgs.libarchive}/bin/bsdtar $out/bin/tar

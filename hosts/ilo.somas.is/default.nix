@@ -136,6 +136,11 @@
 
   services.udisks2.enable = true;
 
+  # TODO remove
+  nixpkgs.config.permittedInsecurePackages = [
+    "imagemagick-6.9.12-68"
+  ];
+
   system.stateVersion = "22.11";
 
   # services.xserver.desktopManager = {
