@@ -1,7 +1,7 @@
 { pkgs, config, ... }: {
   home = {
     packages = [
-      pkgs.khal
+      # TODO pkgs.khal
       # pkgs.remhind
     ];
     persistence."/cache${config.home.homeDirectory}".directories = [ "share/khal" ];

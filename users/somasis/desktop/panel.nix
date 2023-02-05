@@ -15,7 +15,7 @@
     pkgs.mpc-cli
 
     # panel-events
-    pkgs.khal
+    # TODO pkgs.khal
     pkgs.pastel
 
     # panel-anki

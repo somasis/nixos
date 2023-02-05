@@ -13,11 +13,12 @@
 
     "!libgen" = "http://libgen.rs/index.php?req={}";
     "!bookfinder" = "https://www.bookfinder.com/search/?keywords={}";
-    "!library" = "https://openlibrary.org/search?q={}";
     "!abebooks" = "https://www.abebooks.com/servlet/SearchResults?kn={}";
 
     "!appstate" = "https://gb1.appstate.edu/search?q={}";
     "!apppeople" = "https://search.appstate.edu/search.php?last={}&type=all";
+    "!library" = "https://login.proxy006.nclive.org/login?qurl=http%3A%2F%2Fsearch.ebscohost.com%2Flogin.aspx%3Fdirect%3Dtrue%26site%3Deds-live%26scope%3Dsite%26group%3Dmain%26profile%3Deds%26authtime%3Dcookie%2Cip%2Cuid%26bQuery%3D{quoted}";
+    "!scholar" = "https://login.proxy006.nclive.org/login?qurl=https%3A%2F%2Fscholar.google.com%2Fscholar%3Fhl%3Den%26q%3D{quoted}%26btnG%3DSearch";
 
     "!pkg" = "https://parcelsapp.com/en/tracking/{}";
 
@@ -41,12 +42,9 @@
     "!redusers" = "https://redacted.ch/user.php?action=search&search={}";
 
     "!gh" = "https://github.com/search?q={}";
-    "!ghhm" = "https://github.com/nix-community/home-manager/issues?q={}";
-    "!ghnix" = "https://github.com/NixOS/nixpkgs/issues?q={}";
-
-    "!hmopts" = "https://mipmip.github.io/home-manager-option-search/?{unquoted}";
 
     "!nix" = "file://${config.nix.package.doc}/share/doc/nix/manual/index.html?search={}";
+    "!nixissues" = "https://github.com/NixOS/nixpkgs/issues?q={}";
     "!nixopts" = "https://search.nixos.org/options?channel=unstable&sort=alpha_asc&query={}";
     "!nixpkgs" = "https://search.nixos.org/packages?channel=unstable&sort=alpha_asc&query={}";
     "!nixwiki" = "https://nixos.wiki/index.php?go=Go&search={}";
@@ -86,7 +84,7 @@
     "!vimm" = "https://vimm.net/vault/?p=list&q={}";
 
     "!atsd" = "https://jira.appstate.edu/browse/ATSD-{}";
-    "!dell" = "https://www.dell.com/support/home/en-us/product-support/servicetag/{}";
     "!tss" = "https://jira.appstate.edu/secure/QuickSearch.jspa?searchString={}";
+    "!dell" = "https://www.dell.com/support/home/en-us/product-support/servicetag/{}";
   };
 }

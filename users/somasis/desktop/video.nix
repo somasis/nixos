@@ -32,7 +32,7 @@
         ];
 
         alang = commaList [ "jpn" "en" ];
-        slang = "en";
+        slang = commaList [ "en" "en-US" "en-GB" ];
 
         sub-file-paths = pathList [ "sub" "Sub" "subs" "Subs" "subtitle" "Subtitle" "subtitles" "Subtitles" ];
         sub-auto = "fuzzy";

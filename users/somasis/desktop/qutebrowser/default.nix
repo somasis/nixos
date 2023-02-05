@@ -85,6 +85,10 @@ in
   programs.qutebrowser = {
     enable = true;
 
+    package = pkgs.qutebrowser.override {
+      withPdfReader = false;
+    };
+
     loadAutoconfig = true;
 
     settings = rec {
@@ -189,7 +193,7 @@ in
 
       # Languages preferences.
       spellcheck.languages = [ "en-US" "en-AU" "en-GB" "es-ES" ];
-      content.headers.accept_language = lib.concatStringsSep "," (lib.flatten [ "tok" spellcheck.languages "en;q=0.9" ]);
+      content.headers.accept_language = lib.concatStringsSep "," (lib.flatten [ "tok" "en;q=0.9" ]);
 
       zoom = {
         # This will be unnecessary if I ever start using Wayland and don't
@@ -373,6 +377,8 @@ in
       config.unbind("q")
       config.unbind("<Ctrl+q>")
       config.unbind("<F11>")
+
+      config.unbind("<Ctrl+y>", mode="prompt")
     '';
 
     keyBindings = {

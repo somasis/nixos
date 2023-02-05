@@ -1,4 +1,9 @@
-{ config, pkgs, ... }: {
+{ config
+, nixosConfig
+, ...
+}:
+assert nixosConfig.programs.steam.enable;
+{
   home.persistence."/persist${config.home.homeDirectory}" = {
     directories = [ "share/Steam" ];
   };
@@ -12,7 +17,7 @@
     Install.WantedBy = [ "graphical-session.target" ];
     Service = {
       Type = "simple";
-      ExecStart = "${pkgs.steam}/bin/steam -silent";
+      ExecStart = "${nixosConfig.programs.steam.package}/bin/steam -silent";
       Restart = "on-failure";
     };
   };

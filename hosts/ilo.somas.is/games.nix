@@ -8,6 +8,6 @@
     };
   };
 
-  programs.steam.enable = true;
+  # TODO programs.steam.enable = false;
   environment.systemPackages = [ pkgs.protonup ];
 }

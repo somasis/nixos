@@ -329,6 +329,6 @@ in
     ;
   };
 
-  programs.bash.shellAliases."beet-import-all" = "beet import --flat --timid ${lib.escapeShellArg config.xdg.userDirs.music}/source/*/*";
+  home.shellAliases."beet-import-all" = "beet import --flat --timid ${lib.escapeShellArg config.xdg.userDirs.music}/source/*/*";
   programs.qutebrowser.searchEngines."!beets" = "file:///${beets.doc}/share/doc/beets/html/search.html?q={}";
 }

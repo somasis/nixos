@@ -47,7 +47,7 @@ let
     # Force borg's CPU usage to remain low.
     preHook = ''
       borg() {
-          command ${pkgs.limitcpu}/bin/cpulimit -qf -l 50 -- borg "$@"
+          command ${pkgs.limitcpu}/bin/cpulimit -qf -l 25 -- borg "$@"
       }
     '';
 

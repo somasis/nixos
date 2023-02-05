@@ -206,6 +206,24 @@
         };
       };
 
+      "rclone@home-somasis-mnt-gdrive-appstate-shared" = {
+        Unit = {
+          Description = ''Mount rclone remote "gdrive-appstate-shared:" at ${config.home.homeDirectory}/mnt/gdrive/appstate-shared'';
+          PartOf = [ "gdrive.target" ];
+        };
+        Install.WantedBy = [ "gdrive.target" ];
+
+        Service = {
+          Type = "notify";
+          ExecStartPre = [ "${pkgs.coreutils}/bin/mkdir -p ${config.home.homeDirectory}/mnt/gdrive/appstate-shared" ];
+          ExecStart = [
+            "${pkgs.rclone}/bin/rclone mount --poll-interval=30m --vfs-cache-mode=writes --drive-shared-with-me gdrive-appstate: ${config.home.homeDirectory}/mnt/gdrive/appstate-shared"
+          ];
+          ExecReload = [ "${pkgs.procps}/bin/kill -HUP $MAINPID" ];
+          ExecStopPost = [ "-${pkgs.coreutils}/bin/rmdir -p ${config.home.homeDirectory}/mnt/gdrive/appstate-shared" ];
+        };
+      };
+
       "rclone@home-somasis-mnt-gphotos-personal" = {
         Unit = {
           Description = ''Mount rclone remote "gphotos-personal:" at ${config.home.homeDirectory}/mnt/gphotos/personal'';

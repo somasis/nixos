@@ -1,12 +1,12 @@
 {
   # Tweaks for cd(1) usage.
 
-  programs.bash = {
+  home = {
     sessionVariables."CDPATH" = ".:$HOME:$HOME/study:$HOME/src:$HOME/mnt";
     shellAliases = {
       "back" = ''cd "$OLDPWD"'';
       ".." = "cd ..";
     };
-    shellOptions = [ "cdspell" ];
   };
+  programs.bash.shellOptions = [ "cdspell" ];
 }

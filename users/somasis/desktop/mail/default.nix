@@ -115,7 +115,7 @@ in
           Service = {
             Type = "oneshot";
 
-            ExecStart = [ "${pkgs.torsocks}/bin/torsocks ${pkgs.limitcpu}/bin/cpulimit -qf -l 50 -- ${pkgs.offlineimap}/bin/offlineimap -o -u syslog -a ${n}" ];
+            ExecStart = [ "${pkgs.torsocks}/bin/torsocks ${pkgs.limitcpu}/bin/cpulimit -qf -l 25 -- ${pkgs.offlineimap}/bin/offlineimap -o -u syslog -a ${n}" ];
 
             SyslogIdentifier = "offlineimap";
 

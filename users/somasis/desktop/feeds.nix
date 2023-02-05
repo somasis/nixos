@@ -318,6 +318,10 @@ in
           tags = [ "news" ];
         }
         {
+          url = "https://thebaffler.com/feed";
+          tags = [ "news" ];
+        }
+        {
           url = "https://theappalachianonline.com/feed/";
           title = "The Appalachian";
           tags = [ "news" "Appalachian State University" "Boone, NC" ];

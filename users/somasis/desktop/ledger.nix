@@ -10,7 +10,7 @@ let
     name = "ledger-bills";
     runtimeInputs = [
       pkgs.gnugrep
-      pkgs.khal
+      # TODO pkgs.khal
     ];
 
     text = ''

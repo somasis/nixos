@@ -93,9 +93,6 @@
   environment = {
     defaultPackages = [ ];
 
-    # Prevent any aliases from being set by default.
-    shellAliases = lib.mkForce { };
-
     systemPackages = [
       # Necessary for `nixos-rebuild`'s git stuff
       pkgs.git

@@ -75,7 +75,7 @@
     };
   };
 
-  programs.bash.shellAliases = {
+  home.shellAliases = {
     am = "git am";
     add = "git add -v";
     addall = "git addall";

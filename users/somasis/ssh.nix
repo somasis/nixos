@@ -12,7 +12,7 @@
     # "/cache${config.home.homeDirectory}".files = [ ".ssh/known_hosts" ];
   };
 
-  # # HACK Need this symlink because otherwise ssh replaces the file atomically.
+  # HACK Need this symlink because otherwise ssh replaces the file atomically.
   # home.file.".ssh/known_hosts".source = config.lib.file.mkOutOfStoreSymlink "${config.xdg.cacheHome}/ssh/known_hosts";
 
   programs.ssh = {

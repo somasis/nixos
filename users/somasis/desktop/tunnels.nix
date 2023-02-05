@@ -15,6 +15,13 @@
         remote = "somasis@spinoza.7596ff.com";
       }
       {
+        name = "kodi";
+        location = 45780;
+        remoteLocation = 8080;
+
+        remote = "somasis@spinoza.7596ff.com";
+      }
+      {
         name = "syncthing";
         location = 45435;
 

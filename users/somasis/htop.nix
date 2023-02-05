@@ -88,7 +88,7 @@
   };
 
   # Silence warning about being unable to write to configuration file.
-  programs.bash.shellAliases.htop = "2>/dev/null htop";
+  home.shellAliases.htop = "2>/dev/null htop";
 
   services.sxhkd.keybindings."super + alt + Delete" =
     "terminal ${config.programs.htop.package}/bin/htop";

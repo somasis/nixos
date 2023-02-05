@@ -14,7 +14,7 @@
         mouse_right_click = "close_current";
 
         alignment = "left";
-        origin = "top-left";
+        origin = "top-right";
         offset = "0x0";
         width = "(128,752)";
         height = 32;

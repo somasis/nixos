@@ -99,7 +99,7 @@ in
             name = "discord-css";
             files = [
               "${inputs.repluggedThemeCustom}/custom.css"
-              "${inputs.repluggedThemeIrc}/irc.css"
+              # "${inputs.repluggedThemeIrc}/irc.css"
             ];
           }));
         };
