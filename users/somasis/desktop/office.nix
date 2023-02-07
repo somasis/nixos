@@ -124,6 +124,24 @@ in
     "extensions.zotero.integration.useClassicAddCitationDialog" = true;
   };
 
+  services.xsuspender.rules = {
+    zotero = {
+      matchWmClassContains = "Zotero";
+      downclockOnBattery = 1;
+      suspendDelay = 15;
+      resumeEvery = 60;
+      resumeFor = 5;
+    };
+
+    libreoffice = {
+      matchWmClassContains = "libreoffice";
+      downclockOnBattery = 1;
+      suspendDelay = 15;
+      resumeEvery = 60;
+      resumeFor = 5;
+    };
+  };
+
   programs.qutebrowser.keyBindings.normal = {
     "<z><p><z>" = "spawn -u ${qute-zotero'}";
     "<z><p><Z>" = "hint links userscript ${qute-zotero'}";
