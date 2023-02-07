@@ -1,4 +1,6 @@
 { config
+, lib
+, nixosConfig
 , pkgs
 , ...
 }:
@@ -47,6 +49,7 @@ let
     # Force borg's CPU usage to remain low.
     preHook = ''
       borg() {
+          ${lib.optionalString (nixosConfig.networking.networkmanager.enable) "${pkgs.networkmanager}/bin/nm-online -q"}
           command ${pkgs.limitcpu}/bin/cpulimit -qf -l 25 -- borg "$@"
       }
     '';
