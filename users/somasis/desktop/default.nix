@@ -11,10 +11,10 @@
     # ./wayland.nix
     # ./xterm.nix
 
+    ./browser
     ./games
     ./mail
     ./pim
-    ./qutebrowser
     ./stw
 
     ./anki.nix
