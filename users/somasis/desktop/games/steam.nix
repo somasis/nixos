@@ -23,7 +23,7 @@ assert nixosConfig.programs.steam.enable;
   };
 
   # Keep Steam easy-going in the background.
-  services.xsuspender.rules.Steam = {
+  services.xsuspender.rules.steam = {
     matchWmClassContains = "Steam";
     downclockOnBattery = 1;
     suspendDelay = 15;
