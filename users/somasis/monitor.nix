@@ -1,5 +1,5 @@
 { config, ... }: {
-  programs.htop = {
+  programs.htop = with config.lib.htop; {
     enable = true;
     settings = {
       # Application settings
@@ -35,10 +35,9 @@
       highlight_deleted_exe = 1; # "Highlight out-dated/removed programs / libraries"
       highlight_megabytes = 1; # "Highlight large numbers in memory counters"
 
-
       # Display options > Global options: threads
       hide_kernel_threads = 0;
-      hide_userland_threads = 0;
+      hide_userland_threads = 1;
       show_thread_names = 1;
       highlight_threads = 1; # "Display threads in a different color"
 
@@ -48,9 +47,9 @@
       tree_sort_direction = 1; # Sort lowest to highest even in tree view
       tree_sort_key = 0;
       sort_direction = 0; # Sort lowest to highest
-      sort_key = config.lib.htop.fields.PERCENT_CPU; # Sort by PID
+      sort_key = fields.PERCENT_CPU; # Sort by PID
 
-      fields = with config.lib.htop.fields; [
+      fields = with fields; [
         USER
         PID
         STATE
@@ -66,29 +65,28 @@
       header_layout = "two_50_50";
       header_margin = 1;
     }
-    // (with config.lib.htop;
-      leftMeters [
-        (bar "CPU")
-        (bar "AllCPUs4")
-        (bar "Memory")
-        (bar "Zram")
-        (text "Tasks")
-        (text "LoadAverage")
-      ])
-    // (with config.lib.htop;
-      rightMeters [
-        (text "Hostname")
-        (text "System")
-        (text "SystemdState")
-        (text "Uptime")
-        (text "DiskIO")
-        (text "ZFSCARC")
-        (text "NetworkIO")
-      ]);
+    // leftMeters [
+      (bar "CPU")
+      (bar "AllCPUs4")
+      (bar "Memory")
+      (bar "Zram")
+      (text "Tasks")
+      (text "LoadAverage")
+    ]
+    // rightMeters [
+      (text "Hostname")
+      (text "System")
+      (text "SystemdState")
+      (text "Uptime")
+      (text "DiskIO")
+      (text "ZFSCARC")
+      (text "NetworkIO")
+    ];
   };
 
   # Silence warning about being unable to write to configuration file.
-  home.shellAliases.htop = "2>/dev/null htop";
+  # Use programs.bash instead of home.shellAliases because of the `2>/dev/null` usage.
+  programs.bash.shellAliases.htop = "2>/dev/null htop";
 
   services.sxhkd.keybindings."super + alt + Delete" =
     "terminal ${config.programs.htop.package}/bin/htop";

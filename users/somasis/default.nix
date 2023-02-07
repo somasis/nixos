@@ -12,9 +12,9 @@
     ./modules
     ./shell
 
-    ./htop.nix
     ./less.nix
     ./man.nix
+    ./monitor.nix
     ./pass.nix
     ./skim.nix
     ./spell.nix
