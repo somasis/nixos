@@ -119,17 +119,6 @@
         '';
       }
     )
-
-    (pkgs.writeShellApplication {
-      name = "stderred";
-
-      runtimeInputs = [ pkgs.stderred ];
-
-      text = ''
-        export ${lib.toShellVar "LD_PRELOAD" "${pkgs.stderred}/lib/libstderred.so"}
-        exec "$@"
-      '';
-    })
   ];
 
   programs.jq.enable = true;
