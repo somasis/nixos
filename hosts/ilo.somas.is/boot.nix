@@ -126,8 +126,6 @@
       };
     };
 
-    getty = {
-      greetingLine = "o kama pona tawa ${config.networking.fqdn}.";
-    };
+    getty.greetingLine = "o kama pona tawa ${config.networking.fqdn}.";
   };
 }
