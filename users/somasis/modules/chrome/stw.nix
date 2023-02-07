@@ -225,7 +225,7 @@ in
                 + " -- ${command'}"
               ;
 
-              ExecReload = "${pkgs.coreutils}/bin/kill -ALRM $MAINPID";
+              ExecReload = "${pkgs.procps}/bin/kill -ALRM $MAINPID";
             };
           };
         }
