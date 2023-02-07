@@ -157,6 +157,13 @@ in
     Service = {
       Type = "simple";
       ExecStartPre = [
+        # Wait for any standalone instances of libreoffice to quit; there might be one open,
+        # which will cause ExecStart to fail if we don't wait for it to end by itself.
+        # We especially do not want to kill it since it might be some in-progress writing.
+        # If there is no process matching the pattern, pwait will exit non-zero.
+        ''-${pkgs.procps}/bin/pwait -u ${config.home.username} "soffice\.bin"''
+
+        # Install the Zotero connector
         "${pkgs.libreoffice}/bin/unopkg add -f ${pkgs.zotero}/usr/lib/zotero-bin-${pkgs.zotero.version}/extensions/zoteroOpenOfficeIntegration@zotero.org/install/Zotero_OpenOffice_Integration.oxt"
       ];
       ExecStart = [
