@@ -460,7 +460,12 @@ in
   services.sxhkd.keybindings = { "{super + grave, super + Return, alt + F2}" = "dmenu-run"; }
     // lib.optionalAttrs config.xsession.windowManager.bspwm.enable { "super + Escape" = "dmenu-session"; }
     // lib.optionalAttrs (nixosConfig.fonts.fontconfig.defaultFonts.emoji != [ ]) { "super + e" = "dmenu-emoji -c"; }
-    // lib.optionalAttrs config.programs.password-store.enable { "super + shift + p" = "dmenu-pass -cn"; }
+    // lib.optionalAttrs config.programs.password-store.enable {
+    # "super + shift + p" was previously used, but thats used
+    # for the display settings key on the Framework keyboard
+    "super + k" = "dmenu-pass -cn";
+    "super + shift + k" = "dmenu-pass -cn -m otp";
+  }
   ;
 
   services.dunst.settings.global.dmenu = "dmenu -p \"notification\"";
