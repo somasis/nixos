@@ -1,10 +1,10 @@
 { config, ... }: {
   services.openssh = {
     enable = true;
-    forwardX11 = true;
     settings = {
       permitRootLogin = "no";
       passwordAuthentication = false;
+      X11Forwarding = true;
     };
 
     hostKeys = [{ path = "/etc/ssh/host_ed25519"; type = "ed25519"; }];

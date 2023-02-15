@@ -29,7 +29,7 @@
     "LESSHISTFILE" = "${config.xdg.cacheHome}/less/history";
   };
 
-  home.sessionVariables.PAGER = "less";
-
   home.persistence."/cache${config.home.homeDirectory}".directories = [ "var/cache/less" ];
+
+  programs.less.enable = true;
 }
