@@ -344,8 +344,8 @@
     ]);
   };
 
-  # TODO broken with dbus-next check failure
-  # services.pass-secret-service.enable = true;
+  # Provide libsecret service for various apps
+  services.pass-secret-service.enable = true;
 
   programs.qutebrowser.keyBindings.normal =
     let
