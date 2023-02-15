@@ -65,8 +65,6 @@ in
   services.mpd = {
     enable = true;
 
-    network.startWhenNeeded = true;
-
     musicDirectory = "${config.xdg.userDirs.music}/lossy";
     playlistDirectory = "${config.xdg.userDirs.music}/playlists";
 
@@ -101,7 +99,7 @@ in
           type "pulse"
           name "PulseAudio"
           format "48000:24:2"
-          replay_gain_handler "mixer"
+          replay_gain_handler "software"
           mixer_type "hardware"
         }
       '';
