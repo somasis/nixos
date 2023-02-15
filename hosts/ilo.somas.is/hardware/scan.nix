@@ -1,6 +1,9 @@
 {
   hardware.sane = {
     enable = true;
-    # extraBackends = pkgs.hplipWithPlugin;
+
+    openFirewall = true;
+
+    brscan5.enable = true;
   };
 }

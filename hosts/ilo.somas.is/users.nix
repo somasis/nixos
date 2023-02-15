@@ -24,6 +24,12 @@
 
           # ./users/somasis/games/retroarch.nix: controller detection
           "input"
+
+          # ./hardware/scan.nix
+          "scanner"
+
+          # ./hardware/print.nix
+          "lp"
         ];
 
         hashedPassword = "$6$VfKdDqJkx4JrErSl$eJhjdLheyvqDO0hbWE87WKfr6q7qA6pvtmK.EnP.s5wPL7IBZOl1n6YFyrZdpG98HovE7D6X55B0.6c3NYj600";
