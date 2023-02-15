@@ -115,7 +115,7 @@ in
           Service = {
             Type = "oneshot";
 
-            ExecStart = [ "${pkgs.torsocks}/bin/torsocks ${pkgs.limitcpu}/bin/cpulimit -qf -l 25 -- ${pkgs.offlineimap}/bin/offlineimap -o -u syslog -a ${n}" ];
+            ExecStart = [ "${pkgs.limitcpu}/bin/cpulimit -qf -l 25 -- ${lib.optionalString (nixosConfig.services.tor.client.enable) "${pkgs.torsocks}/bin/torsocks"} ${pkgs.offlineimap}/bin/offlineimap -o -u syslog -a ${n}" ];
 
             SyslogIdentifier = "offlineimap";
 

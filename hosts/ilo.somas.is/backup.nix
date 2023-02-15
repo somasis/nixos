@@ -44,13 +44,15 @@ let
     ];
 
     extraArgs = "--lock-wait 600";
-    extraCreateArgs = "--stats --exclude-if-present '.stfolder' --exclude-if-present '.stversions'";
+    extraCreateArgs = "--stats --progress --exclude-if-present '.stfolder' --exclude-if-present '.stversions'";
+
+    inhibitsSleep = true;
 
     # Force borg's CPU usage to remain low.
     preHook = ''
       borg() {
           ${lib.optionalString (nixosConfig.networking.networkmanager.enable) "${pkgs.networkmanager}/bin/nm-online -q"}
-          command ${pkgs.limitcpu}/bin/cpulimit -qf -l 25 -- borg "$@"
+          ${pkgs.limitcpu}/bin/cpulimit -qf -l 25 -- ${lib.optionalString (nixosConfig.services.tor.client.enable) "${pkgs.torsocks}/bin/torsocks"} borg "$@"
       }
     '';
 
@@ -77,6 +79,7 @@ in
       encryption
       environment
       exclude
+      inhibitsSleep
       paths
       prune
       persistentTimer
