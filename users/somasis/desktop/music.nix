@@ -154,7 +154,7 @@ let
       Connection.dir = config.services.mpd.musicDirectory;
 
       Connection.allowLocalStreaming = true; # Local file playback: "via-in-built HTTP server"
-      Connection.autoUpdate = false; # "Server detects changes automatically"
+      Connection.autoUpdate = true; # "Server detects changes automatically"
 
       # Playback
       General.stopFadeDuration = 1000; # "Fadeout on stop"

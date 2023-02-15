@@ -94,6 +94,9 @@ in
       ''
         metadata_to_use "${lib.concatStringsSep "," tags}"
 
+        auto_update "yes"
+        auto_update_depth "1"
+
         audio_output {
           type "pulse"
           name "PulseAudio"
