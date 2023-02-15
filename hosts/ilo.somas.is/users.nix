@@ -15,7 +15,7 @@
           # ./nix.nix: trusted-users
           "wheel"
 
-          # ./networking/wifi.nix: iwd
+          # ./networking/wifi.nix
           "network"
           "networkmanager"
 
