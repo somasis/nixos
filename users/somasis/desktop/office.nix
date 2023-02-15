@@ -126,19 +126,12 @@ in
 
   services.xsuspender.rules = {
     zotero = {
-      matchWmClassContains = "Zotero";
+      matchWmClassGroupContains = "Zotero";
       downclockOnBattery = 1;
       suspendDelay = 15;
       resumeEvery = 60;
       resumeFor = 5;
-    };
-
-    libreoffice = {
-      matchWmClassContains = "libreoffice";
-      downclockOnBattery = 1;
-      suspendDelay = 15;
-      resumeEvery = 60;
-      resumeFor = 5;
+      # suspendSubtreePattern = ".";
     };
   };
 
@@ -161,7 +154,7 @@ in
         # which will cause ExecStart to fail if we don't wait for it to end by itself.
         # We especially do not want to kill it since it might be some in-progress writing.
         # If there is no process matching the pattern, pwait will exit non-zero.
-        ''-${pkgs.procps}/bin/pwait -u ${config.home.username} "soffice\.bin"''
+        ''-${pkgs.procps}/bin/pwait -u ${config.home.username} "soffice.bin"''
 
         # Install the Zotero connector
         "${pkgs.libreoffice}/bin/unopkg add -f ${pkgs.zotero}/usr/lib/zotero-bin-${pkgs.zotero.version}/extensions/zoteroOpenOfficeIntegration@zotero.org/install/Zotero_OpenOffice_Integration.oxt"
