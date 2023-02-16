@@ -30,6 +30,9 @@
     "!mbreleasegroup" = "https://musicbrainz.org/search?query={}&type=release_group&method=advanced";
     "!mbwork" = "https://musicbrainz.org/search?query={}&type=work&method=advanced";
 
+    "!letterboxd" = "https://letterboxd.com/search/{}/";
+    "!imdb" = "https://www.imdb.com/find/?s=all&q={}";
+
     "!osm" = "https://www.openstreetmap.org/search?query={}";
     "!osmwiki" = "https://wiki.openstreetmap.org/wiki/Special:Search?search={}&go=Go";
     "!gmaps" = "https://www.google.com/maps/search/{}";
