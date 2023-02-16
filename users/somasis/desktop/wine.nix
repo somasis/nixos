@@ -1,16 +1,8 @@
 { config
 , pkgs
 , nixosConfig
-, inputs
 , ...
 }:
-let
-  # wineasio = pkgs.callPackage ../../pkgs/wineasio { };
-  # flstudio = pkgs.callPackage ../../../pkgs/flstudio {
-  #   mkWindowsApp = inputs.erosanix.lib.${nixosConfig.nixpkgs.system}.mkWindowsApp;
-  #   wine = pkgs.wineWowPackages.stableFull;
-  # };
-in
 {
   home.packages = [
     pkgs.winetricks
@@ -26,8 +18,5 @@ in
   home.persistence."/persist${config.home.homeDirectory}".directories = [
     "etc/wine"
     { directory = "share/wine"; method = "symlink"; }
-
-    # "etc/mkWindowsApp"
-    # "share/flstudio"
   ];
 }

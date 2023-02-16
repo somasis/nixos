@@ -15,28 +15,20 @@
 
     flake.url = "github:gytis-ivaskevicius/flake-utils-plus";
 
-    nixos.url = "github:nixos/nixpkgs?ref=nixos-unstable";
-    nixosStable.url = "github:nixos/nixpkgs?ref=nixos-22.11";
+    nixpkgs.url = "github:nixos/nixpkgs?ref=nixos-unstable";
+    nixpkgsStable.url = "github:nixos/nixpkgs?ref=nixos-22.11";
+
     nixosHardware.url = "github:nixos/nixos-hardware";
 
     impermanence.url = "github:nix-community/impermanence";
     # disko = {
     #   url = "github:nix-community/disko";
-    #   inputs.nixpkgs.follows = "nixos";
     # };
 
     homeManager.url = "github:nix-community/home-manager";
-    homeManager.inputs.nixpkgs.follows = "nixos";
+    homeManager.inputs.nixpkgs.follows = "nixpkgs";
 
     # nixMinecraft.url = "github:12Boti/nix-minecraft";
-    # nixMinecraft.inputs.nixpkgs.follows = "nixos";
-
-    # erosanix.url = "github:emmanuelrosa/erosanix";
-    # erosanix.inputs.nixpkgs.follows = "nixos";
-
-    plasmaManager.url = "github:pjones/plasma-manager";
-    plasmaManager.inputs.nixpkgs.follows = "nixos";
-    plasmaManager.inputs.home-manager.follows = "homeManager";
 
     catgirl.flake = false;
     catgirl.url = "git+https://git.causal.agency/catgirl?ref=somasis/tokipona";
@@ -50,7 +42,7 @@
     ubase.url = "github:michaelforney/ubase";
 
     replugged.url = "github:LunNova/replugged-nix-flake";
-    replugged.inputs.nixpkgs.follows = "nixos";
+    replugged.inputs.nixpkgs.follows = "nixpkgs";
 
     repluggedPluginBetterCodeblocks.flake = false;
     repluggedPluginBetterCodeblocks.url = "github:replugged-org/better-codeblocks";
@@ -85,7 +77,7 @@
 
     hyprland.flake = true;
     hyprland.url = "github:hyprwm/Hyprland";
-    hyprland.inputs.nixpkgs.follows = "nixos";
+    hyprland.inputs.nixpkgs.follows = "nixpkgs";
 
     adblockEasyList = {
       flake = false;
@@ -120,45 +112,30 @@
     sharedOverlays = [ flake.outputs.overlay ];
 
     hostDefaults = {
-      channelName = "nixosStable";
+      channelName = "nixpkgsStable";
       system = flake.lib.system.x86_64-linux;
 
       extraArgs = { inherit flake inputs; };
 
       modules = with inputs; [
-        { nix.registry.nixpkgs.flake = inputs.nixosStable; }
-
         impermanence.nixosModules.impermanence
 
-        {
+        ({ config, lib, ... }: {
           nix = {
-            generateRegistryFromInputs = true;
-            linkInputs = true;
+            registry = lib.mapAttrs (_: value: { flake = value; }) inputs;
+            nixPath = lib.mapAttrsToList (key: value: "${key}=${value.to.path}") config.nix.registry;
 
-            settings = {
-              experimental-features = [
-                "nix-command"
-                "flakes"
-              ];
-            };
-
-            # Disable $NIX_PATH entirely. Only flake-enabled commands.
-            nixPath = [ ];
+            settings.experimental-features = [ "nix-command" "flakes" ];
           };
-        }
 
-        # {
-        #   users = {
-        #     users.somasis = {
-        #       group = "somasis";
-        #       extraGroups = [ "users" ];
-        #       isNormalUser = true;
-        #     };
-        #     groups.somasis = { };
-        #   };
-        # }
+          nixpkgs.overlays = [
+            (final: _prev: {
+              unstable = inputs.nixpkgs.legacyPackages.${final.system};
+            })
+          ];
+        })
 
-        homeManager.nixosModules.home-manager
+        homeManager.nixosModules.default
         {
           home-manager = {
             useGlobalPkgs = true;
@@ -176,58 +153,35 @@
       ];
     };
 
-    hosts = {
-      ilo = {
-        channelName = "nixos";
+    hosts.ilo = {
+      channelName = "nixpkgs";
 
-        modules = with inputs; [
-          { nix.registry.nixpkgs.flake = inputs.nixos; }
+      modules = with inputs; [
+        nixosHardware.nixosModules.framework
 
-          nixosHardware.nixosModules.framework
+        ./hosts/ilo.somas.is
 
-          ./hosts/ilo.somas.is
+        # disko.nixosModules.disko
 
-          # disko.nixosModules.disko
+        homeManager.nixosModules.default
+        {
+          home-manager = {
+            sharedModules = with inputs; [
+              # nixMinecraft.nixosModules.home-manager.minecraft
+              hyprland.homeManagerModules.default
+            ];
 
-          homeManager.nixosModules.home-manager
-          {
-            home-manager = {
-              sharedModules = with inputs; [
-                # plasmaManager.homeManagerModules.plasma-manager
-                # nixMinecraft.nixosModules.home-manager.minecraft
-                hyprland.homeManagerModules.default
-              ];
+            verbose = true;
 
-              verbose = true;
-
-              users.somasis = {
-                imports = [
-                  ./users/somasis
-                  ./users/somasis/desktop
-                ];
-              };
-            };
-          }
-        ];
-      };
-
-      nixos = {
-        channelName = "nixosStable";
-
-        modules = with inputs; [
-          { nix.registry.nixpkgs.flake = inputs.nixosStable; }
-          ./hosts/nixos.somas.is
-
-          homeManager.nixosModules.home-manager
-          {
-            home-manager.users.somasis = {
+            users.somasis = {
               imports = [
                 ./users/somasis
+                ./users/somasis/desktop
               ];
             };
-          }
-        ];
-      };
+          };
+        }
+      ];
     };
   };
 }
