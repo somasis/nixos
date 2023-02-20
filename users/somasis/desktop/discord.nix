@@ -87,6 +87,9 @@ in
       (name: value: { inherit value; name = camelCaseToSnakeCase name; })
       {
         dangerousEnableDevtoolsOnlyEnableIfYouKnowWhatYoureDoing = true;
+
+        # The nixpkgs Discord package messes with settings.json if it doesn't have
+        # SKIP_HOST_UPDATE set in it already.
         skipHostUpdate = true;
 
         openasar = {
@@ -187,12 +190,17 @@ in
     Service = {
       Type = "simple";
       ExecStart = "${discordProgram} --start-minimized";
-      Restart = "on-failure";
 
-      StandardError = "null";
+      Restart = "on-abnormal";
+
+      StartLimitIntervalSec = 1;
+      StartLimitBurst = 1;
+      StartLimitAction = "none";
 
       # It seems this is required because otherwise Discord moans about options.json being read-only
       # in the journal every time I run `discord` to open the already-running client.
+      # As does OpenASAR, about settings.json.
+      StandardError = "null";
       StandardOutput = "null";
     };
   };
