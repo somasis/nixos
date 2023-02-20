@@ -7,18 +7,18 @@
   # Necessary for realtime usage.
   security.rtkit.enable = true;
 
-  hardware.pulseaudio = {
-    enable = true;
-    support32Bit = true;
-    # package = pkgs.pulseaudioFull;
-  };
-
-  # services.pipewire = {
+  # hardware.pulseaudio = {
   #   enable = true;
-  #   audio.enable = true;
-
-  #   alsa.enable = true;
-  #   pulse.enable = true;
-  #   jack.enable = true;
+  #   support32Bit = true;
+  #   # package = pkgs.pulseaudioFull;
   # };
+
+  services.pipewire = {
+    enable = true;
+    audio.enable = true;
+
+    alsa.enable = true;
+    pulse.enable = true;
+    jack.enable = true;
+  };
 }
