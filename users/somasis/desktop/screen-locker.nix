@@ -11,44 +11,49 @@
   };
 
   systemd.user.services.xsecurelock = {
-    Unit.Description = "Run xsecurelock with specified configuration";
-    Service.Type = "simple";
-
-    Service.ProtectSystem = "strict";
-    Service.UnsetEnvironment = [
-      "HOME"
-      "PATH"
-      "XDG_RUNTIME_DIR"
-      "TERM"
-    ];
-    Service.PassEnvironment = [
-      "NOTIFY_SOCKET"
-    ];
-
-    Service.Environment = [
-      ''"XSECURELOCK_BACKGROUND_COLOR=#000000"''
-      ''"XSECURELOCK_AUTH_BACKGROUND_COLOR=#000000"''
-      ''"XSECURELOCK_AUTH_FOREGROUND_COLOR=${config.xresources.properties."*darkForeground"}"''
-      ''"XSECURELOCK_DATETIME_FORMAT=%%A, %%B %%d, %%I:%%M %%p"''
-      ''"XSECURELOCK_FONT=monospace:style=bold:size=11"''
-      ''"XSECURELOCK_PASSWORD_PROMPT=time"''
-      ''"XSECURELOCK_SHOW_DATETIME=0"''
-      ''"XSECURELOCK_SHOW_HOSTNAME=0"''
-      ''"XSECURELOCK_SHOW_USERNAME=0"''
-
-      # ''"XSECURELOCK_NO_PAM_RHOST=1"'' # Necessary to make fprintd work.
-
-      ''"XSECURELOCK_AUTH_TIMEOUT=30"''
-      ''"XSECURELOCK_BLANK_TIMEOUT=15"''
-    ];
-
-    Service.ExecStart = "${pkgs.xsecurelock}/bin/xsecurelock";
-    Service.Restart = "on-failure";
-    Service.RestartSec = 0;
-    Unit.OnFailure = [ "xsecurelock-kill.service" ];
+    Unit = {
+      Description = "Run xsecurelock with specified configuration";
+      Before = [ "sleep.target" ];
+      OnFailure = [ "xsecurelock-kill.service" ];
+    };
 
     Install.WantedBy = [ "sleep.target" ];
-    Unit.Before = [ "sleep.target" ];
+
+    Service = {
+      Type = "simple";
+
+      ProtectSystem = "strict";
+      UnsetEnvironment = [
+        "HOME"
+        "PATH"
+        "XDG_RUNTIME_DIR"
+        "TERM"
+      ];
+      PassEnvironment = [
+        "NOTIFY_SOCKET"
+      ];
+
+      Environment = [
+        ''"XSECURELOCK_BACKGROUND_COLOR=#000000"''
+        ''"XSECURELOCK_AUTH_BACKGROUND_COLOR=#000000"''
+        ''"XSECURELOCK_AUTH_FOREGROUND_COLOR=${config.xresources.properties."*darkForeground"}"''
+        ''"XSECURELOCK_DATETIME_FORMAT=%%A, %%B %%d, %%I:%%M %%p"''
+        ''"XSECURELOCK_FONT=monospace:style=bold:size=11"''
+        ''"XSECURELOCK_PASSWORD_PROMPT=time"''
+        ''"XSECURELOCK_SHOW_DATETIME=0"''
+        ''"XSECURELOCK_SHOW_HOSTNAME=0"''
+        ''"XSECURELOCK_SHOW_USERNAME=0"''
+
+        # ''"XSECURELOCK_NO_PAM_RHOST=1"'' # Necessary to make fprintd work.
+
+        ''"XSECURELOCK_AUTH_TIMEOUT=30"''
+        ''"XSECURELOCK_BLANK_TIMEOUT=15"''
+      ];
+
+      ExecStart = "${pkgs.xsecurelock}/bin/xsecurelock";
+      Restart = "on-failure";
+      RestartSec = 0;
+    };
   };
 
   systemd.user.services.xsecurelock-failure = {
