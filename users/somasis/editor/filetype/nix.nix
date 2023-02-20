@@ -15,18 +15,28 @@ let
 
   #   rm -f "$t"
   # '';
-  format = "${pkgs.nixpkgs-fmt}/bin/nixpkgs-fmt";
-  # TODO nix-linter is broken
-  # lint = pkgs.writeShellScript "lint" ''
-  #   ${pkgs.nix-linter}/bin/nix-linter -j "$1" \
-  #       | ${config.programs.jq.package}/bin/jq -r '
-  #           . | (
-  #               .file + ":" +
-  #               (.pos.spanBegin | (.sourceLine | tostring) + ":" + (.sourceColumn | tostring)) +
-  #               ": warning: " + .description
-  #           )
-  #       '
-  # '';
+  format = pkgs.writeShellScript "format" ''
+    if ${config.nix.package}/bin/nix eval --json --read-only "$(dirname "$1")"#formatter >/dev/null 2>&1; then
+        ${config.nix.package}/bin/nix fmt -- "$@"
+    else
+        ${pkgs.nixpkgs-fmt}/bin/nixpkgs-fmt -- "$@"
+    fi
+  '';
+
+  lint = pkgs.writeShellScript "lint" ''
+    ${pkgs.statix}/bin/statix check -o json "$@" 2>/dev/null \
+        | ${config.programs.jq.package}/bin/jq -r '
+            .file as $file
+                | .report
+                | map(
+                    (.severity | ascii_downcase) as $severity
+                        | (.note | ascii_downcase) as $note
+                        | .diagnostics
+                        | map("\($file):\(.at.from.line):\(.at.to.line):\(try $severity + ": ")\(.message)\(try " (" + $note + ")")")
+                )
+                | flatten[]
+        '
+  '';
 in
 {
   programs.kakoune.config.hooks = [
@@ -39,9 +49,8 @@ in
           set-option window indentwidth 2
 
           set-option window formatcmd "${format}"
+          set-option window lintcmd "${lint}"
         '';
-      # TODO nix-linter is broken
-      # set-option window lintcmd "${lint}"
     }
   ];
 }
