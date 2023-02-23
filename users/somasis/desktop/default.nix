@@ -15,6 +15,7 @@
     ./games
     ./mail
     ./pim
+    ./study
     ./stw
 
     ./anki.nix
@@ -38,9 +39,7 @@
     ./mouse.nix
     ./music.nix
     ./notifications.nix
-    ./office.nix
     ./panel.nix
-    ./pdf.nix
     ./phone-integration.nix
     ./photo.nix
     ./picom.nix
@@ -48,7 +47,6 @@
     ./screen-brightness.nix
     ./screen-locker.nix
     ./screen-temperature.nix
-    ./study.nix
     ./sxhkd.nix
     ./syncplay.nix
     ./terminal.nix
