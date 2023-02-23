@@ -1,4 +1,5 @@
-{ pkgs
+{ config
+, pkgs
 , ...
 }: {
   programs.zathura = {
@@ -25,17 +26,17 @@
       statusbar-h-padding = 6;
       statusbar-v-padding = 10;
 
-      default-bg = "${config.xresources.properties."*background"}";
-      default-fg = "${config.xresources.properties."*foreground"}";
-      statusbar-bg = "${config.xresources.properties."*background"}";
-      statusbar-fg = "${config.xresources.properties."*foreground"}";
-      inputbar-bg = "${config.xresources.properties."*lightBackground"}";
-      inputbar-fg = "${config.xresources.properties."*lightForeground"}";
+      default-bg = config.xresources.properties."*background";
+      default-fg = config.xresources.properties."*foreground";
+      statusbar-bg = config.xresources.properties."*background";
+      statusbar-fg = config.xresources.properties."*foreground";
+      inputbar-bg = config.xresources.properties."*lightBackground";
+      inputbar-fg = config.xresources.properties."*lightForeground";
 
-      completion-bg = "${config.xresources.properties."*lightBackground"}";
-      completion-fg = "${config.xresources.properties."*lightForeground"}";
-      completion-highlight-bg = "${config.xresources.properties."*colorAccent"}";
-      completion-highlight-fg = "${config.xresources.properties."*foreground"}";
+      completion-bg = config.xresources.properties."*lightBackground";
+      completion-fg = config.xresources.properties."*lightForeground";
+      completion-highlight-bg = config.xresources.properties."*colorAccent";
+      completion-highlight-fg = config.xresources.properties."*foreground";
 
       font = "monospace normal 10";
       recolor-darkcolor = config.xresources.properties."*foreground";
