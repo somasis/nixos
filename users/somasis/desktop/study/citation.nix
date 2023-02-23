@@ -18,24 +18,13 @@ let
       let
         prefs = "$HOME/.zotero/zotero/home-manager.managed/prefs.js";
 
+        managedPrefs = lib.concatStringsSep " " (map (x: "-e 'user_pref(\"${x}\", '") (builtins.attrNames zoteroConfig));
+
         filterPrefs = pkgs.writeShellScript "filter-prefs" ''
-          export PATH="${lib.makeBinPath [ pkgs.gnugrep pkgs.coreutils ]}:$PATH"
+          export PATH="${lib.makeBinPath [ pkgs.coreutils pkgs.gnugrep pkgs.moreutils ]}:$PATH"
 
           touch "${prefs}"
-
-          prefsFiltered=$(
-              grep -v \
-                  -e '^user_pref("extensions\.zotero.autoRenameFiiles' \
-                  -e '^user_pref("extensions\.zotero.fulltext' \
-                  -e '^user_pref("extensions\.zotero.pdfpreview' \
-                  -e '^user_pref("extensions\.zotero.zoteroocr' \
-                  -e '^user_pref("extensions\.zoteropreview' \
-                  "${prefs}"
-          )
-
-          prefsFiltered=$(grep -vP '^user_pref\("extensions\.zotfile\.(?!version)' <<<"$prefs")
-
-          cat > "${prefs}" <<< "$prefsFiltered"
+          grep -vF ${managedPrefs} "${prefs}" | sponge "${prefs}"
         '';
       in
       ''
@@ -96,11 +85,86 @@ let
         user_pref("${name}", ${builtins.toJSON value});
       '') prefs)}
     '';
+
+  zoteroConfig =
+    let
+      # Chicago Manual of Style 17th edition (full note)
+      style = "http://www.zotero.org/styles/chicago-fullnote-bibliography";
+      locale = "en-US";
+    in
+    rec
+    {
+      "intl.locale.requested" = locale;
+
+      # Use Appalachian State University's OpenURL resolver
+      "extensions.zotero.openURL.resolver" = "https://login.proxy006.nclive.org/login?url=https://resolver.ebscohost.com/openurl?";
+
+      # Sort settings
+      "extensions.zotero.sortAttachmentsChronologically" = true;
+      "extensions.zotero.sortNotesChronologically" = true;
+
+      # Citation settings
+      "extensions.zotero.export.citePaperJournalArticleURL" = true;
+
+      "extensions.zotero.export.lastStyle" = style;
+      "extensions.zotero.export.quickCopy.locale" = locale;
+      "extensions.zotero.export.quickCopy.setting" = "bibliography=${style}";
+
+      # Attachment settings
+      "extensions.zotero.useDataDir" = true;
+      "extensions.zotero.dataDir" = "${config.home.homeDirectory}/study/zotero";
+      "extensions.zotfile.dest_dir" = "${config.home.homeDirectory}/study/doc"; # ZotFile > General Settings > "Location of Files"
+      "extensions.zotfile.source_dir" = "${config.home.homeDirectory}/mess/current/incoming"; # ZotFile > General Settings > "Source Folder for Attaching New Files"
+      "extensions.zotfile.useZoteroToRename" = false; # ZotFile > Renaming Rules > "Use Zotero to Rename";
+
+      # ZotFile > Renaming Rules > "Format for all Item Types except Patents"
+      # [author(s) - ]title[ (volume)][ ([year][, journal|publisher])]
+      "extensions.zotfile.renameFormat" = "{%a - }{%t}{ (%v)}{ ({%y{, {%j| %p}}}}";
+
+      "extensions.zotfile.authors_delimiter" = ", "; # ZotFile > Renaming Rules > "Delimiter between multiple authors"
+      "extensions.zotero.attachmentRenameFormatString" = "{%c - }%t{100}{ (%y)}"; # Set the file name format used by Zotero's internal stuff
+
+      "extensions.zotfile.import" = false; # ZotFile > Location of Files > Custom Location
+      "extensions.zotero.autoRenameFiles.linked" = true; # ZotFile > General Settings > Location of Files > Custom Location
+
+      "extensions.zotfile.filetypes" = "pdf,epub,docx,odt"; # ZotFile > Advanced Settings > "Only work with the following filetypes"
+      "extensions.zotero.autoRenameFiles.fileTypes" = "application/pdf,application/epub+zip,application/vnd.openxmlformats-officedocument.wordprocessingml.document,application/vnd.oasis.opendocument.text";
+
+      "extensions.zotfile.confirmation" = false; # ZotFile > Advanced Settings > "Ask user when attaching new files"
+      "extensions.zotfile.confirmation_batch_ask" = false; # ZotFile > Advanced Settings > "Ask user to (batch) rename or move [0] or more attachments
+      "extensions.zotfile.confirmation_batch" = 0;
+      "extensions.zotfile.automatic_renaming" = 2; # ZotFile > Advanced Settigns > "Automatically rename new attachments" > "Always ask (non-disruptive)"
+
+      "extensions.zotfile.removeDiacritics" = true; # ZotFile > Advanced Settings > "Remove special characters (diacritics) from filename"
+
+      # Zotero AutoIndex
+      "extensions.zotero.fulltext.pdfMaxPages" = 1024;
+
+      # Zotero OCR
+      "extensions.zotero.zoteroocr.ocrPath" = "${pkgs.tesseract5}/bin/tesseract";
+      "extensions.zotero.zoteroocr.pdftoppmPath" = "${pkgs.poppler_utils}/bin/pdftoppm";
+
+      "extensions.zotero.zoteroocr.outputPDF" = true; # Output options > "Save output as a PDF with text layer"
+      "extensions.zotero.zoteroocr.overwritePDF" = true; # Output options > "Save output as a PDF with text layer" > "Overwrite the initial PDF with the output"
+
+      "extensions.zotero.zoteroocr.outputHocr" = false; # Output options > "Save output as a HTML/hocr file(s)"
+      "extensions.zotero.zoteroocr.outputNote" = false; # Output options > "Save output as a note"
+      "extensions.zotero.zoteroocr.outputPNG" = false; # Output options > "Save the intermediate PNGs as well in the folder"
+
+      # Zotero PDF Preview
+      "extensions.zotero.pdfpreview.previewTabName" = "PDF Preview"; # Default tab name clashes with Zotero Citation Preview
+
+      # Zotero Citation Preview
+      "extensions.zoteropreview.citationstyle" = style;
+
+      # Zotero LibreOffice Integration
+      "extensions.zotero.integration.useClassicAddCitationDialog" = true;
+    };
 in
 {
-  home.packages = [ zotero' ];
-
   home = {
+    packages = [ zotero' ];
+
     persistence."/persist${config.home.homeDirectory}".directories = [{
       # NOTE Can't use symlink for ~/etc/zotero; user.js is stored in there,
       #      and so home-manager will complain while building; using bindfs really
@@ -124,82 +188,9 @@ in
     };
   };
 
-  xdg.configFile = {
-    # Keep ".zotero/zotero/home-manager.managed/prefs.js" unmanaged;
-    # Zotero store runtime data there.
-    "zotero/user.js".text =
-      let
-        # Chicago Manual of Style 17th edition (full note)
-        style = "http://www.zotero.org/styles/chicago-fullnote-bibliography";
-        locale = "en-US";
-      in
-      mkUserJs rec {
-        "intl.locale.requested" = locale;
-
-        # Use Appalachian State University's OpenURL resolver
-        "extensions.zotero.openURL.resolver" = "https://login.proxy006.nclive.org/login?url=https://resolver.ebscohost.com/openurl?";
-
-        # Sort settings
-        "extensions.zotero.sortAttachmentsChronologically" = true;
-        "extensions.zotero.sortNotesChronologically" = true;
-
-        # Citation settings
-        "extensions.zotero.export.citePaperJournalArticleURL" = true;
-
-        "extensions.zotero.export.lastStyle" = style;
-        "extensions.zotero.export.quickCopy.locale" = locale;
-
-        # Attachment settings
-        "extensions.zotero.useDataDir" = true;
-        "extensions.zotero.dataDir" = "${config.home.homeDirectory}/study/zotero";
-        "extensions.zotfile.dest_dir" = "${config.home.homeDirectory}/study/doc"; # ZotFile > General Settings > "Location of Files"
-        "extensions.zotfile.source_dir" = "${config.home.homeDirectory}/mess/current/incoming"; # ZotFile > General Settings > "Source Folder for Attaching New Files"
-        "extensions.zotfile.useZoteroToRename" = false; # ZotFile > Renaming Rules > "Use Zotero to Rename";
-
-        # ZotFile > Renaming Rules > "Format for all Item Types except Patents"
-        # [author(s) - ]title[ (volume)][ ([year][, journal|publisher])]
-        "extensions.zotfile.renameFormat" = "{%a - }{%t}{ (%v)}{ ({%y{, {%j| %p}}}}";
-
-        "extensions.zotfile.authors_delimiter" = ", "; # ZotFile > Renaming Rules > "Delimiter between multiple authors"
-        "extensions.zotero.attachmentRenameFormatString" = "{%c - }%t{100}{ (%y)}"; # Set the file name format used by Zotero's internal stuff
-
-        "extensions.zotfile.import" = false; # ZotFile > Location of Files > Custom Location
-        "extensions.zotero.autoRenameFiles.linked" = true; # ZotFile > General Settings > Location of Files > Custom Location
-
-        "extensions.zotfile.filetypes" = "pdf,epub,docx,odt"; # ZotFile > Advanced Settings > "Only work with the following filetypes"
-        "extensions.zotero.autoRenameFiles.fileTypes" = "application/pdf,application/epub+zip,application/vnd.openxmlformats-officedocument.wordprocessingml.document,application/vnd.oasis.opendocument.text";
-
-        "extensions.zotfile.confirmation" = false; # ZotFile > Advanced Settings > "Ask user when attaching new files"
-        "extensions.zotfile.confirmation_batch_ask" = false; # ZotFile > Advanced Settings > "Ask user to (batch) rename or move [0] or more attachments
-        "extensions.zotfile.confirmation_batch" = 0;
-        "extensions.zotfile.automatic_renaming" = 2; # ZotFile > Advanced Settigns > "Automatically rename new attachments" > "Always ask (non-disruptive)"
-
-        "extensions.zotfile.removeDiacritics" = true; # ZotFile > Advanced Settings > "Remove special characters (diacritics) from filename"
-
-        # Zotero AutoIndex
-        "extensions.zotero.fulltext.pdfMaxPages" = 1024;
-
-        # Zotero OCR
-        "extensions.zotero.zoteroocr.ocrPath" = "${pkgs.tesseract5}/bin/tesseract";
-        "extensions.zotero.zoteroocr.pdftoppmPath" = "${pkgs.poppler_utils}/bin/pdftoppm";
-
-        "extensions.zotero.zoteroocr.outputPDF" = true; # Output options > "Save output as a PDF with text layer"
-        "extensions.zotero.zoteroocr.overwritePDF" = true; # Output options > "Save output as a PDF with text layer" > "Overwrite the initial PDF with the output"
-
-        "extensions.zotero.zoteroocr.outputHocr" = false; # Output options > "Save output as a HTML/hocr file(s)"
-        "extensions.zotero.zoteroocr.outputNote" = false; # Output options > "Save output as a note"
-        "extensions.zotero.zoteroocr.outputPNG" = false; # Output options > "Save the intermediate PNGs as well in the folder"
-
-        # Zotero PDF Preview
-        "extensions.zotero.pdfpreview.previewTabName" = "PDF Preview"; # Default tab name clashes with Zotero Citation Preview
-
-        # Zotero Citation Preview
-        "extensions.zoteropreview.citationstyle" = style;
-
-        # Zotero LibreOffice Integration
-        "extensions.zotero.integration.useClassicAddCitationDialog" = true;
-      };
-  };
+  # Keep ".zotero/zotero/home-manager.managed/prefs.js" unmanaged;
+  # Zotero store runtime data there.
+  xdg.configFile."zotero/user.js".text = mkUserJs zoteroConfig;
 
   # Install the Zotero connector
   systemd.user.services.libreoffice.Service.ExecStartPre = [
