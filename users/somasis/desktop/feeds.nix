@@ -427,7 +427,7 @@ in
 
         # System
         { url = "https://nixos.org/blog/announcements-rss.xml"; tags = [ "computer" "NixOS" ]; }
-        { url = "file://${config.xdg.cacheHome}/newsboat/home-manager-news.atom"; tags = [ "computer" "NixOS" ]; title = "Home Manager"; }
+        { url = "file://${config.xdg.dataHome}/newsboat/home-manager-news.atom"; tags = [ "computer" "NixOS" ]; title = "Home Manager"; }
 
         # YouTube
         {
@@ -485,9 +485,9 @@ in
       ];
   };
 
-  home.activation =
+  xdg.dataFile."newsboat/home-manager-news.atom".source =
     let
-      jqFilterNews = (pkgs.writeScript "jq-filter-news" ''
+      jqFilterNews = pkgs.writeScript "jq-filter-news" ''
         #!${config.programs.jq.package}/bin/jq -f
         map(select(.condition == true))
             | sort_by(.time)
@@ -527,30 +527,23 @@ in
                   )
                 }
             }
-      '');
-    in
-    {
-      generateHomeManagerNews = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
-        export PATH=${lib.makeBinPath [ config.programs.jq.package pkgs.yq ]}:"$PATH"
-        umask 0077
-
-        # don't lint the json declaration
-        # shellcheck disable=all
-        {
-            ${lib.toShellVar "json" (builtins.toJSON config.news.entries)}
-            ${lib.toShellVar "jqFilterNews" jqFilterNews}
-        }
-
-        [ -n "''${VERBOSE:-}" ] && set -x
-        [ -n "''${DRY_RUN:-}" ] && set -nv
-
-        jq -f "$jqFilterNews" <<<"$json" \
-            | yq --xml-output \
-            | xq --xml-output --xml-dtd \
-            > "${config.xdg.cacheHome}/newsboat/home-manager-news.atom"
-        touch "${config.xdg.cacheHome}/newsboat/home-manager-news.atom"
       '';
-    };
+    in
+    pkgs.runCommandLocal "generate-home-manager-news" { } ''
+      export PATH=${lib.makeBinPath [ config.programs.jq.package pkgs.yq ]}:"$PATH"
+
+      # don't lint the json declaration
+      # shellcheck disable=all
+      {
+          ${lib.toShellVar "json" (builtins.toJSON config.news.entries)}
+          ${lib.toShellVar "jqFilterNews" jqFilterNews}
+      }
+
+      jq -f "$jqFilterNews" <<<"$json" \
+          | yq --xml-output \
+          | xq --xml-output --xml-dtd
+          > "$out"
+    '';
 
 
   home.persistence."/cache${config.home.homeDirectory}".directories = [{ directory = "var/cache/newsboat"; method = "symlink"; }];
