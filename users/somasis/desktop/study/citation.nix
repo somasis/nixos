@@ -119,7 +119,7 @@ let
 
       # ZotFile > Renaming Rules > "Format for all Item Types except Patents"
       # [author(s) - ]title[ (volume)][ ([year][, journal|publisher])]
-      "extensions.zotfile.renameFormat" = "{%a - }{%t}{ (%v)}{ ({%y{, {%j| %p}}}}";
+      "extensions.zotfile.renameFormat" = "{%a - }{%t}{ (%v)}{ ({%y{, %j|, %w}})}";
 
       "extensions.zotfile.authors_delimiter" = ", "; # ZotFile > Renaming Rules > "Delimiter between multiple authors"
       "extensions.zotero.attachmentRenameFormatString" = "{%c - }%t{100}{ (%y)}"; # Set the file name format used by Zotero's internal stuff
