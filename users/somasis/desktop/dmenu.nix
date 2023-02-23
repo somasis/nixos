@@ -329,15 +329,7 @@ let
               printf '%s\n' "''${c}"
               ;;
           username)
-              username="''${c##*/}"
-
-              if pass show "''${c}" | grep -Eq "^(user|username):"; then
-                  username=$(
-                      pass show "''${c}" \
-                          | sed -E \
-                              '/^(user|username):/ s/^(user|username): ?//'
-                  )
-              fi
+              username=$(pass meta "''${c}" username)
 
               if "''${clip}"; then
                   printf '%s\n' "''${username}" \
