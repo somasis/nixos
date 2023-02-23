@@ -1,7 +1,7 @@
 { nixosConfig, config, pkgs, ... }:
 assert nixosConfig.hardware.brillo.enable;
 {
-  home.persistence."/cache${config.home.homeDirectory}".directories = [ "var/cache/brillo" ];
+  home.persistence."/cache${config.home.homeDirectory}".directories = [{ directory = "var/cache/brillo"; method = "symlink"; }];
   home.packages = [ pkgs.brillo ];
 
   # Hardware: {decrease, increase} screen backlight - fn + {f4,f5}

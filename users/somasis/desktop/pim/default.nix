@@ -173,11 +173,15 @@ in
     Install.WantedBy = [ "default.target" ];
   };
 
-  home.persistence."/persist${config.home.homeDirectory}".directories = [
-    "share/vdirsyncer/calendars"
-    "share/vdirsyncer/calendars_readonly"
-    "share/vdirsyncer/contacts"
-  ];
+  home.persistence = {
+    "/persist${config.home.homeDirectory}".directories = [
+      { method = "symlink"; directory = "share/vdirsyncer/calendars"; }
+      { method = "symlink"; directory = "share/vdirsyncer/calendars_readonly"; }
+      { method = "symlink"; directory = "share/vdirsyncer/contacts"; }
+    ];
 
-  home.persistence."/cache${config.home.homeDirectory}".directories = [ "var/cache/vdirsyncer" ];
+    "/cache${config.home.homeDirectory}".directories = [
+      { method = "symlink"; directory = "var/cache/vdirsyncer"; }
+    ];
+  };
 }

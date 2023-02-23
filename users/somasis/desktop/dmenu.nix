@@ -455,7 +455,7 @@ let
     });
 in
 {
-  home.persistence."/cache${config.home.homeDirectory}".directories = [ "var/cache/dmenu" ];
+  home.persistence."/cache${config.home.homeDirectory}".directories = [{ directory = "var/cache/dmenu"; method = "symlink"; }];
 
   services.sxhkd.keybindings = { "{super + grave, super + Return, alt + F2}" = "dmenu-run"; }
     // lib.optionalAttrs config.xsession.windowManager.bspwm.enable { "super + Escape" = "dmenu-session"; }

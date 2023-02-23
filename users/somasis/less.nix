@@ -29,7 +29,7 @@
     "LESSHISTFILE" = "${config.xdg.cacheHome}/less/history";
   };
 
-  home.persistence."/cache${config.home.homeDirectory}".directories = [ "var/cache/less" ];
+  home.persistence."/cache${config.home.homeDirectory}".directories = [{ directory = "var/cache/less"; method = "symlink"; }];
 
   programs.less.enable = true;
 }

@@ -553,7 +553,7 @@ in
     };
 
 
-  home.persistence."/cache${config.home.homeDirectory}".directories = [ "var/cache/newsboat" ];
+  home.persistence."/cache${config.home.homeDirectory}".directories = [{ directory = "var/cache/newsboat"; method = "symlink"; }];
 
   systemd.user = {
     targets.feeds = {

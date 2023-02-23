@@ -99,15 +99,14 @@ in
           type "pulse"
           name "PulseAudio"
           format "48000:24:2"
-          replay_gain_handler "software"
-          mixer_type "hardware"
+          replay_gain_handler "mixer"
         }
       '';
   };
 
   home.persistence = {
-    "/cache${config.home.homeDirectory}".directories = [ "var/cache/mpdscribble" ];
-    "/persist${config.home.homeDirectory}".directories = [ "share/mpd" ];
+    "/cache${config.home.homeDirectory}".directories = [{ directory = "var/cache/mpdscribble"; method = "symlink"; }];
+    "/persist${config.home.homeDirectory}".directories = [{ directory = "share/mpd"; method = "symlink"; }];
   };
 
   home.sessionVariables = {

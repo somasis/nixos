@@ -272,16 +272,14 @@ in
     ../music/play.nix
   ];
 
-  home.persistence = {
-    "/persist${config.home.homeDirectory}".directories = [{ directory = "audio"; method = "symlink"; }];
-    "/cache${config.home.homeDirectory}".directories = [
-      "share/cantata"
-      "var/cache/cantata"
-    ];
-  };
-
-  home.packages = [
-    pkgs.mpc-cli
+  home = {
+    persistence = {
+      "/persist${config.home.homeDirectory}".directories = [{ directory = "audio"; method = "symlink"; }];
+      "/cache${config.home.homeDirectory}".directories = [
+        { directory = "share/cantata"; method = "symlink"; }
+        { directory = "var/cache/cantata"; method = "symlink"; }
+      ];
+    };
 
     (pkgs.symlinkJoin rec {
       name = "cantata-with-pass";

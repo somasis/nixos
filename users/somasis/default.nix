@@ -24,16 +24,24 @@
     ./xdg.nix
   ];
 
-  home.persistence."/persist${config.home.homeDirectory}" = {
-    directories = [ "bin" "logs" ];
+  home.persistence = {
+    "/persist${config.home.homeDirectory}" = {
+      directories = [
+        { method = "symlink"; directory = "bin"; }
+        { method = "symlink"; directory = "logs"; }
+      ];
 
-    allowOther = true;
-  };
+      allowOther = true;
+    };
 
-  home.persistence."/cache${config.home.homeDirectory}" = {
-    directories = [ "var/cache/nix" "var/cache/nix-index" ];
+    "/cache${config.home.homeDirectory}" = {
+      directories = [
+        { method = "symlink"; directory = "var/cache/nix"; }
+        { method = "symlink"; directory = "var/cache/nix-index"; }
+      ];
 
-    allowOther = true;
+      allowOther = true;
+    };
   };
 
   home.keyboard.options = [ "compose:ralt" ];
