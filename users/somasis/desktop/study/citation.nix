@@ -43,6 +43,11 @@ let
       '';
   };
 
+  # TODO I'm not sure how to package this correctly
+  # Traceback (most recent call last):
+  #   File "/nix/store/q258ir6s45m6nsrg8k8aipcrxmsy53d0-python3.10-qute-zotero-unstable-2019-06-15/share/qutebrowser/userscripts/zotero", line 22, in <module>
+  #       from requests import post, get, ReadTimeout, ConnectionError
+  #       ModuleNotFoundError: No module named 'requests'
   qute-zotero = pkgs.callPackage
     ({ lib, fetchFromGitLab, python3Packages }:
       python3Packages.buildPythonPackage rec {
@@ -61,14 +66,15 @@ let
         doConfigure = false;
         doBuild = false;
 
-        propagatedBuildInputs = with python3Packages; [ requests ];
+        propagatedBuildInputs = [ python3Packages.requests ];
 
         installPhase = ''
           install -m0755 -D $src/qute-zotero $out/share/qutebrowser/userscripts/zotero
         '';
 
         postInstall = ''
-          wrapPythonProgramsIn "$out/share/qutebrowser/userscripts/zotero" "$out $propagatedBuildInputs"
+          buildPythonPath "$out $propagatedBuildInputs"
+          patchPythonScript "$out/share/qutebrowser/userscripts/zotero"
         '';
 
         meta = with lib; {
