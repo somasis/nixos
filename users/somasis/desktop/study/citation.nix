@@ -4,6 +4,45 @@
 , ...
 }:
 let
+  inherit (pkgs) zotero;
+  zotero' = pkgs.symlinkJoin {
+    name = "zotero-final";
+
+    buildInputs = [ pkgs.makeWrapper ];
+    paths = [ zotero ];
+
+    # Ensure that there isn't a mismatch between extension settings
+    # (which could get modified during runtime, and then be written
+    # to prefs.js by Zotero) and our user.js.
+    postBuild =
+      let
+        prefs = "$HOME/.zotero/zotero/home-manager.managed/prefs.js";
+
+        filterPrefs = pkgs.writeShellScript "filter-prefs" ''
+          export PATH="${lib.makeBinPath [ pkgs.gnugrep pkgs.coreutils ]}:$PATH"
+
+          touch "${prefs}"
+
+          prefsFiltered=$(
+              grep -v \
+                  -e '^user_pref("extensions\.zotero.autoRenameFiiles' \
+                  -e '^user_pref("extensions\.zotero.fulltext' \
+                  -e '^user_pref("extensions\.zotero.pdfpreview' \
+                  -e '^user_pref("extensions\.zotero.zoteroocr' \
+                  -e '^user_pref("extensions\.zoteropreview' \
+                  "${prefs}"
+          )
+
+          prefsFiltered=$(grep -vP '^user_pref\("extensions\.zotfile\.(?!version)' <<<"$prefs")
+
+          cat > "${prefs}" <<< "$prefsFiltered"
+        '';
+      in
+      ''
+        wrapProgram $out/bin/zotero --run "${filterPrefs}"
+      '';
+  };
+
   qute-zotero = pkgs.callPackage
     ({ lib, fetchFromGitLab, python3Packages }:
       python3Packages.buildPythonPackage rec {
@@ -53,46 +92,7 @@ let
     '';
 in
 {
-  home.packages = [
-    # (pkgs.symlinkJoin {
-    #   name = "zotero-final";
-
-    #   buildInputs = [ pkgs.makeWrapper ];
-    #   paths = [ pkgs.zotero ];
-
-    #   # Ensure that there isn't a mismatch between extension settings
-    #   # (which could get modified during runtime, and then be written
-    #   # to prefs.js by Zotero) and our user.js.
-    #   postBuild =
-    #     let
-    #       prefs = "${config.home.homeDirectory}/.zotero/zotero/home-manager.managed/prefs.js";
-
-    #       filterPrefs = pkgs.writeShellScript "filter-prefs-js" ''
-    #         export PATH="${lib.makeBinPath [ pkgs.gnugrep pkgs.coreutils ]}:$PATH"
-
-    #         touch "${prefs}"
-
-    #         prefsFiltered=$(
-    #             grep -v \
-    #                 -e '^user_pref("extensions\.zotero.autoRenameFiiles' \
-    #                 -e '^user_pref("extensions\.zotero.fulltext' \
-    #                 -e '^user_pref("extensions\.zotero.pdfpreview' \
-    #                 -e '^user_pref("extensions\.zotero.zoteroocr' \
-    #                 -e '^user_pref("extensions\.zoteropreview' \
-    #                 "${prefs}"
-    #         )
-
-    #         prefsFiltered=$(grep -vP '^user_pref\("extensions\.zotfile\.(?!version)' <<<"$prefs")
-
-    #         cat > "${prefs}" <<< "$prefsFiltered"
-    #       '';
-    #     in
-    #     ''
-    #       wrapProgram $out/bin/zotero --run "${filterPrefs}"
-    #     '';
-    # })
-    pkgs.zotero
-  ];
+  home.packages = [ zotero' ];
 
   home = {
     persistence."/persist${config.home.homeDirectory}".directories = [{
