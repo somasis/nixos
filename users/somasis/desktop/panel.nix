@@ -84,7 +84,7 @@
           "${bspc} config window_gap 0"
         ];
 
-        Restart = "on-failure";
+        Restart = "on-success";
       };
 
     Unit.StartLimitInterval = 0;
