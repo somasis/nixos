@@ -42,7 +42,6 @@
     ".cache".source = config.lib.file.mkOutOfStoreSymlink config.xdg.cacheHome;
     ".config".source = config.lib.file.mkOutOfStoreSymlink config.xdg.configHome;
     ".local/bin".source = config.lib.file.mkOutOfStoreSymlink "${config.home.homeDirectory}/bin";
-    ".local/lib".source = config.lib.file.mkOutOfStoreSymlink "${config.home.homeDirectory}/lib";
     ".local/share".source = config.lib.file.mkOutOfStoreSymlink config.xdg.dataHome;
     ".local/state".source = config.lib.file.mkOutOfStoreSymlink config.xdg.stateHome;
   };
