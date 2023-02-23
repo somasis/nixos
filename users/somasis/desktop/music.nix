@@ -5,80 +5,94 @@
 , ...
 }:
 let
-  cantataConf = pkgs.writeText "cantata-config" (lib.generators.toINI
+  envtag = pkgs.writeShellScriptBin "envtag" ''
+    ${pkgs.ffmpeg-full}/bin/ffprobe -loglevel -32 \
+        -of json \
+        -select_streams a \
+        -show_format \
+        -show_entries stream_tags \
+        -i "$1" \
+        | ${config.programs.jq.package}/bin/jq -Sr '
+            .format.tags
+                + {
+                    "format": .format.format_name,
+                    "filename": .format.filename,
+                    "size": (.format.size | tonumber),
+                    "duration": (.format.duration | tonumber),
+                    "bit_rate": (.format.bit_rate | tonumber)
+                }
+                + (.streams | map(.tags) | add)
+                | with_entries(
+                    .key |= (ascii_downcase | gsub(" "; "_"))
+                        | (.value | (tonumber? // .)) as $value
+                        | .value = $value
+                )
+                | keys[] as $k
+                | ("export " + ("\($k)=\(."\($k)")" | @sh))
+        '
+  '';
+
+
+  cantata = pkgs.cantata.override {
+    # just be a music player, no file operations
+    withTaglib = false;
+    withReplaygain = false;
+    withMtp = false;
+    withOnlineServices = false;
+    withDevices = false;
+  };
+
+  mkCantata = lib.generators.toINI
     {
-      mkKeyValue = key: value:
+      mkKeyValue = k: v:
         let
-          value' =
-            if builtins.isList value && value == [ ] then
+          v' =
+            if builtins.isList v && v == [ ] then
               "@Invalid()"
-            else if builtins.isBool value then
-              lib.boolToString value
-            else if builtins.isList value then
-              lib.concatStringsSep '', '' value
+            else if builtins.isBool v then
+              lib.boolToString v
+            else if builtins.isList v then
+              lib.concatStringsSep '', '' v
             else
-              builtins.toString value
+              builtins.toString v
           ;
         in
-        "${key}=${value'}"
+        "${k}=${v'}"
       ;
-    }
-    {
+    };
+
+  cantataConf = pkgs.writeText "cantata-config"
+    (mkCantata {
       # TODO this in setting particular should be functionalized, this is annoying
       CustomActions =
         let
-          envtag = pkgs.writeShellScript "envtag" ''
-            ${pkgs.ffmpeg-full}/bin/ffprobe -loglevel -32 \
-                -of json \
-                -select_streams a \
-                -show_format \
-                -show_entries stream_tags \
-                -i "$1" \
-                | ${config.programs.jq.package}/bin/jq -Sr '
-                    .format.tags
-                        + {
-                            "format": .format.format_name,
-                            "filename": .format.filename,
-                            "size": (.format.size | tonumber),
-                            "duration": (.format.duration | tonumber),
-                            "bit_rate": (.format.bit_rate | tonumber)
-                        }
-                        + (.streams | map(.tags) | add)
-                        | with_entries(
-                            .key |= (ascii_downcase | gsub(" "; "_"))
-                                | (.value | (tonumber? // .)) as $value
-                                | .value = $value
-                        )
-                        | keys[] as $k
-                        | ("export " + ("\($k)=\(."\($k)")" | @sh))
-                '
-          '';
-
-          deleteCoverArt = pkgs.writeShellScript "cantata-delete-cover-art" ''
+          cantata-delete-cover-art = pkgs.writeShellScript "cantata-delete-cover-art" ''
             ${pkgs.findutils}/bin/find "$@" -name 'cover.*' -delete
             ${pkgs.coreutils}/bin/rm -rf "''${XDG_CACHE_HOME:=$HOME/.cache}/cantata/covers-scaled"
           '';
 
-          beetsOpen = pkgs.writeShellScript "cantata-beets-open" ''
+          cantata-beets-open = pkgs.writeShellScript "cantata-beets-open" ''
             set -eu -o pipefail
+            export PATH=${lib.makeBinPath [ envtag config.programs.beets.package pkgs.openssh pkgs.s6-portable-utils pkgs.xdg-utils pkgs.xe ]}:"$PATH"
 
             {
-                eval "$(${envtag} "$1")"
+                eval "$(envtag "$1")"
 
                 for a in \
                     beet list -f '$path' -a \
                         "mb_albumartistid:$musicbrainz_albumartistid" \
                         "mb_albumid:$musicbrainz_albumid"; do
-                        printf '%s ' "$(${pkgs.s6-portable-utils}/bin/s6-quote -d "'" -- "$a")"
+                        printf '%s ' "$(s6-quote -d "'" -- "$a")"
                 done
                 printf '\n'
             } \
-                | ${pkgs.openssh}/bin/ssh spinoza sh -l - \
-                | ${pkgs.xe}/bin/xe -N1 ${pkgs.xdg-utils}/bin/xdg-open
+                | ssh spinoza sh -l - \
+                | xe -N1 xdg-open
           '';
 
-          musicbrainzOpen = pkgs.writeShellScript "cantata-musicbrainz-open" ''i
+          cantata-musicbrainz-open = pkgs.writeShellScript "cantata-musicbrainz-open" ''i
             set -eu -o pipefail
+            export PATH=${lib.makeBinPath [ envtag pkgs.xdg-utils pkgs.xe ]}:"$PATH"
 
             tag_type="$1"
             url="$1"
@@ -95,55 +109,56 @@ let
             urls=()
 
             for f; do
-                eval "$(${envtag} "$f")"
+                eval "$(envtag "$f")"
                 eval "id=\"\$musicbrainz_''${tag_type}id\""
 
                 urls+=( "https://musicbrainz.org/$url/$id" )
             done
 
-            printf '%s\0' "''${urls[@]}" | ${pkgs.xe}/bin/xe -0 -N1 ${pkgs.xdg-utils}/bin/xdg-open
+            printf '%s\0' "''${urls[@]}" | xe -0 -N1 xdg-open
           '';
 
-          youtubeSearchTrack = pkgs.writeShellScript "cantata-youtube-search-track" ''
+          cantata-search-youtube = pkgs.writeShellScript "cantata-search-youtube" ''
             set -eu -o pipefail
+            export PATH=${lib.makeBinPath [ envtag config.programs.jq.package pkgs.xdg-utils ]}:"$PATH"
 
-            eval "$(${envtag} "$1")"
+            eval "$(envtag "$1")"
             url=$(
-                ${config.programs.jq.package}/bin/jq -n '
+                jq -n '
                     ("\(env.artist_credit // env.artist) \(env.title)") as $query
                         | "https://www.youtube.com/results?search_query=\($query | @uri)"
                 '
             )
-            ${pkgs.xdg-utils}/bin/xdg-open "$url"
+            xdg-open "$url"
           '';
         in
         {
           # %f file list, %d directory list, else list of files is appended to command
-          "0_cmd" = "${deleteCoverArt} %d";
+          "0_cmd" = "${cantata-delete-cover-art} %d";
           "0_name" = "Delete cover art";
-          "1_cmd" = "${beetsOpen} %f";
+          "1_cmd" = "${cantata-beets-open} %f";
           "1_name" = "beets: open in library";
-          "2_cmd" = "${musicbrainzOpen} albumartist %f";
+          "2_cmd" = "${cantata-musicbrainz-open} albumartist %f";
           "2_name" = "MusicBrainz: album artist";
-          "3_cmd" = "${musicbrainzOpen} artist %f";
+          "3_cmd" = "${cantata-musicbrainz-open} artist %f";
           "3_name" = "MusicBrainz: artist";
-          "4_cmd" = "${musicbrainzOpen} recording %f";
+          "4_cmd" = "${cantata-musicbrainz-open} recording %f";
           "4_name" = "MusicBrainz: recording";
-          "5_cmd" = "${musicbrainzOpen} releasegroup %f";
+          "5_cmd" = "${cantata-musicbrainz-open} releasegroup %f";
           "5_name" = "MusicBrainz: release group";
-          "6_cmd" = "${musicbrainzOpen} releasetrack %f";
+          "6_cmd" = "${cantata-musicbrainz-open} releasetrack %f";
           "6_name" = "MusicBrainz: release track";
-          "7_cmd" = "${musicbrainzOpen} release %f";
+          "7_cmd" = "${cantata-musicbrainz-open} release %f";
           "7_name" = "MusicBrainz: release";
-          "8_cmd" = "${musicbrainzOpen} work %f";
+          "8_cmd" = "${cantata-musicbrainz-open} work %f";
           "8_name" = "MusicBrainz: work";
-          "9_cmd" = "${youtubeSearchTrack} %f";
+          "9_cmd" = "${cantata-search-youtube} %f";
           "9_name" = "YouTube: search for track";
 
           count = 8;
         };
 
-      General.version = pkgs.cantata.version; # necessary to avoid the first-start dialog
+      General.version = cantata.version; # necessary to avoid the first-start dialog
 
       General.page = "PlayQueuePage"; # Default the starting page to play queue
       General.contextSlimPage = "song"; # Default the track info to lyrics + song info
@@ -255,16 +270,6 @@ let
       localbrowsehome.viewMode = "simpletree";
       localbrowseroot.viewMode = "simpletree";
     });
-
-  cantata = pkgs.cantata.override {
-    # Required for custom actions functionality
-    withTaglib = false;
-
-    withReplaygain = false;
-    withMtp = false;
-    withOnlineServices = false;
-    withDevices = false;
-  };
 in
 {
   imports = [
@@ -281,45 +286,48 @@ in
       ];
     };
 
-    (pkgs.symlinkJoin rec {
-      name = "cantata-with-pass";
+    packages = [
+      pkgs.mpc-cli
 
-      runtimeInputs = [ config.programs.password-store.package pkgs.coreutils ];
+      (pkgs.symlinkJoin rec {
+        name = "cantata-with-pass";
 
-      paths = [
-        # Can't use a FIFO for the configuration- cantata seems to do something
-        # funky at program start that causes it to need an additional write after
-        # being closed for the first time; and after that, it does more r/w...
-        (pkgs.writeShellScriptBin "cantata" ''
-          export PATH="${lib.makeBinPath runtimeInputs}:$PATH"
+        runtimeInputs = [ config.programs.password-store.package pkgs.coreutils ];
 
-          : "''${XDG_CONFIG_HOME:=$HOME/.config}"
-          : "''${XDG_RUNTIME_DIR:=/run/user/$(id -un)}"
+        paths = [
+          # Can't use a FIFO for the configuration- cantata seems to do something
+          # funky at program start that causes it to need an additional write after
+          # being closed for the first time; and after that, it does more r/w...
+          (pkgs.writeShellScriptBin "cantata" ''
+            export PATH="${lib.makeBinPath runtimeInputs}:$PATH"
 
-          set -eu
-          set -o pipefail
+            : "''${XDG_CONFIG_HOME:=$HOME/.config}"
+            : "''${XDG_RUNTIME_DIR:=/run/user/$(id -un)}"
 
-          mkdir -m 700 -p "$XDG_CONFIG_HOME/cantata" "$XDG_RUNTIME_DIR/cantata"
-          touch "$XDG_RUNTIME_DIR/cantata/cantata.conf"
-          chmod 700 "$XDG_RUNTIME_DIR/cantata/cantata.conf"
+            set -eu
+            set -o pipefail
 
-          cat ${cantataConf} - > "$XDG_RUNTIME_DIR"/cantata/cantata.conf <<EOF
-          [Scrobbling]
-          sessionKey=$(pass ${nixosConfig.networking.fqdn}/cantata/last.fm)
-          EOF
+            mkdir -m 700 -p "$XDG_CONFIG_HOME/cantata" "$XDG_RUNTIME_DIR/cantata"
+            touch "$XDG_RUNTIME_DIR/cantata/cantata.conf"
+            chmod 700 "$XDG_RUNTIME_DIR/cantata/cantata.conf"
 
-          ln -sf "$XDG_RUNTIME_DIR/cantata/cantata.conf" "$XDG_CONFIG_HOME/cantata/cantata.conf"
+            cat ${cantataConf} - > "$XDG_RUNTIME_DIR"/cantata/cantata.conf <<EOF
+            [Scrobbling]
+            sessionKey=$(pass ${nixosConfig.networking.fqdn}/cantata/last.fm)
+            EOF
 
-          # -n: don't allow fetching things over the network
-          e=0
-          (exec -a cantata ${cantata}/bin/cantata -n "$@"); e=$?
-          rm -f "$XDG_CONFIG_HOME/cantata/cantata.conf"
-          exit "$e"
-        '')
+            ln -sf "$XDG_RUNTIME_DIR/cantata/cantata.conf" "$XDG_CONFIG_HOME/cantata/cantata.conf"
 
-        cantata
-      ];
-    })
-  ];
+            # -n: don't allow fetching things over the network
+            e=0
+            (exec -a cantata ${cantata}/bin/cantata -n "$@"); e=$?
+            rm -f "$XDG_CONFIG_HOME/cantata/cantata.conf"
+            exit "$e"
+          '')
 
+          cantata
+        ];
+      })
+    ];
+  };
 }
