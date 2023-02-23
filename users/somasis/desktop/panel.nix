@@ -68,7 +68,7 @@
     Service =
       let
         bspc = "${config.xsession.windowManager.bspwm.package}/bin/bspc";
-        settings = config.xsession.windowManager.bspwm.settings;
+        inherit (config.xsession.windowManager.bspwm) settings;
       in
       {
         Type = "simple";
