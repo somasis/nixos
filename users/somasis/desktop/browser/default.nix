@@ -193,7 +193,7 @@ in
 
       # Languages preferences.
       spellcheck.languages = [ "en-US" "en-AU" "en-GB" "es-ES" ];
-      content.headers.accept_language = lib.concatStringsSep "," (lib.flatten [ "tok" "en;q=0.9" ]);
+      content.headers.accept_language = lib.concatStringsSep "," [ "tok;q=0.9" "en-US;q=0.8" "en;q=0.7" "es;q=0.6" ];
 
       zoom = {
         # This will be unnecessary if I ever start using Wayland and don't
