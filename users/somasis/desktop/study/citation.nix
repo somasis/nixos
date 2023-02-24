@@ -118,10 +118,17 @@ let
       "extensions.zotfile.useZoteroToRename" = false; # ZotFile > Renaming Rules > "Use Zotero to Rename";
 
       # ZotFile > Renaming Rules > "Format for all Item Types except Patents"
-      # [author(s) - ]title[ (volume)][ ([year][, journal|publisher])]
-      "extensions.zotfile.renameFormat" = "{%a - }{%t}{ (%v)}{ ({%y{, %j|, %w}})}";
+      # [author(s) - ]title[ (volume)][ ([year][, book title/journal/publisher/meeting])]
+      "extensions.zotfile.renameFormat" = "{%a - }%t{ (%v)}{ (%y{, %B|, %w})}";
+
+      # Custom wildcards
+      "extensions.zotfile.wildcards.user" = builtins.toString (builtins.toJSON {
+        # For book sections.
+        "B" = "bookTitle";
+      });
 
       "extensions.zotfile.authors_delimiter" = ", "; # ZotFile > Renaming Rules > "Delimiter between multiple authors"
+      "extensions.zotfile.max_authors" = 2; # ZotFile > Renaming Rules > "Maximum number of authors"
       "extensions.zotero.attachmentRenameFormatString" = "{%c - }%t{100}{ (%y)}"; # Set the file name format used by Zotero's internal stuff
 
       "extensions.zotfile.import" = false; # ZotFile > Location of Files > Custom Location
