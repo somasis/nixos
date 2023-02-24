@@ -259,19 +259,19 @@ in
   home.packages = [
     bandcamp-collection-downloader
 
-    (pkgs.symlinkJoin {
-      name = "gazelle-origin-final";
+    # (pkgs.symlinkJoin {
+    #   name = "gazelle-origin-final";
 
-      buildInputs = [ pkgs.makeWrapper ];
-      paths = [ pkgs.gazelle-origin ];
+    #   buildInputs = [ pkgs.makeWrapper ];
+    #   paths = [ pkgs.gazelle-origin ];
 
-      postBuild = ''
-        wrapProgram $out/bin/gazelle-origin \
-            --set-default "ORIGIN_TRACKER" "RED" \
-            --run ': "''${RED_API_KEY:=$(${config.programs.password-store.package}/bin/pass ${nixosConfig.networking.fqdn}/gazelle-origin/redacted.ch)}"' \
-            --run 'export RED_API_KEY'
-      '';
-    })
+    #   postBuild = ''
+    #     wrapProgram $out/bin/gazelle-origin \
+    #         --set-default "ORIGIN_TRACKER" "RED" \
+    #         --run ': "''${RED_API_KEY:=$(${config.programs.password-store.package}/bin/pass ${nixosConfig.networking.fqdn}/gazelle-origin/redacted.ch)}"' \
+    #         --run 'export RED_API_KEY'
+    #   '';
+    # })
 
     pass-beets
   ];
