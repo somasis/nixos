@@ -75,6 +75,11 @@
     repluggedThemeIrc.flake = false;
     repluggedThemeIrc.url = "github:somasis/discord-theme-irc";
 
+    csl.flake = false;
+    csl.url = "github:citation-style-language/styles";
+    zoteroTranslators.flake = false;
+    zoteroTranslators.url = "github:zotero/translators";
+
     hyprland.flake = true;
     hyprland.url = "github:hyprwm/Hyprland";
     hyprland.inputs.nixpkgs.follows = "nixpkgs";
@@ -167,11 +172,12 @@
         {
           home-manager = {
             sharedModules = with inputs; [
-              # nixMinecraft.nixosModules.home-manager.minecraft
               hyprland.homeManagerModules.default
             ];
 
             verbose = true;
+
+            backupFileExtension = "bak";
 
             users.somasis = {
               imports = [
