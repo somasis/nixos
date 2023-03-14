@@ -42,7 +42,6 @@
     ./panel.nix
     ./phone-integration.nix
     ./photo.nix
-    ./picom.nix
     ./power.nix
     ./screen-brightness.nix
     ./screen-locker.nix
