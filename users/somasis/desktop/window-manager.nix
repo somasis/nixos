@@ -2,7 +2,11 @@
 , lib
 , pkgs
 , ...
-}: {
+}:
+let
+  bspc = "${config.xsession.windowManager.bspwm.package}/bin/bspc";
+in
+{
   xsession.windowManager.bspwm = {
     enable = true;
 
@@ -40,7 +44,7 @@
     };
 
     extraConfig = ''
-      bspc config "external_rules_command" "${config.home.homeDirectory}/bin/bspwm-rules"
+      ${bspc} config "external_rules_command" "${config.home.homeDirectory}/bin/bspwm-rules"
     '';
   };
 
@@ -49,8 +53,8 @@
   '';
 
   programs.autorandr.hooks.postswitch.bspwm = ''
-    ${config.xsession.windowManager.bspwm.package}/bin/bspc query -M --names \
-        | ${pkgs.xe}/bin/xe ${config.xsession.windowManager.bspwm.package}/bin/bspc monitor {} -d 1 2 3 4 5
+    ${bspc} query -M --names \
+        | ${pkgs.xe}/bin/xe ${bspc} monitor {} -d 1 2 3 4 5
   '';
 
   # systemd.user.services.bspwm-react = {
@@ -62,9 +66,6 @@
   # };
 
   services.sxhkd.keybindings =
-    let
-      bspc = "${config.xsession.windowManager.bspwm.package}/bin/bspc";
-    in
     {
       # Window management: change to desktop {1-10} on focused monitor
       "super + {1-9,0}" = "${bspc} desktop -f focused:'^{1-9,10}'";
