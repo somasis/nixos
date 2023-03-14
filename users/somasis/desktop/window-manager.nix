@@ -53,8 +53,10 @@ in
   '';
 
   programs.autorandr.hooks.postswitch.bspwm = ''
-    ${bspc} query -M --names \
-        | ${pkgs.xe}/bin/xe ${bspc} monitor {} -d 1 2 3 4 5
+    ${bspc} query -M \
+        | ${pkgs.xe}/bin/xe ${bspc} monitor {} \
+            -d  ⠂ ⠒ ⠖ ⠶ ⢶
+            # 1 2 3 4 5
   '';
 
   # systemd.user.services.bspwm-react = {
