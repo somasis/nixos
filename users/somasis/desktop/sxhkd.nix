@@ -140,6 +140,8 @@ in
           set -eu
           set -o pipefail
 
+          : "''${SCREENSHOT_OCR:=}"
+
           mkdir -p "${screenshots}"
 
           export TMPDIR=$(mktemp -d "${screenshots}"/.tmp.XXXXXX)
@@ -148,20 +150,30 @@ in
           ${pkgs.maim}/bin/maim "$@" \
               | ${pkgs.moreutils}/bin/sponge "${screenshots}/$d"
 
-          if qr=$(${pkgs.zbar}/bin/zbarimg -1q -- "${screenshots}/$d"); then
-              qr="''${qr##QR-Code:}"
+          if [ -n "$SCREENSHOT_OCR" ]; then
+              text=$(${pkgs.tesseract5}/bin/tesseract "${screenshots}/$d" stdout)
+
+              ${pkgs.xclip}/bin/xclip -i \
+                  -selection clipboard <<<"$text"
 
               ${pkgs.libnotify}/bin/notify-send \
                   -a screenshot \
                   "screenshot" \
-                  "Scanned QR code to clipboard: \"$qr\""
+                  "Scanned ''${#text} characters to clipboard: \"$text\""
+          elif barcode=$(${pkgs.zbar}/bin/zbarimg -1q -- "${screenshots}/$d"); then
+              barcode_type=''${barcode%%:*}
+              barcode="''${barcode#*:}"
 
               ${pkgs.xclip}/bin/xclip -i \
                   -selection clipboard \
-                  <<<"$qr"
+                  <<<"$barcode"
+
+              ${pkgs.libnotify}/bin/notify-send \
+                  -a screenshot \
+                  "screenshot" \
+                  "Scanned barcode ($barcode_type) to clipboard: \"$barcode\""
           else
-              ${pkgs.xclip}/bin/xclip \
-                  -i \
+              ${pkgs.xclip}/bin/xclip -i \
                   -selection clipboard \
                   -t image/png \
                   < "${screenshots}/$d"
@@ -219,6 +231,9 @@ in
 
         # Take screenshot of window/selection
         "Print" = "${screenshot} -us -b 6 -p -6 -l -c 0.7686,0.9137,0.4705,.5";
+
+        # Take screenshot of window/selection (and scan its text)
+        "ctrl + Print" = "SCREENSHOT_OCR=true ${screenshot} -us -b 6 -p -6 -l -c 0.7686,0.9137,0.4705,.5";
 
         # Take screenshot of current monitor
         "super + Print" = "${screenshot} -g \"$(${getMonitorDimensions})\"";
