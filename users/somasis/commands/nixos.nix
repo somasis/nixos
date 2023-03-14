@@ -174,9 +174,31 @@ in
     })
 
     (pkgs.writeShellScriptBin "nixos-edit" ''
-      find /etc/nixos \
-          -type f -perm -000 ! -path '*/.*' \
-          -exec editor "$@" {} +
+      session_active() {
+          kak -c nixos-edit -ui dummy -e quit >/dev/null 2>&1
+      }
+
+      if session_active; then
+          exec kak -c nixos-edit "$@"
+      else
+          cd /etc/nixos
+          nohup kak -s nixos-edit -d >/dev/null 2>&1 &
+
+          find . \
+              \( \
+                  -type f \
+                  -perm -000 \
+                  ! -name 'flake.lock' \
+                  ! -path '*/.*' \
+              \) \
+              -printf '%d\t%h\tedit %p\n' \
+              | LC_COLLATE=C sort -t "$(printf '\t')" -k2 \
+              | cut -f3- \
+              | tac \
+              | kak -p nixos-edit
+
+          exec kak -c nixos-edit "$@"
+      fi
     '')
 
     (pkgs.writeShellApplication {
