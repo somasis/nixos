@@ -84,6 +84,8 @@
 
     settings = {
       format = "bestvideo[height<=?1080][fps<=?30]+bestaudio/best";
+      trim-filenames = 48;
+      audio-multistreams = true;
     };
   };
 }
