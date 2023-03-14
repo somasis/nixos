@@ -36,7 +36,7 @@
           "-${libreofficeWait}"
         ];
 
-        ExecStart = "${pkgs.libreoffice}/bin/libreoffice --quickstart --nologo --nodefault";
+        ExecStart = "${pkgs.libreoffice}/bin/soffice --quickstart --nologo --nodefault";
 
         Restart = "always";
         KillSignal = "SIGQUIT";
