@@ -379,6 +379,9 @@ let
           | head -n 24 \
           | grep -v "^\s*$" \
           | uq \
+          | while read -r e; do
+              test -e "$PASSWORD_STORE_DIR"/"$e".gpg && echo "$e"
+          done \
           | sponge "''${t}"
 
       mv -f "''${t}" "''${h}"
