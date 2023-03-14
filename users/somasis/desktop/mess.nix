@@ -97,4 +97,6 @@ in
   '';
 
   programs.mpv.config.screenshot-directory = "${messDir}/current/screenshots";
+  programs.zotero.profiles.default.settings."extensions.zotfile.source_dir" =
+    "${messDir}/current/incoming"; # ZotFile > General Settings > "Source Folder for Attaching New Files"
 }
