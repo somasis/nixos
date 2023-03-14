@@ -381,6 +381,7 @@ in
       config.unbind("<Ctrl+y>", mode="prompt")
     '';
 
+    enableDefaultBindings = false;
     keyBindings = {
       normal = {
         "zpt" =
