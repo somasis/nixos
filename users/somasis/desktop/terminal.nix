@@ -29,7 +29,13 @@ in
 {
   services.sxhkd.keybindings = {
     "super + b" = "${t}";
-    "ctrl + shift + b" = "cd \"$(readlink /proc/$(${pkgs.procps}/bin/pgrep -P $(${pkgs.xdotool}/bin/xdotool getactivewindow getwindowpid) | tail -n1)/cwd)\"; exec ${t}";
+    "super + shift + b" = builtins.toString (pkgs.writeShellScript "sxhkd-terminal-at-window-cwd" ''
+      window_pid=$(${pkgs.xdotool}/bin/xdotool getactivewindow getwindowpid)
+      window_pid_parent=$(${pkgs.procps}/bin/pgrep -P "$window_pid" | tail -n1)
+      window_cwd=$(${pkgs.coreutils}/bin/readlink -f /proc/"$window_pid_parent"/cwd)
+      cd "$window_cwd"
+      exec ${t}
+    '');
   };
 
   programs.alacritty = {
