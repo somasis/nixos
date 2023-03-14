@@ -185,7 +185,7 @@ let
       General.responsiveSidebar = true; # "Automatically change style when insufficient space"
 
       # Interface > Play Queue
-      General.playQueueView = "grouped"; # style: "grouped albums"
+      General.playQueueView = "table"; # style: "grouped albums" ("grouped"/"table")
       General.playQueueStartClosed = false; # "initially collapse albums"
       General.playQueueAutoExpand = true; # "automatically expand current album"
       General.playQueueScroll = true; # "scroll to current track"
@@ -248,6 +248,22 @@ let
       Scrobbling.loveEnabled = true;
       Scrobbling.scrobbler = "Last.fm";
       Scrobbling.userName = "kyliesomasis";
+
+      "Shortcuts-cantata" = {
+        rating1 = null;
+        rating2 = null;
+        rating3 = null;
+        rating4 = null;
+        rating5 = null;
+        showfolderstab = "Alt+3";
+        showlibrarytab = "Alt+2";
+        showmenubar = "F1";
+        showonlinetab = "Alt+5";
+        showplayliststab = "Alt+4";
+        showplayqueue = "Alt+1";
+        showsearchtab = "Alt+6";
+        showsonginfo = "Alt+7";
+      };
 
       # Not visible from the main preferences window
       General.contextAutoScroll = false; # info > track > "Scroll lyrics"
