@@ -26,7 +26,6 @@ let
           hash = "sha256-Jv5qrpWSMrfGr6gV8PxELCOfZ0PyGBPO+nBt2czYuu4=";
         };
 
-
         propagatedBuildInputs = with python3Packages; [ requests ];
 
         installPhase = ''
@@ -318,8 +317,8 @@ in
           "extensions.zotero.fulltext.pdfMaxPages" = 1024;
 
           # Zotero OCR
-          "extensions.zotero.zoteroocr.ocrPath" = "${pkgs.tesseract5}/bin/tesseract";
           "extensions.zotero.zoteroocr.pdftoppmPath" = "${pkgs.poppler_utils}/bin/pdftoppm";
+          "extensions.zotero.zoteroocr.ocrPath" = "${pkgs.tesseract5}/bin/tesseract";
 
           "extensions.zotero.zoteroocr.outputPDF" = true; # Output options > "Save output as a PDF with text layer"
           "extensions.zotero.zoteroocr.overwritePDF" = true; # Output options > "Save output as a PDF with text layer" > "Overwrite the initial PDF with the output"
@@ -344,8 +343,15 @@ in
           "extensions.shortdoi.tag_nodoi" = "#no_doi";
 
           "extensions.zotero.automaticScraperUpdates" = false; # Translators are sourced from a flake.
-        }
-      ;
+        };
+
+      # TODO Hide all chrome: need to find a way to toggle this with <F1>.
+      # userChrome = ''
+      #   .chromeclass-menubar,
+      #   .chromeclass-toolbar {
+      #         display: none !important;
+      #   }
+      # '';
     };
   };
 
@@ -531,6 +537,32 @@ in
   };
 
   services.sxhkd.keybindings."super + z" = "${config.programs.zotero.package}/bin/zotero";
+
+  # TODO this should work, but it sure don't
+  # services.xsuspender.rules.zotero = {
+  #   matchWmClassGroupContains = "Zotero";
+  #   downclockOnBattery = 1;
+  #   suspendDelay = 15;
+  #   resumeEvery = 60;
+  #   resumeFor = 5;
+
+  #   # Only suspend if LibreOffice isn't currently open, and qutebrowser isn't
+  #   # currently visible, since it would cause the connector to wait until it is
+  #   # momentarily unsuspended, which is annoying
+  #   execSuspend = ''
+  #     ! ${pkgs.xdotool}/bin/xdotool search \
+  #         --limit 1 \
+  #         --classname \
+  #         '^libreoffice.*' \
+  #         >/dev/null \
+  #     || ! ${pkgs.xdotool}/bin/xdotool search \
+  #         --limit 1 \
+  #         --classname \
+  #         --onlyvisible \
+  #         '^qutebrowser$' \
+  #         >/dev/null
+  #   '';
+  # };
 
   programs.qutebrowser = {
     keyBindings.normal = {

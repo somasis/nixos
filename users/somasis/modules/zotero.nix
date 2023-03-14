@@ -122,6 +122,12 @@ in
               Extra preferences to add to <filename>user.js</filename>.
             '';
           };
+
+          userChrome = mkOption {
+            type = types.lines;
+            default = "";
+            description = "Custom Zotero user chrome CSS.";
+          };
         };
       }
       ));
@@ -165,14 +171,19 @@ in
     home.packages = [ cfg.package ];
 
     home.file = mkMerge ([{
-      "${zoteroConfigPath}/profiles.ini" =
+      "${profilesPath}/profiles.ini" =
         mkIf (cfg.profiles != { }) { text = profilesIni; };
     }] ++ flip mapAttrsToList cfg.profiles (_: profile: {
       "${profilesPath}/${profile.path}/.keep".text = "";
 
+      "${profilesPath}/${profile.path}/chrome/userChrome.css" =
+        mkIf (profile.userChrome != "") { text = profile.userChrome; };
+
       "${profilesPath}/${profile.path}/user.js" = mkIf (profile.settings != { } || profile.extraConfig != "") {
         text =
-          mkUserJs profile.settings profile.extraConfig;
+          mkUserJs
+            (profile.settings // { "extensions.zotero.firstRun2" = false; })
+            profile.extraConfig;
       };
     }));
   };
