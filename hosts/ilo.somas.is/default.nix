@@ -125,6 +125,7 @@
   };
 
   # services.gvfs.enable = lib.mkForce false;
+  services.gvfs.enable = true;
   programs.dconf.enable = true;
 
   # TODO: Remove boot.zfs.enableUnstable when pkgs.linuxKernel.packages.linux_6_0 is compatible
