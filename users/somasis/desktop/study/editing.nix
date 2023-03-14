@@ -1,4 +1,7 @@
-{ pkgs, ... }: {
+{ lib
+, pkgs
+, ...
+}: {
   home.packages = [
     # PDF manipulation tools
     (pkgs.mupdf.override {
@@ -15,4 +18,13 @@
     pkgs.deskew
     pkgs.scantailor-advanced
   ];
+
+  xdg.configFile."scantailor-advanced/scantailor-advanced.ini".text = lib.generators.toINI { } {
+    settings = {
+      auto_save_project = true;
+      color_scheme = "native";
+      enable_opengl = true;
+      units = "in";
+    };
+  };
 }
