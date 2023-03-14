@@ -46,22 +46,22 @@
     mappings = {
       "<F1>" = "toggle_statusbar";
 
-      "Space" = "next";
-      "Esc" = "next";
-      "Left" = "previous";
-      "Right" = "next";
+      "Space" = "navigate next";
+      "Esc" = "navigate next";
+      "Left" = "navigate previous";
+      "Right" = "navigate next";
 
-      "Tab" = "index";
-      "`" = "index";
+      "Tab" = "toggle_index";
+      "`" = "toggle_index";
       "[index] Left" = "navigate_index collapse";
       "[index] Right" = "navigate_index expand";
 
-      "r" = "rotate-cw";
-      "S-r" = "rotate-ccw";
+      "r" = "rotate rotate-cw";
+      "S-r" = "rotate rotate-ccw";
       "i" = "recolor";
 
-      "ad" = "first-page-column 1:1"; # odd page spreads
-      "S-d" = "first-page-column 1:2"; # even page spreads
+      "=" = "adjust_window best-fit";
+      "d" = "toggle_page_mode";
     };
   };
 
