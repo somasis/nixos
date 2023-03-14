@@ -48,7 +48,7 @@
   #     set -o pipefail
 
   #     for u in ${builtins.attrNames config.users.users}; do
-  #         if p=$(pass "${config.networking.fqdn}/users/$u" 2>&1); then
+  #         if p=$(pass "${config.networking.fqdnOrHostName}/users/$u" 2>&1); then
   #             printf '%s:%s\n' "$u" "$(tr -d '\n' <<< "$p" | mkpasswd -m sha-512 -s)"
   #         fi
   #     done

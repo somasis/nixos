@@ -26,35 +26,35 @@
     };
 
     "/nix" = {
-      device = "${config.networking.fqdn}/nixos/root/nix";
+      device = "${config.networking.fqdnOrHostName}/nixos/root/nix";
       fsType = "zfs";
       neededForBoot = true;
       options = [ "x-gvfs-hide" ];
     };
 
     "/persist" = {
-      device = "${config.networking.fqdn}/nixos/data/persist";
+      device = "${config.networking.fqdnOrHostName}/nixos/data/persist";
       fsType = "zfs";
       neededForBoot = true;
       options = [ "x-gvfs-hide" ];
     };
 
     "/cache" = {
-      device = "${config.networking.fqdn}/nixos/root/cache";
+      device = "${config.networking.fqdnOrHostName}/nixos/root/cache";
       fsType = "zfs";
       neededForBoot = true;
       options = [ "x-gvfs-hide" ];
     };
 
     "/log" = {
-      device = "${config.networking.fqdn}/nixos/root/log";
+      device = "${config.networking.fqdnOrHostName}/nixos/root/log";
       fsType = "zfs";
       neededForBoot = true;
       options = [ "x-gvfs-hide" ];
     };
   };
 
-  boot.zfs.requestEncryptionCredentials = [ "${config.networking.fqdn}/nixos" ];
+  boot.zfs.requestEncryptionCredentials = [ "${config.networking.fqdnOrHostName}/nixos" ];
 
   # Restrict the ZFS ARC cache to 8GB.
   boot.extraModprobeConfig = ''
@@ -68,7 +68,7 @@
 
     autoScrub = {
       enable = true;
-      pools = [ "${config.networking.fqdn}" ];
+      pools = [ config.networking.fqdnOrHostName ];
       interval = "Sun, 05:00";
     };
 

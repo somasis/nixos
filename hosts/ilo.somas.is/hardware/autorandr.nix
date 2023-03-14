@@ -1,7 +1,7 @@
 { pkgs, config, ... }: {
   services.autorandr = {
     enable = true;
-    defaultTarget = "${config.networking.fqdn}";
+    defaultTarget = config.networking.fqdnOrHostName;
   };
 
   systemd.packages = [ pkgs.autorandr ];
@@ -11,7 +11,7 @@
   services.acpid = {
     enable = true;
     lidEventCommands = ''
-      ${pkgs.autorandr}/bin/autorandr --batch --default "${config.networking.fqdn}" -c
+      ${pkgs.autorandr}/bin/autorandr --batch --default "${config.networking.fqdnOrHostName}" -c
     '';
   };
 }

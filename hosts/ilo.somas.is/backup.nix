@@ -8,7 +8,7 @@ let
   repoSpinoza = "somasis@spinoza.7596ff.com:/mnt/raid/somasis/backup/borg";
 
   defaults = {
-    archiveBaseName = "${config.networking.fqdn}";
+    archiveBaseName = config.networking.fqdnOrHostName;
     dateFormat = "-u +%Y-%m-%dT%H:%M:%SZ";
     doInit = false;
 
