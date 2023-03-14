@@ -3,7 +3,7 @@
 , ...
 }:
 let
-  terminal = (pkgs.writeShellScriptBin "terminal" ''
+  terminal = pkgs.writeShellScriptBin "terminal" ''
     set -u
 
     case "''${1:-}" in
@@ -23,7 +23,7 @@ let
         #       terminal properly...
         exec ${config.programs.alacritty.package}/bin/alacritty -e "$@"
     fi
-  '');
+  '';
   t = "${terminal}/bin/terminal";
 in
 {
@@ -37,12 +37,12 @@ in
 
     settings =
       let
-        alacrittyExtendedKeys = (pkgs.fetchFromGitHub {
+        alacrittyExtendedKeys = pkgs.fetchFromGitHub {
           owner = "alexherbo2";
           repo = "alacritty-extended-keys";
           rev = "acbdcb765550b8d52eb77a5e47f5d2a0ff7a2337";
           hash = "sha256-KKzJWZ1PEKHVl7vBiRuZg8TyhE0nWohDNWxkP53amZ8=";
-        });
+        };
       in
       {
         include = [ "${alacrittyExtendedKeys}/keys.yml" ];

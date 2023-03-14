@@ -13,7 +13,7 @@ let
     general.checkforupdatesautomatically = false;
 
     client_settings = {
-      name = "${config.home.username}";
+      name = config.home.username;
       playerpath = mpv;
 
       # time synchronization
@@ -53,7 +53,7 @@ let
       ];
 
       mediasearchdirectories = mkList [
-        "${config.xdg.userDirs.download}"
+        config.xdg.userDirs.download
         "${config.home.homeDirectory}/mess/current"
         "${config.xdg.userDirs.videos}/film"
         "${config.xdg.userDirs.videos}/tv"

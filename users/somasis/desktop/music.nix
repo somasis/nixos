@@ -42,24 +42,23 @@ let
     withDevices = false;
   };
 
-  mkCantata = lib.generators.toINI
-    {
-      mkKeyValue = k: v:
-        let
-          v' =
-            if builtins.isList v && v == [ ] then
-              "@Invalid()"
-            else if builtins.isBool v then
-              lib.boolToString v
-            else if builtins.isList v then
-              lib.concatStringsSep '', '' v
-            else
-              builtins.toString v
-          ;
-        in
-        "${k}=${v'}"
-      ;
-    };
+  mkCantata = lib.generators.toINI {
+    mkKeyValue = k: v:
+      let
+        v' =
+          if builtins.isList v && v == [ ] then
+            "@Invalid()"
+          else if builtins.isBool v then
+            lib.boolToString v
+          else if builtins.isList v then
+            lib.concatStringsSep '', '' v
+          else
+            builtins.toString v
+        ;
+      in
+      "${k}=${v'}"
+    ;
+  };
 
   cantataConf = pkgs.writeText "cantata-config"
     (mkCantata {

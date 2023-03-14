@@ -1,6 +1,6 @@
 { pkgs, config, ... }:
 let
-  wttr = (pkgs.writeShellApplication {
+  wttr = pkgs.writeShellApplication {
     name = "wttr";
 
     runtimeInputs = [
@@ -87,7 +87,7 @@ let
 
       exec cat "$d/forecast.txt"
     '';
-  });
+  };
 in
 {
   home.packages = [ wttr ];
@@ -110,7 +110,7 @@ in
         ExecStopPost = [ "-${pkgs.systemd}/bin/systemctl reload --user stw@wttr.service" ];
         StandardOutput = "null";
       }
-      // (lib.optionalAttrs (nixosConfig.networking.networkmanager.enable) { ExecStartPre = [ "${pkgs.networkmanager}/bin/nm-online -q" ]; })
+      // (lib.optionalAttrs nixosConfig.networking.networkmanager.enable { ExecStartPre = [ "${pkgs.networkmanager}/bin/nm-online -q" ]; })
       ;
     };
 

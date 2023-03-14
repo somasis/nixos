@@ -1,6 +1,6 @@
 { config, nixosConfig, lib, ... }:
 let
-  tor = nixosConfig.services.tor;
+  inherit (nixosConfig.services) tor;
 in
 {
   services.syncthing.enable = true;

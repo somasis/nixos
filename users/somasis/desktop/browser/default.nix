@@ -1,6 +1,6 @@
 { config, nixosConfig, pkgs, lib, ... }:
 let
-  tor = nixosConfig.services.tor;
+  inherit (nixosConfig.services) tor;
 in
 {
   imports = [
@@ -385,7 +385,7 @@ in
       normal = {
         "zpt" =
           let
-            translateUrl = (pkgs.writeShellScript "translate-url" ''
+            translateUrl = pkgs.writeShellScript "translate-url" ''
               set -eu
               set -o pipefail
 
@@ -394,13 +394,13 @@ in
               printf 'open -t -r %s\n' \
                   "https://translate.google.com/translate?sl=auto&u=$(${config.programs.jq.package}/bin/jq -Rr '@uri' <<< "$1")" \
                   > "''${QUTE_FIFO}"
-            '');
+            '';
           in
           "spawn -u ${translateUrl} {url}";
 
         "ya" =
           let
-            generateUrlTextAnchor = (pkgs.writeShellScript "generate-url-text-anchor" ''
+            generateUrlTextAnchor = pkgs.writeShellScript "generate-url-text-anchor" ''
               set -eu
               set -o pipefail
 
@@ -419,7 +419,7 @@ in
               url="''${QUTE_URL%#*}#:~:text=''${textStart}"
 
               printf 'yank -q inline "%s" ;; message-info "Yanked URL of highlighted text to clipboard: %s"\n' "''${url}" "''${url}"
-            '');
+            '';
           in
           "spawn -u ${generateUrlTextAnchor}";
 

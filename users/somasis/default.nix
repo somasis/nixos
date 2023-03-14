@@ -81,7 +81,7 @@
     # autocurl - curl for use by background/automatically running services
     (
       let
-        tor = nixosConfig.services.tor;
+        inherit (nixosConfig.services) tor;
 
         userAgent = [ "-A" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/97.0.4692.99 Safari/537.36" ];
         proxy = (lib.optionals (tor.enable && tor.client.enable) (

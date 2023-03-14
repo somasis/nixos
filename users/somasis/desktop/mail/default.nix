@@ -107,7 +107,7 @@ in
   programs.offlineimap.enable = true;
   programs.msmtp.enable = true;
 
-  systemd.user = (lib.foldr
+  systemd.user = lib.foldr
     (n: a:
       lib.recursiveUpdate a {
         services."offlineimap-${systemdName n}" = {
@@ -115,7 +115,7 @@ in
           Service = {
             Type = "oneshot";
 
-            ExecStart = [ "${pkgs.limitcpu}/bin/cpulimit -qf -l 25 -- ${lib.optionalString (nixosConfig.services.tor.client.enable) "${pkgs.torsocks}/bin/torsocks"} ${pkgs.offlineimap}/bin/offlineimap -o -u syslog -a ${n}" ];
+            ExecStart = [ "${pkgs.limitcpu}/bin/cpulimit -qf -l 25 -- ${lib.optionalString nixosConfig.services.tor.client.enable "${pkgs.torsocks}/bin/torsocks"} ${pkgs.offlineimap}/bin/offlineimap -o -u syslog -a ${n}" ];
 
             SyslogIdentifier = "offlineimap";
 
@@ -123,14 +123,14 @@ in
             CPUSchedulingPolicy = "idle";
             IOSchedulingClass = "idle";
             IOSchedulingPriority = 7;
-          } // (lib.optionalAttrs (nixosConfig.networking.networkmanager.enable) { ExecStartPre = [ "${pkgs.networkmanager}/bin/nm-online -q" ]; });
+          } // (lib.optionalAttrs nixosConfig.networking.networkmanager.enable { ExecStartPre = [ "${pkgs.networkmanager}/bin/nm-online -q" ]; });
         };
 
         timers."offlineimap-${systemdName n}" = {
           Unit.Description = "Synchronize IMAP boxes for account ${n} every two hours, and fifteen minutes after startup";
           Timer = {
             OnCalendar = "1/2:00:00";
-            OnStartupSec = "900";
+            OnStartupSec = builtins.toString 60 * 15;
             Persistent = true;
             RandomizedDelaySec = "1m";
           };
@@ -163,7 +163,7 @@ in
       };
     }
     (builtins.attrNames config.accounts.email.accounts)
-  );
+  ;
 
   services.imapnotify.enable = true;
 

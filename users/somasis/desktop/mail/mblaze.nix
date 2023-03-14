@@ -2,9 +2,9 @@
   home.packages = [
     (pkgs.mblaze.overrideAttrs (
       let
-        year = builtins.substring 0 4 (inputs.mblaze.lastModifiedDate);
-        month = builtins.substring 4 2 (inputs.mblaze.lastModifiedDate);
-        day = builtins.substring 6 2 (inputs.mblaze.lastModifiedDate);
+        year = builtins.substring 0 4 inputs.mblaze.lastModifiedDate;
+        month = builtins.substring 4 2 inputs.mblaze.lastModifiedDate;
+        day = builtins.substring 6 2 inputs.mblaze.lastModifiedDate;
       in
       oldAttrs:
       {
@@ -39,7 +39,7 @@
 
   home.file.".mblaze/profile".text =
     let
-      primary = builtins.toString (builtins.map (x: x.address) (builtins.filter (x: x.primary == true) (builtins.attrValues config.accounts.email.accounts)));
+      primary = builtins.toString (builtins.map (x: x.address) (builtins.filter (x: x.primary) (builtins.attrValues config.accounts.email.accounts)));
       alternate = builtins.concatStringsSep "," (builtins.concatLists (builtins.map (x: [ x.address ] ++ x.aliases) (builtins.attrValues config.accounts.email.accounts)));
       replyFrom = builtins.concatStringsSep "," (builtins.map (x: "${x.realName} <${x.address}>") (builtins.attrValues config.accounts.email.accounts));
       mailboxes = builtins.concatStringsSep "," (builtins.map (x: x.maildir.absPath) (builtins.attrValues config.accounts.email.accounts));

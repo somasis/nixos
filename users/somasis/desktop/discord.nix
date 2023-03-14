@@ -166,19 +166,17 @@ in
     };
   };
 
-  services.sxhkd.keybindings."super + d" = builtins.toString (
-    pkgs.writeShellScript "discord" ''
-      if ! ${config.home.homeDirectory}/bin/raise -V '^(.+ - Discord|Discord)$';then
-          if ${pkgs.systemd}/bin/systemctl --user is-active -q discord.service; then
-              exec ${discordProgram} >/dev/null 2>&1
-          else
-              ${pkgs.systemd}/bin/systemctl --user start discord.service \
-                  && sleep 2 \
-                  && exec ${discordProgram} >/dev/null 2>&1
-          fi
-      fi
-    ''
-  );
+  services.sxhkd.keybindings."super + d" = builtins.toString (pkgs.writeShellScript "discord" ''
+    if ! ${config.home.homeDirectory}/bin/raise -V '^(.+ - Discord|Discord)$';then
+        if ${pkgs.systemd}/bin/systemctl --user is-active -q discord.service; then
+            exec ${discordProgram} >/dev/null 2>&1
+        else
+            ${pkgs.systemd}/bin/systemctl --user start discord.service \
+                && sleep 2 \
+                && exec ${discordProgram} >/dev/null 2>&1
+        fi
+    fi
+  '');
 
   systemd.user.services.discord = {
     Unit = {

@@ -160,8 +160,7 @@
   };
 
   services.dunst.iconTheme = {
-    name = config.gtk.iconTheme.name;
-    package = config.gtk.iconTheme.package;
+    inherit (config.gtk.iconTheme) name package;
     size = "32x32";
   };
 

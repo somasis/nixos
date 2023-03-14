@@ -5,7 +5,7 @@
     pkgs.xfce.tumbler
     pkgs.ffmpegthumbnailer
 
-    (pkgs.writeShellScriptBin ''mount-archive'' ''
+    (pkgs.writeShellScriptBin "mount-archive" ''
       set -e
 
       n=''${1%%.*}
