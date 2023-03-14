@@ -217,11 +217,26 @@ in
         '';
       in
       {
-        # Utility: drag files -> open in launcher - super + o
-        "super + shift + o" = ''
-          ${pkgs.xdragon}/bin/dragon -s 32 -t -p -x \
-              | ${pkgs.xe}/bin/xe -N1 xdg-open
-        '';
+        # Utility: drag files - super + shift + o
+        "super + shift + o" = builtins.toString (pkgs.writeShellScript "sxhkd-dragon" ''
+          export PATH=${lib.makeBinPath [ config.xsession.windowManager.bspwm.package pkgs.coreutils pkgs.procps pkgs.xdragon pkgs.xdotool pkgs.xe pkgs.gnome.zenity ]}:"$PATH"
+          window_pid=$(xdotool getactivewindow getwindowpid)
+          window_pid_parent=$(pgrep -P "$window_pid" | tail -n1)
+          window_cwd=$(readlink -f /proc/"$window_pid_parent"/cwd)
+          cd "$window_cwd"
+
+          title='dragon: select a file (select none to create target)'
+
+          bspc rule -a 'Zenity:*:'"$title" -o sticky=on
+          f=$(zenity --title "$title" --file-selection --multiple --separator "$(printf '\n')") || exit 1
+
+          bspc rule -a 'dragon' -o sticky=on
+          if [ -n "$f" ]; then
+              dragon -s 64 -T -A -x -I <<<"$f"
+          else
+              dragon -s 64 -T -A -x -t -k
+          fi
+        '');
 
         # Utility: color picker - super + g
         "super + g" = "${colorPick} -f hex";
