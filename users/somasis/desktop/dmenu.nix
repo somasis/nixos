@@ -68,7 +68,6 @@ let
       // #define REJECTNOMATCH_PATCH    1
       // #define RESTRICT_RETURN_PATCH  1
       // #define TSV_PATCH              1
-      // #define WMTYPE_PATCH           1
       // #define XRESOURCES_PATCH       1
       EOF
     '';
