@@ -1,95 +1,125 @@
 { config
+, lib
 , pkgs
 , ...
-}: {
-  systemd.user.services.xssproxy = {
-    Unit.Description = "Forward DBus calls relating to screensaver to Xss";
-    Service.Type = "simple";
-    Service.ExecStart = "${pkgs.xssproxy}/bin/xssproxy";
-    Unit.PartOf = [ "graphical-session.target" ];
-    Install.WantedBy = [ "graphical-session.target" ];
-  };
+}:
+let
+  xsecurelock = pkgs.xsecurelock.overrideAttrs (oldAttrs: {
+    version = "unstable-2023-01-16";
+    src = pkgs.fetchFromGitHub {
+      owner = "google";
+      repo = oldAttrs.pname;
 
-  systemd.user.services.xsecurelock = {
-    Unit = {
-      Description = "Run xsecurelock with specified configuration";
-      Before = [ "sleep.target" ];
-      OnFailure = [ "xsecurelock-kill.service" ];
+      # TODO Remove once xsecurelock is updated in nixpkgs.
+      rev = "15e9b01b02f64cc40f02184f001849971684ce15";
+      hash = lib.fakeHash;
+    };
+  });
+in
+{
+  systemd.user.services = {
+    xssproxy = {
+      Unit.Description = "Forward DBus calls relating to screensaver to Xss";
+      Service.Type = "simple";
+      Service.ExecStart = "${pkgs.xssproxy}/bin/xssproxy";
+      Unit.PartOf = [ "graphical-session.target" ];
+      Install.WantedBy = [ "graphical-session.target" ];
     };
 
-    Install.WantedBy = [ "sleep.target" ];
+    xsecurelock = {
+      Unit = {
+        Description = "Run xsecurelock with specified configuration";
+        Before = [ "sleep.target" ];
+        # OnFailure = [ "xsecurelock-failure.service" ];
+      };
 
-    Service = {
-      Type = "simple";
+      Install.WantedBy = [ "sleep.target" ];
 
-      ProtectSystem = "strict";
-      UnsetEnvironment = [
-        "HOME"
-        "PATH"
-        "XDG_RUNTIME_DIR"
-        "TERM"
-      ];
-      PassEnvironment = [
-        "NOTIFY_SOCKET"
-      ];
+      Service = {
+        Type = "notify";
 
-      Environment = [
-        ''"XSECURELOCK_BACKGROUND_COLOR=#000000"''
-        ''"XSECURELOCK_AUTH_BACKGROUND_COLOR=#000000"''
-        ''"XSECURELOCK_AUTH_FOREGROUND_COLOR=${config.xresources.properties."*darkForeground"}"''
-        ''"XSECURELOCK_DATETIME_FORMAT=%%A, %%B %%d, %%I:%%M %%p"''
-        ''"XSECURELOCK_FONT=monospace:style=bold:size=11"''
-        ''"XSECURELOCK_PASSWORD_PROMPT=time"''
-        ''"XSECURELOCK_SHOW_DATETIME=0"''
-        ''"XSECURELOCK_SHOW_HOSTNAME=0"''
-        ''"XSECURELOCK_SHOW_USERNAME=0"''
+        ProtectSystem = "strict";
+        UnsetEnvironment = [
+          "HOME"
+          "PATH"
+          "XDG_RUNTIME_DIR"
+          "TERM"
+        ];
+        PassEnvironment = [ "NOTIFY_SOCKET" ];
 
-        # ''"XSECURELOCK_NO_PAM_RHOST=1"'' # Necessary to make fprintd work.
+        Environment = [
+          ''"XSECURELOCK_BACKGROUND_COLOR=#000000"''
+          ''"XSECURELOCK_AUTH_BACKGROUND_COLOR=#000000"''
+          ''"XSECURELOCK_AUTH_FOREGROUND_COLOR=${config.xresources.properties."*darkForeground"}"''
+          ''"XSECURELOCK_DATETIME_FORMAT=%%A, %%B %%d, %%I:%%M %%p"''
+          ''"XSECURELOCK_FONT=monospace:style=bold:size=11"''
+          ''"XSECURELOCK_PASSWORD_PROMPT=time"''
+          ''"XSECURELOCK_SHOW_DATETIME=0"''
+          ''"XSECURELOCK_SHOW_HOSTNAME=0"''
+          ''"XSECURELOCK_SHOW_USERNAME=0"''
+          ''"XSECURELOCK_SHOW_KEYBOARD_LAYOUT=0"''
 
-        ''"XSECURELOCK_AUTH_TIMEOUT=30"''
-        ''"XSECURELOCK_BLANK_TIMEOUT=15"''
-      ];
+          # ''"XSECURELOCK_NO_PAM_RHOST=1"'' # Necessary to make fprintd work.
 
-      ExecStart = "${pkgs.xsecurelock}/bin/xsecurelock";
-      Restart = "on-failure";
-      RestartSec = 0;
+          ''"XSECURELOCK_AUTH_TIMEOUT=30"''
+          ''"XSECURELOCK_BLANK_TIMEOUT=15"''
+        ];
+
+        ExecStart = "${pkgs.xsecurelock}/bin/xsecurelock -- ${pkgs.systemd}/bin/systemd-notify --ready";
+        Restart = "on-failure";
+        RestartSec = 0;
+      };
     };
-  };
 
-  systemd.user.services.xsecurelock-failure = {
-    Unit.Description = "Bring down the system when xsecurelock fails";
-    Service.Type = "oneshot";
-    Service.ExecStart = "${pkgs.systemd}/bin/systemctl poweroff";
+    xsecurelock-dim = {
+      Unit.Description = "Dim the screen and then lock it";
+      Service = {
+        Type = "simple";
+
+        Environment = [
+          ''"XSECURELOCK_DIM_TIME_MS=${builtins.toString 1000 * 5}"'' # milliseconds
+          ''"XSECURELOCK_WAIT_TIME_MS=${builtins.toString 1000 * 15}"'' # milliseconds
+        ];
+
+        ExecStart = "${pkgs.xsecurelock}/libexec/xsecurelock/dimmer";
+        OnSuccess = [ "xsecurelock.service" ];
+      };
+    };
+
+    xsecurelock-failure = {
+      Unit.Description = "Bring down the system when xsecurelock fails";
+      Service.Type = "oneshot";
+      Service.ExecStart = "${pkgs.systemd}/bin/systemctl poweroff";
+    };
   };
 
   # I only need this so I can react to logind's lock-session stuff and suspend events
   services.screen-locker = {
     enable = true;
-    inactiveInterval = 15;
-    lockCmd = "${pkgs.systemd}/bin/systemctl --user start xsecurelock.service";
     xautolock.enable = false; # Use xss-lock
+    lockCmd = "${pkgs.systemd}/bin/systemctl --user start xsecurelock.service";
+
+    inactiveInterval = 15; # minutes
+    xss-lock = {
+      extraOptions = [ "-l" ];
+      screensaverCycle = 60 * 15;
+    };
   };
 
   services.xidlehook = {
     enable = true;
 
+    detect-sleep = true;
     not-when-audio = true;
     not-when-fullscreen = true;
 
-    environment = {
-      "XSECURELOCK_IDLE_TIMERS" = "";
-      "XSECURELOCK_DIM_TIME_MS" = "2500";
-      "XSECURELOCK_WAIT_TIME_MS" = "15000";
-    };
+    environment = { };
 
     timers = [
       {
-        delay = 1500;
-        command = "${pkgs.xsecurelock}/libexec/xsecurelock/until_nonidle ${pkgs.xsecurelock}/libexec/xsecurelock/dimmer";
-      }
-      {
-        delay = 1515;
-        command = "${pkgs.systemd}/bin/systemctl --user start xsecurelock.service";
+        delay = 60 * 1;
+        command = "${pkgs.systemd}/bin/systemctl start --user xsecurelock-dim.service";
+        canceller = "${pkgs.systemd}/bin/systemctl stop --user xsecurelock-dim.service";
       }
     ];
   };
