@@ -1,4 +1,5 @@
-{ pkgs
+{ config
+, pkgs
 , ...
 }: {
   home.packages = [
@@ -15,6 +16,8 @@
   ];
 
   services.clipmenu.enable = true;
+  home.sessionVariables.CM_DIR = "${config.xdg.cacheHome}/clipmenu";
+  home.persistence."/cache${config.home.homeDirectory}".directories = [ "var/cache/clipmenu" ];
 
   services.sxhkd.keybindings = {
     # Clipboard: show clipboard history - super + x
