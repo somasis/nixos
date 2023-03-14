@@ -43,7 +43,7 @@
 
   # Stolen from <https://github.com/ncfavier/config/blob/0c12d8559f7b2aa2ea0ddc9cb2cec5066469cabe/modules/station/default.nix>
   environment.etc."systemd/system-sleep/batenergy".source = pkgs.writeShellScript "batenergy" ''
-    PATH=${lib.makeBinPath [ pkgs.coreutils pkgs.bc ]}
+    PATH=${lib.makeBinPath [ pkgs.coreutils pkgs.bc ]}":$PATH"
     source ${pkgs.fetchFromGitHub {
       owner = "equaeghe";
       repo = "batenergy";
