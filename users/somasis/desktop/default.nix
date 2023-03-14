@@ -12,6 +12,7 @@
     # ./xterm.nix
 
     ./browser
+    ./chat
     ./games
     ./mail
     ./pim
@@ -26,12 +27,10 @@
     ./compositing.nix
     ./dates.nix
     ./diary.nix
-    ./discord.nix
     ./dmenu.nix
     ./feeds.nix
     ./file-manager.nix
     ./fonts.nix
-    ./irc.nix
     ./ledger.nix
     ./list.nix
     ./mess.nix

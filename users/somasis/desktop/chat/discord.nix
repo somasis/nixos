@@ -81,8 +81,8 @@ in
   #   "var/cache/powercord"
   # ];
 
-  xdg.configFile."discordcanary/settings.json".text = (lib.generators.toJSON { }
-    # Convert all the attributes to SNAKE_CASE in the generated JSON
+  # Convert all the attributes to SNAKE_CASE in the generated JSON
+  xdg.configFile."discordcanary/settings.json".text = lib.generators.toJSON { }
     (lib.mapAttrs'
       (name: value: { inherit value; name = camelCaseToSnakeCase name; })
       {
@@ -98,20 +98,20 @@ in
           themeSync = true;
           quickstart = true;
 
-          css = (lib.fileContents (pkgs.concatTextFile {
+          css = lib.fileContents (pkgs.concatTextFile {
             name = "discord-css";
             files = [
               "${inputs.repluggedThemeCustom}/custom.css"
               # "${inputs.repluggedThemeIrc}/irc.css"
             ];
-          }));
+          });
         };
       }
-    )
-  );
+    );
 
   services.mpd-discord-rpc = {
-    enable = config.services.mpd.enable;
+    inherit (config.services.mpd) enable;
+
     settings = {
       hosts = [ "${config.services.mpd.network.listenAddress}:${builtins.toString config.services.mpd.network.port}" ];
       format = {
