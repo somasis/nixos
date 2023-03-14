@@ -84,8 +84,28 @@ in
       # Window management: rotate desktop layout - super + r
       "super + {_,shift} + r" = "${bspc} node @/ -R {90,-90}";
 
-      # Window management: {close, kill} window - super + w, super + shift + w
-      "super + {_,shift} + w" = "${bspc} node -{c,k}";
+      # Window management: close window - super + w
+      "super + w" = builtins.toString (pkgs.writeShellScript "bspwm-hide-or-close" ''
+        # If we're closing a window,
+
+        : "''${XDG_CACHE_HOME:=$HOME/.cache}"
+
+        cache="$XDG_CACHE_HOME"/bspwm
+        mkdir -p "$cache"
+
+        focused=$(${bspc} query -N -n)
+
+        # and the window to close is marked locked=on, ...
+        if [ "$focused" = "$(${bspc} query -N "$focused" -n '.locked')" ]; then
+            # and just mark it hidden.
+            ${bspc} node "$focused" -g hidden=on
+        else
+            ${bspc} node "$focused" -c
+        fi
+      '');
+
+      # Window management: kill window - super + shift + w
+      "super + shift + w" = "${bspc} node -k";
 
       # Window management: set desktop layout to {tiled, monocle} - super + m
       "super + m" = "${bspc} desktop -l next";
