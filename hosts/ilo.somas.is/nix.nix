@@ -26,25 +26,24 @@
       # Quiet the dirty messages when using `nixos-dev`.
       warn-dirty = false;
 
-      # TODO Use content-addressed derivations
-      # <https://discourse.nixos.org/t/content-addressed-nix-call-for-testers/12881#:~:text=Level%203%20%E2%80%94%20Raider%20of%20the%20unknown>
-      # experimental-features = [ "ca-derivations" ];
-      # substituters = [ "https://cache.ngi0.nixos.org/" ];
-      # trusted-public-keys = [ "cache.ngi0.nixos.org-1:KqH5CBLNSyX184S9BKZJo1LxrxJ9ltnY2uAs5c/f1MA=" ];
+      substituters = [ "ssh-ng://somasis@spinoza.7596ff.com" ];
 
-      trusted-substituters = [ "ssh://eu.nixbuild.net" ];
-      trusted-public-keys = [ "nixbuild.net/kylie@somas.is-1:y3JOAdjCfkUnVGDEvx6Ab8zoyIZwR4bezZIeJOLFupQ=" ];
+      # TODO Use content-addressed derivations?
+      # <https://discourse.nixos.org/t/content-addressed-nix-call-for-testers/12881#:~:text=Level%203%20%E2%80%94%20Raider%20of%20the%20unknown>
     };
 
     distributedBuilds = true;
-    buildMachines = [
-      {
-        hostName = "eu.nixbuild.net";
-        system = "x86_64-linux";
-        maxJobs = 100;
-        supportedFeatures = [ "benchmark" "big-parallel" ];
-      }
-    ];
+    buildMachines = [{
+      hostName = "spinoza.7596ff.com";
+      sshUser = "somasis";
+      sshKey = "${config.users.users.root.home}/.ssh/id_ed25519";
+      system = "x86_64-linux";
+      maxJobs = 4;
+
+      publicHostKey = "c3NoLWVkMjU1MTkgQUFBQUMzTnphQzFsWkRJMU5URTVBQUFBSU5rSWRPNDVQeVozMDAydlRHbHN0cDJPMTV2cHo4akU2bXdjV1M2ZjZRUE4gcm9vdEBzcGlub3phCg==";
+
+      protocol = "ssh-ng";
+    }];
 
     gc = {
       automatic = true;
@@ -54,23 +53,22 @@
   };
 
   programs.ssh.extraConfig = ''
-    Host eu.nixbuild.net
-      PubkeyAcceptedKeyTypes ssh-ed25519
-      IdentityFile ${config.users.users.root.home}/.ssh/id_ed25519
-      ControlMaster no
-      ControlPath /tmp/%C.control.ssh
-      ControlPersist 15m
-      Compression yes
+    Host spinoza.7596ff.com
+        PubkeyAcceptedKeyTypes ssh-ed25519
+
+        Port 1312
+
+        ControlMaster no
+        ControlPath /tmp/%C.control.ssh
+        ControlPersist 15m
+
+        ServerAliveInterval 15
+
+        Compression yes
   '';
 
-  programs.ssh.knownHosts.nixbuild = {
-    hostNames = [ "eu.nixbuild.net" ];
-    publicKey = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIPIQCZc54poJ8vqawd8TraNryQeJnvH1eLpIDgbiqymM";
+  programs.ssh.knownHosts.spinoza = {
+    hostNames = [ "spinoza.7596ff.com" ];
+    publicKey = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAINkIdO45PyZ3002vTGlstp2O15vpz8jE6mwcWS6f6QPN";
   };
-
-  environment.shellAliases.nixbuild = ''doas ssh eu.nixbuild.net shell'';
-
-  # nixpkgs.config = {
-  #   contentAddressedByDefault = true;
-  # };
 }
