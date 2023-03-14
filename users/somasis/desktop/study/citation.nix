@@ -9,6 +9,8 @@ let
   inherit (inputs) csl zoteroTranslators;
   inherit (nixosConfig.services) tor;
 
+  libgen = "${pkgs.libgen-cli}/bin/libgen-cli";
+
   qute-zotero = pkgs.callPackage
     ({ lib, fetchurl, fetchFromGitHub, python3Packages }:
       python3Packages.buildPythonApplication rec {
@@ -543,4 +545,6 @@ in
       "!scholar" = "${proxy}?qurl=https%3A%2F%2Fscholar.google.com%2Fscholar%3Fhl%3Den%26q%3D{quoted}%26btnG%3DSearch";
     };
   };
+
+  home.shellAliases."libgen" = lib.optionalString nixosConfig.services.tor.client.enable "${pkgs.torsocks}/bin/torsocks " + "${libgen}";
 }
