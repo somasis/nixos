@@ -24,32 +24,22 @@
     zstd = "zstd -T0 -19";
     gzip = "pigz -p $(( $(nproc) / 2 )) -9";
 
+    # ... | peek | ...
     peek = "tee /dev/stderr";
 
-    systemctl = "systemctl -l --legend=false";
-    userctl = "systemctl --user";
-    journalctl = "journalctl -e";
-    syslog = "${journalctl} -b";
+    sys = "systemctl -l --legend=false";
+    user = "systemctl --user";
+    journal = "journalctl -e";
+    syslog = "${journal} -b";
     userlog = "${syslog} --user";
+    bus = "busctl --verbose -j";
 
     wget = "curl -q -Lf# -Z --no-clobber --remote-name-all --remote-header-name --remove-on-error --retry 20 --retry-delay 10";
 
     since = "datediff -f '%Yy %mm %ww %dd %0Hh %0Mm %0Ss'";
-
-    bus = "busctl --verbose -j";
   };
 
   programs.bash.initExtra = ''
-    # diff() {
-    #     command diff "$@" \
-    #         | {
-    #             if [ -t 1 ] || [ -n "$NO_COLOR" ]; then
-    #                 sed \
-    #                     -e '/^+/ { s/^/\e[32m/; s/$/\e[0m/' \
-    #                     -e '/^-/ { s/^/\e[31m/; s/$/\e[0m/' \
-    #                     -e '/^
-    # }
-
     edo() { printf '+ %s\n' "$*" >&2; "$@"; }
 
     mount() {

@@ -11,10 +11,6 @@
     enableVteIntegration = true;
   };
 
-  # TODO: this doesn't work :(
-  # home.packages = [
-  #   pkgs.complete-alias
-  # ];
   programs.bash.initExtra = lib.mkAfter ''
     . ${pkgs.complete-alias}/bin/complete_alias
     complete -F _complete_alias ''${!BASH_ALIASES[@]}
