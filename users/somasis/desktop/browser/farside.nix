@@ -27,21 +27,15 @@
         return farside(url, "/scribe/")
 
 
-    def instagram(url: QUrl) -> bool:
-        return farside(url, "/bibliogram/")
-
-
     # def gtranslate(url: QUrl) -> bool:
     #     return farside(url, "/simplytranslate/")
 
 
     redirects = {
         "imgur.com": imgur,
-        "instagram.com": instagram,
         "medium.com": medium,
         # "translate.google.com": gtranslate,
     }
-
 
     def f(info: i.Request):
         if info.resource_type != i.ResourceType.main_frame or info.request_url.scheme() in {
