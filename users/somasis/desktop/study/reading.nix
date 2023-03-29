@@ -48,8 +48,9 @@
 
       "Space" = "navigate next";
       "Esc" = "navigate next";
-      "Left" = "navigate previous";
-      "Right" = "navigate next";
+
+      "<A-Left>" = "navigate previous";
+      "<A-Right>" = "navigate next";
 
       "Tab" = "toggle_index";
       "`" = "toggle_index";
@@ -65,9 +66,10 @@
     };
   };
 
-  home.persistence."/persist${config.home.homeDirectory}".directories = [
-    { method = "symlink"; directory = "share/zathura"; }
-  ];
+  home.persistence."/persist${config.home.homeDirectory}".directories = [{
+    method = "symlink";
+    directory = "share/zathura";
+  }];
 
   xdg.mimeApps.defaultApplications = {
     "application/pdf" = "org.pwmt.zathura.desktop";
