@@ -2,7 +2,6 @@
   services.printing = {
     enable = true;
     browsing = true;
-    cups-pdf.enable = true;
     drivers = [ pkgs.gutenprint ];
   };
 
