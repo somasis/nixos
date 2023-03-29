@@ -11,6 +11,7 @@
       enableGL = false;
     })
 
+    # PDF editing tools
     pkgs.ocrmypdf
     pkgs.pdfarranger
 
