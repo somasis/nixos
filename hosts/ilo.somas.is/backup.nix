@@ -25,13 +25,13 @@ let
 
     environment = {
       BORG_RSH = "
-            ${pkgs.buildPackages.doas}/bin/doas -u somasis \
-                ${config.programs.ssh.package}/bin/ssh \
-                    -i /home/somasis/.ssh/id_ed25519 \
-                    -o ExitOnForwardFailure=no \
-                    -Tx \
-                    -l somasis
-          ";
+        ${pkgs.buildPackages.doas}/bin/doas -u somasis \
+            ${config.programs.ssh.package}/bin/ssh \
+                -i ${config.users.users.somasis.home}/.ssh/id_ed25519 \
+                -o ExitOnForwardFailure=no \
+                -Tx \
+                -l somasis
+      ";
     };
 
     exclude = [
@@ -40,19 +40,23 @@ let
       ".stversions"
       "/persist/home/somasis/etc/syncthing/index-*.db"
       "pp:/persist/home/somasis/audio/source"
-      "re:/persist/home/somasis/etc/discord/[0-9\.]+/.*"
+      "re:/persist/home/somasis/etc/discord(canary)?/[0-9\.]+/.*"
     ];
 
-    extraArgs = "--lock-wait 600";
-    extraCreateArgs = "--stats --progress --exclude-if-present '.stfolder' --exclude-if-present '.stversions'";
+    extraArgs = lib.cli.toGNUCommandLineShell { } { lock-wait = 600; };
+    extraCreateArgs = lib.cli.toGNUCommandLineShell { } {
+      stats = true;
+      progress = true;
+      exclude-if-present = [ ".stfolder" ".stversions" ];
+    };
 
     inhibitsSleep = true;
 
     # Force borg's CPU usage to remain low.
     preHook = ''
       borg() {
-          ${lib.optionalString (nixosConfig.networking.networkmanager.enable) "${pkgs.networkmanager}/bin/nm-online -q"}
-          ${pkgs.limitcpu}/bin/cpulimit -qf -l 25 -- ${lib.optionalString (nixosConfig.services.tor.client.enable) "${pkgs.torsocks}/bin/torsocks"} borg "$@"
+          ${lib.optionalString nixosConfig.networking.networkmanager.enable "${pkgs.networkmanager}/bin/nm-online -q"}
+          ${pkgs.limitcpu}/bin/cpulimit -qf -l 25 -- borg "$@"
       }
     '';
 
