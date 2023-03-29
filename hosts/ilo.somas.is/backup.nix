@@ -238,7 +238,7 @@ in
     })
 
     (pkgs.writeShellApplication rec {
-      name = "borg-import-google-takeout";
+      name = "borg-import-google";
 
       runtimeInputs = [
         pkgs.coreutils
@@ -282,29 +282,29 @@ in
                 | head -n1
         )
 
-        printf '::google-takeout-%s-%s (%s)\n' "$a" "$date" "$d"
+        printf '::google-%s-%s (%s)\n' "$a" "$date" "$d"
 
         bsdtar -cf - --format=ustar "''${files[@]}" \
             | doas borg-job-spinoza \
                 import-tar \
                     ${extraArgs} \
                     --stats -p \
-                    --comment="imported with borg import-tar via. borg-import-google-takeout" \
+                    --comment="imported with borg import-tar via. borg-import-google" \
                     --timestamp="''${d}" \
-                    "::google-takeout-''${a}-''${date}.failed" \
+                    "::google-''${a}-''${date}.failed" \
                     -
 
             doas borg-job-spinoza \
                 rename \
                     ${extraArgs} \
-                    "::google-takeout-''${a}-''${date}.failed" \
-                    "google-takeout-''${a}-''${date}"
+                    "::google-''${a}-''${date}.failed" \
+                    "google-''${a}-''${date}"
 
             doas borg-job-spinoza \
                 prune \
                     ${extraArgs} \
                     --keep-monthly=12 --keep-yearly=4 \
-                    -a "google-takeout-''${a}-*"
+                    -a "google-''${a}-*"
       '';
     })
   ];
