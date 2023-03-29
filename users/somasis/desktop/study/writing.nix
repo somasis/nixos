@@ -1,15 +1,21 @@
 { pkgs
+, lib
 , config
 , ...
 }:
 {
-  home.packages = [ pkgs.libreoffice ];
+  home = {
+    packages = [ pkgs.libreoffice ];
 
-  # See for more details:
-  # <https://wiki.documentfoundation.org/UserProfile#User_profile_content>
-  home.persistence."/persist${config.home.homeDirectory}".directories = [
-    { method = "symlink"; directory = "etc/libreoffice"; }
-  ];
+    # See for more details:
+    # <https://wiki.documentfoundation.org/UserProfile#User_profile_content>
+    persistence."/persist${config.home.homeDirectory}".directories = [{
+      method = "symlink";
+      directory = "etc/libreoffice";
+    }];
+  };
+
+  xdg.mimeApps.associations.removed = lib.genAttrs [ "text/plain" ] (_: "libreoffice.desktop");
 
   systemd.user.services.libreoffice = {
     Unit = {
