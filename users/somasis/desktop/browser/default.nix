@@ -139,9 +139,6 @@ in
         # Use system proxy settings.
         proxy = "system";
 
-        # Don't use pdf.js, I prefer the system application.
-        pdfjs = false;
-
         # Allow JavaScript to read from or write to the clipboard.
         javascript = {
           can_access_clipboard = true;

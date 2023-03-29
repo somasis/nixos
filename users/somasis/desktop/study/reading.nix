@@ -76,37 +76,5 @@
 
   xsession.windowManager.bspwm.rules."Zathura".state = "tiled";
 
-  # home.packages = [
-  #   pkgs.foliate
-  # ];
-
-  # home.persistence."/cache${config.home.homeDirectory}".directories = [
-  #       { method = "symlink"; directory = "var/cache/com.github.johnfactotum.Foliate"; }
-  # ];
-
-  # dconf.settings = {
-  #   "com/github/johnfactotum/Foliate" = {
-  #     footer-left = "none";
-  #     footer-right = "location";
-  #     selection-action-single = "dictionary";
-  #     use-menubar = false;
-  #     use-sidebar = true;
-  #   };
-
-  #   "com/github/johnfactotum/Foliate/library".use-tracker = false;
-
-  #   "com/github/johnfactotum/Foliate/view" = {
-  #     enable-footnote = false;
-  #     hyphenate = true;
-  #     layout = "auto";
-  #     margin = 60;
-  #     max-width = 1400;
-  #     prefer-dark-theme = false;
-  #     skeuomorphism = true;
-  #     spacing = 2.0;
-  #     use-publisher-font = true;
-  #   };
-
-  #   "com/github/johnfactotum/Foliate/window-state".show-sidebar = false;
-  # };
+  programs.qutebrowser.settings.content.pdfjs = false;
 }
