@@ -16,39 +16,39 @@ in
       username = "kylie@somas.is";
       calendar_collections = mkCollection [
         # Calendars
-        "66b2cb1d-142a-45c4-a69d-29088d7bb857" # Calendar
-        "62cb408f-6476-40c9-bd04-bb8376cb6098" # Diet
-        "069e7367-d705-4992-88cc-e962388b2289" # Ledger
-        "b5460bba-446f-4c9a-9b75-7da771e7239c" # University
+        "66b2cb1d-142a-45c4-a69d-29088d7bb857"
+        "62cb408f-6476-40c9-bd04-bb8376cb6098"
+        "069e7367-d705-4992-88cc-e962388b2289"
+        "b5460bba-446f-4c9a-9b75-7da771e7239c"
 
         # Google (kylie@somas.is)
-        "1d0980c8-f93f-47c1-ab2d-257dd15bffaf" # Google Calendar: kylie@somas.is
-        "bd1b9987-2b26-48d1-b9f4-5483204f74d9" # Violet & Kylie
-        "6910c6d1-2786-4151-83c6-c7bee7dc4c45" # Jonesers
+        "1d0980c8-f93f-47c1-ab2d-257dd15bffaf"
+        "bd1b9987-2b26-48d1-b9f4-5483204f74d9"
+        "6910c6d1-2786-4151-83c6-c7bee7dc4c45"
 
         # Google (mcclainkj@appstate.edu)
-        "acfc59e6-8aa5-4b40-9db2-54459b7efefc" # Google Calendar: mcclainkj@appstate.edu
+        "acfc59e6-8aa5-4b40-9db2-54459b7efefc"
       ];
       calendar_readonly_collections = mkCollection [
         # Subscriptions
-        "fe8edc23-dbea-42dd-b4ca-ee5e5f0e2241" # University: classes
-        "e4d7681e-c502-4999-ba48-85d17090d5c3" # Cassie
-        "5bfbb874-f100-4cd5-8d2f-d2bf13ddf1bf" # Cassie: university
-        "66c5ec19-fa45-4b8b-9886-48f645c0c15d" # Violet: university
-        "444c093a-d07c-40f2-b9e3-210fb0467041" # Zeyla
-        "04cd6e3c-f738-45f1-b8f1-736cb5043640" # Zeyla: work
-        "c64932da-80e3-4e11-92f2-389a076595a1" # Jes: university
-        "a24bf95b-ef6e-428e-a5d9-26be33dffce5" # Holiday: North Carolina
-        "a074e6e1-676c-414b-ac72-8709731ed134" # Holiday: South Australia
-        "8d38d1e1-2d3b-4d61-b401-450634b548f5" # Holiday: Washington
+        "fe8edc23-dbea-42dd-b4ca-ee5e5f0e2241"
+        "e4d7681e-c502-4999-ba48-85d17090d5c3"
+        "5bfbb874-f100-4cd5-8d2f-d2bf13ddf1bf"
+        "66c5ec19-fa45-4b8b-9886-48f645c0c15d"
+        "444c093a-d07c-40f2-b9e3-210fb0467041"
+        "04cd6e3c-f738-45f1-b8f1-736cb5043640"
+        "c64932da-80e3-4e11-92f2-389a076595a1"
+        "a24bf95b-ef6e-428e-a5d9-26be33dffce5"
+        "a074e6e1-676c-414b-ac72-8709731ed134"
+        "8d38d1e1-2d3b-4d61-b401-450634b548f5"
 
         # Google (kylie@somas.is)
-        "792a8695-6ce1-4c55-80fb-f560369a02d4" # Violet
+        "792a8695-6ce1-4c55-80fb-f560369a02d4"
 
         # Google (mcclainkj@appstate.edu)
-        "8286567d-a494-469f-a8f3-4b98e4881f5f" # Appalachian State University: academic
-        "ba199a48-3069-4317-bc7c-98b2b60def26" # Appalachian State University: registration
-        "781d751f-34d0-42f6-86d6-6b7263def307" # Work
+        "8286567d-a494-469f-a8f3-4b98e4881f5f"
+        "ba199a48-3069-4317-bc7c-98b2b60def26"
+        "781d751f-34d0-42f6-86d6-6b7263def307"
       ];
     in
     ''
@@ -88,7 +88,7 @@ in
           type = "caldav"
           url = "https://caldav.messagingengine.com/"
           username = "${username}"
-          password.fetch = ["command", "pass", "${nixosConfig.networking.fqdn}/vdirsyncer/${username}"]
+          password.fetch = ["command", "pass", "${nixosConfig.networking.fqdnOrHostName}/vdirsyncer/${username}"]
 
       [pair contacts]
           a = "contacts_remote"
@@ -107,7 +107,7 @@ in
           type = "carddav"
           url = "https://carddav.messagingengine.com/"
           username = "${username}"
-          password.fetch = ["command", "pass", "${nixosConfig.networking.fqdn}/vdirsyncer/${username}"]
+          password.fetch = ["command", "pass", "${nixosConfig.networking.fqdnOrHostName}/vdirsyncer/${username}"]
     '';
 
   systemd.user.services.vdirsyncer = {
@@ -127,8 +127,8 @@ in
       # }";
 
       ExecStart = [
-        "${pkgs.limitcpu}/bin/cpulimit -qf -l 25 -- ${lib.optionalString nixosConfig.services.tor.client.enable "${pkgs.torsocks}/bin/torsocks"} ${pkgs.vdirsyncer}/bin/vdirsyncer metasync"
-        "${pkgs.limitcpu}/bin/cpulimit -qf -l 25 -- ${lib.optionalString nixosConfig.services.tor.client.enable "${pkgs.torsocks}/bin/torsocks"} ${pkgs.vdirsyncer}/bin/vdirsyncer sync"
+        "${pkgs.limitcpu}/bin/cpulimit -qf -l 25 -- ${lib.optionalString nixosConfig.services.tor.client.enable "${pkgs.torsocks}/bin/torsocks"} ${pkgs.vdirsyncer}/bin/vdirsyncer -v WARNING metasync"
+        "${pkgs.limitcpu}/bin/cpulimit -qf -l 25 -- ${lib.optionalString nixosConfig.services.tor.client.enable "${pkgs.torsocks}/bin/torsocks"} ${pkgs.vdirsyncer}/bin/vdirsyncer -v WARNING sync"
       ];
 
       SyslogIdentifier = "vdirsyncer";

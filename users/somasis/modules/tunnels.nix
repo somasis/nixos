@@ -74,8 +74,8 @@ with lib;
     };
   };
 
-  config = mkIf (config.somasis.tunnels.enable) {
-    systemd.user = (foldr
+  config = mkIf config.somasis.tunnels.enable {
+    systemd.user = lib.foldr
       (
         tunnel:
         let
@@ -185,7 +185,7 @@ with lib;
                 ExecStopPost = [ "${pkgs.coreutils}/bin/rm -f %t/${socket}" ];
 
                 Restart = "on-failure";
-              } // (lib.optionalAttrs (nixosConfig.networking.networkmanager.enable) { ExecStartPre = [ "${pkgs.networkmanager}/bin/nm-online -q" ]; });
+              } // (lib.optionalAttrs nixosConfig.networking.networkmanager.enable { ExecStartPre = [ "${pkgs.networkmanager}/bin/nm-online -q" ]; });
           };
         }
       )
@@ -200,6 +200,6 @@ with lib;
         };
       }
       config.somasis.tunnels.tunnels
-    );
+    ;
   };
 }

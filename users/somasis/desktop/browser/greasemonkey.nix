@@ -1,139 +1,140 @@
 { pkgs
+, config
 , lib
+, inputs
 , ...
 }:
 let
-  #   mkScript =
-  #     list:
-  #     builtins.listToAttrs
-  #       (
-  #         builtins.map
-  #           (
-  #             attrs@{ url, hash, required ? false, name ? null }:
-  #             let
-  #               # Roughly implement qutebrowser's required-script-filename modification logic.
-  #               finalName = (
-  #                 if name == null then
-  #                   lib.replaceStrings [ ".user.js" ".js" ] [ "" "" ] (builtins.split "\." script.name)
-  #                 else
-  #                   name
-  #               );
-  #             in
-  #             attr // {
-  #               xdg.dataFile."qutebrowser/greasemonkey/${if required then ''requires/'' else ''''}${finalName}";
-  #               value.source = script;
-  #             }
-  #           )
-  #           list
-  #       )
-  #   ;
-  # mkScript = name: list: pkgs.linkFarm name
-  #   (builtins.map
-  #     (drv:
-  #       { finalName ? drv.name, ... }: {
-  #         name = finalName;
-  #         path = "${drv}";
-  #       }
-  #     )
-  #     list);
+  nix-filter = inputs.nix-filter.lib;
+
+  loujine-musicbrainz = pkgs.symlinkJoin {
+    name = "loujine-musicbrainz";
+
+    paths = [
+      (nix-filter {
+        root = pkgs.fetchFromGitHub {
+          owner = "loujine";
+          repo = "musicbrainz-scripts";
+          rev = "417dcdbff16f5e06d5d3f590549d559c34adb905";
+          hash = "sha256-nJ26J2QZRG4HMIo7GM++vLLCQX+I0RoONykuGY6UHJA=";
+        };
+        include = [ (nix-filter.matchExt "js") ];
+      })
+    ];
+  };
+
+  murdos-musicbrainz = pkgs.symlinkJoin {
+    name = "murdos-musicbrainz";
+
+    paths = [
+      (nix-filter {
+        root = pkgs.fetchFromGitHub {
+          owner = "murdos";
+          repo = "musicbrainz-userscripts";
+          rev = "a7139415ba3ffd55ec22f3af91cd8ec9b592ed36";
+          hash = "sha256-7torWVYJuUqDDjxjHuVbu+Ku5q0V1Sb3m/OIwbf6HvE=";
+        };
+        include = [ (nix-filter.matchExt "js") ];
+      })
+    ];
+  };
 in
 {
-  programs.qutebrowser = {
-    userScripts = [
-      # Global
-      (pkgs.fetchurl { url = "https://greasyfork.org/scripts/32-show-password-onmouseover/code/Show%20Password%20onMouseOver.user.js"; hash = "sha256-4nDL4vPOki+qpQmCKqLEVUc1Bh0uO3eJ8OpB8CuhJgs="; })
-      (pkgs.fetchurl { url = "https://greasyfork.org/scripts/382482-assassinate-ad-block-blockers/code/Assassinate%20Ad%20Block%20Blockers.user.js"; hash = "sha256-4DiJWIdX7Awsf6SIBQ39GSoDjVd2ztDkvvZCDnVxRz4="; })
-      (pkgs.fetchurl { url = "https://greasyfork.org/scripts/789-select-text-inside-a-link-like-opera/code/Select%20text%20inside%20a%20link%20like%20Opera.user.js"; hash = "sha256-jdjQw6tTOP5UZ26oYKRF6yNwN2WffzTRE18RMdBtB0U="; })
-      (pkgs.fetchurl { url = "https://openuserjs.org/install/SelaoO/Ctrl+Enter_is_submit_everywhere.user.js"; hash = "sha256-FshnFfKDwdCAam4Ikq0GlYcoJ0/a7B5vs8QMytLTqig="; })
-      (pkgs.fetchurl { url = "https://openuserjs.org/install/navchandar/Auto_Load_Big_Image.user.js"; hash = "sha256-byunLh6WroO0oz9F1s6d1KYEhKtqyCs7cfcymiFa6rQ="; })
-      (pkgs.fetchurl { url = "https://userscripts.adtidy.org/release/disable-amp/1.0/disable-amp.user.js"; hash = "sha256-NHPpnOKKJ9VJ0k9AG83xgeh2fcJs95kXYRXV94vYBXg="; })
-      (pkgs.fetchurl { url = "https://adsbypasser.github.io/releases/adsbypasser.full.es7.user.js"; hash = "sha256-HasztV3C8lC9trGAJwOMOymaTLfQfTTxoSbvh4S88F4="; })
-      # { userscript = pkgs.fetchurl { url = "https://greasyfork.org/scripts/4255-linkify-plus-plus/code/Linkify%20Plus%20Plus.user.js"; hash = "sha256-F63/UXvFhBmcgHcoh4scOLqVgKdj+CjssIGnn3CshpU="; }; }
+  # home.persistence."/cache${config.home.homeDirectory}".directories = [ "etc/qutebrowser/greasemonkey/requires" ];
 
-      # YouTube
-      (pkgs.fetchurl { url = "https://gist.githubusercontent.com/codiac-killer/87e027a2c4d5d5510b4af2d25bca5b01/raw/youtube-autoskip.user.js"; hash = "sha256-pKxroIOn19WvcvBKA5/+ZkkA2YxXkdTjN3l2SLLcC0A="; })
-      (pkgs.fetchurl { url = "https://greasyfork.org/scripts/418283-youtube-cpu-tamer/code/YouTube%20CPU%20Tamer.user.js"; hash = "sha256-4sidgnCqiIYSsgaO/7Qx+vRQBtdZqlsqjP5fAAxYmGE="; })
-      (pkgs.fetchurl { url = "https://raw.githubusercontent.com/mchangrh/sb.js/main/docs/sb-loader.user.js"; hash = "sha256-YrJkz7lyn+NFdAW5GaLsWPhfHGBIY3UfHY0jqgvLNkg="; })
+  programs.qutebrowser.greasemonkey = [
+    # Global
+    (pkgs.fetchurl { hash = "sha256-PhyOl2bxQhJ9bNQboPYQf9J+87AxIUpEcz1wu5KzE/k="; url = "https://raw.githubusercontent.com/navchandar/Auto-Load-Big-Image/8fff139d89617697a2f83f92d62b8ca9df95e6f9/Userscript.user.js"; })
+    (pkgs.fetchurl { hash = "sha256-jdjQw6tTOP5UZ26oYKRF6yNwN2WffzTRE18RMdBtB0U="; url = "https://raw.githubusercontent.com/eight04/select-text-inside-a-link-like-opera/v6.0.0/select-text-inside-a-link-like-opera.user.js"; })
+    (pkgs.fetchurl { hash = "sha256-R+1ZM05ZJgNUskjnmo0mtYMH3gPEldTNfBaMc5t5t3Y="; url = "https://gist.githubusercontent.com/oxguy3/ebd9fe692518c7f7a1e9/raw/234f5667d97e6a14fe47ef39ae45b6e5d5ebaf46/RoughScroll.js"; })
 
-      # Google
-      (pkgs.fetchurl { url = "https://greasyfork.org/scripts/29420-google-dwimages/code/Google%20DWIMages.user.js"; hash = "sha256-oWv3MKnx6NxWLOEOfLryhKM3vM8AGhf9SB4YuuLGlOw="; })
-      (pkgs.fetchurl { url = "https://greasyfork.org/scripts/32635-disable-google-search-result-url-redirector/code/Disable%20Google%20Search%20Result%20URL%20Redirector.user.js"; hash = "sha256-azHAQKmNxAcnyc7l08oW9X6DuMqAblFGPwD8T9DsrSs="; })
-      (pkgs.fetchurl { url = "https://greasyfork.org/scripts/37166-add-site-search-links-to-google-search-result/code/Add%20Site%20Search%20Links%20To%20Google%20Search%20Result.user.js"; hash = "sha256-l5qXH6yl5uXanDhHj+7A9WLLiDHdcQo+nhrbJQjWJZc="; })
-      (pkgs.fetchurl { url = "https://greasyfork.org/scripts/382039-speed-up-google-captcha/code/Speed%20up%20Google%20Captcha.user.js"; hash = "sha256-5C7No5dYcYfWMY+DwciMeBmkdE/wnplu5fxk4q7OFZc="; })
+    (pkgs.fetchurl { hash = "sha256-+HDTlu5/WmuXI7vqNDi9XuQ5RvzHXaAf8fK7x3XxEp0="; url = "https://adsbypasser.github.io/releases/adsbypasser.full.es7.user.js"; })
+    (pkgs.fetchurl { hash = "sha256-4nDL4vPOki+qpQmCKqLEVUc1Bh0uO3eJ8OpB8CuhJgs="; url = "https://greasyfork.org/scripts/32-show-password-onmouseover/code/Show%20Password%20onMouseOver.user.js"; })
+    (pkgs.fetchurl { hash = "sha256-FshnFfKDwdCAam4Ikq0GlYcoJ0/a7B5vs8QMytLTqig="; url = "https://openuserjs.org/install/SelaoO/Ctrl+Enter_is_submit_everywhere.user.js"; })
+    (pkgs.fetchurl { hash = "sha256-jDHXF0tV5yVACfwdMrRl65Ihl7SG/Xs+0WrNywseB0g="; url = "https://userscripts.adtidy.org/release/disable-amp/1.0/disable-amp.user.js"; })
 
-      # Redacted
-      (pkgs.fetchurl { url = "https://gitlab.com/_mclovin/purchase-links-for-music-requests/-/raw/master/request-external-links.user.js"; hash = "sha256-eh7QPO2vxP0rcaEL1Z+mso6yGX36jsQpwYU02UCXNTw="; })
-      (pkgs.fetchurl { url = "https://greasyfork.org/scripts/2140-redacted-ch-extended-main-menu/code/RedactedCH%20::%20Extended%20Main%20Menu.user.js"; hash = "sha256-ToKUcsKwyEYUccC1zQQurJ8iTB8mfAGSiJbvk0f6sF8="; })
-      (pkgs.fetchurl { url = "https://greasyfork.org/scripts/395736-is-it-down/code/Is%20it%20Down.user.js"; hash = "sha256-CeDotDjzjD4PcJ603NK1WCFw412wChZW5fcOjCg+4cI="; })
-      (pkgs.fetchurl { url = "https://raw.githubusercontent.com/SavageCore/yadg-pth-userscript/master/pth_yadg.meta.js"; hash = "sha256-M02cD/Y+MmyEX06lTy06kgA0wNa3mKaLDxlVN9ehJqo="; })
+    # musicbrainz.com
+    # loujine-musicbrainz
+    # murdos-musicbrainz
+    # (pkgs.fetchurl { hash = "sha256-XfhDiCzTGG6IABLG+BnTWZkzCAwTIIqpGNKT30KaKj8="; url = "https://raw.githubusercontent.com/jesus2099/konami-command/master/mb_AUTO-FOCUS-KEYBOARD-SELECT.user.js"; })
+    # (pkgs.fetchurl { hash = "sha256-a6n6Ne6U1LOrnAFjWFtQuVugrLHJSQkED9i7Jm4VqZs="; url = "https://raw.githubusercontent.com/jesus2099/konami-command/master/mb_REDIRECT-WHEN-UNIQUE-RESULT.user.js"; })
+    # (pkgs.fetchurl { hash = "sha256-mofYLb+YQcY9knApTev869CMnFes1sPpSj39aY8DWrs="; url = "https://raw.githubusercontent.com/jesus2099/konami-command/master/mb_ELEPHANT-EDITOR.user.js"; })
 
-      # IMDB
-      (pkgs.fetchurl { url = "https://greasyfork.org/scripts/15222-imdb-tomatoes/code/IMDb%20Tomatoes.user.js"; hash = "sha256-QVLgFK9LW9ZyyjViyjMP/lS/RS0C8Xzj7idNUPI6vDc="; })
-      (pkgs.fetchurl { url = "https://greasyfork.org/scripts/23433-imdb-full-summary/code/IMDb%20Full%20Summary.user.js"; hash = "sha256-xJx6cUDrQi+pmqqQ/8r84D4XC3425pXvbNQh1BaTlkg="; })
+    # bandcamp.com
+    (pkgs.fetchurl { hash = "sha256-4NNDhOo9yyessyjmEMk3Znz0aRZgA+wtQw+JaUuD+iE="; url = "https://greasyfork.org/scripts/423498-bandcamp-extended-album-history/code/Bandcamp%20extended%20album%20history.user.js"; })
+    (pkgs.fetchurl { hash = "sha256-bCMCQje8YBgjLXPzAgFvFo/MTzsE4JkdkZHjIW4C9hg="; url = "https://greasyfork.org/scripts/38012-bandcamp-volume-bar/code/Bandcamp%20Volume%20Bar.user.js"; })
 
-      # Hacker News
-      (pkgs.fetchurl { url = "https://greasyfork.org/scripts/39311-hacker-news-highlighter/code/Hacker%20News%20Highlighter.user.js"; hash = "sha256-QZNhmtob3fxCYBnEGPpQ+jw84AEQjSspcTErlYWoujI="; })
-      (pkgs.fetchurl { url = "https://greasyfork.org/scripts/23432-hacker-news-date-tooltips/code/Hacker%20News%20Date%20Tooltips.user.js"; hash = "sha256-S2c6egARy9hxejN6Ct/zshUT/sWr9w6+LMfrRnVsDw0="; })
+    # redacted.ch
+    (pkgs.fetchurl { hash = "sha256-ToKUcsKwyEYUccC1zQQurJ8iTB8mfAGSiJbvk0f6sF8="; url = "https://greasyfork.org/scripts/2140-redacted-ch-extended-main-menu/code/RedactedCH%20::%20Extended%20Main%20Menu.user.js"; })
+    (pkgs.fetchurl { hash = "sha256-CeDotDjzjD4PcJ603NK1WCFw412wChZW5fcOjCg+4cI="; url = "https://greasyfork.org/scripts/395736-is-it-down/code/Is%20it%20Down.user.js"; })
+    (pkgs.fetchurl { hash = "sha256-eh7QPO2vxP0rcaEL1Z+mso6yGX36jsQpwYU02UCXNTw="; url = "https://gitlab.com/_mclovin/purchase-links-for-music-requests/-/raw/1aa5621357a8b527ae75a5deef03367030b929e4/request-external-links.user.js"; })
+    (pkgs.writeText "redacted-collapse-collages.js" ./userscripts/redacted-collapse-collages.js)
 
-      # Lobsters
-      (pkgs.fetchurl { url = "https://greasyfork.org/scripts/392307-lobste-rs-open-in-new-tab/code/Lobsters%20Open%20in%20New%20Tab.user.js"; hash = "sha256-JuF4HlaN5udaDKAwCEJKdKKCggJloGAZkCptMXI0xys="; })
-      (pkgs.fetchurl { url = "https://greasyfork.org/scripts/40906-lobsters-highlighter/code/Lobsters%20Highlighter.user.js"; hash = "sha256-CJyDG74QVsw5n4U1lztzymorZ96/P20ifQF+/PtJKMs="; })
+    (pkgs.fetchurl { hash = "sha256-zJPLwo1nkpouG4Disb+egRKRAAC6d3lVaQP8JJl9uYE="; url = "https://raw.githubusercontent.com/SavageCore/yadg-pth-userscript/v1.9.0/pth_yadg.meta.js"; })
 
-      # Tumblr
-      (pkgs.fetchurl { url = "https://greasyfork.org/scripts/31593-tumblr-images-to-hd-redirector/code/Tumblr%20Images%20to%20HD%20Redirector.user.js"; hash = "sha256-ArfFzIPFoLIoFVpxKVu5JWOhgmVE58L47ljbcI4yksM="; })
+    # github.com
+    (pkgs.fetchurl { hash = "sha256-jH2WsbtSIxlyMyVLD0r7i+yKczwpAV/7CEh+vrc6yuY="; url = "https://raw.githubusercontent.com/devxoul/github-monospace-editor/0.1.3/script/github-monospace-editor.user.js"; })
 
-      # Bandcamp
-      (pkgs.fetchurl { url = "https://greasyfork.org/scripts/423498-bandcamp-extended-album-history/code/Bandcamp%20extended%20album%20history.user.js"; hash = "sha256-4NNDhOo9yyessyjmEMk3Znz0aRZgA+wtQw+JaUuD+iE="; })
-      (pkgs.fetchurl { url = "https://greasyfork.org/scripts/38012-bandcamp-volume-bar/code/Bandcamp%20Volume%20Bar.user.js"; hash = "sha256-bCMCQje8YBgjLXPzAgFvFo/MTzsE4JkdkZHjIW4C9hg="; })
+    # news.ycombinator.com
+    (pkgs.fetchurl { hash = "sha256-B8Po//yloy6fZfwlUsmNjWkwUV2IkTHBzc7TXu+E44c="; url = "https://greasyfork.org/scripts/39311-hacker-news-highlighter/code/Hacker%20News%20Highlighter.user.js"; })
+    (pkgs.fetchurl { hash = "sha256-S2c6egARy9hxejN6Ct/zshUT/sWr9w6+LMfrRnVsDw0="; url = "https://greasyfork.org/scripts/23432-hacker-news-date-tooltips/code/Hacker%20News%20Date%20Tooltips.user.js"; })
 
-      # Discord
-      # { userscript = pkgs.fetchurl { url = "https://dht.chylex.com/build/track.user.js"; hash = "sha256-+6h9Pf9GPxZMif+vwpsGGL8wQoKWoOs3bs5IW4Wgbxw="; }; }
+    # imdb.com
+    (pkgs.fetchurl { hash = "sha256-+ZKq++Vd97Kn/Z37Se5gyVFqYsXepyQrWPzD/TG+Luk="; url = "https://greasyfork.org/scripts/23433-imdb-full-summary/code/IMDb%20Full%20Summary.user.js"; })
+    (pkgs.fetchurl { hash = "sha256-8aOU00t2Dyw9iiFWYNnVS8Z130jnCrC1QIB2YQGKYY8="; url = "https://greasyfork.org/scripts/15222-imdb-tomatoes/code/IMDb%20Tomatoes.user.js"; })
 
-      # Twitter
-      (pkgs.fetchurl { url = "https://greasyfork.org/scripts/404632-twitter-direct/code/Twitter%20Direct.user.js"; hash = "sha256-lUA+PPswJU9AyCrowRlG/h/+FhDT/1v927xowmbpYAw="; })
-      (pkgs.fetchurl { url = "https://greasyfork.org/scripts/405103-twitter-linkify-trends/code/Twitter%20Linkify%20Trends.user.js"; hash = "sha256-YrXf0OgpZ1nvoBABj8X3YyEMWpPOseGhDrSi10ArMCA="; })
-      (pkgs.fetchurl { url = "https://greasyfork.org/scripts/413963-twitter-zoom-cursor/code/Twitter%20Zoom%20Cursor.user.js"; hash = "sha256-tNWUn4LQZxn3ehfSzJ6KFs7H41+I7V8o9773Ua5uQJE="; })
-      (pkgs.fetchurl { url = "https://openuserjs.org/install/Sapp/Twitter_Show_Timestamp.user.js"; hash = "sha256-q4YHRRPhP+3Qt0uqITpyK93VGM5I3Hs7wgZ2E9dAUsE="; })
-      (pkgs.fetchurl { url = "https://greasyfork.org/scripts/400695-i-like-latest-tweets/code/I%20like%20latest%20tweets%20!.user.js"; hash = "sha256-AFrjUK1fymk5r5aMBHlrc9odmjxNr+Zb5lGhHKixgNo="; })
-      (pkgs.fetchurl { url = "https://openuserjs.org/install/tomviner/Collapse_Twitter_Messages_Tab.user.js"; hash = "sha256-Bqi8koASSUpS1kHkBerP7ZI8wrVdWfZOQIwqzkM7riE="; })
-      (pkgs.fetchurl { url = "https://raw.githubusercontent.com/yuhaofe/Video-Quality-Fixer-for-Twitter/master/vqfft.user.js"; hash = "sha256-JFBaqr7MDRwKbiGYm0b5YhcRhfkDWzg2Idf8N+U3pLs="; })
+    # google.com
+    (pkgs.fetchurl { hash = "sha256-azHAQKmNxAcnyc7l08oW9X6DuMqAblFGPwD8T9DsrSs="; url = "https://greasyfork.org/scripts/32635-disable-google-search-result-url-redirector/code/Disable%20Google%20Search%20Result%20URL%20Redirector.user.js"; })
+    (pkgs.fetchurl { hash = "sha256-Bb1QsU6R9xU718hRskGbuwNO7rrhuV7S1gvKtC9SlL0="; url = "https://greasyfork.org/scripts/37166-add-site-search-links-to-google-search-result/code/Add%20Site%20Search%20Links%20To%20Google%20Search%20Result.user.js"; })
+    (pkgs.fetchurl { hash = "sha256-5C7No5dYcYfWMY+DwciMeBmkdE/wnplu5fxk4q7OFZc="; url = "https://greasyfork.org/scripts/382039-speed-up-google-captcha/code/Speed%20up%20Google%20Captcha.user.js"; })
 
-      # Reddit
-      (pkgs.fetchurl { url = "https://greasyfork.org/scripts/39312-reddit-highlighter/code/Reddit%20Highlighter.user.js"; hash = "sha256-R53piHtc6P0EKmR51PUgHimdfN9UgnIY65El9XKxJiI="; })
+    # images.google.com
+    (pkgs.fetchurl { hash = "sha256-lNGCdMjf5RsR/70T81VaW2S5w71PSK4pHwsaBTL6Gqg="; url = "https://greasyfork.org/scripts/29420-google-dwimages/code/Google%20DWIMages.user.js"; })
 
-      # Zoom
-      (pkgs.fetchurl { url = "https://openuserjs.org/install/clemente/Zoom_redirector.user.js"; hash = "sha256-BWIOITDCDnbX2MCIcTK/JtqBaz4SU6nRu5f8WUbN8GE="; })
+    # twitter.com
+    (pkgs.fetchurl { hash = "sha256-JFBaqr7MDRwKbiGYm0b5YhcRhfkDWzg2Idf8N+U3pLs="; url = "https://raw.githubusercontent.com/yuhaofe/Video-Quality-Fixer-for-Twitter/v0.2.0/vqfft.user.js"; })
+    # (pkgs.fetchurl { hash = "sha256-zQd4egcF4xOVEOJi8RKHSTzFfzrR3bBhHcT6tzIkmtc="; url = "https://greasyfork.org/scripts/387773-control-panel-for-twitter/code/Control%20Panel%20for%20Twitter.user.js"; })
 
-      # Mastodon
-      # (pkgs.fetchurl { url = "https://openuserjs.org/install/leobm/Mastodon_DeepL_translate_button.user.js"; hash = "sha256-R0ycO8zLwTMpBYEWtvw6KkHa1vhUZmZwhB1GHOh//nE="; })
+    (pkgs.fetchurl { hash = "sha256-3WED6Kodom4j27CDr7CBtdPFXBdRUf41iQk/O/Lkaz4="; url = "https://greasyfork.org/scripts/404632-twitter-direct/code/Twitter%20Direct.user.js"; })
+    (pkgs.fetchurl { hash = "sha256-/bkWrnzxoG9fHnj1t7Nbr0nFLoyovQAEXkgd/ZuBu1M="; url = "https://greasyfork.org/scripts/405103-twitter-linkify-trends/code/Twitter%20Linkify%20Trends.user.js"; })
+    (pkgs.fetchurl { hash = "sha256-tNWUn4LQZxn3ehfSzJ6KFs7H41+I7V8o9773Ua5uQJE="; url = "https://greasyfork.org/scripts/413963-twitter-zoom-cursor/code/Twitter%20Zoom%20Cursor.user.js"; })
 
-      # GitHub
-      (pkgs.fetchurl { url = "https://greasyfork.org/scripts/411765-github-my-issues/code/GitHub%20My%20Issues.user.js"; hash = "sha256-hDHmrcU8by/L4H928WRQOz/RmXQvRUgqQNNzBtXU4Ek="; })
-      (pkgs.fetchurl { url = "https://raw.githubusercontent.com/devxoul/github-monospace-editor/master/script/github-monospace-editor.user.js"; hash = "sha256-jH2WsbtSIxlyMyVLD0r7i+yKczwpAV/7CEh+vrc6yuY="; })
+    # tumblr.com
+    (pkgs.fetchurl { hash = "sha256-ArfFzIPFoLIoFVpxKVu5JWOhgmVE58L47ljbcI4yksM="; url = "https://greasyfork.org/scripts/31593-tumblr-images-to-hd-redirector/code/Tumblr%20Images%20to%20HD%20Redirector.user.js"; })
 
-      # MusicBrainz
-      (pkgs.fetchurl { name = "lib_mbimport.js"; url = "https://raw.githubusercontent.com/murdos/musicbrainz-userscripts/master/lib/mbimport.js"; hash = "sha256-YEWdDYSVTiqbz+k9CfaHjUqVCFSwndl9Ibfme3tHSrs="; })
-      (pkgs.fetchurl { name = "lib_mbimportstyle.js"; url = "https://raw.githubusercontent.com/murdos/musicbrainz-userscripts/master/lib/mbimportstyle.js"; hash = "sha256-j8xS+EG6gCGQlan/iyDkWoPETwa0oTQwOwK9bt8bLko="; })
-      (pkgs.fetchurl { name = "lib_mblinks.js"; url = "https://raw.githubusercontent.com/murdos/musicbrainz-userscripts/master/lib/mblinks.js"; hash = "sha256-189GEmgU/FopNQvEihU14EgYk9sMMvtfYtTXGE30csc="; })
-      (pkgs.fetchurl { name = "lib_logger.js"; url = "https://raw.githubusercontent.com/murdos/musicbrainz-userscripts/master/lib/logger.js"; hash = "sha256-Ks+THhs22kFtKnxE8iGUa7qvxDwo/kq7HGRGIN+r/kk="; })
+    # lobste.rs
+    (pkgs.fetchurl { hash = "sha256-CJyDG74QVsw5n4U1lztzymorZ96/P20ifQF+/PtJKMs="; url = "https://greasyfork.org/scripts/40906-lobsters-highlighter/code/Lobsters%20Highlighter.user.js"; })
+    (pkgs.fetchurl { hash = "sha256-JuF4HlaN5udaDKAwCEJKdKKCggJloGAZkCptMXI0xys="; url = "https://greasyfork.org/scripts/392307-lobste-rs-open-in-new-tab/code/Lobsters%20Open%20in%20New%20Tab.user.js"; })
 
-      (pkgs.fetchurl { url = "https://raw.githubusercontent.com/murdos/musicbrainz-userscripts/master/bandcamp_importer.user.js"; hash = "sha256-EwMkVG3w3UZvsxJXFtt87+bXUQi0SBWUEAXcVEmaSOw="; })
-      (pkgs.fetchurl { url = "https://raw.githubusercontent.com/murdos/musicbrainz-userscripts/master/batch-add-recording-relationships.user.js"; hash = "sha256-3SjJ5IuieOBIhLeX9AU+hjmHmqfJbt5dKLJi0tQ4lcE="; })
-      (pkgs.fetchurl { url = "https://raw.githubusercontent.com/murdos/musicbrainz-userscripts/master/beatport_classic_importer.user.js"; hash = "sha256-ZcsMJ6ltJK6MrSfQJ39VJKKTH8v4YoKrY4zfvlWP41Y="; })
-      (pkgs.fetchurl { url = "https://raw.githubusercontent.com/murdos/musicbrainz-userscripts/master/beatport_importer.user.js"; hash = "sha256-U2nLscRu2YIBsYf5b/wHHx9kW7WpZpRVtRWvNnvioZQ="; })
-      (pkgs.fetchurl { url = "https://raw.githubusercontent.com/murdos/musicbrainz-userscripts/master/discogs_importer.user.js"; hash = "sha256-/pMp4VoAea/CjbQodZWLvw0tosmurkZZ9OuPxN5Evl0="; })
-      (pkgs.fetchurl { url = "https://raw.githubusercontent.com/murdos/musicbrainz-userscripts/master/edit-instrument-recordings-links.user.js"; hash = "sha256-64pjjDbg9LdzVUl0Jhwj/R3nvUI8nWlerVodTK7IH2w="; })
-      (pkgs.fetchurl { url = "https://raw.githubusercontent.com/murdos/musicbrainz-userscripts/master/expand-collapse-release-groups.user.js"; hash = "sha256-Tevw4H/W7cqCQMcKadgZNreeRlixlPIGJqMLN39Jqn8="; })
-      (pkgs.fetchurl { url = "https://raw.githubusercontent.com/murdos/musicbrainz-userscripts/master/fast-cancel-edits.user.js"; hash = "sha256-0XyMMLAjsONM284LKKSs2c40i1+s70CNuFVR1RdKpXI="; })
-      (pkgs.fetchurl { url = "https://raw.githubusercontent.com/murdos/musicbrainz-userscripts/master/mb_discids_detector.user.js"; hash = "sha256-mb8KjYPsprhqO35IS0RHnJVVuLEqa7RFMl/pD6AUIjM="; })
-      (pkgs.fetchurl { url = "https://raw.githubusercontent.com/murdos/musicbrainz-userscripts/master/mb_relationship_shortcuts.user.js"; hash = "sha256-wvrWaUE+Py7fcC1LAkWOt3cXFVhQDsG5nmnX2DZD10I="; })
-      (pkgs.fetchurl { url = "https://raw.githubusercontent.com/murdos/musicbrainz-userscripts/master/set-recording-comments.user.js"; hash = "sha256-+m7whj8s010xITbSYGx3cYMNo4OFJoY/cBJUwUikEww="; })
-      # { userscript = pkgs.fetchurl { url = "https://raw.githubusercontent.com/murdos/musicbrainz-userscripts/master/bandcamp_importer_helper.user.js"; hash = "sha256-njx5Itm/bRLbuJ43A8O9iJH/R/fgyp2FscduWDhvCOQ="; }; }
+    # reddit.com
+    (pkgs.fetchurl { hash = "sha256-R53piHtc6P0EKmR51PUgHimdfN9UgnIY65El9XKxJiI="; url = "https://greasyfork.org/scripts/39312-reddit-highlighter/code/Reddit%20Highlighter.user.js"; })
 
-      (pkgs.fetchurl { url = "https://raw.githubusercontent.com/jesus2099/konami-command/master/mb_AUTO-FOCUS-KEYBOARD-SELECT.user.js"; hash = "sha256-sDxOxjHkPYXtAy/XXbeErS0wx9kRxGjMzbLBNRGnb0k="; })
-      (pkgs.fetchurl { url = "https://raw.githubusercontent.com/jesus2099/konami-command/master/mb_ELEPHANT-EDITOR.user.js"; hash = "sha256-2ff471iQ/p6gXsi9iQsnyyOnmvo6S5H/TLaJ5wyRpug="; })
-      (pkgs.fetchurl { url = "https://raw.githubusercontent.com/jesus2099/konami-command/master/mb_REDIRECT-WHEN-UNIQUE-RESULT.user.js"; hash = "sha256-Q7C4E+/M71/daAU9RHGhCEPdFUf5vMajZLAOa7c64dA="; })
+    # youtube.com
+    (pkgs.fetchurl { hash = "sha256-pKxroIOn19WvcvBKA5/+ZkkA2YxXkdTjN3l2SLLcC0A="; url = "https://gist.githubusercontent.com/codiac-killer/87e027a2c4d5d5510b4af2d25bca5b01/raw/764a0821aa248ec4126b16cdba7516c7190d287d/youtube-autoskip.user.js"; })
+    (pkgs.fetchurl { hash = "sha256-zXkIH+FNLh2m7rb7s+bztRUM6aPZwvqj9OvW/uTeb74="; url = "https://raw.githubusercontent.com/mchangrh/sb.js/v1.3.1/docs/sb-loader.user.js"; })
 
-      (pkgs.fetchurl { url = "https://raw.githubusercontent.com/loujine/musicbrainz-scripts/master/mb-edit-add_aliases.user.js"; hash = "sha256-pzouE0pxJo2x+cb3JoDVEcSj1USOzfqkSLjHb+1seyI="; })
-    ];
-  }
+    # wikipedia.org / wikipesija.org
+    (pkgs.writeText "mediawiki-anchors.js" ./userscripts/mediawiki-anchors.js)
+
+    # zoom.us
+    (pkgs.fetchurl { hash = "sha256-BWIOITDCDnbX2MCIcTK/JtqBaz4SU6nRu5f8WUbN8GE="; url = "https://openuserjs.org/install/clemente/Zoom_redirector.user.js"; })
+
+    # mastodon.social
+    (pkgs.runCommand "mastodon-larger-preview.user.js"
+      {
+        src = pkgs.fetchurl {
+          url = "https://raw.githubusercontent.com/Frederick888/mastodon-larger-preview/e9005241dfd904373041fdb46d7bf932ac7492f0/main.user.js";
+          hash = "sha256-fI3FnflWfZu5dinktgOgvKMQr/MDhjoWcpu1dzLx7vQ=";
+        };
+      } ''sed '/^\/\/ @match/ i // @match https://mastodon.social/*' "$src" > "$out"''
+    )
+    (pkgs.runCommand "mastodon-pixiv-preview.user.js"
+      {
+        src = pkgs.fetchurl {
+          url = "https://raw.githubusercontent.com/Frederick888/mastodon-pixiv-preview/b2994b11d041c77945bb59d0ebfe7ceb2920c985/main.user.js";
+          hash = "sha256-t/lm/ydlkW/4Gl86rXdwrBWsMYvRMWHl9gJ0qCCs1Sw=";
+        };
+      } ''sed '/^\/\/ @match/ i // @match https://mastodon.social/*' "$src" > "$out"''
+    )
+  ];
+}

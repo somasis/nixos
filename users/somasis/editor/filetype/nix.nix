@@ -39,18 +39,16 @@ let
   '';
 in
 {
-  programs.kakoune.config.hooks = [
-    {
-      name = "WinSetOption";
-      option = "filetype=nix";
-      commands =
-        ''
-          set-option window tabstop 2
-          set-option window indentwidth 2
+  programs.kakoune.config.hooks = [{
+    name = "WinSetOption";
+    option = "filetype=nix";
+    commands =
+      ''
+        set-option window tabstop 2
+        set-option window indentwidth 2
 
-          set-option window formatcmd "${format}"
-          set-option window lintcmd "${lint}"
-        '';
-    }
-  ];
+        set-option window formatcmd "${format}"
+        set-option window lintcmd "${lint}"
+      '';
+  }];
 }

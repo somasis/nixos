@@ -6,11 +6,11 @@
 }:
 # TODO: write catgirl configuration templating
 let
-  catgirl = (pkgs.catgirl.overrideAttrs (
+  catgirl = pkgs.catgirl.overrideAttrs (
     let
-      year = builtins.substring 0 4 (inputs.catgirl.lastModifiedDate);
-      month = builtins.substring 4 2 (inputs.catgirl.lastModifiedDate);
-      day = builtins.substring 6 2 (inputs.catgirl.lastModifiedDate);
+      year = builtins.substring 0 4 inputs.catgirl.lastModifiedDate;
+      month = builtins.substring 4 2 inputs.catgirl.lastModifiedDate;
+      day = builtins.substring 6 2 inputs.catgirl.lastModifiedDate;
     in
     oldAttrs:
     {
@@ -18,9 +18,9 @@ let
       version = "unstable-${year}-${month}-${day}";
       src = inputs.catgirl;
     }
-  ));
+  );
 
-  catgirls = (pkgs.writeShellApplication {
+  catgirls = pkgs.writeShellApplication {
     name = "catgirls";
     runtimeInputs = [
       catgirl
@@ -50,8 +50,8 @@ let
         case "$mode" in
             catgirl)
                 exec catgirl \
-                    -u "${nixosConfig.networking.fqdn}" \
-                    -c "$XDG_CONFIG_HOME/catgirl/client-${nixosConfig.networking.fqdn}.crt" \
+                    -u "${nixosConfig.networking.fqdnOrHostName}" \
+                    -c "$XDG_CONFIG_HOME/catgirl/client-${nixosConfig.networking.fqdnOrHostName}.crt" \
                     -N "$0 -n" \
                     "$@"
                 ;;
@@ -114,9 +114,9 @@ let
 
       exec tmux -L catgirls -f "$XDG_CONFIG_HOME"/tmux/catgirls.conf "$@"
     '';
-  });
+  };
 
-  catgirls-uri = (pkgs.writeShellApplication {
+  catgirls-uri = pkgs.writeShellApplication {
     name = "catgirls-uri";
     runtimeInputs = [
       catgirl
@@ -296,9 +296,9 @@ let
           new-window -n "$server" -- "$0" -c "$config"
       exit $?
     '';
-  });
+  };
 
-  catgirls-spoiler = (pkgs.writeShellApplication {
+  catgirls-spoiler = pkgs.writeShellApplication {
     name = "catgirls-spoiler";
     runtimeInputs = [
       pkgs.coreutils
@@ -332,7 +332,7 @@ let
           exec touch "$runtime"/spoiler-"$1"
       fi
     '';
-  });
+  };
 in
 {
   home.packages = [
@@ -516,7 +516,7 @@ in
   };
 
   home.persistence."/persist${config.home.homeDirectory}".files = [
-    "etc/catgirl/client-${nixosConfig.networking.fqdn}.crt"
+    "etc/catgirl/client-${nixosConfig.networking.fqdnOrHostName}.crt"
     # "share/catgirl/bitlbee.pounce.somas.is.buf"
     "share/catgirl/libera.pounce.somas.is.buf"
     "share/catgirl/oftc.pounce.somas.is.buf"
@@ -597,6 +597,13 @@ in
       foreground = "#ffffff";
     };
   };
+
+  somasis.tunnels.tunnels = [{
+    name = "scooper";
+    location = 9400;
+
+    remote = "somasis@lacan.somas.is";
+  }];
 
   services.sxhkd.keybindings."super + c" = "${config.home.homeDirectory}/bin/raise \"^catgirl: .+$\" terminal catgirls";
 }

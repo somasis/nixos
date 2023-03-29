@@ -4,15 +4,15 @@
 , ...
 }:
 let
-  xsecurelock = pkgs.xsecurelock.overrideAttrs (oldAttrs: {
+  xsecurelock = pkgs.xsecurelock.overrideAttrs (prev: {
     version = "unstable-2023-01-16";
     src = pkgs.fetchFromGitHub {
       owner = "google";
-      repo = oldAttrs.pname;
+      repo = prev.pname;
 
       # TODO Remove once xsecurelock is updated in nixpkgs.
       rev = "15e9b01b02f64cc40f02184f001849971684ce15";
-      hash = lib.fakeHash;
+      hash = "sha256-k7xkM53hLJtjVDkv4eklvOntAR7n1jsxWHEHeRv5GJU=";
     };
   });
 in
@@ -30,13 +30,14 @@ in
       Unit = {
         Description = "Run xsecurelock with specified configuration";
         Before = [ "sleep.target" ];
+        After = [ "xsecurelock-dim.service" ];
         # OnFailure = [ "xsecurelock-failure.service" ];
       };
 
       Install.WantedBy = [ "sleep.target" ];
 
       Service = {
-        Type = "notify";
+        Type = "simple";
 
         ProtectSystem = "strict";
         UnsetEnvironment = [
@@ -45,7 +46,8 @@ in
           "XDG_RUNTIME_DIR"
           "TERM"
         ];
-        PassEnvironment = [ "NOTIFY_SOCKET" ];
+        # PassEnvironment = [ "NOTIFY_SOCKET" ];
+        # NotifyAccess = "all";
 
         Environment = [
           ''"XSECURELOCK_BACKGROUND_COLOR=#000000"''
@@ -65,24 +67,32 @@ in
           ''"XSECURELOCK_BLANK_TIMEOUT=15"''
         ];
 
-        ExecStart = "${pkgs.xsecurelock}/bin/xsecurelock -- ${pkgs.systemd}/bin/systemd-notify --ready";
+        ExecStart = "${xsecurelock}/bin/xsecurelock";
         Restart = "on-failure";
         RestartSec = 0;
       };
     };
 
     xsecurelock-dim = {
-      Unit.Description = "Dim the screen and then lock it";
+      Unit = {
+        Description = "Dim the screen and then lock it";
+        OnFailure = [ "xsecurelock.service" ];
+      };
+
       Service = {
         Type = "simple";
 
         Environment = [
-          ''"XSECURELOCK_DIM_TIME_MS=${builtins.toString 1000 * 5}"'' # milliseconds
-          ''"XSECURELOCK_WAIT_TIME_MS=${builtins.toString 1000 * 15}"'' # milliseconds
+          ''"XSECURELOCK_DIM_TIME_MS=${builtins.toString (1000 * 5)}"'' # milliseconds
+          ''"XSECURELOCK_WAIT_TIME_MS=${builtins.toString (1000 * 15)}"'' # milliseconds
         ];
 
-        ExecStart = "${pkgs.xsecurelock}/libexec/xsecurelock/dimmer";
-        OnSuccess = [ "xsecurelock.service" ];
+        # Avoid a flash after dimming
+        ExecStartPre = builtins.toString (pkgs.writeShellScript "xsecurelock-early" ''
+          sleep $(( $XSECURELOCK_WAIT_TIME_MS - 500 ))
+          ${pkgs.systemd}/bin/systemctl ---user start xsecurelock.service
+        '');
+        ExecStart = "${xsecurelock}/libexec/xsecurelock/until_nonidle ${xsecurelock}/libexec/xsecurelock/dimmer";
       };
     };
 
@@ -101,13 +111,18 @@ in
 
     inactiveInterval = 15; # minutes
     xss-lock = {
-      extraOptions = [ "-l" ];
+      extraOptions = [
+        "-l"
+        "-n ${pkgs.writeShellScript "xss-lock" ''
+          ${pkgs.systemd}/bin/systemctl --user start xsecurelock-dim.service
+        ''}"
+      ];
       screensaverCycle = 60 * 15;
     };
   };
 
   services.xidlehook = {
-    enable = true;
+    enable = false;
 
     detect-sleep = true;
     not-when-audio = true;
@@ -117,7 +132,7 @@ in
 
     timers = [
       {
-        delay = 60 * 1;
+        delay = 10;
         command = "${pkgs.systemd}/bin/systemctl start --user xsecurelock-dim.service";
         canceller = "${pkgs.systemd}/bin/systemctl stop --user xsecurelock-dim.service";
       }
@@ -126,10 +141,10 @@ in
 
   services.sxhkd.keybindings = {
     # Session: lock screen - super + l
-    "super + l" = "${pkgs.systemd}/bin/systemctl --user start xsecurelock.service";
+    "super + l" = "${pkgs.systemd}/bin/loginctl lock-session";
 
     # Session: toggle screensaver on/off - super + shift + l
-    "super + shift + l" = ''toggle-xsecurelock'';
+    "super + shift + l" = "toggle-xsecurelock";
   };
 
   home.packages = [

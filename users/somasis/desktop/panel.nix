@@ -1,7 +1,12 @@
 { config
 , pkgs
 , ...
-}: {
+}:
+let
+  bspwm = config.xsession.windowManager.bspwm;
+  bspc = "${bspwm.package}/bin/bspc";
+in
+{
   home.packages = [
     # panel
     pkgs.lemonbar-xft
@@ -65,27 +70,22 @@
     };
     Install.WantedBy = [ "chrome.target" ];
 
-    Service =
-      let
-        bspc = "${config.xsession.windowManager.bspwm.package}/bin/bspc";
-        inherit (config.xsession.windowManager.bspwm) settings;
-      in
-      {
-        Type = "simple";
-        ExecStart = [ "${config.home.homeDirectory}/bin/panel" ];
-        ExecStartPost = [
-          "${bspc} config top_padding ${builtins.toString settings.top_padding}"
-          "${bspc} config border_width ${builtins.toString settings.border_width}"
-          "${bspc} config window_gap ${builtins.toString settings.window_gap}"
-        ];
-        ExecStopPost = [
-          "${bspc} config top_padding 0"
-          "${bspc} config border_width 0"
-          "${bspc} config window_gap 0"
-        ];
+    Service = {
+      Type = "simple";
+      ExecStart = [ "${config.home.homeDirectory}/bin/panel" ];
+      ExecStartPost = [
+        "${bspc} config top_padding ${builtins.toString bspwm.settings.top_padding}"
+        "${bspc} config border_width ${builtins.toString bspwm.settings.border_width}"
+        "${bspc} config window_gap ${builtins.toString bspwm.settings.window_gap}"
+      ];
+      ExecStopPost = [
+        "${bspc} config top_padding 0"
+        "${bspc} config border_width 0"
+        "${bspc} config window_gap 0"
+      ];
 
-        Restart = "on-success";
-      };
+      Restart = "on-success";
+    };
 
     Unit.StartLimitInterval = 0;
   };

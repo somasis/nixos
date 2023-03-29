@@ -6,8 +6,8 @@ in
   services.syncthing.enable = true;
 
   home.persistence."/persist${config.home.homeDirectory}".directories = [
-    "etc/syncthing"
-    "share/syncthing"
+    { method = "symlink"; directory = "etc/syncthing"; }
+    { method = "symlink"; directory = "share/syncthing"; }
 
     "shared"
     "sync"
@@ -24,7 +24,10 @@ in
       ++ lib.optionals (tor.enable && tor.client.enable)
         [
           "all_proxy=socks5://${tor.client.socksListenAddress.addr}:${toString tor.client.socksListenAddress.port}"
-          "ALL_PROXY_NO_FALLBACK=1"
+
+          # Disabled because otherwise syncthing will try to use Tor
+          # for accessing localhost (and thus, ssh tunneled connections)
+          # "ALL_PROXY_NO_FALLBACK=1"
         ]
       ;
 

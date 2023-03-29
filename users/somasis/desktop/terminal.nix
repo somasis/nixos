@@ -1,4 +1,5 @@
 { config
+, lib
 , pkgs
 , ...
 }:
@@ -92,6 +93,11 @@ in
             cyan = "${config.xresources.properties."*color14"}";
             white = "${config.xresources.properties."*color15"}";
           };
+
+          footer_bar = {
+            background = "${config.xresources.properties."*colorAccent"}";
+            foreground = "#ffffff";
+          };
         };
 
         scrolling = {
@@ -99,7 +105,33 @@ in
           history = 20000;
         };
 
-        selections.save_to_clipboard = true;
+        selection = {
+          save_to_clipboard = true;
+          semantic_escape_chars = lib.concatStrings [
+            # Defaults
+            ","
+            "│"
+            "`"
+            "|"
+            ":"
+            ''\''
+            "\\\""
+            "'"
+            " "
+            "("
+            ")"
+            "["
+            "]"
+            "{"
+            "}"
+            "<"
+            ">"
+            "\t"
+
+            "¬" # Used by Kakoune for the newline indicator
+            ";"
+          ];
+        };
       };
   };
 

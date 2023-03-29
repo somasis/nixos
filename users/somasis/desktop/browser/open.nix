@@ -17,9 +17,11 @@ let
   '';
 in
 {
-  programs.qutebrowser.keyBindings.normal = {
-    "<z><p><g>" = "spawn -u ${gallery-dl} {url}";
-    "<z><p><l>" = "spawn -u ${mpv} {url}";
+  programs.qutebrowser = {
+    aliases.gallery-dl = "spawn -u ${gallery-dl} {url}";
+    aliases.mpv = "spawn -u ${mpv} {url}";
+    keyBindings.normal."zpg" = "gallery-dl";
+    keyBindings.normal."zpl" = "mpv";
   };
 
   programs.gallery-dl.enable = true;

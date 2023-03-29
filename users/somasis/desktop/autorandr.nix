@@ -39,12 +39,14 @@ let
   '';
 in
 {
-  home.activation."autorandr" = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
-    if $DRY_RUN_CMD ${pkgs.systemd}/bin/systemctl --user is-active -q graphical-session.target \
-        && [ "$($DRY_RUN_CMD ${hook} --detected)" != "$($DRY_RUN_CMD ${hook} --current)" ]; then
-        $DRY_RUN_CMD ${hook} -c || :
-    fi
-  '';
+  # home.activation."autorandr" = ''
+  #   if [ -n "''${DISPLAY:-}" ] \
+  #       && ${pkgs.systemd}/bin/systemctl --user is-active -q graphical-session.target >/dev/null \
+  #       && [ "$($DRY_RUN_CMD ${hook} --detected)" != "$($DRY_RUN_CMD ${hook} --current)" ]; then
+  #       $DRY_RUN_CMD ${hook} -c || :
+  #   fi
+  #   exit
+  # '';
 
   systemd.user.services.xsecurelock.Service.ExecStopPost = [ "-${hook} -c" ];
   services.sxhkd.keybindings."super + p" = "${hook} --cycle";
@@ -68,14 +70,14 @@ in
     profiles = {
       # internal:external: external monitor *only*
       # internal+external: internal monitor *with* external monitor
-      "${nixosConfig.networking.fqdn}" = {
+      "${nixosConfig.networking.fqdnOrHostName}" = {
         fingerprint.eDP-1 = monitor.ilo.fingerprint;
         config = {
           eDP-1 = {
+            inherit (monitor.ilo) dpi mode;
+
             enable = true;
             primary = true;
-            dpi = monitor.ilo.dpi;
-            mode = monitor.ilo.mode;
 
             position = "0x0";
           };

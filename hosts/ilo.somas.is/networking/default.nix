@@ -1,6 +1,7 @@
 { config, ... }: {
   imports = [
     ./dns.nix
+    ./ipfs.nix
     ./tor.nix
     ./wifi.nix
   ];
@@ -10,7 +11,7 @@
     domain = "somas.is";
     # search = [ "somas.is" ];
 
-    hostId = builtins.substring 0 8 (builtins.hashString "sha256" "${config.networking.fqdn}");
+    hostId = builtins.substring 0 8 (builtins.hashString "sha256" "${config.networking.fqdnOrHostName}");
 
     useDHCP = false;
 

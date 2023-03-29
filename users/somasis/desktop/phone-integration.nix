@@ -1,4 +1,9 @@
-{ pkgs, lib, config, ... }:
+{ pkgs
+, config
+, nixosConfig
+, lib
+, ...
+}:
 let
   kdeconnectShare = pkgs.writeShellApplication {
     name = "kdeconnect-share";
@@ -19,7 +24,20 @@ let
 in
 {
   services.kdeconnect.enable = true;
+
+  xdg.configFile = {
+    # "kdeconnect/.keep".source = builtins.toFile "keep" "";
+
+    "kdeconnect/config".text = lib.generators.toINI { } {
+      General.name = "${config.home.username}@${nixosConfig.networking.fqdnOrHostName}";
+    };
+  };
+
+
   home.persistence."/persist${config.home.homeDirectory}".directories = [ "etc/kdeconnect" ];
 
-  programs.qutebrowser.keyBindings.normal."<z><k>" = "spawn -u ${kdeconnectShare}";
+  programs.qutebrowser = {
+    aliases.kdeconnect = "spawn -u ${kdeconnectShare}";
+    keyBindings.normal."zk" = "kdeconnect";
+  };
 }

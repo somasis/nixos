@@ -1,8 +1,6 @@
 { pkgs, ... }: {
   programs.kakoune = {
-    plugins = [
-      pkgs.kakounePlugins.fzf-kak
-    ];
+    plugins = [ pkgs.kakounePlugins.fzf-kak ];
 
     extraConfig = ''
       hook -once global ModuleLoaded fzf %{

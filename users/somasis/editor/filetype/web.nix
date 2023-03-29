@@ -1,12 +1,13 @@
-{ pkgs, config, ... }:
+{ lib, pkgs, config, ... }:
 let
-  format = ''
-    ${pkgs.nodePackages.prettier}/bin/prettier
-        --tab-width=%opt{indentwidth}
-        --print-width=%opt{autowrap_column}
-        --config-precedence prefer-file
-        --stdin-filepath=%val{buffile}
-  '';
+  format = lib.concatStringsSep " " [
+    "${pkgs.nodePackages.prettier}/bin/prettier"
+    "--tab-width=%opt{indentwidth}"
+    "--print-width=%opt{autowrap_column}"
+    "--config-precedence"
+    "prefer-file"
+    "--stdin-filepath=%val{buffile}"
+  ];
 
   # CSS
   # TODO Need a new CSS linting tool; stylelint is broken with recent NixOS updates, it seems, due to
@@ -44,10 +45,10 @@ in
       '';
     }
 
-    # CSS
+    # CSS, HTML
     {
       name = "WinSetOption";
-      option = "filetype=css";
+      option = "filetype=(css|html)";
       commands = ''
         set-option window formatcmd "${format}"
       '';

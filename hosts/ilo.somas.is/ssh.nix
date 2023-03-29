@@ -11,15 +11,12 @@
   };
 
   programs.ssh = {
+    startAgent = true;
+
     knownHosts."spinoza.7596ff.com" = {
       extraHostNames = [ "spinoza" ];
       publicKey = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIAroN0Hvz6bV+aRkm3aEWbP58QsNES5r6mhafHlraKnV";
     };
-
-    extraConfig = ''
-      Host spinoza.7596ff.com
-        Port 1312
-    '';
   };
 
   environment.persistence."/persist" = {

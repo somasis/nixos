@@ -60,11 +60,13 @@
       urgency_low = {
         background = config.xresources.properties."*background";
         foreground = config.xresources.properties."*foreground";
+        fullscreen = "pushback";
       };
 
       urgency_normal = {
         background = config.xresources.properties."*lightBackground";
         foreground = config.xresources.properties."*lightForeground";
+        fullscreen = "pushback";
       };
 
       urgency_critical = {

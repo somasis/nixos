@@ -1,6 +1,6 @@
 { config, pkgs, ... }:
 let
-  dates = (pkgs.writeShellApplication {
+  dates = pkgs.writeShellApplication {
     name = "dates";
 
     runtimeInputs = [ pkgs.coreutils ];
@@ -66,7 +66,7 @@ let
           shift
       done
     '';
-  });
+  };
 in
 {
   xdg.configFile = {

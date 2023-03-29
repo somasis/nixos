@@ -1,73 +1,72 @@
 { pkgs, config, ... }:
 let
-  wallpaperctl =
-    pkgs.writeShellApplication {
-      name = "wallpaperctl";
+  wallpaperctl = pkgs.writeShellApplication {
+    name = "wallpaperctl";
 
-      runtimeInputs = [
-        pkgs.hsetroot
-        pkgs.s6-portable-utils
-        pkgs.systemd
-      ];
+    runtimeInputs = [
+      pkgs.hsetroot
+      pkgs.s6-portable-utils
+      pkgs.systemd
+    ];
 
-      text = ''
-        usage() {
-            cat >&2 <<EOF
-        usage: ''${0##*/} set [hsetroot arguments]
-               ''${0##*/} restore
+    text = ''
+      usage() {
+          cat >&2 <<EOF
+      usage: ''${0##*/} set [hsetroot arguments]
+             ''${0##*/} restore
 
-        EOF
-            hsetroot -help >&2
-            exit 69
-        }
+      EOF
+          hsetroot -help >&2
+          exit 69
+      }
 
-        cfg="''${XDG_CONFIG_HOME:-$HOME/.config}/wallpaper"
-        mkdir -p "$cfg"
+      cfg="''${XDG_CONFIG_HOME:-$HOME/.config}/wallpaper"
+      mkdir -p "$cfg"
 
-        [ "$#" -gt 0 ] || usage
+      [ "$#" -gt 0 ] || usage
 
-        mode="''${1}"
-        shift
+      mode="''${1}"
+      shift
 
-        case "$mode" in
-            set)
-                [ "$#" -gt 1 ] || usage
+      case "$mode" in
+          set)
+              [ "$#" -gt 1 ] || usage
 
-                args=
-                for a; do
-                    a=$(s6-quote -d \' -u -- "$a")
-                    args="''${args:+$args }'$a'"
-                done
+              args=
+              for a; do
+                  a=$(s6-quote -d \' -u -- "$a")
+                  args="''${args:+$args }'$a'"
+              done
 
-                printf '+ hsetroot %s\n' "$args" >&2
-                if hsetroot "$@"; then
-                    printf '%s\n' "$args" > "$cfg"/args
-                else
-                    exec hsetroot -help >&2
-                fi
-                ;;
-            restore)
-                if ! [ -s "$cfg"/args ]; then
-                    printf 'error: no arguments set\n' >&2
-                    exit 127
-                fi
+              printf '+ hsetroot %s\n' "$args" >&2
+              if hsetroot "$@"; then
+                  printf '%s\n' "$args" > "$cfg"/args
+              else
+                  exec hsetroot -help >&2
+              fi
+              ;;
+          restore)
+              if ! [ -s "$cfg"/args ]; then
+                  printf 'error: no arguments set\n' >&2
+                  exit 127
+              fi
 
-                args=$(cat "$cfg"/args)
-                eval "set -- $args"
+              args=$(cat "$cfg"/args)
+              eval "set -- $args"
 
-                printf '+ hsetroot %s\n' "$args" >&2
-                if hsetroot "$@"; then
-                    exit
-                else
-                    exec hsetroot -help >&2
-                fi
-                ;;
-            *)
-                usage
-                ;;
-        esac
-      '';
-    };
+              printf '+ hsetroot %s\n' "$args" >&2
+              if hsetroot "$@"; then
+                  exit
+              else
+                  exec hsetroot -help >&2
+              fi
+              ;;
+          *)
+              usage
+              ;;
+      esac
+    '';
+  };
 in
 {
   home.packages = [ wallpaperctl ];

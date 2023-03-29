@@ -1,86 +1,114 @@
 { config, nixosConfig, pkgs, lib, ... }:
 let
   inherit (nixosConfig.services) tor;
+
+  translateUrl = pkgs.writeShellScript "translate-url" ''
+    set -eu
+    set -o pipefail
+
+    : "''${QUTE_FIFO:?}"
+
+    printf 'open -t -r %s\n' \
+        "https://translate.google.com/translate?sl=auto&u=$(${config.programs.jq.package}/bin/jq -Rr '@uri' <<< "$1")" \
+        > "''${QUTE_FIFO}"
+  '';
+
+  generateUrlTextAnchor = pkgs.writeShellScript "generate-url-text-anchor" ''
+    set -eu
+    set -o pipefail
+
+    : "''${QUTE_FIFO:?}"
+    : "''${QUTE_SELECTED_TEXT:?}"
+    : "''${QUTE_URL:?}"
+
+    exec >>"''${QUTE_FIFO}"
+
+    textStart=$(
+        printf '%s' "''${QUTE_SELECTED_TEXT}" \
+            | sed 's/^ *//; s/ *$//' \
+            | ${config.programs.jq.package}/bin/jq -Rr '@uri'
+    )
+
+    url="''${QUTE_URL%#*}#:~:text=''${textStart}"
+
+    printf 'yank -q inline "%s" ;; message-info "Yanked URL of highlighted text to clipboard: %s"\n' "''${url}" "''${url}"
+  '';
 in
 {
   imports = [
     ./adblock.nix
-    ./farside.nix
-    ./gallery-dl.nix
-    # ./greasemonkey.nix
-    ./rdrview.nix
+    # ./farside.nix
+    ./greasemonkey.nix
+    ./open.nix
+    ./reader.nix
     ./search.nix
   ];
 
-  home.persistence."/persist${config.home.homeDirectory}" = {
-    directories = [
-      "etc/qutebrowser"
-      "share/qutebrowser/greasemonkey"
-      # "etc/qutebrowser/greasemonkey"
-      # "etc/qutebrowser/userscripts"
-      # "etc/qutebrowser/userstyles"
-    ];
-    files = [
-      # BUG(?): Can't make autoconfig.yml an impermanent file; I think qutebrowser
-      #         modifies it atomically (write new file -> rename to replace) so I
-      #         think that it gets upset when a bind mount is used.
-      # "etc/qutebrowser/autoconfig.yml"
-      # "etc/qutebrowser/bookmarks/urls"
-      # "etc/qutebrowser/greasemonkey.conf" # TODO: migrate to home-manager management
-      # "etc/qutebrowser/quickmarks"
-    ];
+  home = {
+    persistence = {
+      "/persist${config.home.homeDirectory}" = {
+        directories = [
+          "etc/qutebrowser"
+          # "etc/qutebrowser/userscripts"
+          # "etc/qutebrowser/userstyles"
+        ];
+
+        # files = [
+        #   # BUG(?): Can't make autoconfig.yml an impermanent file; I think qutebrowser
+        #   #         modifies it atomically (write new file -> rename to replace) so I
+        #   #         think that it gets upset when a bind mount is used.
+        #   # "etc/qutebrowser/autoconfig.yml"
+        #   # "etc/qutebrowser/bookmarks/urls"
+        #   # "etc/qutebrowser/quickmarks"
+        # ];
+      };
+
+      "/cache${config.home.homeDirectory}" = {
+        directories = [
+          "share/qutebrowser/qtwebengine_dictionaries"
+          "share/qutebrowser/sessions"
+          "share/qutebrowser/webengine"
+          "var/cache/qutebrowser"
+        ];
+
+        files = [
+          "share/qutebrowser/cmd-history"
+          "share/qutebrowser/cookies"
+          "share/qutebrowser/history.sqlite"
+          "share/qutebrowser/state"
+        ];
+      };
+    };
+
+    # activation."qutebrowser-dict" = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
+    #   set -e
+
+    #   dictcli() { ${config.programs.qutebrowser.package}/share/qutebrowser/scripts/dictcli.py "$@"; }
+
+    #   set -- ${lib.escapeShellArgs config.programs.qutebrowser.settings.spellcheck.languages}
+
+    #   dictcli list \
+    #       | sed 's/   */\t/g' \
+    #       | while IFS=$(printf '\t') read -r lang _ remote local; do
+    #           for l; do
+    #               [ "$lang" = "$l" ] || continue
+    #               case "$local" in
+    #                   -)
+    #                       $DRY_RUN_CMD dictcli install "$l"
+    #                       ;;
+    #                   "$remote")
+    #                       continue
+    #                       ;;
+    #                   *)
+    #                       $DRY_RUN_CMD dictcli update "$l"
+    #                       ;;
+    #               esac
+    #           done
+    #       done
+    # '';
+
+    sessionVariables."BROWSER" = "qutebrowser";
   };
-
-  home.persistence."/cache${config.home.homeDirectory}" = {
-    directories = [
-      "share/qutebrowser/qtwebengine_dictionaries"
-      "share/qutebrowser/sessions"
-      "share/qutebrowser/webengine"
-      "var/cache/qutebrowser"
-    ];
-    files = [
-      "share/qutebrowser/cmd-history"
-      "share/qutebrowser/cookies"
-      "share/qutebrowser/history.sqlite"
-      "share/qutebrowser/state"
-    ];
-  };
-
-  # home.activation."qutebrowser-dict" = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
-  #   set -e
-
-  #   dictcli() { ${config.programs.qutebrowser.package}/share/qutebrowser/scripts/dictcli.py "$@"; }
-
-  #   set -- ${lib.escapeShellArgs config.programs.qutebrowser.settings.spellcheck.languages}
-
-  #   dictcli list \
-  #       | sed 's/   */\t/g' \
-  #       | while IFS=$(printf '\t') read -r lang _ remote local; do
-  #           for l; do
-  #               [ "$lang" = "$l" ] || continue
-  #               case "$local" in
-  #                   -)
-  #                       $DRY_RUN_CMD dictcli install "$l"
-  #                       ;;
-  #                   "$remote")
-  #                       continue
-  #                       ;;
-  #                   *)
-  #                       $DRY_RUN_CMD dictcli update "$l"
-  #                       ;;
-  #               esac
-  #           done
-  #       done
-  # '';
-
-  home.packages = [
-    (pkgs.writeShellScriptBin "browser" ''
-      PATH=${lib.makeBinPath [ pkgs.coreutils pkgs.socat ]}:"$PATH"
-      exec ${config.programs.qutebrowser.package}/share/qutebrowser/scripts/open_url_in_instance.sh "$@"
-    '')
-  ];
-
-  home.sessionVariables."BROWSER" = "browser";
 
   programs.qutebrowser = {
     enable = true;
@@ -94,6 +122,24 @@ in
     settings = rec {
       # Clear default aliases
       aliases = { };
+
+      qt.args = [
+        # Force GPU-utilizing acceleration
+        # <https://wiki.archlinux.org/title/Chromium#Force_GPU_acceleration>
+        "ignore-gpu-blocklist"
+        "enable-gpu-rasterization"
+        "enable-zero-copy"
+
+        # Enable hardware video acceleration
+        # <https://wiki.archlinux.org/title/Chromium#Hardware_video_acceleration>
+        # <https://community.frame.work/t/guide-linux-battery-life-tuning/6665/303>
+        "enable-features=VaapiVideoDecoder,VaapiVideoEncoder"
+        "enable-accelerated-mjpeg-decode"
+        "enable-accelerated-video-decode"
+        "disable-gpu-driver-bug-workarounds"
+        "use-gl=egl"
+        "disable-features=UseChromeOSDirectVideoDecoder"
+      ];
 
       # Always restore open sites when qutebrowser is reopened.
       # Equivalent of Firefox's "Restore previous session" setting.
@@ -152,7 +198,7 @@ in
         prefers_reduced_motion = true;
 
         # List of user stylesheet filenames to use. These apply globally.
-        user_stylesheets = builtins.map (builtins.toString) [
+        user_stylesheets = builtins.map builtins.toString [
           (pkgs.writeText "fonts.user.css" ''
             @font-face {
                 font-family: ui-sans-serif;
@@ -253,19 +299,25 @@ in
         "filesystem"
       ];
 
-      colors.statusbar.command.bg = config.xresources.properties."*lightBackground";
-      colors.statusbar.command.fg = config.xresources.properties."*lightForeground";
-      colors.statusbar.insert.bg = config.xresources.properties."*color2";
-      colors.statusbar.insert.fg = config.xresources.properties."*foreground";
       colors.statusbar.normal.bg = config.xresources.properties."*background";
       colors.statusbar.normal.fg = config.xresources.properties."*foreground";
+
+      colors.statusbar.command.bg = config.xresources.properties."*lightBackground";
+      colors.statusbar.command.fg = config.xresources.properties."*lightForeground";
+
+      colors.statusbar.insert.bg = config.xresources.properties."*color2";
+      colors.statusbar.insert.fg = config.xresources.properties."*foreground";
+
       colors.statusbar.passthrough.bg = config.xresources.properties."*color4";
       colors.statusbar.passthrough.fg = config.xresources.properties."*foreground";
+
       colors.statusbar.private.bg = config.xresources.properties."*color5";
       colors.statusbar.private.fg = config.xresources.properties."*foreground";
+
       colors.statusbar.progress.bg = config.xresources.properties."*color2";
-      colors.statusbar.url.error.fg = config.xresources.properties."*color9";
+
       colors.statusbar.url.fg = config.xresources.properties."*color4";
+      colors.statusbar.url.error.fg = config.xresources.properties."*color9";
       colors.statusbar.url.hover.fg = config.xresources.properties."*color4";
       colors.statusbar.url.success.http.fg = config.xresources.properties."*color4";
       colors.statusbar.url.success.https.fg = config.xresources.properties."*color4";
@@ -335,6 +387,17 @@ in
       colors.tabs.selected.even.bg = config.xresources.properties."*colorAccent";
       colors.tabs.selected.odd.bg = config.xresources.properties."*colorAccent";
 
+      colors.messages = rec {
+        error.bg = config.xresources.properties."*color1";
+        warning.bg = config.xresources.properties."*color3";
+        info.bg = config.xresources.properties."*colorAccent";
+        info.fg = config.xresources.properties."*foreground";
+
+        error.border = error.bg;
+        warning.border = warning.bg;
+        info.border = info.bg;
+      };
+
       # Window.
       window.title_format = "qutebrowser{title_sep}{current_title}";
 
@@ -378,52 +441,20 @@ in
       config.unbind("<Ctrl+y>", mode="prompt")
     '';
 
-    enableDefaultBindings = false;
+    # enableDefaultBindings = false;
+    aliases = {
+      translate = "spawn -u ${translateUrl} {url}";
+      generate-text-anchor = "spawn -u ${generateUrlTextAnchor}";
+    };
+
     keyBindings = {
       normal = {
-        "zpt" =
-          let
-            translateUrl = pkgs.writeShellScript "translate-url" ''
-              set -eu
-              set -o pipefail
-
-              : "''${QUTE_FIFO:?}"
-
-              printf 'open -t -r %s\n' \
-                  "https://translate.google.com/translate?sl=auto&u=$(${config.programs.jq.package}/bin/jq -Rr '@uri' <<< "$1")" \
-                  > "''${QUTE_FIFO}"
-            '';
-          in
-          "spawn -u ${translateUrl} {url}";
-
-        "ya" =
-          let
-            generateUrlTextAnchor = pkgs.writeShellScript "generate-url-text-anchor" ''
-              set -eu
-              set -o pipefail
-
-              : "''${QUTE_FIFO:?}"
-              : "''${QUTE_SELECTED_TEXT:?}"
-              : "''${QUTE_URL:?}"
-
-              exec >>"''${QUTE_FIFO}"
-
-              textStart=$(
-                  printf '%s' "''${QUTE_SELECTED_TEXT}" \
-                      | sed 's/^ *//; s/ *$//' \
-                      | ${config.programs.jq.package}/bin/jq -Rr '@uri'
-              )
-
-              url="''${QUTE_URL%#*}#:~:text=''${textStart}"
-
-              printf 'yank -q inline "%s" ;; message-info "Yanked URL of highlighted text to clipboard: %s"\n' "''${url}" "''${url}"
-            '';
-          in
-          "spawn -u ${generateUrlTextAnchor}";
+        "zpt" = "translate";
+        "ya" = "generate-text-anchor";
 
         "qa" = "set-cmd-text :quickmark-add {url} \"{title}\"";
         "ql" = "set-cmd-text -s :quickmark-load";
-        "qd" = "set-cmd-text :quickmark-del {url:domain} ;; fake-key -g <Tab>";
+        "qd" = lib.mkMerge [ "set-cmd-text :quickmark-del {url:domain}" "fake-key -g <Tab>" ];
         "ba" = "set-cmd-text :bookmark-add {url} \"{title}\"";
         "bl" = "set-cmd-text -s :bookmark-load";
 
@@ -446,14 +477,11 @@ in
         "<Ctrl+Shift+i>" = "devtools";
 
         # Emulate Tree Style Tabs keyboard shortcuts.
-        #
-        # TODO Change when <https://github.com/nix-community/home-manager/pull/3322> merged
-        # "<F1>" = [
-        #   "config-cycle tabs.show never always"
-        #   "config-cycle statusbar.show in-mode always"
-        #   "config-cycle scrolling.bar never always"
-        # ];
-        "<F1>" = "config-cycle tabs.show never always ;; config-cycle statusbar.show in-mode always ;; config-cycle scrolling.bar never always";
+        "<F1>" = lib.mkMerge [
+          "config-cycle tabs.show never always"
+          "config-cycle statusbar.show in-mode always"
+          "config-cycle scrolling.bar never always"
+        ];
 
         # Provide some Kakoune-style keyboard shortcuts.
         "gg" = "scroll-to-perc 0";
@@ -471,21 +499,6 @@ in
       qutebrowser-vacuum = {
         Unit = {
           Description = "${config.systemd.user.services.qutebrowser-vacuum.Unit.Description} every week";
-          PartOf = [ "timers.target" ];
-        };
-        Install.WantedBy = [ "timers.target" ];
-
-        Timer = {
-          OnCalendar = "weekly";
-          Persistent = true;
-          AccuracySec = "15m";
-          RandomizedDelaySec = "5m";
-        };
-      };
-
-      qutebrowser-greasemonkey = {
-        Unit = {
-          Description = "${config.systemd.user.services.qutebrowser-greasemonkey.Unit.Description} every week";
           PartOf = [ "timers.target" ];
         };
         Install.WantedBy = [ "timers.target" ];
@@ -545,35 +558,6 @@ in
           IOSchedulingPriority = 7;
         };
       };
-
-      qutebrowser-greasemonkey = {
-        Unit.Description = "Update qutebrowser's greasemonkey scripts";
-
-        Service = {
-          Type = "oneshot";
-          ExecStart = [ "${config.home.homeDirectory}/bin/qutebrowser-greasemonkey" ];
-
-          Nice = 19;
-          CPUSchedulingPolicy = "idle";
-          IOSchedulingClass = "idle";
-          IOSchedulingPriority = 7;
-        };
-      };
     };
-  };
-
-  xdg.desktopEntries.qutebrowser = {
-    name = "qutebrowser";
-    genericName = "ilo lukin";
-    exec = "browser %U";
-    categories = [ "Application" "Network" "WebBrowser" ];
-    noDisplay = true;
-    mimeType = [
-      "text/html"
-      "x-scheme-handler/about"
-      "x-scheme-handler/http"
-      "x-scheme-handler/https"
-      "x-scheme-handler/unknown"
-    ];
   };
 }

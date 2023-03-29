@@ -84,6 +84,8 @@ let
     ];
 
     text = ''
+      : "''${SHLINT_SHELL:=sh}"
+
       (
           (
               set +e
@@ -93,7 +95,7 @@ let
               exit 0
           ) &
 
-          shellcheck -f gcc -x "$@" &
+          shellcheck ''${SHLINT_SHELL:+-s "$SHLINT_SHELL"} -f gcc -x "$@" &
           wait
       ) | sort
     '';
@@ -101,6 +103,18 @@ let
 in
 {
   programs.kakoune.config.hooks = [
+    # Set the filetype of buffers bash uses for editing commands.
+    {
+      name = "WinCreate";
+      option = ".*/bash-fc\.[^\/]+";
+      commands = ''
+        set-option window filetype sh
+        set-option window formatcmd "${format}/bin/shformat"
+        set-option window lintcmd "SHLINT_SHELL=bash ${lint}/bin/shlint"
+        format-buffer
+      '';
+    }
+
     {
       name = "WinSetOption";
       option = "filetype=sh";

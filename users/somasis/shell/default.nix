@@ -9,7 +9,23 @@
   programs.bash = {
     enable = true;
     enableVteIntegration = true;
+
+    sessionVariables = {
+      IGNOREEOF = 1;
+      TIMEFORMAT = ''
+        \nwall\t%3lR\nuser\t%3lU\nkern\t%3lS\ncpu%%\t%P
+      '';
+    };
+
+    shellOptions = [
+      "dirspell" # correct spelling of directory names during completion
+      "checkjobs" # warn when trying to quit a shell with jobs running
+      "globstar" # allow for using ** for recursive globbing
+      "lithist" # save multi-line commands to the history with their newlines
+    ];
   };
+
+  programs.nix-index.enable = true;
 
   programs.bash.initExtra = lib.mkAfter ''
     . ${pkgs.complete-alias}/bin/complete_alias

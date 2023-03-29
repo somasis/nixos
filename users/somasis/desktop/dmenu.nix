@@ -6,84 +6,83 @@
 , ...
 }:
 let
-  dmenu-flexipatch = (pkgs.stdenv.mkDerivation rec {
-    pname = "dmenu-flexipatch";
-    version =
-      let
-        year = builtins.substring 0 4 (inputs.dmenu-flexipatch.lastModifiedDate);
-        month = builtins.substring 4 2 (inputs.dmenu-flexipatch.lastModifiedDate);
-        day = builtins.substring 6 2 (inputs.dmenu-flexipatch.lastModifiedDate);
-      in
-      "unstable-${year}-${month}-${day}";
+  dmenu-flexipatch =
+    let
+      year = builtins.substring 0 4 inputs.dmenu-flexipatch.lastModifiedDate;
+      month = builtins.substring 4 2 inputs.dmenu-flexipatch.lastModifiedDate;
+      day = builtins.substring 6 2 inputs.dmenu-flexipatch.lastModifiedDate;
+    in
+    pkgs.stdenv.mkDerivation rec {
+      pname = "dmenu-flexipatch";
+      version = "unstable-${year}-${month}-${day}";
 
-    src = inputs.dmenu-flexipatch;
+      src = inputs.dmenu-flexipatch;
 
-    buildInputs = [
-      pkgs.xorg.libX11
-      pkgs.xorg.libXinerama
-      pkgs.zlib
+      buildInputs = [
+        pkgs.xorg.libX11
+        pkgs.xorg.libXinerama
+        pkgs.zlib
 
-      pkgs.pango
-    ];
+        pkgs.pango
+      ];
 
-    nativeBuildInputs = [ pkgs.pkg-config ];
+      nativeBuildInputs = [ pkgs.pkg-config ];
 
-    postPatch = ''
-      sed -ri -e 's!\<(dmenu|dmenu_path|stest)\>!'"$out/bin"'/&!g' dmenu_run
-      sed -ri -e 's!\<stest\>!'"$out/bin"'/&!g' dmenu_path
-    '';
+      postPatch = ''
+        sed -ri -e 's!\<(dmenu|dmenu_path|stest)\>!'"$out/bin"'/&!g' dmenu_run
+        sed -ri -e 's!\<stest\>!'"$out/bin"'/&!g' dmenu_path
+      '';
 
-    preConfigure = ''
-      sed -i \
-        -e "s@PREFIX = /usr/local@PREFIX = $out@g" \
-        -e "s@^#PANGO@PANGO@" \
-        config.mk
-        # -e 's@"monospace:size=10"@"monospace:size=11", "emoji:size=11"@' \
+      preConfigure = ''
+        sed -i \
+          -e "s@PREFIX = /usr/local@PREFIX = $out@g" \
+          -e "s@^#PANGO@PANGO@" \
+          config.mk
+          # -e 's@"monospace:size=10"@"monospace:size=11", "emoji:size=11"@' \
 
-      cat > patches.h <<EOF
-      #define ALPHA_PATCH            1
-      #define COLOR_EMOJI_PATCH      1
-      #define CTRL_V_TO_PASTE_PATCH  1
-      #define GRIDNAV_PATCH          1
-      #define GRID_PATCH             1
-      #define HIGHLIGHT_PATCH        1
-      #define INITIALTEXT_PATCH      1
-      #define INSTANT_PATCH          1
-      #define LINE_HEIGHT_PATCH      1
-      #define MOUSE_SUPPORT_PATCH    1
-      #define NO_SORT_PATCH          1
-      #define PANGO_PATCH            1
-      #define PLAIN_PROMPT_PATCH     1
-      #define VERTFULL_PATCH         1
-      #define WMTYPE_PATCH           1
-      // #define DYNAMIC_OPTIONS_PATCH  1
-      // #define FUZZYHIGHLIGHT_PATCH   1
-      // #define FUZZYMATCH_PATCH       1
-      // #define MANAGED_PATCH          1
-      // #define NUMBERS_PATCH          1
-      // #define PASSWORD_PATCH         1
-      // #define PREFIXCOMPLETION_PATCH 1
-      // #define PRESELECT_PATCH        1
-      // #define PRINTINDEX_PATCH       1
-      // #define REJECTNOMATCH_PATCH    1
-      // #define RESTRICT_RETURN_PATCH  1
-      // #define TSV_PATCH              1
-      // #define XRESOURCES_PATCH       1
-      EOF
-    '';
+        cat > patches.h <<EOF
+        #define ALPHA_PATCH            1
+        #define COLOR_EMOJI_PATCH      1
+        #define CTRL_V_TO_PASTE_PATCH  1
+        #define GRIDNAV_PATCH          1
+        #define GRID_PATCH             1
+        #define HIGHLIGHT_PATCH        1
+        #define INITIALTEXT_PATCH      1
+        #define INSTANT_PATCH          1
+        #define LINE_HEIGHT_PATCH      1
+        #define MOUSE_SUPPORT_PATCH    1
+        #define NO_SORT_PATCH          1
+        #define PANGO_PATCH            1
+        #define PLAIN_PROMPT_PATCH     1
+        #define VERTFULL_PATCH         1
+        #define WMTYPE_PATCH           1
+        // #define DYNAMIC_OPTIONS_PATCH  1
+        // #define FUZZYHIGHLIGHT_PATCH   1
+        // #define FUZZYMATCH_PATCH       1
+        // #define MANAGED_PATCH          1
+        // #define NUMBERS_PATCH          1
+        // #define PASSWORD_PATCH         1
+        // #define PREFIXCOMPLETION_PATCH 1
+        // #define PRESELECT_PATCH        1
+        // #define PRINTINDEX_PATCH       1
+        // #define REJECTNOMATCH_PATCH    1
+        // #define RESTRICT_RETURN_PATCH  1
+        // #define TSV_PATCH              1
+        // #define XRESOURCES_PATCH       1
+        EOF
+      '';
 
-    makeFlags = [ "CC:=$(CC)" "PKG_CONFIG:=$(PKG_CONFIG)" ];
+      makeFlags = [ "CC:=$(CC)" "PKG_CONFIG:=$(PKG_CONFIG)" ];
 
-    meta = with pkgs.lib; {
-      description = "A generic, highly customizable, and efficient menu for the X Window System";
-      license = with licenses; [ mit ];
-      maintainers = with maintainers; [ somasis ];
-      platforms = platforms.all;
+      meta = with pkgs.lib; {
+        description = "A generic, highly customizable, and efficient menu for the X Window System";
+        license = with licenses; [ mit ];
+        maintainers = with maintainers; [ somasis ];
+        platforms = platforms.all;
+      };
     };
-  }
-  );
 
-  dmenu = (pkgs.writeShellApplication {
+  dmenu = pkgs.writeShellApplication {
     name = "dmenu";
 
     runtimeInputs = [ dmenu-flexipatch ];
@@ -102,9 +101,9 @@ let
         -shf "${config.xresources.properties."*color1"}" \
         "$@"
     '';
-  });
+  };
 
-  dmenu-emoji = (pkgs.writeShellApplication {
+  dmenu-emoji = pkgs.writeShellApplication {
     name = "dmenu-emoji";
 
     runtimeInputs = [
@@ -190,9 +189,9 @@ let
           | uq \
           | sponge "$DMENU_EMOJI_RECENT"
     '';
-  });
+  };
 
-  dmenu-run = (pkgs.writeShellApplication {
+  dmenu-run = pkgs.writeShellApplication {
     name = "dmenu-run";
 
     runtimeInputs = [
@@ -251,9 +250,9 @@ let
 
       mv -f "$t" "$h"
     '';
-  });
+  };
 
-  dmenu-pass = (pkgs.writeShellApplication {
+  dmenu-pass = pkgs.writeShellApplication {
     name = "dmenu-pass";
 
     runtimeInputs = [
@@ -385,68 +384,67 @@ let
 
       mv -f "''${t}" "''${h}"
     '';
-  });
+  };
 
-  dmenu-session = (
-    pkgs.writeShellApplication {
-      name = "dmenu-session";
+  dmenu-session = pkgs.writeShellApplication {
+    name = "dmenu-session";
 
-      runtimeInputs = [
-        dmenu
-        config.xsession.windowManager.bspwm.package
-        pkgs.gnugrep
-        pkgs.systemd
-        pkgs.xorg.xset
-      ];
+    runtimeInputs = [
+      dmenu
+      config.xsession.windowManager.bspwm.package
+      pkgs.gnugrep
+      pkgs.systemd
+      pkgs.xorg.xset
+    ];
 
-      text = ''
-        usage() {
-            cat >&2 <<EOF
-        usage: dmenu-session [dmenu options]
-        EOF
-            exit 69
-        }
+    text = ''
+      usage() {
+          cat >&2 <<EOF
+      usage: dmenu-session [dmenu options]
+      EOF
+          exit 69
+      }
 
-        lockScreen=${lib.boolToString config.services.screen-locker.enable}
-        lockScreenText=
-        screensaverText=
-        monitorText=
+      lockScreen=${lib.boolToString config.services.screen-locker.enable}
+      lockScreenText=
+      screensaverText=
+      monitorText=
 
-        if "''${lockScreen}"; then
-            lockScreenText="Lock screen"
-            screensaverText="Toggle screensaver"
-            monitorText="Toggle monitor power saving"
-        fi
+      if "''${lockScreen}"; then
+          lockScreenText="Lock screen"
+          screensaverText="Toggle screensaver"
+          monitorText="Toggle monitor power saving"
+      fi
 
-        choice=$(
-            cat <<EOF | ''${DMENU:-dmenu -i} -p "session" "$@"
-        Sleep
-        Reboot
-        $(
-            [ -n "''${lockScreen}" ] \
-                && printf '%s\n' \
-                    "''${lockScreenText}" \
-                    "''${screensaverText}" \
-                    "''${monitorText}"
-        )
-        Power off
-        Logout
-        EOF
-        )
+      choice=$(
+          cat <<EOF | ''${DMENU:-dmenu -i} -p "session" "$@"
+      Sleep
+      Reboot
+      $(
+          [ -n "''${lockScreen}" ] \
+              && printf '%s\n' \
+                  "''${lockScreenText}" \
+                  "''${screensaverText}" \
+                  "''${monitorText}"
+      )
+      Power off
+      Logout
+      EOF
+      )
 
-        case "''${choice}" in
-            "") exit 0 ;;
-            "Sleep") systemctl suspend ;;
-            "Power off") systemctl poweroff ;;
-            "Reboot") systemctl reboot ;;
-            "Logout") systemctl --user stop graphical-session.target; bspc quit & ;;
-            "''${lockScreenText}") systemctl --user start xsecurelock.service & ;;
-            "''${screensaverText}") xsecurelock-toggle & ;;
-            "''${monitorText}") dpms-toggle & ;;
-            *) usage ;;
-        esac
-      '';
-    });
+      case "''${choice}" in
+          "") exit 0 ;;
+          "Sleep") systemctl suspend ;;
+          "Power off") systemctl poweroff ;;
+          "Reboot") systemctl reboot ;;
+          "Logout") systemctl --user stop graphical-session.target; bspc quit & ;;
+          "''${lockScreenText}") systemctl --user start xsecurelock.service & ;;
+          "''${screensaverText}") xsecurelock-toggle & ;;
+          "''${monitorText}") dpms-toggle & ;;
+          *) usage ;;
+      esac
+    '';
+  };
 in
 {
   home.persistence."/cache${config.home.homeDirectory}".directories = [{ directory = "var/cache/dmenu"; method = "symlink"; }];

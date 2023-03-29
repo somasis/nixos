@@ -99,4 +99,13 @@ in
   programs.mpv.config.screenshot-directory = "${messDir}/current/screenshots";
   programs.zotero.profiles.default.settings."extensions.zotfile.source_dir" =
     "${messDir}/current/incoming"; # ZotFile > General Settings > "Source Folder for Attaching New Files"
+
+  programs.bash = {
+    # Don't have a history file for the entire week; split it into days of week
+    # and then fractions of days so as to keep history from being too messy.
+    # Need to strip leading hour so bash doesn't show a warning
+    historyFile = "${messDir}/current/.bash_history.$(date +%w).$(( $(date +%1H) / (24 / 4) ))";
+    historyFileSize = -1;
+    shellOptions = [ "histappend" ];
+  };
 }

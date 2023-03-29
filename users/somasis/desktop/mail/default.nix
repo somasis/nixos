@@ -42,7 +42,7 @@ in
     {
       "kylie@somas.is" = { name, ... }: rec {
         address = name;
-        passwordCommand = "${passCmd} show ${nixosConfig.networking.fqdn}/nixos/${address}";
+        passwordCommand = "${passCmd} show ${nixosConfig.networking.fqdnOrHostName}/nixos/${address}";
 
         inherit realName;
 
@@ -87,7 +87,7 @@ in
 
       "somasissounds@gmail.com" = { name, ... }: rec {
         address = name;
-        passwordCommand = "${passCmd} show ${nixosConfig.networking.fqdn}/nixos/${address}";
+        passwordCommand = "${passCmd} show ${nixosConfig.networking.fqdnOrHostName}/nixos/${address}";
 
         inherit realName;
 
@@ -130,7 +130,7 @@ in
           Unit.Description = "Synchronize IMAP boxes for account ${n} every two hours, and fifteen minutes after startup";
           Timer = {
             OnCalendar = "1/2:00:00";
-            OnStartupSec = builtins.toString 60 * 15;
+            OnStartupSec = builtins.toString (60 * 15);
             Persistent = true;
             RandomizedDelaySec = "1m";
           };

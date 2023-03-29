@@ -11,7 +11,7 @@
       pager = "cat";
     };
 
-    package = (pkgs.symlinkJoin {
+    package = pkgs.symlinkJoin {
       name = "gh-with-pass";
       paths = [ pkgs.gh ];
 
@@ -19,9 +19,9 @@
       postBuild = ''
         wrapProgram $out/bin/gh \
             --set-default GH_HOST "github.com" \
-            --run ': "''${GH_TOKEN:=$(${config.programs.password-store.package}/bin/pass "${nixosConfig.networking.fqdn}/gh/$GH_HOST/somasis")}"' \
+            --run ': "''${GH_TOKEN:=$(${config.programs.password-store.package}/bin/pass "${nixosConfig.networking.fqdnOrHostName}/gh/$GH_HOST/somasis")}"' \
             --run 'export GH_TOKEN'
       '';
-    });
+    };
   };
 }

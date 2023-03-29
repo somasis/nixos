@@ -97,6 +97,61 @@ in
 
   environment.systemPackages = let inherit (defaults) extraArgs; in [
     (pkgs.writeShellApplication rec {
+      name = "borg-import-letterboxd";
+
+      runtimeInputs = [
+        pkgs.coreutils
+        pkgs.libarchive
+        pkgs.jq
+      ];
+
+      text = ''
+        set -e
+
+        usage() {
+            cat >&2 <<EOF
+        usage: ${name} letterboxd-*.zip
+        EOF
+            exit 69
+        }
+
+        [ "$#" -ge 1 ] || usage
+
+        n=$(basename "$1")
+        n=''${n#letterboxd-}
+
+        a=''${n%-*-*-*-*-*-utc.zip}
+
+        d=''${n#*-}
+        d=''${d%-*.zip}
+        d=''${d:0:10}T''${d:11:2}:''${d:14:2}:00Z
+
+        printf '::letterboxd-%s-%s\n' "$a" "$d"
+
+        bsdtar -cf - "''$1" \
+            | doas borg-job-spinoza \
+                import-tar \
+                    ${extraArgs} \
+                    --stats -p \
+                    --comment="imported with borg import-tar via. borg-import-letterboxd" \
+                    "::letterboxd-''${a}-''${d}.failed" \
+                    -
+
+        doas borg-job-spinoza \
+            rename \
+                ${extraArgs} \
+                "::letterboxd-''${a}-''${d}.failed" \
+                "letterboxd-''${a}-''${d}"
+
+        doas borg-job-spinoza \
+            prune \
+                ${extraArgs} \
+                --keep-monthly=12 --keep-yearly=4 \
+                -a "letterboxd-''${a}-*"
+      '';
+    })
+
+    (pkgs.writeShellApplication rec {
       name = "borg-import-tumblr";
 
       runtimeInputs = [

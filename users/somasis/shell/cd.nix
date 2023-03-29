@@ -8,5 +8,8 @@
       ".." = "cd ..";
     };
   };
-  programs.bash.shellOptions = [ "cdspell" ];
+  programs.bash.shellOptions = [
+    "autocd" # `cd` into directories given as commands
+    "cdspell" # correct directory misspellings
+  ];
 }

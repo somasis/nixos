@@ -55,7 +55,7 @@ in
   programs.autorandr.hooks.postswitch.bspwm = ''
     ${bspc} query -M \
         | ${pkgs.xe}/bin/xe ${bspc} monitor {} \
-            -d  ⠂ ⠒ ⠖ ⠶ ⢶
+            -d  "⠂" "⠒" "⠖" "⠶" "⢶"
             # 1 2 3 4 5
   '';
 
@@ -67,62 +67,65 @@ in
   #   Install.WantedBy = [ "graphical-session.target" ];
   # };
 
-  services.sxhkd.keybindings =
-    {
-      # Window management: change to desktop {1-10} on focused monitor
-      "super + {1-9,0}" = "${bspc} desktop -f focused:'^{1-9,10}'";
+  home.packages = [
+    (pkgs.writeShellScriptBin "bspwm-hide-or-close" ''
+      # If we're closing a window,
 
-      # Window management: send focused node to desktop {1-10} on focused monitor
-      "super + shift + {1-9,0}" = "${bspc} node -d focused:'^{1-9,10}'";
+      : "''${XDG_CACHE_HOME:=$HOME/.cache}"
 
-      # Window management: send focused node to focused desktop on monitor {1-10}
-      "super + ctrl + {1-9,0}" = "${bspc} node -d ^{1-9,10}:focused";
+      cache="$XDG_CACHE_HOME"/bspwm
+      mkdir -p "$cache"
 
-      # Window management: switch to {next,previous} window - super + {_,shift} + a
-      "super + {_,shift} + a" = "${bspc} node -f {next,prev}.!hidden.window";
+      focused=$(${bspc} query -N -n)
 
-      # Window management: rotate desktop layout - super + r
-      "super + {_,shift} + r" = "${bspc} node @/ -R {90,-90}";
+      # and the window to close is marked locked=on, ...
+      if [ "$focused" = "$(${bspc} query -N "$focused" -n '.locked')" ]; then
+          # and just mark it hidden.
+          ${bspc} node "$focused" -g hidden=on
+      else
+          ${bspc} node "$focused" -c
+      fi
+    '')
+  ];
 
-      # Window management: close window - super + w
-      "super + w" = builtins.toString (pkgs.writeShellScript "bspwm-hide-or-close" ''
-        # If we're closing a window,
+  services.sxhkd.keybindings = {
+    # Window management: change to desktop {1-10} on focused monitor
+    "super + {1-9,0}" = "${bspc} desktop -f focused:'^{1-9,10}'";
 
-        : "''${XDG_CACHE_HOME:=$HOME/.cache}"
+    # Window management: send focused node to desktop {1-10} on focused monitor
+    "super + shift + {1-9,0}" = "${bspc} node -d focused:'^{1-9,10}'";
 
-        cache="$XDG_CACHE_HOME"/bspwm
-        mkdir -p "$cache"
+    # Window management: send focused node to focused desktop on monitor {1-10}
+    "super + ctrl + {1-9,0}" = "${bspc} node -d ^{1-9,10}:focused";
 
-        focused=$(${bspc} query -N -n)
+    # Window management: switch to {next,previous} window - super + {_,shift} + a
+    "super + {_,shift} + a" = "${bspc} node -f {next,prev}.!hidden.window";
 
-        # and the window to close is marked locked=on, ...
-        if [ "$focused" = "$(${bspc} query -N "$focused" -n '.locked')" ]; then
-            # and just mark it hidden.
-            ${bspc} node "$focused" -g hidden=on
-        else
-            ${bspc} node "$focused" -c
-        fi
-      '');
+    # Window management: rotate desktop layout - super + r
+    "super + {_,shift} + r" = "${bspc} node @/ -R {90,-90}";
 
-      # Window management: kill window - super + shift + w
-      "super + shift + w" = "${bspc} node -k";
+    # Window management: close window - super + w
+    "super + w" = "bspwm-hide-or-close";
 
-      # Window management: set desktop layout to {tiled, monocle} - super + m
-      "super + m" = "${bspc} desktop -l next";
+    # Window management: kill window - super + shift + w
+    "super + shift + w" = "${bspc} node -k";
 
-      # Window management: set window state to {tiled, pseudo-tiled, floating, fullscreen} - super + {t,shift + t,f,m}
-      "super + {t,shift + t,f,m}" = "${bspc} node -t {tiled,pseudo_tiled,floating,fullscreen}";
+    # Window management: set desktop layout to {tiled, monocle} - super + m
+    "super + m" = "${bspc} desktop -l next";
 
-      # Window management: move window to window {left, down, up, right} of current window - super + shift + {left,down,up,right}
-      "super + shift + {Left,Down,Up,Right}" = "${bspc} node -s {west,south,north,east}";
+    # Window management: set window state to {tiled, pseudo-tiled, floating, fullscreen} - super + {t,shift + t,f,m}
+    "super + {t,shift + t,f,m}" = "${bspc} node -t {tiled,pseudo_tiled,floating,fullscreen}";
 
-      # Window management: focus {previous, next} window on the current desktop - super + {left,right}
-      "super + {Left,Right}" = "${bspc} node -f {prev,next}.local.!hidden.window";
+    # Window management: move window to window {left, down, up, right} of current window - super + shift + {left,down,up,right}
+    "super + shift + {Left,Down,Up,Right}" = "${bspc} node -s {west,south,north,east}";
 
-      # Window management: change to {next, previous} window - super + {mouse scroll up,mouse scroll down}
-      "super + {button5,button4}" = "${bspc} node -f {next,prev}.!hidden.window";
+    # Window management: focus {previous, next} window on the current desktop - super + {left,right}
+    "super + {Left,Right}" = "${bspc} node -f {prev,next}.local.!hidden.window";
 
-      # Window management: change to desktop {1-10} on focused monitor - super + {mouse forward,mouse backward}
-      "super + shift + {button5,button4}" = "${bspc} desktop -f focused#{next,prev}";
-    };
+    # Window management: change to {next, previous} window - super + {mouse scroll up,mouse scroll down}
+    "super + {button5,button4}" = "${bspc} node -f {next,prev}.!hidden.window";
+
+    # Window management: change to desktop {1-10} on focused monitor - super + {mouse forward,mouse backward}
+    "super + shift + {button5,button4}" = "${bspc} desktop -f focused#{next,prev}";
+  };
 }

@@ -1,6 +1,7 @@
 { config
 , pkgs
 , nixosConfig
+, lib
 , ...
 }: {
   home.persistence = {
@@ -18,7 +19,7 @@
   programs.ssh = {
     enable = true;
 
-    # compression = true;
+    compression = true;
     # hashKnownHosts = true;
     # userKnownHostsFile = "${config.xdg.cacheHome}/ssh/known_hosts";
 
@@ -30,7 +31,7 @@
     # Send an in-band keep-alive every 30 seconds.
     serverAliveInterval = 30;
 
-    matchBlocks = {
+    matchBlocks = let algoList = lib.concatStringsSep ","; in {
       "*" = {
         # Too often, IPv6 is broken on the wifi I'm on.
         addressFamily = "inet";
@@ -44,6 +45,20 @@
 
           # Accept unknown keys for unfamiliar hosts, yell when known hosts change their key.
           StrictHostKeyChecking = "accept-new";
+
+          HostKeyAlgorithms = algoList [
+            "ssh-ed25519-cert-v01@openssh.com"
+            "sk-ssh-ed25519-cert-v01@openssh.com"
+            "ssh-ed25519"
+            "sk-ssh-ed25519@openssh.com"
+          ];
+
+          PubkeyAcceptedAlgorithms = algoList [
+            "ssh-ed25519-cert-v01@openssh.com"
+            "sk-ssh-ed25519-cert-v01@openssh.com"
+            "ssh-ed25519"
+            "sk-ssh-ed25519@openssh.com"
+          ];
         };
       };
 
@@ -80,19 +95,9 @@
         dynamicForwards = [{ address = "localhost"; port = 6003; }];
       };
 
-      "trotsky.somas.is" = {
-        host = "trotsky.somas.is trotsky";
-        hostname = "trotsky.somas.is";
-        port = 5398;
-
-        forwardAgent = true;
-        forwardX11 = true;
-      };
-
       "spinoza.7596ff.com" = {
         host = "spinoza.7596ff.com spinoza";
         hostname = "spinoza.7596ff.com";
-        port = 1312;
 
         forwardAgent = true;
         forwardX11 = true;

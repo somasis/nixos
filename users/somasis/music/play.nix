@@ -5,6 +5,34 @@
 , ...
 }:
 let
+  # INI is shell-expanded as a heredoc, so be careful with special characters
+  mpdscribbleConf = lib.generators.toINIWithGlobalSection { } {
+    globalSection = {
+      log = "-";
+      host = config.services.mpd.network.listenAddress;
+      port = builtins.toString config.services.mpd.network.port;
+      verbose = 2;
+    };
+
+    sections = {
+      "last.fm" = {
+        journal = "${config.xdg.cacheHome}/mpdscribble/last.fm.journal";
+        url = "https://post.audioscrobbler.com/";
+
+        username = "kyliesomasis";
+        password = "$(pass www/last.fm/kyliesomasis | tr -d '\n' | md5sum - | cut -d' ' -f1)";
+      };
+
+      "listenbrainz" = {
+        journal = "${config.xdg.cacheHome}/mpdscribble/listenbrainz.journal";
+        url = "http://proxy.listenbrainz.org";
+
+        username = "Somasis";
+        password = "$(pass ${nixosConfig.networking.fqdnOrHostName}/mpdscribble/listenbrainz.org)";
+      };
+    };
+  };
+
   xdgRuntimeDir = "/run/user/${toString nixosConfig.users.users.${config.home.username}.uid}";
 
   pass-mpdscribble = pkgs.writeShellApplication {
@@ -13,40 +41,11 @@ let
       config.programs.password-store.package
     ];
 
-    text =
-      let
-        mpdscribbleConf = lib.generators.toINIWithGlobalSection { } {
-          globalSection = {
-            log = "-";
-            host = config.services.mpd.network.listenAddress;
-            port = builtins.toString config.services.mpd.network.port;
-            verbose = 2;
-          };
-
-          sections = {
-            "last.fm" = {
-              journal = "${config.xdg.cacheHome}/mpdscribble/last.fm.journal";
-              url = "https://post.audioscrobbler.com/";
-
-              username = "kyliesomasis";
-              password = "$(pass www/last.fm/kyliesomasis | tr -d '\n' | md5sum - | cut -d' ' -f1)";
-            };
-
-            "listenbrainz" = {
-              journal = "${config.xdg.cacheHome}/mpdscribble/listenbrainz.journal";
-              url = "http://proxy.listenbrainz.org";
-
-              username = "Somasis";
-              password = "$(pass ${nixosConfig.networking.fqdn}/mpdscribble/listenbrainz.org)";
-            };
-          };
-        };
-      in
-      ''
-        cat <<EOF
-        ${mpdscribbleConf}
-        EOF
-      '';
+    text = ''
+      cat <<EOF
+      ${mpdscribbleConf}
+      EOF
+    '';
   };
 
   mpdscribble = pkgs.symlinkJoin {
@@ -131,10 +130,10 @@ in
   };
 
   services.mpdris2 = {
-    enable = config.services.mpd.enable;
+    inherit (config.services.mpd) enable;
     mpd = {
+      inherit (config.services.mpd) musicDirectory;
       host = config.services.mpd.network.listenAddress;
-      musicDirectory = config.services.mpd.musicDirectory;
     };
   };
 

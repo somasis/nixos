@@ -5,9 +5,10 @@
 }: {
   xdg.userDirs.videos = "${config.home.homeDirectory}/video";
 
-  home.persistence."/persist${config.home.homeDirectory}".directories = [
-    { directory = "video"; method = "symlink"; }
-  ];
+  home.persistence."/persist${config.home.homeDirectory}".directories = [{
+    directory = "video";
+    method = "symlink";
+  }];
 
   programs.mpv = {
     enable = true;
@@ -22,14 +23,6 @@
 
         # Use yt-dlp's format preference.
         ytdl-format = "ytdl";
-
-        script-opts = commaList [
-          # "thumbnail-osc=false"
-
-          # https://github.com/po5/mpv_sponsorblock/issues/31
-          "sponsorblock-local_database=no"
-          "sponsorblock-server_address=https://sponsor.ajay.app"
-        ];
 
         alang = commaList [ "jpn" "en" ];
         slang = commaList [ "en" "en-US" "en-GB" ];
@@ -46,6 +39,7 @@
 
         screenshot-format = "png";
         screenshot-template = "%tY-%tm-%tdT%tH:%tM:%tSZ %F %wH:%wM:%wf";
+        screenshot-tag-colorspace = true;
 
         osd-font = "monospace";
         osd-font-size = 48;
@@ -60,6 +54,16 @@
         # mpvScripts.thumbnail
         # thumbnail_network = true;
       };
+
+    scriptOpts = {
+      # thumbnail.osc = false;
+
+      # https://github.com/po5/mpv_sponsorblock/issues/31
+      sponsorblock = {
+        local_database = false;
+        server_address = "https://sponsor.ajay.app";
+      };
+    };
 
     # Use TZ=UTC for `mpv` so that screenshot-template always uses UTC time.
     # We can't use programs.mpv.scripts because of this being set.
@@ -85,7 +89,7 @@
     settings = {
       format = "bestvideo[height<=?1080][fps<=?30]+bestaudio/best";
       trim-filenames = 48;
-      audio-multistreams = true;
+      # audio-multistreams = true;
     };
   };
 }

@@ -4,10 +4,7 @@
 , ...
 }:
 {
-  home.packages = [
-    pkgs.rclone
-    pkgs.sshfs
-  ];
+  home.packages = [ pkgs.rclone pkgs.sshfs ];
 
   home.persistence."/persist${config.home.homeDirectory}".directories = [ "etc/rclone" ];
 
@@ -68,7 +65,7 @@
             Type = "fuse.sshfs";
             inherit What Where;
 
-            Options = (lib.concatStringsSep "," [
+            Options = lib.concatStringsSep "," [
               "_netdev"
               "compression=yes"
               "dir_cache=yes"
@@ -77,7 +74,7 @@
               "follow_symlinks"
               "delay_connect"
               "reconnect"
-            ]);
+            ];
           };
         };
 
@@ -97,7 +94,7 @@
             Type = "fuse.sshfs";
             inherit What Where;
 
-            Options = (lib.concatStringsSep "," [
+            Options = lib.concatStringsSep "," [
               "_netdev"
               "compression=yes"
               "dir_cache=yes"
@@ -106,7 +103,7 @@
               "follow_symlinks"
               "delay_connect"
               "reconnect"
-            ]);
+            ];
           };
         };
 
@@ -126,7 +123,7 @@
             Type = "fuse.sshfs";
             inherit What Where;
 
-            Options = (lib.concatStringsSep "," [
+            Options = lib.concatStringsSep "," [
               "_netdev"
               "compression=yes"
               "dir_cache=yes"
@@ -135,7 +132,7 @@
               "follow_symlinks"
               "delay_connect"
               "reconnect"
-            ]);
+            ];
           };
         };
 
@@ -155,7 +152,7 @@
             inherit What Where;
             Type = "fuse.sshfs";
 
-            Options = (lib.concatStringsSep "," [
+            Options = lib.concatStringsSep "," [
               "_netdev"
               "compression=yes"
               "dir_cache=yes"
@@ -164,7 +161,7 @@
               "follow_symlinks"
               "delay_connect"
               "reconnect"
-            ]);
+            ];
           };
         };
     };

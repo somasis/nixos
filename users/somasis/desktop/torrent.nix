@@ -28,7 +28,7 @@ let
         auto-connect = true;
         hostname = "localhost";
         rpc-url-path = "/transmission/rpc";
-        port = 17994;
+        port = 9091;
 
         ssl = false;
         timeout = 60;
@@ -130,7 +130,7 @@ let
     };
   });
 
-  tpull = (pkgs.writeShellApplication {
+  tpull = pkgs.writeShellApplication {
     name = "tpull";
 
     runtimeInputs = [
@@ -149,9 +149,6 @@ let
       #     -H seedbox.nsa.gov \
       #     -d ~/mess/current/incoming \
       #     %{id}[ ]
-
-      set -eu
-      set -o pipefail
 
       usage() {
           cat >&2 <<EOF
@@ -241,9 +238,9 @@ let
           shift
       done
     '';
-  });
+  };
 
-  topen = (pkgs.writeShellApplication {
+  topen = pkgs.writeShellApplication {
     name = "topen";
 
     runtimeInputs = [
@@ -318,11 +315,40 @@ let
           shift
       done
     '';
-  });
+  };
 in
 {
+  somasis.tunnels.tunnels = [{
+    name = "transmission";
+    location = 9091;
+    remoteLocation = 17994;
+
+    remote = "somasis@genesis.whatbox.ca";
+  }];
+
   home.packages = [
-    pkgs.transmission
+    (pkgs.symlinkJoin {
+      name = "transmission-final";
+      paths = [
+        (pkgs.writeShellApplication {
+          name = "transmission-remote";
+
+          runtimeInputs = [
+            config.programs.password-store.package
+            pkgs.transmission
+          ];
+
+          text = ''
+            entry=www/whatbox.ca/somasis
+
+            TR_AUTH="$(pass meta "$entry" username):$(pass "$entry")" \
+            exec ${pkgs.transmission}/bin/transmission-remote "$@" --authenv
+          '';
+        })
+
+        pkgs.transmission
+      ];
+    })
 
     (pkgs.symlinkJoin {
       name = "transmission-remote-gtk-with-pass";

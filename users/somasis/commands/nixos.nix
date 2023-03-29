@@ -4,18 +4,12 @@
 , ...
 }:
 let
-  nix = "${nixosConfig.nix.package}/bin/nix";
-
   repl = pkgs.writeShellScript "nixos-repl" ''
-    ${nix} repl \
+    ${nixosConfig.nix.package}/bin/nix repl \
         --argstr hostName "${nixosConfig.networking.hostName}" \
         --argstr userName "${config.home.username}" \
         "$@" --file /etc/nixos/repl.nix
   '';
-
-  # nixosReplCurrent = pkgs.writeShellScriptBin "nixos-repl-current" ''
-  #   ${repl} --argstr flake "${outPath}"
-  # '';
 
   nixosRepl = pkgs.writeShellScriptBin "nixos-repl" ''
     ${repl} --argstr flake "/etc/nixos"
@@ -23,13 +17,7 @@ let
 in
 {
   home.packages = [
-    # nixosReplCurrent
-    nixosRepl
-
-    (pkgs.writeShellScriptBin "nixos-todos" ''
-      # Find all things that really ought to be improved.
-      find /etc/nixos -type f -perm -000 ! -path '*/.*' -exec todos {} +
-    '')
+    # nixosRepl
 
     (pkgs.writeShellApplication {
       name = "nixos-search";
@@ -47,8 +35,6 @@ in
       ];
 
       text = ''
-        set -e
-
         export COLUMNS="''${COLUMNS:-$(tput cols)}"
 
         JOBS=''${JOBS:-0}
@@ -134,8 +120,6 @@ in
       ];
 
       text = ''
-        set -e
-
         nix flake metadata --json /etc/nixos \
             | jq -r '
                 .locks.nodes.root[][] as $input
@@ -202,12 +186,6 @@ in
     '')
 
     (pkgs.writeShellApplication {
-      name = "nixos-check";
-      runtimeInputs = [ nixosConfig.nix.package ];
-      text = ''nix flake check /etc/nixos'';
-    })
-
-    (pkgs.writeShellApplication {
       name = "nixos-source";
 
       runtimeInputs = [
@@ -262,10 +240,10 @@ in
             )
 
             args+=( "$pkgFile" )
-            [ "$#" -gt 1 ] || args+=( "+''${pkgSourceLine:++$pkgSource}" )
+            [[ "$#" -gt 1 ]] || args+=( "+''${pkgSourceLine:++$pkgSource}" )
         done
 
-        editor "''${args[@]}"
+        ''${EDITOR:-vi} "''${args[@]}"
       '';
     })
 
@@ -315,45 +293,55 @@ in
       '';
     })
 
-    (pkgs.writeShellScriptBin "nixos-dev" ''
-      set -e
+    (pkgs.writeShellApplication {
+      name = "nixos-dev";
+      runtimeInputs = [
+        config.programs.git.package
+        config.programs.jq.package
+        pkgs.coreutils
+        pkgs.s6-portable-utils
+      ];
 
-      edo() { printf '+ %s\n' "$*" >&2; "$@"; }
+      text = ''
+        set -e
 
-      args=$(
-          nix flake metadata --json /etc/nixos \
-              | jq -r '
-                  .locks.nodes.root[][] as $input
-                      | .locks.nodes."\($input)"
-                      | (
-                          .original.repo
-                              // (
-                                  (.original.url // .original.path)
-                                      | scan("^.*/(.*)")[]
-                              )?
-                      ) as $name
-                      | (.original.ref // "") as $ref
-                      | "\($input)\t\($name)\t\($ref)"' \
-              | while IFS=$(printf '\t') read -r input source;do
-                  basename=$(basename "$source" .git)
-                  for d in \
-                      ~/src/nix/"$input" \
-                      ~/src/"$input" \
-                      ~/src/nix/"$basename" \
-                      ~/src/"$basename"; do
-                      if [ -e "$d"/.git ] && git -C "$d" diff-files --quiet; then
-                          s6-quote -u -- "--override-input '$input' 'git+file://$d'"
-                          break
-                      elif [ -e "$d" ]; then
-                          s6-quote -u -- "--override-input '$input' 'path:$d'"
-                          break
-                      fi
-                  done
-              done | tr '\n' ' '
-      )
+        edo() { printf '+ %s\n' "$*" >&2; "$@"; }
 
-      eval "exec nixos $args \"\''${@:-switch}\""
-    '')
+        args=$(
+            nix flake metadata --json /etc/nixos \
+                | jq -r '
+                    .locks.nodes.root[][] as $input
+                        | .locks.nodes."\($input)"
+                        | (
+                            .original.repo
+                                // (
+                                    (.original.url // .original.path)
+                                        | scan("^.*/(.*)")[]
+                                )?
+                        ) as $name
+                        | (.original.ref // "") as $ref
+                        | "\($input)\t\($name)\t\($ref)"' \
+                | while IFS=$(printf '\t') read -r input source;do
+                    basename=$(basename "$source" .git)
+                    for d in \
+                        ~/src/nix/"$input" \
+                        ~/src/"$input" \
+                        ~/src/nix/"$basename" \
+                        ~/src/"$basename"; do
+                        if [ -e "$d"/.git ] && git -C "$d" diff-files --quiet; then
+                            s6-quote -u -- "--override-input '$input' 'git+file://$d'"
+                            break
+                        elif [ -e "$d" ]; then
+                            s6-quote -u -- "--override-input '$input' 'path:$d'"
+                            break
+                        fi
+                    done
+                done | tr '\n' ' '
+        )
+
+        eval "exec nixos $args \"\''${@:-switch}\""
+      '';
+    })
 
     (pkgs.writeShellScriptBin "nixos" ''
       set -e

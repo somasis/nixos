@@ -1,4 +1,5 @@
 { config
+, lib
 , pkgs
 , ...
 }:
@@ -53,18 +54,19 @@
     ./plugins
   ];
 
-  home.packages = [
-    # makel
+  home = {
+    packages = [
+      # makel
 
-    # Used by spell.kak; see spell.nix for dictionaries
-    pkgs.aspell
+      # Used by spell.kak; see spell.nix for dictionaries
+      pkgs.aspell
 
-    (pkgs.writeShellScriptBin "editor" ''
-      exec kak "$@"
-    '')
-  ];
+      # Used by editorconfig.kak
+      pkgs.editorconfig-core-c
+    ];
 
-  home.sessionVariables."EDITOR" = "editor";
+    sessionVariables."EDITOR" = "kak";
+  };
 
   # TODO: can remove on next Kakoune release, maybe
   #       <https://github.com/mawww/kakoune/pull/4699>
@@ -75,13 +77,13 @@
     icon = "kakoune";
     categories = [ "Utility" "TextEditor" ];
 
-    exec = "kak -- %F";
+    exec = "kak %F";
     terminal = true;
     mimeType = [ "text/*" ];
     startupNotify = false;
   };
 
-  xdg.mimeApps.defaultApplications."text/*" = "kakoune.desktop";
+  xdg.mimeApps.defaultApplications = lib.genAttrs [ "text/*" "text/plain" ] (_: "kakoune.desktop");
 
   programs.kakoune = {
     enable = true;
@@ -278,6 +280,8 @@
           while [ $# -gt 0 ]; do \
               printf 'map global normal "%s" "%s"\n' "$1" "$2"; \
               printf 'map global insert "%s" "<esc>%s"\n' "$1" "$2"; \
+              printf 'map global normal "%s" "%s"\n' "$1" "$2" >&2; \
+              printf 'map global insert "%s" "<esc>%s"\n' "$1" "$2" >&2; \
               shift 2; \
           done
       }
@@ -297,6 +301,8 @@
           while [ $# -gt 0 ]; do \
               printf 'map global normal "%s" "%s"\n' "$1" "$2"; \
               printf 'map global insert "%s" "<esc>%s"\n' "$1" "$2"; \
+              printf 'map global normal "%s" "%s"\n' "$1" "$2" >&2; \
+              printf 'map global insert "%s" "<esc>%s"\n' "$1" "$2" >&2; \
               shift 2; \
           done
       }
@@ -326,18 +332,39 @@
 
       add-highlighter global/user-highlight-cursor-word dynregex '%opt{user_cursor_word}' 0:UserCursorWord
 
-      set-option global windowing_modules ""
-      require-module "x11"
-
-      hook -once global ModuleLoaded x11 %{
-          set-option global termcmd "terminal"
-      }
+      set-option global windowing_modules 'tmux' 'wayland' 'x11'
 
       # Disable startup changelog unless development version.
       set-option global startup_info_version -1
-      set-face global PrimaryCursor default,rgba:657088a0,default+bi
 
-      set-face global MatchingChar +rbi
+      set-face global Error               white,red,default+b
+
+      set-face global PrimaryCursor       bright-white,rgb:5294e2,default+b
+      set-face global PrimaryCursorEol    black,rgb:96c7ec,default+g
+      set-face global PrimarySelection    bright-white,rgb:5294e2,default+g
+
+      set-face global SecondaryCursor     black,magenta,default+b
+      set-face global SecondaryCursorEol  black,bright-magenta,default+g
+      set-face global SecondarySelection  black,magenta,default+bg
+
+      set-face global LineNumbers         bright-black,default,default+d
+      set-face global LineNumbersWrapped  bright-black,default,default+di
+      set-face global LineNumberCursor    white,default,default
+
+      set-face global MatchingChar        +rbi
+
+      set-face global Prompt              white,default,default+b
+      set-face global StatusCursor        white,rgb:5294e2,default+b
+      set-face global StatusLine          default,rgb:2f343f,default
+      set-face global StatusLineInfo      default,default,default
+      set-face global StatusLineMode      green,default,default
+      set-face global StatusLineValue     green,default,default
+
+      set-face global BufferPadding       bright-black,default,default
+      set-face global Whitespace          bright-black,default,default
+
+      set-face global MenuBackground      rgb:e0eaf0,rgb:353946,default
+      set-face global MenuForeground      rgb:ffffff,rgb:5294e2,default+b
 
       map global goto f '<esc>: goto-file<ret>' -docstring 'file'
       map global goto F f -docstring 'file (legacy)'

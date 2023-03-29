@@ -1,7 +1,7 @@
 {
   home.shellAliases = rec {
     # LC_COLLATE=C sorts uppercase before lowercase.
-    ls = "LC_COLLATE=C ls -AFlh";
+    ls = "LC_COLLATE=C ls --hyperlink=auto --group-directories-first --dereference-command-line-symlink-to-dir -AFlh -b";
     vi = "$EDITOR";
 
     # Quick ssh aliases
@@ -30,30 +30,49 @@
     sys = "systemctl -l --legend=false";
     user = "systemctl --user";
     journal = "journalctl -e";
-    syslog = "${journal} -b";
+    syslog = "${journal} -b 0";
     userlog = "${syslog} --user";
     bus = "busctl --verbose -j";
 
     wget = "curl -q -Lf# -Z --no-clobber --remote-name-all --remote-header-name --remove-on-error --retry 20 --retry-delay 10";
 
     since = "datediff -f '%Yy %mm %ww %dd %0Hh %0Mm %0Ss'";
+
+    table = "column -t -s $'\t'";
   };
 
   programs.bash.initExtra = ''
     edo() { printf '+ %s\n' "$*" >&2; "$@"; }
 
-    mount() {
-        if [ "$#" -eq 0 ] && [ -t 1 ]; then
-            # TODO: fuse is hidden because home-manager impermanence mounts are mounted as just "fuse", not as "bindfs" or whatever
-            # TODO: also, surely there's some way to hide pseudo filesystems easier than this...?
-            findmnt --tree \
-                -mv \
-                -O nox-gvfs-hide \
-                -t noautofs,nobinfmt_misc,nobpf,nocgroup,nocgroup2,noconfigfs,nodevpts,nodevtmpfs,noefivarfs,nofusectl,nohugetlbfs,nomqueue,noproc,nopstore,noramfs,nosecurityfs,nosysfs,notmpfs,nofuse
-        else
-            command mount "$@"
-        fi
-    }
+    # # / $ echo ./nix | p cd; pwd
+    # # /nix
+    # p() {
+    #     local opt cmd args args_count=1 args_max=$(getconf ARG_MAX)
+    #     local null=
+    #     while getopts :N:0 opt >/dev/null 2>&1; do
+    #         case "$opt" in
+    #             N) args_count="$OPTARG" ;;
+    #             0) null=true ;;
+    #         esac
+    #     done
+    #     shift $(( OPTIND - 1 ))
+
+    #     cmd=( "$@" )
+
+    #     [[ $(( args_count - ''${#cmd[@]} )) -gt "$args_max" ]] && args_count="$args_max"
+
+    #     local i=0 maxed_out=
+    #     while IFS= read -r ''${null:+-d $'\0'} arg; do
+    #         [[ -n "$maxed_out" ]] && args=() && maxed_out=
+
+    #         args+=( "$arg" )
+    #         i=$(( i + 1 ))
+
+    #         [[ "$i" -eq "$args_count" ]] \
+    #             && maxed_out=true \
+    #             && "''${cmd[@]}" "''${args[@]}"
+    #     done
+    # }
 
     # Spawn a new terminal, detached from the current one, inheriting environment and working directory.
     newt() (

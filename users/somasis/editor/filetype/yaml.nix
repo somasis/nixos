@@ -6,13 +6,11 @@ let
   '';
 in
 {
-  programs.kakoune.config.hooks = [
-    {
-      name = "WinSetOption";
-      option = "filetype=yaml";
-      commands = ''
-        set-option window lintcmd "${lint}"
-      '';
-    }
-  ];
+  programs.kakoune.config.hooks = [{
+    name = "WinSetOption";
+    option = "filetype=yaml";
+    commands = ''
+      set-option window lintcmd "${lint}"
+    '';
+  }];
 }

@@ -3,7 +3,6 @@
 with lib;
 
 let
-
   inherit (pkgs.stdenv.hostPlatform) isDarwin;
 
   cfg = config.programs.zotero;
@@ -155,7 +154,7 @@ in
       (
         let
           duplicates = filterAttrs (_: v: length v != 1) (zipAttrs
-            (mapAttrsToList (n: v: { "${toString v.id}" = n; }) (cfg.profiles)));
+            (mapAttrsToList (n: v: { "${toString v.id}" = n; }) cfg.profiles));
 
           mkMsg = n: v: "  - ID ${n} is used by ${concatStringsSep ", " v}";
         in

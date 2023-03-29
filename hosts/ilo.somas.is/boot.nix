@@ -2,8 +2,7 @@
 , pkgs
 , lib
 , ...
-}:
-{
+}: {
   fileSystems."/boot" = {
     device = "/dev/disk/by-id/nvme-WDS100T1X0E-00AFY0_2045A0800564-part1";
     fsType = "vfat";
@@ -15,28 +14,30 @@
   boot = {
     loader = {
       efi.canTouchEfiVariables = true;
+
       systemd-boot = {
         enable = true;
         editor = false;
 
         configurationLimit = 25;
-
-        netbootxyz.enable = true;
       };
       timeout = 0;
     };
 
     # Silent boot.
-    consoleLogLevel = 0;
+    consoleLogLevel = 3;
     kernelParams = [
       "quiet"
       "udev.log_level=3"
     ];
+
     extraModprobeConfig = ''
       options i915 enable_fbc=1
     '';
 
     initrd = {
+      availableKernelModules = [ "i915" ];
+
       verbose = false;
 
       # NOTE: Necessary for ZFS password prompting via plymouth

@@ -68,23 +68,27 @@ in
   '';
 
   # Integrate with list-add(1).
-  programs.qutebrowser.keyBindings.normal."ztw" =
-    let
-      listAdd = pkgs.writeShellScript "list-add" ''
-        set -eu
-        set -o pipefail
+  programs.qutebrowser = {
+    aliases.list-add =
+      let
+        list-add = pkgs.writeShellScript "list-add" ''
+          set -eu
+          set -o pipefail
 
-        : "''${QUTE_FIFO:?}"
-        exec >>"''${QUTE_FIFO}"
+          : "''${QUTE_FIFO:?}"
+          exec >>"''${QUTE_FIFO}"
 
-        title="$1"; shift
-        url="$1"; shift
+          title="$1"; shift
+          url="$1"; shift
 
-        attrs=$(dmenu -p "''${1:+\`}list-add''${1:+ $*\` }[''${title}]")
-        [ $? -eq 1 ] && exit 0
+          attrs=$(dmenu -p "''${1:+\`}list-add''${1:+ $*\` }[''${title}]")
+          [ $? -eq 1 ] && exit 0
 
-        list-add -f ${list} "$@" "''${title} ''${url}''${attrs:+ ''${attrs}}"
-      '';
-    in
-    "spawn -u ${listAdd} {title} {url} -l wish";
+          list-add -f ${list} "$@" "''${title} ''${url}''${attrs:+ ''${attrs}}"
+        '';
+      in
+      "spawn -u ${list-add} {title} {url} -l wish";
+
+    keyBindings.normal."ztw" = "list-add";
+  };
 }

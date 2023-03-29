@@ -36,12 +36,12 @@ in
             name = mkOption {
               type = types.str;
               description = "Pretty name for use by other stuff";
-              default = (builtins.head (builtins.split " " (builtins.baseNameOf (builtins.toString config.command))));
+              default = builtins.head (builtins.split " " (builtins.baseNameOf (builtins.toString config.command)));
               example = "fortune";
             };
 
             update = mkOption {
-              type = with types; nullOr (either (enum [ "none" "instant" ]) (ints.positive));
+              type = with types; nullOr (either (enum [ "none" "instant" ]) ints.positive);
               description = ''
                 How often to run the command.
 
@@ -172,8 +172,8 @@ in
     };
   };
 
-  config = mkIf (cfg.enable) {
-    systemd.user = (foldr
+  config = mkIf cfg.enable {
+    systemd.user = foldr
       (
         widget:
         units:
@@ -241,8 +241,6 @@ in
         };
       }
       cfg.widgets
-    );
+    ;
   };
 }
-
-

@@ -34,44 +34,11 @@ let
     ];
   };
 
-  # TODO bugs :(
-  # bsdunzip = (
-  #   let
-  #     year = builtins.substring 0 4 (inputs.bsdunzip.lastModifiedDate);
-  #     month = builtins.substring 4 2 (inputs.bsdunzip.lastModifiedDate);
-  #     day = builtins.substring 6 2 (inputs.bsdunzip.lastModifiedDate);
-  #   in
-  #   pkgs.stdenv.mkDerivation rec {
-  #     pname = "bsdunzip";
-  #     version = "unstable-${year}-${month}-${day}";
-
-  #     src = inputs.bsdunzip;
-
-  #     buildInputs = [ pkgs.libarchive ];
-  #     nativeBuildInputs = [ pkgs.pkg-config ];
-
-  #     makeFlags = [ "PREFIX=${placeholder "out"}" ];
-  #     prepareFlags = [ "bsdunzip.c" "man" ];
-  #     installFlags = [ "install" ];
-  #     postInstall = ''
-  #       ln -s bsdunzip $out/bin/unzip
-  #     '';
-
-  #     enableParallelBuilding = true;
-
-  #     meta = with lib; {
-  #       description = "libarchive(3)-utilizing unzip implementation, lightly ported from FreeBSD";
-  #       license = [ licenses.isc licenses.bsd2 ];
-  #       maintainers = with maintainers; [ somasis ];
-  #     };
-  #   }
-  # );
-
-  sbase = (
+  sbase =
     let
-      year = builtins.substring 0 4 (inputs.sbase.lastModifiedDate);
-      month = builtins.substring 4 2 (inputs.sbase.lastModifiedDate);
-      day = builtins.substring 6 2 (inputs.sbase.lastModifiedDate);
+      year = builtins.substring 0 4 inputs.sbase.lastModifiedDate;
+      month = builtins.substring 4 2 inputs.sbase.lastModifiedDate;
+      day = builtins.substring 6 2 inputs.sbase.lastModifiedDate;
     in
     pkgs.stdenv.mkDerivation rec {
       pname = "sbase";
@@ -98,16 +65,14 @@ let
         license = licenses.mit;
         maintainers = with maintainers; [ somasis ];
       };
-    }
-  );
+    };
 
-  ubase = (
+  ubase =
     let
-      year = builtins.substring 0 4 (inputs.ubase.lastModifiedDate);
-      month = builtins.substring 4 2 (inputs.ubase.lastModifiedDate);
-      day = builtins.substring 6 2 (inputs.ubase.lastModifiedDate);
+      year = builtins.substring 0 4 inputs.ubase.lastModifiedDate;
+      month = builtins.substring 4 2 inputs.ubase.lastModifiedDate;
+      day = builtins.substring 6 2 inputs.ubase.lastModifiedDate;
     in
-
     pkgs.stdenv.mkDerivation rec {
       pname = "ubase";
       version = "unstable-${year}-${month}-${day}";
@@ -129,11 +94,10 @@ let
         license = licenses.mit;
         maintainers = with maintainers; [ somasis ];
       };
-    }
-  );
+    };
 
-  busybox = (pkgs.busybox.override { enableStatic = true; });
-  toybox = (pkgs.toybox.override { enableStatic = true; });
+  busybox = pkgs.busybox.override { enableStatic = true; };
+  toybox = pkgs.toybox.override { enableStatic = true; };
 in
 {
   home.packages = [

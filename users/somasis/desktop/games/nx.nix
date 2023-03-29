@@ -3,7 +3,7 @@
 , ...
 }:
 let
-  nxapi = pkgs.nodePackages.nxapi;
+  inherit (pkgs.nodePackages) nxapi;
   # nxapiProxy = "127.0.0.1:8472";
 in
 {

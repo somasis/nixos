@@ -47,14 +47,10 @@ let
         x
   ;
 
-  discord = pkgs.discord-canary.override {
-    withOpenASAR = true;
-  };
+  # discord = pkgs.discord-canary;
+  discord = pkgs.discord-canary.override { withOpenASAR = true; };
   discordDescription = discord.meta.description;
   discordProgram = "${discord}/bin/${discord.meta.mainProgram}";
-  # discord = pkgs.discord.override {
-  #   withOpenASAR = true;
-  # };
 in
 {
   home.packages = [
@@ -77,9 +73,7 @@ in
     # "etc/powercord"
   ];
 
-  # home.persistence."/cache${config.home.homeDirectory}".directories = [
-  #   "var/cache/powercord"
-  # ];
+  # home.persistence."/cache${config.home.homeDirectory}".directories = [ "var/cache/powercord" ];
 
   # Convert all the attributes to SNAKE_CASE in the generated JSON
   xdg.configFile."discordcanary/settings.json".text = lib.generators.toJSON { }
@@ -102,7 +96,7 @@ in
             name = "discord-css";
             files = [
               "${inputs.repluggedThemeCustom}/custom.css"
-              # "${inputs.repluggedThemeIrc}/irc.css"
+              "${inputs.repluggedThemeIrc}/irc.css"
             ];
           });
         };
@@ -151,13 +145,6 @@ in
       foreground = "#ffffff";
     };
 
-    zz-discord-david = {
-      appname = "discord";
-      summary = "david";
-      background = "#ffffff";
-      foreground = "#000000";
-    };
-
     zz-discord-phidica = {
       appname = "discord";
       summary = "Phidica*";
@@ -182,18 +169,32 @@ in
     Unit = {
       Description = discordDescription;
       PartOf = [ "graphical-session.target" ];
+
+      StartLimitIntervalSec = 1;
+      StartLimitBurst = 1;
+      StartLimitAction = "none";
     };
     Install.WantedBy = [ "graphical-session.target" ];
 
     Service = {
       Type = "simple";
-      ExecStart = "${discordProgram} --start-minimized";
+      ExecStart = "${discordProgram} " + lib.concatStringsSep " " (map (x: "--${x}") [
+        "start-minimized"
+
+        # Force GPU-utilizing acceleration
+        # <https://wiki.archlinux.org/title/Chromium#Force_GPU_acceleration>
+        "ignore-gpu-blocklist"
+        "enable-gpu-rasterization"
+        "enable-zero-copy"
+
+        # Enable hardware video acceleration
+        # <https://wiki.archlinux.org/title/Chromium#Hardware_video_acceleration>
+        "enable-features=VaapiVideoDecoder"
+        "enable-accelerated-mjpeg-decode"
+        "enable-accelerated-video-decode"
+      ]);
 
       Restart = "on-abnormal";
-
-      StartLimitIntervalSec = 1;
-      StartLimitBurst = 1;
-      StartLimitAction = "none";
 
       # It seems this is required because otherwise Discord moans about options.json being read-only
       # in the journal every time I run `discord` to open the already-running client.
@@ -201,5 +202,37 @@ in
       StandardError = "null";
       StandardOutput = "null";
     };
+  };
+
+  services.xsuspender.rules.discord = {
+    matchWmClassGroupContains = "discord";
+    downclockOnBattery = 0;
+    suspendDelay = 300;
+    resumeEvery = 10;
+    resumeFor = 5;
+
+    suspendSubtreePattern = ".";
+
+    # Only suspend if discord isn't currently open, and no applications
+    # are playing on pulseaudio
+    execSuspend = builtins.toString (pkgs.writeShellScript "suspend" ''
+      ! ${pkgs.xdotool}/bin/xdotool search \
+          --limit 1 \
+          --onlyvisible \
+          --classname \
+          '^discord$' \
+          >/dev/null \
+          && test "$(
+              ${pkgs.ponymix}/bin/ponymix \
+                  --short \
+                  --sink-input \
+                  list \
+                  | wc -l
+              )" \
+              -eq 0
+      e=$?
+      ${pkgs.libnotify}/bin/notify-send -a xsuspender xsuspender "suspending $WM_NAME ($PID, $WID)"
+      exit $e
+    '');
   };
 }

@@ -1,5 +1,4 @@
-{ pkgs, ... }:
-{
+{ pkgs, ... }: {
   # Enable ALSA and preserve the mixer state across boots.
   sound.enable = true;
   environment.persistence."/cache".directories = [ "/var/lib/alsa" ];
@@ -17,7 +16,11 @@
   #   enable = true;
   #   audio.enable = true;
 
-  #   alsa.enable = true;
+  #   alsa = {
+  #     enable = true;
+  #     support32Bit = true;
+  #   };
+
   #   pulse.enable = true;
   #   jack.enable = true;
   # };

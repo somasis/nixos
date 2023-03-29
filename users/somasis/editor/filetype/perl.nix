@@ -26,16 +26,13 @@ let
   '';
 in
 {
-  programs.kakoune.config.hooks =
-    [
-      {
-        name = "WinSetOption";
-        option = "filetype=perl";
-        commands =
-          ''
-            set-option window formatcmd "${format}"
-            set-option window lintcmd "${lint}"
-          '';
-      }
-    ];
+  programs.kakoune.config.hooks = [{
+    name = "WinSetOption";
+    option = "filetype=perl";
+    commands =
+      ''
+        set-option window formatcmd "${format}"
+        set-option window lintcmd "${lint}"
+      '';
+  }];
 }

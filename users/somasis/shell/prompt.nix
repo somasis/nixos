@@ -1,5 +1,5 @@
 {
-  # prompt - Set variables such as $PS1. See sh(1).
+  # prompt - Set variables such as $PS1, as well as readline configuration. See bash(1).
 
   programs.bash.initExtra = ''
     _before_command() {
@@ -48,4 +48,46 @@
 
     PROMPT_COMMAND="''${PROMPT_COMMAND:+; }_before_prompt"
   '';
+
+  programs.readline = {
+    enable = true;
+
+    bindings = {
+      "\\x08" = "unix-word-rubout"; # ctrl-backspace
+    };
+
+    variables = {
+      # Use a single <tab> for completion, always; even when
+      # there's multiple possible completions, and thus it's
+      # ambiguous as to which is meant.
+      show-all-if-ambiguous = true;
+
+      # Append a symbol to the end of files in the completion list
+      # (akin to `ls -F`).
+      visible-stats = true;
+      colored-stats = false;
+
+      # When browsing history, move the cursor to the point it
+      # was at when it was editing the entry in question.
+      # history-preserve-point = true;
+
+      # Briefly move the cursor over to a matching parenthesis
+      # (for visibility).
+      blink-matching-paren = true;
+
+      menu-complete-display-prefix = true;
+      mark-symlinked-directories = true;
+
+      # Don't use readline's internal pager for showing completion;
+      # just print them to the terminal.
+      page-completions = false;
+      print-completions-horizontally = true;
+
+      # "when inserting a single match into the line ... [do] not
+      # insert characters from the completion that match characters
+      # after point in the word being completed, so [that] portions
+      # of the word following the cursor are not duplicated."
+      skip-completed-text = true;
+    };
+  };
 }

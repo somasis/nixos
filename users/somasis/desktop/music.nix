@@ -42,6 +42,11 @@ let
     withDevices = false;
   };
 
+  # TODO There ought to be a JSON <-> QSettings converter
+  # It seems like it ought to be doable with PySide...
+  # <https://doc.qt.io/qtforpython-5/PySide2/QtCore/QSettings.html>
+  # <https://doc.qt.io/qtforpython-5/PySide2/QtCore/QJsonDocument.html>
+  # <https://doc.qt.io/qtforpython-5/PySide2/QtCore/QJsonValue.html>
   mkCantata = lib.generators.toINI {
     mkKeyValue = k: v:
       let
@@ -328,7 +333,7 @@ in
 
             cat ${cantataConf} - > "$XDG_RUNTIME_DIR"/cantata/cantata.conf <<EOF
             [Scrobbling]
-            sessionKey=$(pass ${nixosConfig.networking.fqdn}/cantata/last.fm)
+            sessionKey=$(pass ${nixosConfig.networking.fqdnOrHostName}/cantata/last.fm)
             EOF
 
             ln -sf "$XDG_RUNTIME_DIR/cantata/cantata.conf" "$XDG_CONFIG_HOME/cantata/cantata.conf"

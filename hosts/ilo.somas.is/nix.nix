@@ -26,7 +26,23 @@
       # Quiet the dirty messages when using `nixos-dev`.
       warn-dirty = false;
 
-      substituters = [ "ssh-ng://somasis@spinoza.7596ff.com" ];
+      substituters = [
+        "ssh-ng://nix-ssh@spinoza.7596ff.com"
+
+        # Use binary cache for nonfree packages
+        # <https://github.com/numtide/nixpkgs-unfree>
+        "https://numtide.cachix.org"
+
+        "https://nix-community.cachix.org"
+      ];
+
+      trusted-public-keys = [
+        "spinoza.7596ff.com-1:3evmjxB2owiKU1RcWMaVW7al/xdOG3QVqEEYwILPK1w="
+
+        "numtide.cachix.org-1:2ps1kLBUWjxIneOy1Ik6cQjb41X0iXVXeHigGmycPPE="
+
+        "nix-community.cachix.org-1:mB9FSh9qf2dCimDSUo8Zy7bkq5CX+/rkCWyvRCYg3Fs="
+      ];
 
       # TODO Use content-addressed derivations?
       # <https://discourse.nixos.org/t/content-addressed-nix-call-for-testers/12881#:~:text=Level%203%20%E2%80%94%20Raider%20of%20the%20unknown>
@@ -35,14 +51,17 @@
     distributedBuilds = true;
     buildMachines = [{
       hostName = "spinoza.7596ff.com";
-      sshUser = "somasis";
-      sshKey = "${config.users.users.root.home}/.ssh/id_ed25519";
+
       system = "x86_64-linux";
       maxJobs = 4;
 
+      protocol = "ssh-ng";
+      sshUser = "nix-ssh";
+      sshKey = "${config.users.users.root.home}/.ssh/id_ed25519";
+
       publicHostKey = "c3NoLWVkMjU1MTkgQUFBQUMzTnphQzFsWkRJMU5URTVBQUFBSU5rSWRPNDVQeVozMDAydlRHbHN0cDJPMTV2cHo4akU2bXdjV1M2ZjZRUE4gcm9vdEBzcGlub3phCg==";
 
-      protocol = "ssh-ng";
+      supportedFeatures = [ "nixos-test" "benchmark" "big-parallel" "kvm" ];
     }];
 
     gc = {
@@ -54,17 +73,13 @@
 
   programs.ssh.extraConfig = ''
     Host spinoza.7596ff.com
-        PubkeyAcceptedKeyTypes ssh-ed25519
+      ControlMaster auto
+      ControlPath /tmp/%C.control.ssh
+      ControlPersist 15m
 
-        Port 1312
+      ServerAliveInterval 15
 
-        ControlMaster no
-        ControlPath /tmp/%C.control.ssh
-        ControlPersist 15m
-
-        ServerAliveInterval 15
-
-        Compression yes
+      Compression yes
   '';
 
   programs.ssh.knownHosts.spinoza = {

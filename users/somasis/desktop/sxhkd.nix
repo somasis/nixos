@@ -4,7 +4,131 @@
 , ...
 }:
 let
-  xinput-notify = (pkgs.writeShellApplication {
+  screenshots = "${config.home.homeDirectory}/mess/current/screenshots";
+
+  colorPick = pkgs.writeShellScript "color-pick" ''
+    c=$(${pkgs.xcolor}/bin/xcolor "$@")
+
+    printf '%s' "$c" | ${pkgs.xclip}/bin/xclip -in -selection clipboard
+    ${pkgs.libnotify}/bin/notify-send \
+        -a xcolor \
+        -i gnome-color-chooser \
+        "xcolor" \
+        "Copied '$c' to clipboard."
+  '';
+
+  screenshot = pkgs.writeShellApplication {
+    name = "screenshot";
+
+    runtimeInputs = [
+      pkgs.coreutils
+      pkgs.fq
+      pkgs.libnotify
+      pkgs.maim
+      pkgs.moreutils
+      pkgs.slop
+      pkgs.tesseract
+      pkgs.xclip
+      pkgs.xdotool
+      pkgs.zbar
+    ];
+
+    text = ''
+      : "''${SCREENSHOT_DIR:=${screenshots}}"
+      : "''${SCREENSHOT_BARCODE:=true}"
+      : "''${SCREENSHOT_OCR:=false}"
+      : "''${SCREENSHOT_MAIM:=}"
+
+      maim() {
+          # shellcheck disable=SC2086
+          command maim $SCREENSHOT_MAIM "$@"
+      }
+
+      mkdir -p "$SCREENSHOT_DIR"
+      b="$SCREENSHOT_DIR/$(TZ=UTC date +"%Y-%m-%dT%H:%M:%SZ")"
+
+      case "''${SCREENSHOT_GEOMETRY:=selection}" in
+          selection)
+              slop=$(slop "$@" -f '%g %i') || exit 1
+
+              read -r geometry window <<< "$slop"
+              window=$(
+                  # make sure it's actually a window ID
+                  if [ "''${#window}" -eq 7 ]; then
+                      xdotool getwindowclassname "$window" 2>/dev/null
+                  else
+                      xdotool getmouselocation getwindowclassname 2>/dev/null
+                  fi
+              )
+
+              b="$b''${window:+ $window}"
+              maim -g "$geometry" "$b".png
+              ;;
+          *)
+              maim "$b".png
+              ;;
+      esac
+
+      if [ "$SCREENSHOT_OCR" = true ] \
+          && ocr=$(tesseract "$b".png stdout | ifne tee "$b".txt) \
+          && [ -n "$ocr" ]; then
+          xclip -i \
+              -selection clipboard \
+              "$b".txt \
+              >&- 2>&-
+
+          notify-send \
+              -a screenshot \
+              -i scanner \
+              "screenshot" \
+              "Scanned ''${#ocr} characters: \"$ocr\""
+
+      # Barcode data is not saved since it may contain sensitive information.
+      elif [ "$SCREENSHOT_BARCODE" = true ] \
+          && barcode=$(zbarimg -1q --xml -- "$b".png) \
+          && [ -n "$barcode" ] \
+          && barcode_type=$(fq -d xml -r '.barcodes.source.index.symbol."@type"' <<<"$barcode") \
+          && barcode_data=$(fq -d xml -r '.barcodes.source.index.symbol.data' <<<"$barcode"); then
+
+          xclip -i \
+              -selection clipboard \
+              <<<"$barcode_data" \
+              >&- 2>&-
+
+          notify-send \
+              -a screenshot \
+              -i view-barcode-qr \
+              "screenshot" \
+              "Scanned barcode ($barcode_type): \"$barcode_data\""
+      else
+          xclip -i \
+              -selection clipboard \
+              -target image/png \
+              "$b".png \
+              >&- 2>&-
+
+          xclip -i \
+              -selection clipboard \
+              -target UTF8_STRING \
+              <<<"$b.png" \
+              >&- 2>&-
+
+          xclip -i \
+              -selection clipboard \
+              -target text/uri-list \
+              <<<"file://$b.png" \
+              >&- 2>&-
+
+          notify-send \
+              -a screenshot \
+              -i accessories-screenshot \
+              "screenshot" \
+              "Took screenshot: \"$b.png\""
+      fi
+    '';
+  };
+
+  xinput-notify = pkgs.writeShellApplication {
     name = "xinput-notify";
     runtimeInputs = [
       pkgs.coreutils
@@ -119,7 +243,7 @@ let
           shift
       done
     '';
-  });
+  };
 in
 {
   # XXX Don't use systemctl --user reload here; sxhkd is loaded on the fly in xsession for some reason
@@ -129,59 +253,17 @@ in
         || :
   '';
 
-  home.packages = [ xinput-notify ];
+  home.packages = [
+    pkgs.xrandr-invert-colors
+
+    screenshot
+    xinput-notify
+  ];
 
   services.sxhkd = {
     enable = true;
     keybindings =
       let
-        screenshots = "${config.home.homeDirectory}/mess/current/screenshots";
-        screenshot = pkgs.writeShellScript "screenshot" ''
-          set -eu
-          set -o pipefail
-
-          : "''${SCREENSHOT_OCR:=}"
-
-          mkdir -p "${screenshots}"
-
-          export TMPDIR=$(mktemp -d "${screenshots}"/.tmp.XXXXXX)
-          d=$(TZ=UTC date +"%Y-%m-%dT%H:%M:%SZ.png")
-
-          ${pkgs.maim}/bin/maim "$@" \
-              | ${pkgs.moreutils}/bin/sponge "${screenshots}/$d"
-
-          if [ -n "$SCREENSHOT_OCR" ]; then
-              text=$(${pkgs.tesseract5}/bin/tesseract "${screenshots}/$d" stdout)
-
-              ${pkgs.xclip}/bin/xclip -i \
-                  -selection clipboard <<<"$text"
-
-              ${pkgs.libnotify}/bin/notify-send \
-                  -a screenshot \
-                  "screenshot" \
-                  "Scanned ''${#text} characters to clipboard: \"$text\""
-          elif barcode=$(${pkgs.zbar}/bin/zbarimg -1q -- "${screenshots}/$d"); then
-              barcode_type=''${barcode%%:*}
-              barcode="''${barcode#*:}"
-
-              ${pkgs.xclip}/bin/xclip -i \
-                  -selection clipboard \
-                  <<<"$barcode"
-
-              ${pkgs.libnotify}/bin/notify-send \
-                  -a screenshot \
-                  "screenshot" \
-                  "Scanned barcode ($barcode_type) to clipboard: \"$barcode\""
-          else
-              ${pkgs.xclip}/bin/xclip -i \
-                  -selection clipboard \
-                  -t image/png \
-                  < "${screenshots}/$d"
-          fi
-
-          rm -r "$TMPDIR"
-        '';
-
         getMonitorDimensions = pkgs.writeShellScript "get-monitor-dimensions" ''
           # TODO: This is an absolutely disgusting solution. I hate this. Isn't there a better way?
           #       Better yet, why doesn't maim(1) just handle displays in a way that makes sense???
@@ -202,18 +284,8 @@ in
                   getwindowgeometry \
                       --shell
           )
+
           printf '%sx%s+%s+%s\n' "$WIDTH" "$HEIGHT" "$X" "$Y"
-        '';
-
-        colorPick = pkgs.writeShellScript "color-pick" ''
-          c=$(${pkgs.xcolor}/bin/xcolor "$@")
-
-          printf '%s' "$c" | ${pkgs.xclip}/bin/xclip -in -selection clipboard
-          ${pkgs.libnotify}/bin/notify-send \
-              -a xcolor \
-              -i color-picker \
-              "xcolor" \
-              "Copied '$c' to clipboard."
         '';
       in
       {
@@ -242,19 +314,27 @@ in
         "super + g" = "${colorPick} -f hex";
         "super + alt + g" = "${colorPick} -f rgb";
 
-        "super + i " = "${pkgs.xrandr-invert-colors}/bin/xrandr-invert-colors";
+        "super + i" = "xrandr-invert-colors";
 
         # Take screenshot of window/selection
-        "Print" = "${screenshot} -us -b 6 -p -6 -l -c 0.7686,0.9137,0.4705,.5";
+        "Print" = ''
+          SCREENSHOT_MAIM=-u screenshot -b 6 -p -6 -l -c 0.7686,0.9137,0.4705,.5
+        '';
 
         # Take screenshot of window/selection (and scan its text)
-        "ctrl + Print" = "SCREENSHOT_OCR=true ${screenshot} -us -b 6 -p -6 -l -c 0.7686,0.9137,0.4705,.5";
+        "shift + Print" = ''
+          SCREENSHOT_MAIM=-u SCREENSHOT_OCR=true screenshot -b 6 -p -6 -l -c 0.7686,0.9137,0.4705,.5
+        '';
 
         # Take screenshot of current monitor
-        "super + Print" = "${screenshot} -g \"$(${getMonitorDimensions})\"";
+        "super + Print" = ''
+          SCREENSHOT_GEOMETRY=$(${getMonitorDimensions}) screenshot
+        '';
 
         # Take screenshot of all monitors
-        "alt + Print" = "${screenshot}";
+        "alt + Print" = ''
+          SCREENSHOT_GEOMETRY=desktop screenshot
+        '';
 
         # Hardware: {mute, lower, raise} output volume - fn + {f1,f2,f3}
         "XF86AudioMute" = "ponymix -t sink toggle";
@@ -265,7 +345,7 @@ in
         "super + XF86AudioLowerVolume" = "ponymix-snap -t source decrease 5";
 
         # Hardware: toggle touchpad - super + f1
-        "super + F2" = "${xinput-notify}/bin/xinput-notify touchpad";
+        "super + F2" = "xinput-notify touchpad";
       };
   };
 }

@@ -2,27 +2,22 @@
   home.packages = [
     pkgs.nsxiv
 
-    pkgs.gimp
-    # TODO gmic broken
-    # (pkgs.gimp-with-plugins.override {
-    #   plugins = [
-    #     # pkgs.gimpPlugins.gmic
-    #     pkgs.gimpPlugins.lqrPlugin
-    #     pkgs.gimpPlugins.texturize
-    #     pkgs.gimpPlugins.resynthesizer
-    #     pkgs.gimpPlugins.waveletSharpen
-    #   ];
-    # })
+    (pkgs.gimp-with-plugins.override {
+      plugins = [
+        pkgs.gimpPlugins.gmic
+        pkgs.gimpPlugins.lqrPlugin
+        pkgs.gimpPlugins.texturize
+        pkgs.gimpPlugins.waveletSharpen
+      ];
+    })
 
+    pkgs.darktable
     pkgs.inkscape
-
-    # TODO gmic broken
-    # pkgs.darktable
   ];
 
   home.persistence."/persist${config.home.homeDirectory}".directories = [
-    "pictures"
-    "etc/GIMP"
+    { method = "symlink"; directory = "pictures"; }
+    { method = "symlink"; directory = "etc/GIMP"; }
   ];
 
   xdg.userDirs.pictures = "${config.home.homeDirectory}/pictures";

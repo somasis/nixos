@@ -7,21 +7,31 @@ let
   };
 
   rdrview = pkgs.writeShellScript "rdrview" ''
-    set -eu
-    umask 0077
-
-    PATH=${lib.makeBinPath [ pkgs.rdrview pkgs.coreutils pkgs.gnused ]}:$PATH
+    set -x
 
     : "''${QUTE_FIFO:?}"
     : "''${QUTE_URL:?}"
+    : "''${QUTE_HTML:?}"
+
+    umask 0077
+
+    PATH=${lib.makeBinPath [ pkgs.rdrview pkgs.coreutils pkgs.gnused ]}:$PATH
+    : "''${TMPDIR:=/tmp}"
 
     exec >> "$QUTE_FIFO"
 
-    rdrview -c "$QUTE_URL"
+    case "$QUTE_URL" in
+        file://*) QUTE_URL=''${QUTE_URL#file://} ;;
+    esac
 
-    : "''${TMPDIR:=/tmp}"
     tmp=$(mktemp "$TMPDIR"/rdrview.XXXXXXXXX.html)
     base=$(printf '%s\n' "$QUTE_URL" | sed -E '/^[^:]+:\/\/.*\// s|^(.*)/[^/]+$|\1|')
+
+    if ! rdrview -u "$base" -c "$QUTE_HTML"; then
+        printf "message-error \"rdrview: could not find article content in '%s'\"\n" "$QUTE_URL"
+        cat "$QUTE_HTML" >&2
+        exit 1
+    fi
 
     cat >"$tmp" <<EOF
     <!DOCTYPE html>
@@ -29,7 +39,20 @@ let
       <meta charset="utf-8">
       <title>rdrview''${QUTE_TITLE:+: $QUTE_TITLE}</title>
       <style>
-        $(cat "${hello-css}")
+        $(cat ${hello-css})
+
+        article {
+            counter-reset: section;
+        }
+
+        article p:before {
+            counter-increment: section;
+            content: "" counter(section) " ";
+            opacity: .5;
+            font-weight: bold;
+            vertical-align: super;
+            font-size: 75%;
+        }
       </style>
     </head>
     <body>
@@ -41,14 +64,11 @@ let
     EOF
 
     printf 'open -r %s\n' "$tmp"
-
-    # Remove the temporary files once qutebrowser closes.
-    {
-      wait $PPID
-      rm -f "$tmp"
-    } &
   '';
 in
 {
-  programs.qutebrowser.keyBindings.normal."<z><p><r>" = "spawn -u ${rdrview}";
+  programs.qutebrowser = {
+    aliases.rdrview = "spawn -u ${rdrview}";
+    keyBindings.normal."zpr" = "rdrview";
+  };
 }

@@ -24,6 +24,8 @@
     ./xdg.nix
   ];
 
+  nix.settings.extra-experimental-features = [ "flakes" "nix-command" ];
+
   home.persistence = {
     "/persist${config.home.homeDirectory}" = {
       directories = [
@@ -35,10 +37,7 @@
     };
 
     "/cache${config.home.homeDirectory}" = {
-      directories = [
-        { method = "symlink"; directory = "var/cache/nix"; }
-        { method = "symlink"; directory = "var/cache/nix-index"; }
-      ];
+      directories = [{ method = "symlink"; directory = "var/cache/nix"; }];
 
       allowOther = true;
     };
@@ -84,20 +83,20 @@
         inherit (nixosConfig.services) tor;
 
         userAgent = [ "-A" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/97.0.4692.99 Safari/537.36" ];
-        proxy = (lib.optionals (tor.enable && tor.client.enable) (
+        proxy = lib.optionals (tor.enable && tor.client.enable) (
           let
-            proxyProtocol = (if tor.client.dns.enable then "socks5h" else "socks5");
-            proxyAddress = (if (builtins.substring 0 1 tor.client.socksListenAddress.addr) == "/" then
-              "${tor.client.socksListenAddress.addr}:${toString tor.client.socksListenAddress.port}"
-            else
-              "localhost/${tor.client.socksListenAddress.addr}"
-            );
+            proxyProtocol = if tor.client.dns.enable then "socks5h" else "socks5";
+            proxyAddress =
+              if (builtins.substring 0 1 tor.client.socksListenAddress.addr) == "/" then
+                "${tor.client.socksListenAddress.addr}:${toString tor.client.socksListenAddress.port}"
+              else
+                "localhost/${tor.client.socksListenAddress.addr}";
           in
           [
             "-x"
             "${proxyProtocol}://${proxyAddress}"
           ]
-        ));
+        );
       in
       pkgs.writeShellApplication {
         name = "autocurl";
@@ -106,7 +105,7 @@
 
         runtimeInputs =
           [ pkgs.curl ]
-          ++ lib.optional (nixosConfig.networking.networkmanager.enable) pkgs.networkmanager
+          ++ lib.optional nixosConfig.networking.networkmanager.enable pkgs.networkmanager
         ;
 
         text = ''
@@ -131,16 +130,37 @@
 
   programs.jq.enable = true;
 
+  # <https://rosettacode.org/wiki/URL_decoding#jq>
+  home.file.".jq".text = ''
+    def uri_decode:
+      # The helper function converts the input string written in the given
+      # "base" to an integer
+      def to_i(base):
+        explode
+        | reverse
+        | map(if 65 <= . and . <= 90 then . + 32  else . end)   # downcase
+        | map(if . > 96  then . - 87 else . - 48 end)  # "a" ~ 97 => 10 ~ 87
+        | reduce .[] as $c
+            # base: [power, ans]
+            ([1,0]; (.[0] * base) as $b | [$b, .[1] + (.[0] * $c)]) | .[1];
+
+      .  as $in
+      | length as $length
+      | [0, ""]  # i, answer
+      | until ( .[0] >= $length;
+          .[0] as $i
+          |  if $in[$i:$i+1] == "%"
+             then [ $i + 3, .[1] + ([$in[$i+1:$i+3] | to_i(16)] | implode) ]
+             else [ $i + 1, .[1] + $in[$i:$i+1] ]
+             end)
+      | .[1];  # answer
+  '';
+
   systemd.user.startServices = true;
 
   home.sessionPath = [ "$HOME/bin" ];
 
   home.sessionVariables."SYSTEMD_PAGER" = "cat";
-
-  programs.nix-index = {
-    enable = true;
-    enableBashIntegration = false;
-  };
 
   home.stateVersion = "22.11";
 }

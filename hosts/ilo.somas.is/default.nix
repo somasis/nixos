@@ -24,8 +24,8 @@ nixpkgs.lib.nixosSystem {
       };
     })
 
-    impermanence.nixosModules.impermanence
     disko.nixosModules.disko
+    impermanence.nixosModules.impermanence
     nixos-hardware.nixosModules.framework
 
     nix-index-database.nixosModules.nix-index

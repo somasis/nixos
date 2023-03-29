@@ -64,7 +64,7 @@ in
   xfconf.settings.thunar =
     let
       constList = lib.concatStringsSep ",";
-      listString = l: lib.concatStringsSep "," (map (x: builtins.toString x) l);
+      listString = l: lib.concatStringsSep "," (map builtins.toString l);
     in
     {
       # Display > View settings
@@ -104,6 +104,7 @@ in
       # View defaults: default view
       default-view = "void"; # View new folders using "last active view"
       last-view = "ThunarCompactView";
+      last-show-hidden = true;
 
       # View defaults: compact view
       last-compact-view-zoom-level = "THUNAR_ZOOM_LEVEL_50_PERCENT";

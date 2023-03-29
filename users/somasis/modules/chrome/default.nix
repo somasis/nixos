@@ -10,7 +10,7 @@ let cfg = config.somasis.chrome; in
     ./stw.nix
   ];
 
-  config = mkIf (cfg.stw.enable) {
+  config = mkIf cfg.stw.enable {
     systemd.user.targets.chrome = {
       Unit = {
         Description = "All services that put something on the screeen supplementary to the desktop";

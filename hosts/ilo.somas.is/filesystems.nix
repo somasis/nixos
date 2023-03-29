@@ -1,6 +1,13 @@
 { config
+, pkgs
 , ...
 }: {
+  # TODO: Remove when pkgs.linuxKernel.packages.linux_6_0 is compatible
+  boot.kernelPackages = config.boot.zfs.package.latestCompatibleLinuxPackages;
+  # boot.zfs.enableUnstable = true;
+
+  services.udisks2.enable = true;
+
   boot.supportedFilesystems = [
     "vfat"
     "zfs"

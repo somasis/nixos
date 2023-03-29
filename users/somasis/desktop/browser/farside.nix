@@ -11,31 +11,18 @@
     s = "setHost"
     i = interceptor
 
-
-    def farside(url: QUrl, i) -> bool:
+    def farside(url: QUrl, r) -> bool:
         url.setHost("farside.link")
         p = url.path().strip("/")
-        url.setPath(urljoin(i, p))
+        url.setPath(urljoin(r, p))
         return True
 
-
-    def imgur(url: QUrl) -> bool:
-        return farside(url, "/rimgo/")
-
-
-    def medium(url: QUrl) -> bool:
-        return farside(url, "/scribe/")
-
-
-    # def gtranslate(url: QUrl) -> bool:
-    #     return farside(url, "/simplytranslate/")
-
-
-    redirects = {
-        "imgur.com": imgur,
-        "medium.com": medium,
-        # "translate.google.com": gtranslate,
-    }
+    redirects = [
+        "imgur.com",
+        "medium.com",
+        "tiktok.com",
+        "www.tiktok.com"
+    ]
 
     def f(info: i.Request):
         if info.resource_type != i.ResourceType.main_frame or info.request_url.scheme() in {
@@ -45,11 +32,8 @@
             return
 
         url = info.request_url
-        redir = redirects.get(url.host())
-
-        if redir is not None and redir(url) is not False:
-            info.redirect(url)
-
+        if url.host() in redirects:
+            info.redirect(farside(url, url.host()))
 
     i.register(f)
   '';

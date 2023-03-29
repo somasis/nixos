@@ -161,7 +161,7 @@
 
   services.dunst.iconTheme = {
     inherit (config.gtk.iconTheme) name package;
-    size = "32x32";
+    size = "24x24";
   };
 
   # Necessary to make Qt apps not scale like shit
@@ -169,7 +169,7 @@
     QT_AUTO_SCREEN_SCALE_FACTOR = 0;
     QT_AUTO_SCREEN_SCALE_FACTORS = 1.5;
 
-    QT_STYLE_OVERRIDE = "${config.qt.style.name}"; # TODO: why is this necessary
+    QT_STYLE_OVERRIDE = config.qt.style.name; # TODO: why is this necessary
 
     # QT_QPA_PLATFORMTHEME = "qt5ct";
     # QT_SCALE_FACTOR = "1.5";

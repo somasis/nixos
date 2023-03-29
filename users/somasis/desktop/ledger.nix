@@ -15,9 +15,9 @@ let
 
     text = ''
       : "''${NO_COLOR:=}"
-      [[ -z "''${NO_COLOR}" ]] && [[ -t 0 ]] && khal() { command khal --color "$@"; }
+      [ -z "''${NO_COLOR}" ] && [ -t 0 ] && khal() { command khal --color "$@"; }
 
-      [[ $# -gt 0 ]] && set -- today 1d
+      [ $# -gt 0 ] && set -- today 1d
 
       khal list \
           -a Ledger \
@@ -55,13 +55,13 @@ let
       cols=$(tput cols)
       lines=$(tput lines)
 
-      [[ "''${cols}" -gt 120 ]] && cols=120
-      [[ "''${lines}" -gt 30 ]] && lines=30
+      [ "''${cols}" -gt 120 ] && cols=120
+      [ "''${lines}" -gt 30 ] && lines=30
 
       led_terminal="dumb ansi size ''${cols},''${lines}"
 
-      if [[ "$#" -gt 0 ]]; then
-          while [[ "$#" -gt 0 ]]; do
+      if [ "$#" -gt 0 ]; then
+          while [ "$#" -gt 0 ]; do
               plot "$1"
               shift
           done
@@ -162,7 +162,7 @@ let
     ];
 
     text = ''
-      [[ $# -eq 0 ]] && exec ledger edit
+      [ $# -eq 0 ] && exec ledger edit
 
       ledger entry "$@" >/dev/null || exit $?
       entry=$(ledger entry "$@" | sed 's/\$-/-\$/')
@@ -175,7 +175,7 @@ let
                   entry=$(printf '%s\n' "''${entry}" | vipe --suffix=.ledger)
                   ;;
               [Yy] | "")
-                  [[ -n "$(tail -n1 "${ledgerAbsolute}"/transactions.ledger)" ]] && printf '\n' >>"${ledgerAbsolute}"/transactions.ledger
+                  [ -n "$(tail -n1 "${ledgerAbsolute}"/transactions.ledger)" ] && printf '\n' >>"${ledgerAbsolute}"/transactions.ledger
                   printf '%s\n' "''${entry}" >>"${ledgerAbsolute}"/transactions.ledger
                   break
                   ;;
@@ -260,7 +260,7 @@ let
       # shellcheck disable=SC2119
       transaction "''${te:+''${te}=}''${td}" "''${ts}" "''${tn}"
 
-      while [[ "$#" -gt 0 ]]; do
+      while [ "$#" -gt 0 ]; do
           case "''${1}" in
               *=*) posting "''${1%=*}" "''${1#*=}" ;;
               *)   posting "$1" ;;
@@ -373,7 +373,7 @@ in
       --time-colon
     '';
 
-    package = (pkgs.symlinkJoin {
+    package = pkgs.symlinkJoin {
       name = "ledger-final";
 
       paths = [
@@ -410,13 +410,13 @@ in
             export LEDGER_FILE
 
             prompt() {
-                if [[ $# -eq 1 ]]; then
+                if [ $# -eq 1 ]; then
                     printf '%s: ' "$1" >&2
                 else
                     printf '%s [%s]: ' "$1" "$2" >&2
                 fi
                 read -r prompt
-                [[ $# -gt 1 ]] && [[ -z "''${prompt}" ]] && prompt="''${2}"
+                [ $# -gt 1 ] && [ -z "''${prompt}" ] && prompt="''${2}"
                 printf '%s' "''${prompt}"
             }
 
@@ -446,6 +446,6 @@ in
           '';
         })
       ];
-    });
+    };
   };
 }

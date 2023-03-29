@@ -6,7 +6,14 @@
 , ...
 }: {
   programs.beets.settings = rec {
-    plugins = [ "convert" ];
+    plugins = [ "convert" "alternatives" ];
+    alternatives.lossy = {
+      directory = "${config.xdg.userDirs.music}/alternatives_test";
+      formats = [ "opus" ];
+      query = "";
+      removable = false;
+    };
+
     convert = {
       # auto = true;
 

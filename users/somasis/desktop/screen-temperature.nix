@@ -4,7 +4,7 @@
     baseTemperature = 3900;
   };
 
-  systemd.user.services.xsecurelock.Service.ExecStartPre = [
+  systemd.user.services.xsecurelock.Service.ExecStartPost = [
     "-${pkgs.systemd}/bin/systemctl --user stop sctd.service"
   ];
 
@@ -13,7 +13,7 @@
   ];
 
   programs.autorandr.hooks.postswitch."sctd" = ''
-    f="${nixosConfig.networking.fqdn}"
+    f="${nixosConfig.networking.fqdnOrHostName}"
 
     case "$AUTORANDR_CURRENT_PROFILE" in
         "$f"[:+]"tv")

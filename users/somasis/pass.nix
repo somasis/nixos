@@ -1,15 +1,20 @@
+# TODO: Replace with age-based password store when Android
+#       Password Store is usable with it
+
 { config
 , pkgs
 , nixosConfig
 , lib
 , ...
 }:
-# TODO: Replace with age-based password store when Android
-#       Password Store is usable with it
+let
+  # TODO move into NixOS configuration
+  qute-pass = "${config.home.homeDirectory}/bin/qute-pass";
+in
 {
   home.persistence."/persist${config.home.homeDirectory}".directories = [
     ".gnupg"
-    "share/password-store"
+    { method = "symlink"; directory = "share/password-store"; }
   ];
 
   programs.gpg.enable = true;
@@ -47,6 +52,7 @@
 
       (pkgs.writeTextFile {
         name = "pass-meta";
+
         executable = true;
         destination = "/lib/password-store/extensions/meta.bash";
 
@@ -115,6 +121,7 @@
 
       (pkgs.writeTextFile {
         name = "pass-link";
+
         executable = true;
         destination = "/lib/password-store/extensions/link.bash";
 
@@ -347,56 +354,57 @@
   # Provide libsecret service for various apps
   services.pass-secret-service.enable = true;
 
-  programs.qutebrowser.keyBindings.normal =
+  programs.qutebrowser =
     let
-      passGenerateCmd = pkgs.writeShellScript
-        "pass-generate-cmd"
-        ''
-          : "''${QUTE_FIFO:?}"
+      passGenerateCmd = pkgs.writeShellScript "pass-generate-cmd" ''
+        : "''${QUTE_FIFO:?}"
 
-          password_store_host=$(
-              printf '%s\n' "$2" \
-                  | sed -E \
-                      -e "s|^https?://||" \
-                      -e "s|^www\.||" \
-                      -e "s|/.*||" \
-                      -e "s|^|www/|" \
-                      -e "s|$||"
-          )
+        password_store_host=$(
+            printf '%s\n' "$2" \
+                | sed -E \
+                    -e "s|^https?://||" \
+                    -e "s|^www\.||" \
+                    -e "s|/.*||" \
+                    -e "s|^|www/|" \
+                    -e "s|$||"
+        )
 
-          printf 'set-cmd-text :spawn -u %s %s/\n' "$1" "$password_store_host" >>"''${QUTE_FIFO}"
-        '';
-      passGenerate = pkgs.writeShellScript
-        "pass-generate"
-        ''
-          : "''${QUTE_FIFO:?}"
+        printf 'set-cmd-text :spawn -u %s %s/\n' "$1" "$password_store_host" >>"''${QUTE_FIFO}"
+      '';
+      passGenerate = pkgs.writeShellScript "pass-generate" ''
+        : "''${QUTE_FIFO:?}"
 
-          if ${config.programs.password-store.package}/bin/pass generate -c "$1"; then
-              ${pkgs.libnotify}/bin/notify-send \
-                  -a pass \
-                  -i password \
-                  -u low \
-                  "pass" \
-                  "Generated password at '$1'. Copied to clipboard and will be cleared in ''${PASSWORD_STORE_CLIP_TIME} seconds."
-          else
-              ${pkgs.libnotify}/bin/notify-send \
-                  -a pass \
-                  -i password \
-                  pass \
-                  "\`pass generate -c '$1'\` failed for some reason..."
-              exit 1
-          fi
-        '';
+        if ${config.programs.password-store.package}/bin/pass generate -c "$1"; then
+            ${pkgs.libnotify}/bin/notify-send \
+                -a pass \
+                -i password \
+                -u low \
+                "pass" \
+                "Generated password at '$1'. Copied to clipboard and will be cleared in ''${PASSWORD_STORE_CLIP_TIME} seconds."
+        else
+            ${pkgs.libnotify}/bin/notify-send \
+                -a pass \
+                -i password \
+                pass \
+                "\`pass generate -c '$1'\` failed for some reason..."
+            exit 1
+        fi
+      '';
     in
     {
+      aliases."pass" = "spawn -u ${qute-pass}";
+      aliases."pass-generate" = "spawn -u ${passGenerateCmd} ${passGenerate}";
+
       # -n: Don't automatically enter into insert mode, so as to match the input.insert_mode.* settings.
-      "zll" = "spawn -u ${config.home.homeDirectory}/bin/qute-pass";
-      "zlL" = "spawn -u ${config.home.homeDirectory}/bin/qute-pass -d Enter";
-      "zlz" = "spawn -u ${config.home.homeDirectory}/bin/qute-pass -E";
-      "zlu" = "spawn -u ${config.home.homeDirectory}/bin/qute-pass -u";
-      "zlp" = "spawn -u ${config.home.homeDirectory}/bin/qute-pass -p";
-      "zlo" = "spawn -u ${config.home.homeDirectory}/bin/qute-pass -o";
-      "zlg" = "spawn -u ${passGenerateCmd} ${passGenerate} {url:host}";
-      # "<z><l><z>" = "spawn -u pass-hint-username";
+      keyBindings.normal = {
+        "zll" = "pass";
+        "zlL" = "pass -d Enter";
+        "zlz" = "pass -E";
+        # "zlz" = "spawn -u pass-hint-username";
+        "zlu" = "pass -u";
+        "zlp" = "pass -p";
+        "zlo" = "pass -o";
+        "zlg" = "pass-generate {url:host}";
+      };
     };
 }

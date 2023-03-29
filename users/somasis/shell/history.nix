@@ -1,8 +1,9 @@
-{
+{ lib, ... }: {
   programs.bash = {
-    historyFile = "/dev/null";
-    historyFileSize = 0;
+    historyFile = lib.mkDefault "/dev/null";
+    historyFileSize = lib.mkDefault 0;
     historyControl = [ "ignorespace" "ignoredups" ];
-    shellOptions = [ "-histappend" ];
+
+    sessionVariables.HISTTIMEFORMAT = "%Y-%m-%dT%H:%M:%S%z";
   };
 }

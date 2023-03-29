@@ -26,7 +26,7 @@ in
                   -q \
                   -asxml \
                   -w 0 2>/dev/null \
-              | ${pkgs.w3m-nox}/bin/w3m \
+              | ${pkgs.w3m-batch}/bin/w3m \
                   -dump \
                   -T text/html
         '';
@@ -482,6 +482,17 @@ in
         (feedReddit { subreddit = "tokiponataso"; tags = [ "toki pona" ]; })
         (feedReddit { subreddit = "mi_lon"; tags = [ "toki pona" ]; })
         (feedReddit { subreddit = "sitelen_musi"; tags = [ "toki pona" ]; })
+
+        {
+          url = "https://www.urbanterror.info/rss/news/all";
+          title = "Urban Terror: news";
+          tags = [ "urban terror" "games" ];
+        }
+        {
+          url = "http://www.urbanterror.info/rss/blogs/all/";
+          title = "Urban Terror: blogs";
+          tags = [ "urban terror" "blog" ];
+        }
       ];
   };
 
@@ -592,31 +603,33 @@ in
     };
   };
 
-  programs.qutebrowser.keyBindings.normal."<z><p><f>" =
-    let
-      quteFeeds = pkgs.writeShellScript "qute-feeds" ''
-        set -eu
-        set -o pipefail
+  programs.qutebrowser = {
+    aliases."feeds" =
+      let
+        quteFeeds = pkgs.writeShellScript "qute-feeds" ''
+          PATH=${lib.makeBinPath [ pkgs.coreutils pkgs.moreutils pkgs.sfeed pkgs.xclip ]}:$PATH
 
-        : "''${QUTE_FIFO:?}"
-        : "''${QUTE_HTML:?}"
+          : "''${QUTE_FIFO:?}"
+          : "''${QUTE_HTML:?}"
 
-        feeds=$(${pkgs.sfeed}/bin/sfeed_web "$1" <"$QUTE_HTML")
+          [ -n "$feeds" ] ||
+                printf 'message-warning "%s"\n' \
+                    "feeds: no feeds were found." \
+                    > "''${QUTE_FIFO}"
 
-        [ -n "$feeds" ] ||
-              printf 'message-warning "%s"\n' \
-                  "feeds: No feeds were found." \
-                  > "''${QUTE_FIFO}"
+          <"$QUTE_HTML" sfeed_web "$1" \
+              | ifne dmenu -p "qutebrowser [feeds]:" \
+              | cut -f1 \
+              | xclip -i -selection clipboard
 
-        dmenu -p "qutebrowser [feeds]:" \
-            | cut -f1 \
-            | ${pkgs.xclip}/bin/xclip -i -selection clipboard
+          [ -n "$feeds" ] ||
+                printf 'message-info "%s"\n' \
+                    "feeds: copied feed to clipboard." \
+                    > "''${QUTE_FIFO}"
+        '';
+      in
+      "spawn -u ${quteFeeds} {url:domain}";
 
-        [ -n "$feeds" ] ||
-              printf 'message-info "%s"\n' \
-                  "feeds: Copied feed to clipboard." \
-                  > "''${QUTE_FIFO}"
-      '';
-    in
-    "spawn -u ${quteFeeds} {url:domain}";
+    keyBindings.normal."zpf" = "feeds";
+  };
 }

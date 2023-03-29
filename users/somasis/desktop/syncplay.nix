@@ -3,13 +3,12 @@
 , config
 , ...
 }:
-with lib.generators;
 let
   mkList = list: "[" + (lib.concatStringsSep "," (map (x: ''"${x}"'') list)) + "]";
 
   mpv = "${config.programs.mpv.package}/bin/mpv";
 
-  syncplayINI = toINI { } {
+  syncplayINI = lib.generators.toINI { } {
     general.checkforupdatesautomatically = false;
 
     client_settings = {
@@ -36,8 +35,8 @@ let
       autoplayminusers = -1.0;
       autoplayrequiresamefilenames = true;
 
-      filenameprivacymode = "SendRaw";
-      filesizeprivacymode = "SendRaw";
+      filenameprivacymode = "SendHashed";
+      filesizeprivacymode = "SendHashed";
       loopatendofplaylist = false;
       loopsinglefiles = false;
 
@@ -65,6 +64,7 @@ let
       roomlist = mkList [
         "anime"
         "pones"
+        "wifes"
         "wives"
       ];
     };
@@ -104,7 +104,7 @@ let
     };
   };
 
-  pass-syncplay = (pkgs.writeShellApplication {
+  pass-syncplay = pkgs.writeShellApplication {
     name = "pass-syncplay";
     runtimeInputs = [
       config.programs.password-store.package
@@ -134,7 +134,7 @@ let
 
       ln -sf "$runtime"/syncplay.ini "$XDG_CONFIG_HOME"/syncplay.ini
     '';
-  });
+  };
 in
 {
   systemd.user.services."pass-syncplay" = {
@@ -158,7 +158,7 @@ in
   home.packages = [ pass-syncplay pkgs.syncplay ];
 
   xdg.configFile = {
-    "Syncplay/MainWindow.conf".text = toINI { } {
+    "Syncplay/MainWindow.conf".text = lib.generators.toINI { } {
       MainWindow = {
         autoplayChecked = false;
         autoplayMinUsers = 3;
@@ -167,11 +167,11 @@ in
       };
     };
 
-    "Syncplay/MoreSettings.conf".text = toINI { } {
+    "Syncplay/MoreSettings.conf".text = lib.generators.toINI { } {
       MoreSettings.ShowMoreSettings = true;
     };
 
-    "Syncplay/PlayerList.conf".text = toINI { } {
+    "Syncplay/PlayerList.conf".text = lib.generators.toINI { } {
       PlayerList.PlayerList = mpv;
     };
   };

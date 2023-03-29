@@ -4,7 +4,7 @@
 , ...
 }:
 let
-  pass-spr = (pkgs.writeShellApplication {
+  pass-spr = pkgs.writeShellApplication {
     name = "pass-spr";
     runtimeInputs = [
       config.programs.password-store.package
@@ -12,9 +12,6 @@ let
     ];
 
     text = ''
-      set -eu
-      set -o pipefail
-
       umask 0077
 
       hostname="$1"; shift
@@ -30,14 +27,14 @@ let
 
       cat > "$config" <<EOF
       [spr]
-      githubAuthToken = $(pass "${nixosConfig.networking.fqdn}/spr/$hostname/$username")
+      githubAuthToken = $(pass "${nixosConfig.networking.fqdnOrHostName}/spr/$hostname/$username")
       EOF
 
       for p in "$runtime"/*/*.conf; do
           printf '[include]\npath = "%s"\n' "$p"
       done > "$runtime"/gitconfig
     '';
-  });
+  };
 in
 {
   programs.git = {

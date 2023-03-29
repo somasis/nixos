@@ -63,7 +63,7 @@
                 -q \
                 -asxml \
                 -w 0 2>/dev/null \
-            | ${pkgs.w3m-nox}/bin/w3m \
+            | ${pkgs.w3m-batch}/bin/w3m \
                 -dump \
                 -T text/html
 
