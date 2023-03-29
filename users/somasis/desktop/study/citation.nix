@@ -182,11 +182,13 @@ in
                     # is different from, say, activating a running instance
                     # of Discord, so it trips me up. Move it to the focused
                     # desktop when this is the case.
-                    exec bspc node "$wid" -g hidden=off -d focused -f
+                    bspc node "$wid" -g hidden=off -d focused -f
                 else
                     # If it is not hidden, just focus it on the desktop it is on.
-                    exec bspc node "$wid" -g hidden=off -f
+                    bspc node "$wid" -g hidden=off -f
                 fi
+
+                _skip=true
             fi
           '';
 
@@ -199,9 +201,10 @@ in
         in
         ''
           wrapProgram $out/bin/zotero \
-              --run ". ${startService}" \
-              --run ". ${unhideZotero}" \
-              --run "${filterPrefs}"
+              --run '[ -z "$_skip" ] && . ${startService}' \
+              --run "[ -z "$_skip" ] && . ${unhideZotero}" \
+              --run "[ -z "$_skip" ] && ${filterPrefs}" \
+              --run "[ -z "$_skip" ] || unset _skip" \
         '';
     };
 
@@ -227,6 +230,15 @@ in
               "mode" = "html";
               "selector" = "#pdf";
               "attribute" = "src";
+              "automatic" = true;
+            }
+            {
+              "name" = "Google Scholar";
+              "method" = "GET";
+              "url" = "{z:openURL}https://scholar.google.com/scholar?q=doi%3A{doi}";
+              "mode" = "html";
+              "selector" = ".gs_or_ggsm a:first-child";
+              "attribute" = "href";
               "automatic" = true;
             }
           ];
@@ -368,144 +380,145 @@ in
     "zotero/styles".source = csl;
     "zotero/translators".source = zoteroTranslators;
 
+    "zotero/locate/.keep".source = builtins.toFile "keep" "";
     "zotero/locate/engines.json".text = builtins.toJSON [
       {
-        hidden = false;
+        _hidden = false;
 
-        name = "CrossRef Lookup";
-        alias = "CrossRef";
-        description = "CrossRef Search Engine";
-        icon = "https://crossref.org/favicon.ico";
+        _name = "CrossRef Lookup";
+        _alias = "CrossRef";
+        _description = "CrossRef Search Engine";
+        _icon = "https://crossref.org/favicon.ico";
 
-        "_urlTemplate" = "https://crossref.org/openurl?{z:openURL}&pid=zter:zter321";
-        "_urlParams" = [ ];
+        _urlTemplate = "https://crossref.org/openurl?{z:openURL}&pid=zter:zter321";
+        _urlParams = [ ];
 
-        "_urlNamespaces" = {
+        _urlNamespaces = {
           "" = "http://a9.com/-/spec/opensearch/1.1/";
-          "z" = "http://www.zotero.org/namespaces/openSearch#";
+          z = "http://www.zotero.org/namespaces/openSearch#";
         };
       }
 
       {
-        hidden = false;
+        _hidden = false;
 
-        name = "Google Scholar";
-        alias = "Google Scholar";
-        description = "Google Scholar Search";
-        icon = "https://scholar.google.com/favicon.ico";
+        _name = "Google Scholar";
+        _alias = "Google Scholar";
+        _description = "Google Scholar Search";
+        _icon = "https://scholar.google.com/favicon.ico";
 
-        "_urlTemplate" = "https://scholar.google.com/scholar?as_q=&as_epq={z:title}&as_occt=title&as_sauthors={rft:aufirst?}+{rft:aulast?}&as_ylo={z:year?}&as_yhi={z:year?}&as_sdt=1.&as_sdtp=on&as_sdtf=&as_sdts=22&";
-        "_urlParams" = [ ];
+        _urlTemplate = "https://scholar.google.com/scholar?as_q=&as_epq={z:title}&as_occt=title&as_sauthors={rft:aufirst?}+{rft:aulast?}&as_ylo={z:year?}&as_yhi={z:year?}&as_sdt=1.&as_sdtp=on&as_sdtf=&as_sdts=22&";
+        _urlParams = [ ];
 
-        "_urlNamespaces" = {
+        _urlNamespaces = {
           "" = "http://a9.com/-/spec/opensearch/1.1/";
-          "z" = "http://www.zotero.org/namespaces/openSearch#";
-          "rft" = "info:ofi/fmt:kev:mtx:journal";
+          z = "http://www.zotero.org/namespaces/openSearch#";
+          rft = "info:ofi/fmt:kev:mtx";
         };
       }
       {
-        hidden = false;
+        _hidden = false;
 
-        name = "Google Scholar (title only)";
-        alias = "Google Scholar";
-        description = "Google Scholar Search (title only)";
-        icon = "https://scholar.google.com/favicon.ico";
+        _name = "Google Scholar (title only)";
+        _alias = "Google Scholar (title)";
+        _description = "Google Scholar Search (title only)";
+        _icon = "https://scholar.google.com/favicon.ico";
 
-        "_urlTemplate" = "https://scholar.google.com/scholar?as_q=&as_epq={z:title}&as_occt=title&as_sdt=1.&as_sdtp=on&as_sdtf=&as_sdts=22&";
-        "_urlParams" = [ ];
+        _urlTemplate = "https://scholar.google.com/scholar?as_q=&as_epq={z:title}&as_occt=title&as_sdt=1.&as_sdtp=on&as_sdtf=&as_sdts=22&";
+        _urlParams = [ ];
 
-        "_urlNamespaces" = {
+        _urlNamespaces = {
           "" = "http://a9.com/-/spec/opensearch/1.1/";
-          "z" = "http://www.zotero.org/namespaces/openSearch#";
-          "rft" = "info:ofi/fmt:kev:mtx:journal";
-        };
-      }
-
-      {
-        hidden = false;
-
-        name = "Thriftbooks";
-        alias = "Thriftbooks";
-        description = "Search Thriftbooks";
-        icon = "https://static.thriftbooks.com/images/favicon.ico";
-
-        "_urlTemplate" = "https://www.thriftbooks.com/viewDetails.aspx?ASIN={rft:isbn}";
-        "_urlParams" = [ ];
-
-        "_urlNamespaces" = {
-          "" = "http://a9.com/-/spec/opensearch/1.1/";
-          "z" = "http://www.zotero.org/namespaces/openSearch#";
-          "rft" = "info:ofi/fmt:kev:mtx:book";
+          z = "http://www.zotero.org/namespaces/openSearch#";
+          rft = "info:ofi/fmt:kev:mtx:book";
         };
       }
 
       {
-        hidden = false;
+        _hidden = false;
 
-        name = "Abebooks";
-        alias = "Abebooks";
-        description = "Search Abebooks";
-        icon = "https://www.abebooks.com/favicon.ico";
+        _name = "Thriftbooks";
+        _alias = "Thriftbooks";
+        _description = "Search Thriftbooks";
+        _icon = "https://static.thriftbooks.com/images/favicon.ico";
 
-        "_urlTemplate" = "https://www.abebooks.com/servlet/SearchResults?isbn={rft:isbn}";
-        "_urlParams" = [ ];
+        _urlTemplate = "https://www.thriftbooks.com/viewDetails.aspx?ASIN={rft:isbn}";
+        _urlParams = [ ];
 
-        "_urlNamespaces" = {
+        _urlNamespaces = {
           "" = "http://a9.com/-/spec/opensearch/1.1/";
-          "z" = "http://www.zotero.org/namespaces/openSearch#";
-          "rft" = "info:ofi/fmt:kev:mtx:book";
+          z = "http://www.zotero.org/namespaces/openSearch#";
+          rft = "info:ofi/fmt:kev:mtx:book";
         };
       }
 
       {
-        hidden = false;
+        _hidden = false;
 
-        name = "Library Genesis";
-        alias = "Library Genesis";
-        description = "Search Library Genesis";
-        icon = "http://libgen.rs/favicon.ico";
+        _name = "Abebooks";
+        _alias = "Abebooks";
+        _description = "Search Abebooks";
+        _icon = "https://www.abebooks.com/favicon.ico";
 
-        "_urlTemplate" = "http://libgen.rs/search.php?req={rft:isbn}&open=0&res=25&view=detailed&phrase=1&column=identifier";
-        "_urlParams" = [ ];
+        _urlTemplate = "https://www.abebooks.com/servlet/SearchResults?isbn={rft:isbn}";
+        _urlParams = [ ];
 
-        "_urlNamespaces" = {
+        _urlNamespaces = {
           "" = "http://a9.com/-/spec/opensearch/1.1/";
-          "z" = "http://www.zotero.org/namespaces/openSearch#";
-          "rft" = "info:ofi/fmt:kev:mtx:book";
+          z = "http://www.zotero.org/namespaces/openSearch#";
+          rft = "info:ofi/fmt:kev:mtx:book";
         };
       }
 
       {
-        hidden = false;
+        _hidden = false;
 
-        name = "12ft";
-        alias = "12ft.io";
-        description = "Show me a 10ft paywall, I'll show you a 12ft ladder";
-        icon = "https://12ft.io/favicon.png";
+        _name = "Library Genesis";
+        _alias = "Library Genesis";
+        _description = "Search Library Genesis";
+        _icon = "http://libgen.rs/favicon.ico";
 
-        "_urlTemplate" = "https://12ft.io/{z:URL}";
-        "_urlParams" = [ ];
+        _urlTemplate = "http://libgen.rs/search.php?req={rft:isbn}&open=0&res=25&view=detailed&phrase=1&column=identifier";
+        _urlParams = [ ];
 
-        "_urlNamespaces" = {
+        _urlNamespaces = {
+          "" = "http://a9.com/-/spec/opensearch/1.1/";
+          z = "http://www.zotero.org/namespaces/openSearch#";
+          rft = "info:ofi/fmt:kev:mtx:book";
+        };
+      }
+
+      {
+        _hidden = false;
+
+        _name = "12ft.io";
+        _alias = "12ft.io";
+        _description = "Show me a 10ft paywall, I'll show you a 12ft ladder";
+        _icon = "https://12ft.io/favicon.png";
+
+        _urlTemplate = "https://12ft.io/api/proxy?q={z:url}";
+        _urlParams = [ ];
+
+        _urlNamespaces = {
           "" = "http://a9.com/-/spec/opensearch/1.1/";
           z = "http://www.zotero.org/namespaces/openSearch#";
         };
       }
       {
-        hidden = false;
+        _hidden = false;
 
-        name = "Unpaywall";
-        alias = "Unpaywall";
-        description = "Unpaywall Lookup";
-        icon = "https://oadoi.org/static/img/favicon.png";
+        _name = "Unpaywall";
+        _alias = "Unpaywall";
+        _description = "Unpaywall Lookup";
+        _icon = "https://oadoi.org/static/img/favicon.png";
 
-        "_urlTemplate" = "https://oadoi.org/{z:DOI}";
-        "_urlParams" = [ ];
+        _urlTemplate = "https://oadoi.org/{z:DOI}";
+        _urlParams = [ ];
 
-        "_urlNamespaces" = {
+        _urlNamespaces = {
           "" = "http://a9.com/-/spec/opensearch/1.1/";
           z = "http://www.zotero.org/namespaces/openSearch#";
-          "rft" = "info:ofi/fmt:kev:mtx:journal";
+          rft = "info:ofi/fmt:kev:mtx:journal";
         };
       }
     ];
@@ -523,6 +536,7 @@ in
       Unit = {
         Description = pkgs.zotero.meta.description;
         PartOf = [ "graphical-session.target" ];
+        After = [ "picom.service" "panel.service" ];
       };
       Install.WantedBy = [ "graphical-session.target" ];
 
@@ -536,12 +550,21 @@ in
     };
   };
 
+  xdg.mimeApps.defaultApplications = lib.genAttrs [
+    "application/marc"
+    "application/rdf+xml"
+    "application/x-research-info-systems"
+    "text/x-bibtex"
+  ]
+    (_: [ "zotero.desktop" ])
+  ;
+
   services.sxhkd.keybindings."super + z" = "${config.programs.zotero.package}/bin/zotero";
 
   # TODO this should work, but it sure don't
   # services.xsuspender.rules.zotero = {
   #   matchWmClassGroupContains = "Zotero";
-  #   downclockOnBattery = 1;
+  #   downclockOnBattery = 0;
   #   suspendDelay = 15;
   #   resumeEvery = 60;
   #   resumeFor = 5;
@@ -549,7 +572,8 @@ in
   #   # Only suspend if LibreOffice isn't currently open, and qutebrowser isn't
   #   # currently visible, since it would cause the connector to wait until it is
   #   # momentarily unsuspended, which is annoying
-  #   execSuspend = ''
+  #
+  #   execSuspend = builtins.toString (pkgs.writeShellScript "suspend" ''
   #     ! ${pkgs.xdotool}/bin/xdotool search \
   #         --limit 1 \
   #         --classname \
@@ -561,16 +585,14 @@ in
   #         --onlyvisible \
   #         '^qutebrowser$' \
   #         >/dev/null
-  #   '';
+  #   '');
   # };
 
   programs.qutebrowser = {
-    keyBindings.normal = {
-      "<z><p><z>" = "spawn -u ${qute-zotero}/bin/qute-zotero";
-      "<z><p><Z>" = "hint links userscript ${qute-zotero}/bin/qute-zotero";
-    };
-
-    aliases.zotero = "spawn -u ${qute-zotero}/bin/zotero";
+    aliases.zotero = "spawn -u ${qute-zotero}/bin/qute-zotero";
+    aliases.Zotero = "hint links userscript ${qute-zotero}/bin/qute-zotero";
+    keyBindings.normal."zpz" = "zotero";
+    keyBindings.normal."zpZ" = "Zotero";
 
     searchEngines = {
       "!library" = "${proxy}?qurl=http%3A%2F%2Fsearch.ebscohost.com%2Flogin.aspx%3Fdirect%3Dtrue%26site%3Deds-live%26scope%3Dsite%26group%3Dmain%26profile%3Deds%26authtime%3Dcookie%2Cip%2Cuid%26bQuery%3D{quoted}";
