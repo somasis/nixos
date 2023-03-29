@@ -13,20 +13,23 @@
     #   url = "https://www.gravatar.com/avatar/a187e38560bb56f5231cd19e45ad80f6?s=512&d=https%3A%2F%2Favatars.githubusercontent.com%2Fsomasis%3Fsize%3D512";
     # };
 
-    flake.url = "github:gytis-ivaskevicius/flake-utils-plus";
+    nix-filter.url = "github:numtide/nix-filter";
 
     nixpkgs.url = "github:nixos/nixpkgs?ref=nixos-unstable";
     nixpkgsStable.url = "github:nixos/nixpkgs?ref=nixos-22.11";
 
-    nixosHardware.url = "github:nixos/nixos-hardware";
+    # Use a pre-built nix-index database
+    nix-index-database.url = "github:Mic92/nix-index-database";
+    nix-index-database.inputs.nixpkgs.follows = "nixpkgs";
+
+    nixos-hardware.url = "github:nixos/nixos-hardware";
 
     impermanence.url = "github:nix-community/impermanence";
-    # disko = {
-    #   url = "github:nix-community/disko";
-    # };
+    disko.url = "github:nix-community/disko";
+    disko.inputs.nixpkgs.follows = "nixpkgs";
 
-    homeManager.url = "github:nix-community/home-manager";
-    homeManager.inputs.nixpkgs.follows = "nixpkgs";
+    home-manager.url = "github:nix-community/home-manager";
+    home-manager.inputs.nixpkgs.follows = "nixpkgs";
 
     # nixMinecraft.url = "github:12Boti/nix-minecraft";
 
@@ -80,114 +83,31 @@
     zoteroTranslators.flake = false;
     zoteroTranslators.url = "github:zotero/translators";
 
-    hyprland.flake = true;
-    hyprland.url = "github:hyprwm/Hyprland";
-    hyprland.inputs.nixpkgs.follows = "nixpkgs";
+    # hyprland.flake = true;
+    # hyprland.url = "github:hyprwm/Hyprland";
+    # hyprland.inputs.nixpkgs.follows = "nixpkgs";
 
-    adblockEasyList = {
-      flake = false;
-      url = "github:easylist/easylist";
-    };
+    adblockEasyList.flake = false;
+    adblockEasyList.url = "github:easylist/easylist";
 
-    adblockEasyListSpanish = {
-      flake = false;
-      url = "github:easylist/easylistspanish";
-    };
+    adblockEasyListSpanish.flake = false;
+    adblockEasyListSpanish.url = "github:easylist/easylistspanish";
 
-    adblockAntiAdblockFilters = {
-      flake = false;
-      url = "github:easylist/antiadblockfilters";
-    };
+    adblockAntiAdblockFilters.flake = false;
+    adblockAntiAdblockFilters.url = "github:easylist/antiadblockfilters";
 
-    uBlock = {
-      flake = false;
-      url = "github:uBlockOrigin/uAssets";
-    };
+    uAssets.flake = false;
+    uAssets.url = "github:uBlockOrigin/uAssets";
 
     adblockHosts.flake = false;
     adblockHosts.url = "github:StevenBlack/hosts";
   };
 
-  outputs = inputs@{ self, flake, ... }: flake.lib.mkFlake {
-    inherit self inputs;
-
-    supportedSystems = with flake.lib.system; [ x86_64-linux ];
-    channelsConfig.allowUnfree = true;
-
-    sharedOverlays = [ flake.outputs.overlay ];
-
-    hostDefaults = {
-      channelName = "nixpkgsStable";
-      system = flake.lib.system.x86_64-linux;
-
-      extraArgs = { inherit flake inputs; };
-
-      modules = with inputs; [
-        impermanence.nixosModules.impermanence
-
-        ({ config, lib, ... }: {
-          nix = {
-            registry = lib.mapAttrs (_: value: { flake = value; }) inputs;
-            nixPath = lib.mapAttrsToList (key: value: "${key}=${value.to.path}") config.nix.registry;
-
-            settings.experimental-features = [ "nix-command" "flakes" ];
-          };
-
-          nixpkgs.overlays = [
-            (final: _prev: {
-              unstable = inputs.nixpkgs.legacyPackages.${final.system};
-            })
-          ];
-        })
-
-        homeManager.nixosModules.default
-        {
-          home-manager = {
-            useGlobalPkgs = true;
-            useUserPackages = true;
-
-            sharedModules = with inputs; [
-              impermanence.nixosModules.home-manager.impermanence
-
-              { home.enableNixpkgsReleaseCheck = true; }
-            ];
-
-            extraSpecialArgs = { inherit inputs; };
-          };
-        }
-      ];
+  outputs = inputs@{ nixpkgs, home-manager, ... }: {
+    nixosConfigurations.ilo = import ./hosts/ilo.somas.is {
+      inherit inputs nixpkgs;
     };
 
-    hosts.ilo = {
-      channelName = "nixpkgs";
-
-      modules = with inputs; [
-        nixosHardware.nixosModules.framework
-
-        ./hosts/ilo.somas.is
-
-        # disko.nixosModules.disko
-
-        homeManager.nixosModules.default
-        {
-          home-manager = {
-            sharedModules = with inputs; [
-              hyprland.homeManagerModules.default
-            ];
-
-            verbose = true;
-
-            backupFileExtension = "bak";
-
-            users.somasis = {
-              imports = [
-                ./users/somasis
-                ./users/somasis/desktop
-              ];
-            };
-          };
-        }
-      ];
-    };
+    homeConfigurations.somasis = import ./users/somasis;
   };
 }

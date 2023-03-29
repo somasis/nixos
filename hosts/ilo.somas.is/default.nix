@@ -1,160 +1,173 @@
-{ pkgs
-, lib
-, config
+{ inputs
+, nixpkgs
 , ...
-}: {
-  imports = [
-    ./hardware
-    ./networking
-    ./hardware-configuration.nix
+}:
+nixpkgs.lib.nixosSystem {
+  inherit (nixpkgs) lib;
 
-    ./backup.nix
-    ./boot.nix
-    ./console.nix
-    ./filesystems.nix
-    ./fonts.nix
-    ./games.nix
-    # ./harden.nix
-    ./locale.nix
-    ./nix.nix
-    ./power.nix
-    ./security.nix
-    ./ssh.nix
-    ./uptimed.nix
-    ./users.nix
-    ./wine.nix
-  ];
+  modules = with inputs; [
+    ({ lib, ... }: {
+      nixpkgs = {
+        config = {
+          allowUnfree = true;
+          permittedInsecurePackages = [ "imagemagick-6.9.12-68" ];
+        };
 
-  environment.persistence."/persist" = {
-    hideMounts = true;
-    directories = [
-      "/etc/nixos"
-    ];
-  };
+        localSystem = {
+          system = "x86_64-linux";
+          isLinux = true;
+          isx86_64 = true;
 
-  environment.persistence."/cache" = {
-    hideMounts = true;
-    directories = [
-      "/var/lib/systemd/timers"
-      "/var/lib/systemd/timesync"
-      "/var/lib/systemd/backlight"
-    ];
-    files = [
-      "/var/lib/systemd/random-seed"
-    ];
-  };
-
-  environment.persistence."/log" = {
-    hideMounts = true;
-    directories = [
-      "/var/lib/systemd/catalog"
-      "/var/lib/systemd/coredump"
-      "/var/log/journal"
-    ];
-    files = [
-      "/var/log/btmp"
-      "/var/log/lastlog"
-      "/var/log/wtmp"
-    ];
-  };
-
-  hardware = {
-    video.hidpi.enable = true;
-    opengl.driSupport32Bit = true;
-  };
-
-  services.journald.console = "/dev/tty12";
-
-  services.xserver.enable = true;
-
-  documentation = {
-    info.enable = false;
-    doc.enable = false;
-    dev.enable = true;
-    nixos = {
-      enable = true; # Provides `nixos-help`.
-      includeAllModules = true;
-    };
-
-    man = {
-      enable = true;
-      generateCaches = true;
-      man-db.enable = false;
-      mandoc = {
-        enable = true;
-        # manPath = [ "share/man/tok" ];
+          # isMusl = true;
+          # useLLVM = true;
+        };
       };
-    };
-  };
+    })
 
-  programs.ssh.startAgent = true;
+    impermanence.nixosModules.impermanence
+    disko.nixosModules.disko
+    nixos-hardware.nixosModules.framework
 
-  programs.command-not-found.enable = false;
-  environment = {
-    defaultPackages = [ ];
+    nix-index-database.nixosModules.nix-index
 
-    systemPackages = [
-      # Necessary for `nixos-rebuild`'s git stuff
-      pkgs.git
+    ({ config, pkgs, lib, ... }: {
+      imports = [
+        ./hardware
+        ./networking
 
-      pkgs.gparted
-    ];
+        ./backup.nix
+        ./boot.nix
+        ./console.nix
+        ./filesystems.nix
+        ./fonts.nix
+        ./games.nix
+        # ./harden.nix
+        ./locale.nix
+        ./nix.nix
+        ./power.nix
+        ./security.nix
+        ./ssh.nix
+        ./uptimed.nix
+        ./users.nix
+        ./wine.nix
+      ];
 
-    variables = {
-      XDG_CACHE_HOME = "\${HOME}/var/cache";
-      XDG_CONFIG_HOME = "\${HOME}/etc";
-      XDG_DATA_HOME = "\${HOME}/share";
-      XDG_STATE_HOME = "\${HOME}/var/spool";
-      XDG_BIN_HOME = "\${HOME}/local/bin";
-      XDG_LIB_HOME = "\${HOME}/local/lib";
-    };
-  };
+      environment.persistence."/persist" = {
+        hideMounts = true;
+        directories = [ "/etc/nixos" ];
+      };
 
-  # Force is required because services.xserver forces xdg.*.enable to true.
-  xdg = lib.mkForce {
-    autostart.enable = false;
-    menus.enable = true;
-    mime.enable = true; # TODO
-    sounds.enable = false;
-    portal.enable = false;
-  };
+      environment.persistence."/cache" = {
+        hideMounts = true;
+        directories = [
+          "/var/lib/systemd/timers"
+          "/var/lib/systemd/timesync"
+          "/var/lib/systemd/backlight"
+        ];
+        files = [ "/var/lib/systemd/random-seed" ];
+      };
 
-  programs.bash = {
-    enableCompletion = true;
-    enableLsColors = false;
-  };
+      environment.persistence."/log" = {
+        hideMounts = true;
+        directories = [
+          "/var/lib/systemd/catalog"
+          "/var/lib/systemd/coredump"
+          "/var/log/journal"
+        ];
+        files = [
+          "/var/log/btmp"
+          "/var/log/lastlog"
+          "/var/log/wtmp"
+        ];
+      };
 
-  # services.gvfs.enable = lib.mkForce false;
-  services.gvfs.enable = true;
-  programs.dconf.enable = true;
+      services.journald.console = "/dev/tty12";
 
-  # TODO: Remove boot.zfs.enableUnstable when pkgs.linuxKernel.packages.linux_6_0 is compatible
-  boot.kernelPackages = config.boot.zfs.package.latestCompatibleLinuxPackages;
-  boot.zfs.enableUnstable = true;
+      services.xserver.enable = true;
 
-  services.udisks2.enable = true;
+      documentation = {
+        info.enable = false;
+        doc.enable = false;
+        dev.enable = true;
+        nixos = {
+          enable = true; # Provides `nixos-help`.
+          includeAllModules = true;
+        };
 
-  # TODO remove
-  nixpkgs.config.permittedInsecurePackages = [
-    "imagemagick-6.9.12-68"
+        man = {
+          enable = true;
+          generateCaches = true;
+          man-db.enable = false;
+          mandoc = {
+            enable = true;
+            # manPath = [ "share/man/tok" ];
+          };
+        };
+      };
+
+      programs.command-not-found.enable = false;
+      environment = {
+        defaultPackages = [ ];
+
+        systemPackages = [
+          # Necessary for `nixos-rebuild`'s git stuff
+          pkgs.git
+
+          pkgs.gparted
+        ];
+
+        variables = {
+          XDG_CACHE_HOME = "\${HOME}/var/cache";
+          XDG_CONFIG_HOME = "\${HOME}/etc";
+          XDG_DATA_HOME = "\${HOME}/share";
+          XDG_STATE_HOME = "\${HOME}/var/spool";
+          XDG_BIN_HOME = "\${HOME}/local/bin";
+          XDG_LIB_HOME = "\${HOME}/local/lib";
+        };
+      };
+
+      # Force is required because services.xserver forces xdg.*.enable to true.
+      xdg = lib.mkForce {
+        autostart.enable = false;
+        menus.enable = true;
+        mime.enable = true; # TODO
+        sounds.enable = false;
+        portal.enable = false;
+      };
+
+      programs.bash = {
+        enableCompletion = true;
+        enableLsColors = false;
+      };
+
+      # services.gvfs.enable = lib.mkForce false;
+      programs.dconf.enable = true;
+
+      system.stateVersion = "22.11";
+    })
+
+    home-manager.nixosModules.default
+    {
+      home-manager = {
+        verbose = true;
+
+        useGlobalPkgs = true;
+        useUserPackages = true;
+        extraSpecialArgs = {
+          inherit inputs;
+        };
+
+        sharedModules = with inputs; [
+          impermanence.nixosModules.home-manager.impermanence
+          nix-index-database.hmModules.nix-index
+          # hyprland.homeManagerModules.default
+        ];
+
+        users.somasis.imports = [
+          ../../users/somasis
+          ../../users/somasis/desktop
+        ];
+      };
+    }
   ];
-
-  system.stateVersion = "22.11";
-
-  # services.xserver.desktopManager = {
-  #   plasma5 = {
-  #     enable = false;
-  #     useQtScaling = true;
-  #     supportDDC = true;
-  #   };
-  #   cinnamon.enable = true;
-  # };
-
-  # services.xserver.displayManager.gdm.enable = true;
-  # services.xserver.desktopManager.gnome.enable = true;
-  # services.gnome = {
-  #   core-utilities.enable = false;
-  #   tracker.enable = false;
-  #   tracker-miners.enable = false;
-  # };
 }
