@@ -70,8 +70,8 @@
 
   console = {
     packages = [ pkgs.spleen pkgs.uw-ttyp0 pkgs.uni-vga ];
-    # font = "${pkgs.spleen}/share/consolefonts/spleen-12x24.psfu";
+    font = "${pkgs.spleen}/share/consolefonts/spleen-12x24.psfu";
     # font = "${pkgs.uni-vga}/share/consolefonts/u_vga16.psf.gz";
-    font = "${pkgs.uw-ttyp0}/share/consolefonts/t0-22-uni.psf";
+    # font = "${pkgs.uw-ttyp0}/share/consolefonts/t0-22-uni.psf";
   };
 }
