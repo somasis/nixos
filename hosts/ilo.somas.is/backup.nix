@@ -112,6 +112,10 @@ in
 
   systemd.services."borgbackup-job-spinoza".serviceConfig.Nice = 19;
 
+  programs.bash.shellAliases.borg = lib.mkIf (builtins.length (builtins.attrNames config.services.borgbackup.jobs) == 1) ''
+    borg-job-${builtins.head (builtins.attrNames config.services.borgbackup.jobs)}
+  '';
+
   environment.systemPackages = let inherit (defaults) extraArgs; in [
     (pkgs.writeShellApplication rec {
       name = "borg-import-letterboxd";
