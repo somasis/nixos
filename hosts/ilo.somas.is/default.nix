@@ -2,25 +2,33 @@
 , nixpkgs
 , ...
 }:
+let
+  system = "x86_64-linux";
+in
 nixpkgs.lib.nixosSystem {
   inherit (nixpkgs) lib;
+
+  specialArgs = { inherit inputs nixpkgs; };
 
   modules = with inputs; [
     ({ lib, ... }: {
       nixpkgs = {
-        config = {
-          allowUnfree = true;
-          permittedInsecurePackages = [ "imagemagick-6.9.12-68" ];
-        };
+        config.allowUnfree = true;
 
         localSystem = {
-          system = "x86_64-linux";
+          inherit system;
           isLinux = true;
           isx86_64 = true;
 
           # isMusl = true;
           # useLLVM = true;
         };
+
+        overlays = [
+          (final: prev: {
+            stable = inputs.nixpkgsStable.legacyPackages."${system}";
+          })
+        ];
       };
     })
 
