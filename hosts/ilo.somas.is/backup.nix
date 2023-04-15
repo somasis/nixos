@@ -65,7 +65,7 @@ let
     extraCreateArgs = lib.cli.toGNUCommandLineShell { } {
       stats = true;
       progress = true;
-      exclude-if-present = [ ".stfolder" ".stversions" ];
+      exclude-if-present = [ ".stfolder" ];
     };
 
     inhibitsSleep = true;
@@ -88,7 +88,7 @@ let
       yearly = 1;
     };
 
-    startAt = "daily";
+    startAt = "04:00";
   };
 in
 {
@@ -123,8 +123,6 @@ in
       ];
 
       text = ''
-        set -e
-
         usage() {
             cat >&2 <<EOF
         usage: ${name} letterboxd-*.zip
@@ -178,8 +176,6 @@ in
       ];
 
       text = ''
-        set -e
-
         usage() {
             cat >&2 <<EOF
         usage: ${name} *.zip
@@ -250,8 +246,6 @@ in
       ];
 
       text = ''
-        set -e
-
         usage() {
             cat >&2 <<EOF
         usage: ${name} twitter-1970-01-01-*
@@ -320,8 +314,6 @@ in
       ];
 
       text = ''
-        set -e
-
         usage() {
             cat >&2 <<EOF
         usage: ${name} takeout-19700101T000000Z-*
