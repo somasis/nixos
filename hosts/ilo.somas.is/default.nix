@@ -125,12 +125,12 @@ nixpkgs.lib.nixosSystem {
         ];
 
         variables = {
+          XDG_BIN_HOME = "\${HOME}/local/bin";
           XDG_CACHE_HOME = "\${HOME}/var/cache";
           XDG_CONFIG_HOME = "\${HOME}/etc";
           XDG_DATA_HOME = "\${HOME}/share";
-          XDG_STATE_HOME = "\${HOME}/var/spool";
-          XDG_BIN_HOME = "\${HOME}/local/bin";
           XDG_LIB_HOME = "\${HOME}/local/lib";
+          XDG_STATE_HOME = "\${HOME}/var/lib";
         };
       };
 

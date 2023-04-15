@@ -11,7 +11,7 @@
     configHome = "${config.home.homeDirectory}/etc";
     dataHome = "${config.home.homeDirectory}/share";
     cacheHome = "${config.home.homeDirectory}/var/cache";
-    stateHome = "${config.home.homeDirectory}/var/spool";
+    stateHome = "${config.home.homeDirectory}/var/lib";
 
     userDirs = {
       enable = true;
