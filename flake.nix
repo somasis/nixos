@@ -103,7 +103,7 @@
     adblockHosts.url = "github:StevenBlack/hosts";
   };
 
-  outputs = inputs@{ nixpkgs, home-manager, ... }: {
+  outputs = { self, nixpkgs, home-manager, ... }@inputs: {
     nixosConfigurations.ilo = import ./hosts/ilo.somas.is {
       inherit inputs nixpkgs;
     };

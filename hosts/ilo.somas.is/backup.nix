@@ -1,10 +1,25 @@
 { config
 , lib
-, nixosConfig
 , pkgs
 , ...
 }:
 let
+  runas_user = "somasis";
+  runas = ''
+    runas() {
+        local runas_user
+
+        ${lib.toShellVar "runas_user" runas_user}
+        if test "$(id -un)" = "$runas_user"; then
+            "$@"; return $?
+        else
+            su -l - "$runas_user" sh -c '"$@"' -- "$@"; return $?
+        fi
+    }
+
+  '' + "runas"
+  ;
+
   repoSpinoza = "somasis@spinoza.7596ff.com:/mnt/raid/somasis/backup/borg";
 
   defaults = {
@@ -14,24 +29,25 @@ let
 
     encryption = {
       mode = "repokey";
-      passCommand = builtins.toString (pkgs.writeShellScript ''pass-borg'' ''
-        ${pkgs.buildPackages.doas}/bin/doas -u somasis \
-            ${pkgs.coreutils}/bin/env \
-                PASSWORD_STORE_DIR=/home/somasis/share/password-store \
-                ${pkgs.pass}/bin/pass borg/somasis \
-                | ${pkgs.coreutils}/bin/head -n1
+      passCommand = builtins.toString (pkgs.writeShellScript "borg-pass" ''
+        : "''${BORG_REPO:?}"
+        ${runas} pass "borg/''${BORG_REPO%%:*}" | head -n1
       '');
     };
 
     environment = {
-      BORG_RSH = "
-        ${pkgs.buildPackages.doas}/bin/doas -u somasis \
-            ${config.programs.ssh.package}/bin/ssh \
-                -i ${config.users.users.somasis.home}/.ssh/id_ed25519 \
-                -o ExitOnForwardFailure=no \
-                -Tx \
-                -l somasis
-      ";
+      BORG_RSH = builtins.toString (pkgs.writeShellScript "borg-ssh" ''
+        : "''${BORG_REPO:?}"
+        case "$BORG_REPO" in
+          *@*:*|*@*) ssh_user=''${BORG_REPO%%@*} ;;
+        esac
+
+        ${lib.optionalString config.networking.networkmanager.enable "${pkgs.networkmanager}/bin/nm-online -q || exit 255"}
+        ${runas} ssh \
+            -o ExitOnForwardFailure=no \
+            -o BatchMode=yes \
+            -Takx ''${ssh_user:+-l "$ssh_user"} "$@"
+      '');
     };
 
     exclude = [
@@ -55,7 +71,6 @@ let
     # Force borg's CPU usage to remain low.
     preHook = ''
       borg() {
-          ${lib.optionalString nixosConfig.networking.networkmanager.enable "${pkgs.networkmanager}/bin/nm-online -q"}
           ${pkgs.limitcpu}/bin/cpulimit -qf -l 25 -- borg "$@"
       }
     '';
