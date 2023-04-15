@@ -36,6 +36,8 @@ let
     };
 
     environment = {
+      BORG_HOST_ID = config.networking.fqdnOrHostName;
+
       BORG_RSH = builtins.toString (pkgs.writeShellScript "borg-ssh" ''
         : "''${BORG_REPO:?}"
         case "$BORG_REPO" in
