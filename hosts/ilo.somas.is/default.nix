@@ -161,9 +161,8 @@ nixpkgs.lib.nixosSystem {
 
         useGlobalPkgs = true;
         useUserPackages = true;
-        extraSpecialArgs = {
-          inherit inputs;
-        };
+
+        extraSpecialArgs = { inherit inputs nixpkgs; };
 
         sharedModules = with inputs; [
           impermanence.nixosModules.home-manager.impermanence
