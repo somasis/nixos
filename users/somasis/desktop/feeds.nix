@@ -9,6 +9,8 @@ let
   userAgent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/97.0.4692.99 Safari/537.36";
 in
 {
+  news.display = "silent";
+
   programs.newsboat = {
     enable = true;
 
