@@ -82,5 +82,8 @@
     };
   };
 
+  # Only run scrubs when on AC power.
+  systemd.timers.zfs-scrub.unitConfig.ConditionACPower = true;
+
   zramSwap.enable = true;
 }
