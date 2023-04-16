@@ -3,9 +3,10 @@
 , config
 , ...
 }:
+let libreoffice = pkgs.libreoffice-still; in
 {
   home = {
-    packages = [ pkgs.libreoffice ];
+    packages = [ libreoffice ];
 
     # See for more details:
     # <https://wiki.documentfoundation.org/UserProfile#User_profile_content>
@@ -19,7 +20,7 @@
 
   systemd.user.services.libreoffice = {
     Unit = {
-      Description = pkgs.libreoffice.meta.description;
+      Description = libreoffice.meta.description;
       PartOf = [ "graphical-session.target" ];
     };
     Install.WantedBy = [ "graphical-session.target" ];
@@ -34,15 +35,15 @@
       {
         Type = "simple";
 
+        # Wait for any standalone instances of libreoffice to quit; there might be one open,
+        # which will cause ExecStart to fail if we don't wait for it to end by itself.
+        # We especially do not want to kill it since it might be some in-progress writing.
+        # If there is no process matching the pattern, pwait will exit non-zero.
         ExecStartPre = [
-          # Wait for any standalone instances of libreoffice to quit; there might be one open,
-          # which will cause ExecStart to fail if we don't wait for it to end by itself.
-          # We especially do not want to kill it since it might be some in-progress writing.
-          # If there is no process matching the pattern, pwait will exit non-zero.
           "-${libreofficeWait}"
         ];
 
-        ExecStart = "${pkgs.libreoffice}/bin/soffice --quickstart --nologo --nodefault";
+        ExecStart = [ "${libreoffice}/bin/soffice --quickstart --nologo --nodefault" ];
 
         Restart = "always";
         KillSignal = "SIGQUIT";

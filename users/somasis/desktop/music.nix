@@ -32,7 +32,6 @@ let
         '
   '';
 
-
   cantata = pkgs.cantata.override {
     # just be a music player, no file operations
     withTaglib = false;

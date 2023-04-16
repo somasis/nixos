@@ -5,12 +5,13 @@
 , ...
 }:
 let
+  # inherit (lib) systemdName;
+  systemdName = lib.replaceStrings [ "@" ":" "\\" "[" "]" ] [ "-" "-" "-" "" "" ];
+
   offlineimapNametransGmail = {
     remote.nametrans = "lambda f: f.replace('[Gmail]/', '') if f.startswith('[Gmail]/') else f";
     local.nametrans = "lambda f: '[Gmail]/' + f if f in ['Drafts', 'Starred', 'Important', 'Spam', 'Trash', 'All Mail', 'Sent Mail'] else f";
   };
-
-  systemdName = lib.replaceStrings [ "@" ":" "\\" "[" "]" ] [ "-" "-" "-" "" "" ];
 
   passCmd = "${config.programs.password-store.package}/bin/pass";
   systemctl = "${pkgs.systemd}/bin/systemctl --user";
@@ -28,10 +29,7 @@ in
     "mail/sms"
   ]
   ++ builtins.map
-    (x: {
-      directory = "mail/${x.maildir.path}";
-      method = "symlink";
-    })
+    (x: { method = "symlink"; directory = "mail/${x.maildir.path}"; })
     (builtins.attrValues config.accounts.email.accounts)
   ;
 

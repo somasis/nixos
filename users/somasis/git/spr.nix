@@ -62,9 +62,7 @@ in
       RemainAfterExit = true;
 
       ExecStart = [ "${pass-spr}/bin/pass-spr github.com somasis" ];
-      ExecStop = [
-        "${pkgs.coreutils}/bin/rm -rf %t/pass-spr"
-      ];
+      ExecStop = [ "${pkgs.coreutils}/bin/rm -rf %t/pass-spr" ];
     };
   };
 

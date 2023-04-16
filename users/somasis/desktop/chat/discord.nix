@@ -5,6 +5,17 @@
 , ...
 }:
 let
+  # inherit (lib) camelCaseToSnakeCase;
+  camelCaseToSnakeCase = x:
+    if lib.toLower x == x then
+      x
+    else
+      lib.replaceStrings
+        (lib.upperChars ++ lib.lowerChars)
+        ((map (c: "_${c}") lib.upperChars) ++ lib.upperChars)
+        x
+  ;
+
   # TODO Go back to using Replugged once <https://github.com/replugged-org/replugged/issues/205> is resolved
   # discord = inputs.replugged.lib.makeDiscordPlugged {
   #   inherit pkgs;
@@ -36,16 +47,6 @@ let
   #       ;
   #   };
   # };
-
-  camelCaseToSnakeCase = x:
-    if lib.toLower x == x then
-      x
-    else
-      lib.replaceStrings
-        (lib.upperChars ++ lib.lowerChars)
-        ((map (c: "_${c}") lib.upperChars) ++ lib.upperChars)
-        x
-  ;
 
   # discord = pkgs.discord-canary;
   discord = pkgs.discord-canary.override { withOpenASAR = true; };

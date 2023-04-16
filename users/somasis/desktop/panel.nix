@@ -3,7 +3,7 @@
 , ...
 }:
 let
-  bspwm = config.xsession.windowManager.bspwm;
+  inherit (config.xsession.windowManager) bspwm;
   bspc = "${bspwm.package}/bin/bspc";
 in
 {

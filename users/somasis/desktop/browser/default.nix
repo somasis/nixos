@@ -113,12 +113,9 @@ in
   programs.qutebrowser = {
     enable = true;
 
-    package = pkgs.qutebrowser.override {
-      withPdfReader = false;
-    };
+    package = pkgs.qutebrowser.override { withPdfReader = false; };
 
     loadAutoconfig = true;
-
     settings = rec {
       # Clear default aliases
       aliases = { };
@@ -157,7 +154,7 @@ in
       # Open a blank page when :open is given with no arguments.
       url = rec {
         default_page = "about:blank";
-        start_pages = "${default_page}";
+        start_pages = default_page;
       };
 
       # I seem to have better performance with process-per-site rather than process-per-site-instance...

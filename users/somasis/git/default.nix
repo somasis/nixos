@@ -137,6 +137,7 @@
         log --no-merges "$@"
     }
   '';
+
   programs.kakoune.config.hooks = [
     # Show git diff on save
     {

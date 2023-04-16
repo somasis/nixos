@@ -24,9 +24,7 @@
   ];
 
   home.persistence."/persist${config.home.homeDirectory}" = {
-    files = [
-      "etc/kpatrc"
-    ];
+    files = [ "etc/kpatrc" ];
 
     directories = [
       ".lbreakout2"

@@ -5,16 +5,31 @@
 , ...
 }:
 let
+  inherit (lib) concatStringsSep;
+  snakeCaseToCamelCase = x:
+    let
+      x' =
+        lib.replaceStrings
+          (map (x: "_${x}") (lib.lowerChars ++ lib.upperChars))
+          (lib.upperChars ++ lib.lowerChars)
+          x
+      ;
+    in
+    "${lib.toLower (builtins.substring 0 1 x)}${builtins.substring 1 ((builtins.stringLength x') - 1) x'}"
+  ;
+
+  programName = p: p.meta.metaProgram or p.pname or p.name;
+  programPath = p: "${lib.getBin p}/bin/${programName p}";
+
   signal = pkgs.signal-desktop-beta;
   signalTitle = "Signal Beta";
 
-  signalMainProgramName = signal.meta.mainProgram or signal.pname;
   signalDescription = signal.meta.description;
 
   signal' = pkgs.symlinkJoin {
     name = "signal-desktop-with-pass";
     paths = [
-      (pkgs.writeShellScriptBin signalMainProgramName ''
+      (pkgs.writeShellScriptBin (programName signal) ''
         set -eu
         set -o pipefail
 
@@ -36,7 +51,7 @@ let
             | ${pkgs.xe}/bin/xe -s 'rm -f "$XDG_CONFIG_HOME/${signalTitle}"/config.json' &
 
         e=0
-        (exec -a ${signalMainProgramName} ${signal}/bin/${signalMainProgramName} "$@") || e=$?
+        (exec -a ${programName signal} ${programPath signal} "$@") || e=$?
         kill $(jobs -p)
         exit "$e"
       '')
@@ -70,11 +85,11 @@ in
   services.sxhkd.keybindings."super + s" = builtins.toString (pkgs.writeShellScript "signal" ''
     if ! ${config.home.homeDirectory}/bin/raise -V '^(.+ - ${signalTitle}|${signalTitle})$';then
         if ${pkgs.systemd}/bin/systemctl --user is-active -q signal.service; then
-            exec ${signalProgram} >/dev/null 2>&1
+            exec ${signalPath} >/dev/null 2>&1
         else
             ${pkgs.systemd}/bin/systemctl --user start signal.service \
                 && sleep 2 \
-                && exec ${signalProgram} >/dev/null 2>&1
+                && exec ${signalPath} >/dev/null 2>&1
         fi
     fi
   '');
@@ -92,7 +107,7 @@ in
 
     Service = {
       Type = "simple";
-      ExecStart = "${signalProgram} " + lib.concatStringsSep " " (map (x: "--${x}") [
+      ExecStart = "${signalPath} " + concatStringsSep " " (map (x: "--${x}") [
         "start-in-tray"
 
         # Force GPU-utilizing acceleration

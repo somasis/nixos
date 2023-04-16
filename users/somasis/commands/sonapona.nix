@@ -1,6 +1,6 @@
 { config, pkgs, ... }:
 let
-  dir = "share/sonapona";
+  directory = "share/sonapona";
 in
 {
   home.packages = [
@@ -15,7 +15,7 @@ in
       ];
 
       text = ''
-        bfs "$HOME/${dir}" \
+        bfs "$HOME/${directory}" \
             -mindepth 2 -type f ! -executable \
             "$@" -exec shuf -n 1 -e {} + \
             | xe fold -w 80 -s \

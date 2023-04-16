@@ -38,7 +38,11 @@ nixpkgs.lib.nixosSystem {
 
     nix-index-database.nixosModules.nix-index
 
-    ({ config, pkgs, lib, ... }: {
+    ({ config
+     , pkgs
+     , lib
+     , ...
+     }: {
       imports = [
         ./hardware
         ./networking

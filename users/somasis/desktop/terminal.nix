@@ -68,34 +68,34 @@ in
 
         colors = {
           primary = {
-            foreground = "${config.xresources.properties."*foreground"}";
-            background = "${config.xresources.properties."*background"}";
+            foreground = config.xresources.properties."*foreground";
+            background = config.xresources.properties."*background";
           };
 
           normal = {
-            black = "${config.xresources.properties."*color0"}";
-            red = "${config.xresources.properties."*color1"}";
-            green = "${config.xresources.properties."*color2"}";
-            yellow = "${config.xresources.properties."*color3"}";
-            blue = "${config.xresources.properties."*color4"}";
-            magenta = "${config.xresources.properties."*color5"}";
-            cyan = "${config.xresources.properties."*color6"}";
-            white = "${config.xresources.properties."*color7"}";
+            black = config.xresources.properties."*color0";
+            red = config.xresources.properties."*color1";
+            green = config.xresources.properties."*color2";
+            yellow = config.xresources.properties."*color3";
+            blue = config.xresources.properties."*color4";
+            magenta = config.xresources.properties."*color5";
+            cyan = config.xresources.properties."*color6";
+            white = config.xresources.properties."*color7";
           };
 
           bright = {
-            black = "${config.xresources.properties."*color8"}";
-            red = "${config.xresources.properties."*color9"}";
-            green = "${config.xresources.properties."*color10"}";
-            yellow = "${config.xresources.properties."*color11"}";
-            blue = "${config.xresources.properties."*color12"}";
-            magenta = "${config.xresources.properties."*color13"}";
-            cyan = "${config.xresources.properties."*color14"}";
-            white = "${config.xresources.properties."*color15"}";
+            black = config.xresources.properties."*color8";
+            red = config.xresources.properties."*color9";
+            green = config.xresources.properties."*color10";
+            yellow = config.xresources.properties."*color11";
+            blue = config.xresources.properties."*color12";
+            magenta = config.xresources.properties."*color13";
+            cyan = config.xresources.properties."*color14";
+            white = config.xresources.properties."*color15";
           };
 
           footer_bar = {
-            background = "${config.xresources.properties."*colorAccent"}";
+            background = config.xresources.properties."*colorAccent";
             foreground = "#ffffff";
           };
         };

@@ -38,7 +38,7 @@ in
   # i18n.extraLocaleSettings.LANGUAGE = "tok:en_US:en";
 
   i18n = rec {
-    defaultLocale = "${locale}";
+    defaultLocale = locale;
     supportedLocales = [ "${locale}/${localeType}" ];
 
     extraLocaleSettings.LC_COLLATE = "C";

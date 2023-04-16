@@ -9,11 +9,9 @@
 
     # Report headphones' battery level to UPower
     # <https://wiki.archlinux.org/title/Bluetooth#Enabling_experimental_features>
-    settings = {
-      General = {
-        Experimental = config.services.upower.enable;
-        KernelExperimental = config.services.upower.enable;
-      };
+    settings.General = {
+      Experimental = config.services.upower.enable;
+      KernelExperimental = config.services.upower.enable;
     };
   };
 

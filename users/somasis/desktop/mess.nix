@@ -39,8 +39,10 @@ let
   };
 in
 {
-  home.packages = [ mess ];
-  home.persistence."/persist${config.home.homeDirectory}".directories = [ "mess" ];
+  home = {
+    packages = [ mess ];
+    persistence."/persist${config.home.homeDirectory}".directories = [ "mess" ];
+  };
 
   xdg.userDirs = {
     desktop = "${messDir}/current";
