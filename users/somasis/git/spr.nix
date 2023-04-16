@@ -38,15 +38,13 @@ let
 in
 {
   programs.git = {
-    includes = [
-      { path = "/run/user/${toString nixosConfig.users.users.somasis.uid}/pass-spr/gitconfig"; }
-    ];
+    includes = [{
+      path = "/run/user/${toString nixosConfig.users.users.somasis.uid}/pass-spr/gitconfig";
+    }];
 
-    extraConfig = {
-      spr = {
-        requireTestPlan = false;
-        branchPrefix = "${config.home.username}/";
-      };
+    extraConfig.spr = {
+      requireTestPlan = false;
+      branchPrefix = "${config.home.username}/";
     };
   };
 
