@@ -25,7 +25,7 @@
       amend = "commit --amend";
       amendall = "!git addall; EDITOR=cat git amend";
       com = "commit";
-      commits = "log --branches --not --remotes --oneline --reverse";
+      commits = "log --branches --not --remotes --oneline --reverse --pretty='%C(auto)%h %C(auto,yellow)(%C(auto,bold)%C(auto,green)%S%C(auto,reset)%C(auto,yellow))%C(auto,reset) %s' @{upstream}..@";
       patches = "format-patch -M -C -C --stdout origin..HEAD";
       rbc = "rebase --continue";
       re = "rebase";
@@ -72,6 +72,12 @@
 
       # <https://github.com/NixOS/nixpkgs/issues/169193#issuecomment-1116090241>
       safe.directory = "*";
+
+      url = {
+        "ssh://git@github.com:".insteadOf = "gh:";
+        "ssh://git@gitlab.com:".insteadOf = "gl:";
+        "ssh://git@git.sr.ht:".insteadOf = "srht:";
+      };
     };
   };
 
@@ -84,6 +90,8 @@
 
     checkout = "git checkout";
     restore = "git restore";
+    reset = "git reset";
+
     com = "git commit";
     amend = "git commit -v --amend";
     amendall = "addall;EDITOR=cat amend >/dev/null";
@@ -94,7 +102,7 @@
 
     status = "git status --show-stash -sb";
     log = "git log --patch-with-stat --summary -M -C -C";
-    commits = "git log --reverse --oneline @{upstream}..@";
+    commits = "git commits";
 
     merge = "git merge";
 
@@ -107,9 +115,9 @@
     ri = "git ri";
 
     branch = "git branch -v";
-    reset = "git reset";
     switch = "git switch";
     cherry = "git cherry-pick";
+    branchoff = "git branchoff";
   };
 
   programs.bash.initExtra = ''
