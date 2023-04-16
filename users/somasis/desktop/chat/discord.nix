@@ -100,13 +100,12 @@ in
           themeSync = true;
           quickstart = true;
 
-          css = lib.fileContents (pkgs.concatTextFile {
-            name = "discord-css";
-            files = [
-              "${inputs.repluggedThemeCustom}/custom.css"
-              "${inputs.repluggedThemeIrc}/irc.css"
-            ];
-          });
+          css = lib.fileContents (pkgs.runCommandLocal "discord-css" { } ''
+            ${pkgs.coreutils}/bin/cat \
+                "${inputs.repluggedThemeCustom}/custom.css" \
+                "${inputs.repluggedThemeIrc}/irc.css" \
+                | ${pkgs.minify}/bin/minify --type css > "$out"
+          '');
         };
       }
     );
