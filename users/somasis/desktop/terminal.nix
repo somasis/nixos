@@ -3,44 +3,84 @@
 , pkgs
 , ...
 }:
-let
-  terminal = pkgs.writeShellScriptBin "terminal" ''
-    set -u
-
-    case "''${1:-}" in
-        -c | -e | -x | --command | --)
-            shift
-            ;;
-    esac
-
-    if [ -t 0 ] || [ -t 1 ]; then
-        exec "$@"
-    fi
-
-    if [ $# -eq 0 ]; then
-        exec ${config.programs.alacritty.package}/bin/alacritty
-    else
-        # HACK: I've not really figured out why this is needed to make some invocations start the
-        #       terminal properly...
-        exec ${config.programs.alacritty.package}/bin/alacritty -e "$@"
-    fi
-  '';
-  t = "${terminal}/bin/terminal";
-in
 {
   services.sxhkd.keybindings = {
-    "super + b" = "${t}";
-    "super + shift + b" = builtins.toString (pkgs.writeShellScript "sxhkd-terminal-at-window-cwd" ''
-      window_pid=$(${pkgs.xdotool}/bin/xdotool getactivewindow getwindowpid)
-      window_pid_parent=$(${pkgs.procps}/bin/pgrep -P "$window_pid" | tail -n1)
-      window_cwd=$(${pkgs.coreutils}/bin/readlink -f /proc/"$window_pid_parent"/cwd)
-      cd "$window_cwd"
-      exec ${t}
-    '');
+    "super + b" = "alacritty";
+    # "super + shift + b" = builtins.toString (pkgs.writeShellScript "sxhkd-terminal-at-window-cwd" ''
+    #   window_pid=$(${pkgs.xdotool}/bin/xdotool getactivewindow getwindowpid)
+    #   window_pid_parent=$(${pkgs.procps}/bin/pgrep -P "$window_pid" | tail -n1)
+    #   window_cwd=$(${pkgs.coreutils}/bin/readlink -f /proc/"$window_pid_parent"/cwd)
+    #   cd "$window_cwd"
+    #   exec alacritty
+    # '');
+    "super + shift + b" = ''
+      alacritty --working-directory "$(${pkgs.xcwd}/bin/xcwd)"
+    '';
   };
 
   programs.alacritty = {
     enable = true;
+
+    package =
+      let
+        xdgFixed = pkgs.writeShellScriptBin "xdg-open" ''
+          PATH=${lib.makeBinPath [ pkgs.gnused pkgs.nettools pkgs.systemd pkgs.xdg-utils pkgs.xe ] }":$PATH"
+
+          case "$1" in
+              --)  : ;;
+              --*) exec ${pkgs.xdg-utils}/bin/xdg-open "$@" ;;
+              *)   uri="$1" ;;
+          esac
+
+          case "$uri" in
+              # Locally-resolved file URIs.
+              file:///*) : ;;
+
+              # Remote-resolved file URIs.
+              # We need to parse out the hostname from file:// URIs, since xdg-open doesn't do it.
+              # (but it ought to!)
+              file://*/*)
+                  host=''${uri#file://}
+                  host=''${host%%/*}
+                  case "$host" in
+                      "$(hostname)")
+                          uri=''${uri#file://"$host"/}
+                          ;;
+                      *)
+                          paths=(
+                              $(
+                                  systemctl --user list-unit-files --type=mount --no-legend \
+                                      | sed 's/ .*//; s/\.mount$//' \
+                                      | xe -N1 -j0 -L systemd-escape -p -u
+                              )
+                          )
+
+                          for path in "''${paths[@]}"; do
+                              case "$path" in
+                                  */"$host".*)
+                                      new_uri=~/mnt/sftp/"''${path##*/}"
+                                      [ -e "$new_uri" ] && uri="$new_uri" && continue
+                                      ;;
+                              esac
+                          done
+                          ;;
+                  esac
+                  ;;
+          esac
+
+          exec ${pkgs.xdg-utils}/bin/xdg-open "$uri"
+        '';
+      in
+      pkgs.symlinkJoin {
+        name = "alacritty-final";
+
+        buildInputs = [ pkgs.makeWrapper ];
+        paths = [ pkgs.alacritty ];
+
+        postBuild = ''
+          wrapProgram $out/bin/alacritty --prefix PATH : "${xdgFixed}/bin"
+        '';
+      };
 
     settings =
       let
@@ -135,10 +175,7 @@ in
       };
   };
 
-  home.packages = [
-    (pkgs.writeShellScriptBin "xterm" ''exec ${t}'')
-    terminal
-  ];
+  home.packages = [ (pkgs.writeShellScriptBin "xterm" ''exec alacritty "$@"'') ];
 
   # programs.kitty = {
   #   enable = false;
