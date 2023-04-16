@@ -36,7 +36,7 @@ let
 in
 {
   imports = [
-    ./adblock.nix
+    ./blocking.nix
     # ./farside.nix
     ./greasemonkey.nix
     ./open.nix
