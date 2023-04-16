@@ -109,5 +109,50 @@
     };
 
     homeConfigurations.somasis = import ./users/somasis;
+
+    lib = let inherit (nixpkgs) lib; in {
+      # TODO how do I extend the lib that is used by the nixosConfigurations? :(
+      systemdName = lib.replaceStrings [ "@" ":" "\\" "[" "]" ] [ "-" "-" "-" "" "" ];
+
+      # testCase -> test_case
+      camelCaseToSnakeCase = x:
+        if lib.toLower x == x then
+          x
+        else
+          lib.replaceStrings
+            (lib.upperChars ++ lib.lowerChars)
+            ((map (c: "_${c}") lib.upperChars) ++ lib.upperChars)
+            x
+      ;
+
+      # testCase -> test-case
+      camelCaseToKebabCase = x:
+        if lib.toLower x == x then
+          x
+        else
+          lib.replaceStrings
+            (lib.upperChars ++ lib.lowerChars)
+            ((map (c: "-${c}") lib.upperChars) ++ lib.upperChars)
+            x
+      ;
+
+      # test_case -> testCase
+      snakeCaseToCamelCase = x:
+        let
+          x' =
+            lib.replaceStrings
+              (map (x: "_${x}") (lib.lowerChars ++ lib.upperChars))
+              (lib.upperChars ++ lib.lowerChars)
+              x
+          ;
+        in
+        "${lib.toLower (builtins.substring 0 1 x)}${builtins.substring 1 ((builtins.stringLength x') - 1) x'}"
+      ;
+
+      # Get the program name and path using the same logic as `nix run`.
+      programName = p: p.meta.metaProgram or p.pname or p.name;
+      programPath = p: "${lib.getBin p}/bin/${lib.programName p}";
+    };
   };
 }
+
