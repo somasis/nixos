@@ -2,7 +2,6 @@
   services.printing = {
     enable = true;
     browsing = true;
-    drivers = [ pkgs.gutenprint ];
   };
 
   # Necessary for discovering printers on the network.
