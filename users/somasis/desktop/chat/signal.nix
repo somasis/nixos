@@ -73,12 +73,17 @@ in
 
   home.persistence."/persist${config.home.homeDirectory}".directories = [ "etc/${signalTitle}" ];
 
-  # xdg.configFile."${signalTitle}/ephemeral.json".text = lib.generators.toJSON { } {
-  #   system-tray-setting = "MinimizeToSystemTray";
-  #   theme-setting = "system";
-  #   spell-check = true;
-  #   window.autoHideMenuBar = true;
-  # };
+  xdg.configFile."${signalTitle}/ephemeral.json".text = lib.generators.toJSON { }
+    (lib.mapAttrs' (n: v: lib.nameValuePair (camelCaseToSnakeCase n) v) {
+      systemTraySetting = "MinimizeToSystemTray";
+      shownTrayNotice = true;
+
+      themeSetting = "system";
+
+      window.autoHideMenuBar = true;
+
+      spellCheck = true;
+    });
 
   services.dunst.settings.zz-signal = {
     appname = "signal-desktop.*";
