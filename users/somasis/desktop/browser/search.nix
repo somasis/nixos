@@ -42,6 +42,7 @@
       "!osm" = "https://www.openstreetmap.org/search?query={}";
       "!osmwiki" = "https://wiki.openstreetmap.org/wiki/Special:Search?search={}&go=Go";
       "!gmaps" = "https://www.google.com/maps/search/{}";
+      "!fa" = "https://flightaware.com/ajax/ignoreall/omnisearch/disambiguation.rvt?searchterm={}&token=";
 
       "!red" = "https://redacted.ch/torrents.php?searchstr={}";
       "!redartist" = "https://redacted.ch/artist.php?artistname={}";
