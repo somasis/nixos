@@ -50,7 +50,7 @@ in
 
   systemd.user.services.xsecurelock.Service.ExecStopPost = [ "-${hook} -c" ];
   services.sxhkd.keybindings."super + p" = "${hook} --cycle";
-  xsession.windowManager.bspwm.extraConfig = "${hook} -c";
+  xsession.windowManager.bspwm.startupPrograms = lib.mkBefore [ "${hook} -c" ];
 
   # Match exclusively based on the fingerprint rather than the display name.
   # The EDID can change based on the location that an expansion port ends up on the USB bus.
