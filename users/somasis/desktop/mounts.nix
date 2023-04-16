@@ -181,7 +181,7 @@
           Type = "notify";
           ExecStartPre = [ "${pkgs.coreutils}/bin/mkdir -p ${config.home.homeDirectory}/mnt/gdrive/personal" ];
           ExecStart = [
-            "${pkgs.rclone}/bin/rclone mount --poll-interval=30m --vfs-cache-mode=writes gdrive-personal: ${config.home.homeDirectory}/mnt/gdrive/personal"
+            "${pkgs.rclone}/bin/rclone mount --poll-interval=30m --vfs-cache-mode=full --vfs-cache-max-size=1G --vfs-cache-poll-interval=5m --write-back-cache gdrive-personal: ${config.home.homeDirectory}/mnt/gdrive/personal"
           ];
           ExecReload = [ "${pkgs.procps}/bin/kill -HUP $MAINPID" ];
           ExecStopPost = [ "-${pkgs.coreutils}/bin/rmdir -p ${config.home.homeDirectory}/mnt/gdrive/personal" ];
@@ -199,7 +199,7 @@
           Type = "notify";
           ExecStartPre = [ "${pkgs.coreutils}/bin/mkdir -p ${config.home.homeDirectory}/mnt/gdrive/appstate" ];
           ExecStart = [
-            "${pkgs.rclone}/bin/rclone mount --poll-interval=30m --vfs-cache-mode=writes gdrive-appstate: ${config.home.homeDirectory}/mnt/gdrive/appstate"
+            "${pkgs.rclone}/bin/rclone mount --poll-interval=30m --vfs-cache-mode=full --vfs-cache-max-size=1G --vfs-cache-poll-interval=5m --write-back-cache gdrive-appstate: ${config.home.homeDirectory}/mnt/gdrive/appstate"
           ];
           ExecReload = [ "${pkgs.procps}/bin/kill -HUP $MAINPID" ];
           ExecStopPost = [ "-${pkgs.coreutils}/bin/rmdir -p ${config.home.homeDirectory}/mnt/gdrive/appstate" ];
@@ -217,7 +217,7 @@
           Type = "notify";
           ExecStartPre = [ "${pkgs.coreutils}/bin/mkdir -p ${config.home.homeDirectory}/mnt/gdrive/appstate-shared" ];
           ExecStart = [
-            "${pkgs.rclone}/bin/rclone mount --poll-interval=30m --vfs-cache-mode=writes --drive-shared-with-me gdrive-appstate: ${config.home.homeDirectory}/mnt/gdrive/appstate-shared"
+            "${pkgs.rclone}/bin/rclone mount --poll-interval=30m --vfs-cache-mode=full --vfs-cache-max-size=1G --vfs-cache-poll-interval=5m --write-back-cache --drive-shared-with-me gdrive-appstate: ${config.home.homeDirectory}/mnt/gdrive/appstate-shared"
           ];
           ExecReload = [ "${pkgs.procps}/bin/kill -HUP $MAINPID" ];
           ExecStopPost = [ "-${pkgs.coreutils}/bin/rmdir -p ${config.home.homeDirectory}/mnt/gdrive/appstate-shared" ];
