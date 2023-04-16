@@ -330,34 +330,30 @@ in
         '');
 
         # Take screenshot of window/selection
-        "Print" = ''
-          SCREENSHOT_MAIM=-u screenshot -b 6 -p -6 -l -c 0.7686,0.9137,0.4705,.5
-        '';
+        "Print" = "SCREENSHOT_MAIM=-u screenshot -b 6 -p -6 -l -c 0.7686,0.9137,0.4705,.5";
 
         # Take screenshot of window/selection (and scan its text)
-        "shift + Print" = ''
-          SCREENSHOT_MAIM=-u SCREENSHOT_OCR=true screenshot -b 6 -p -6 -l -c 0.7686,0.9137,0.4705,.5
-        '';
+        "shift + Print" = "SCREENSHOT_MAIM=-u SCREENSHOT_OCR=true screenshot -b 6 -p -6 -l -c 0.7686,0.9137,0.4705,.5";
 
         # Take screenshot of current monitor
-        "super + Print" = ''
-          SCREENSHOT_GEOMETRY=$(${getMonitorDimensions}) screenshot
-        '';
+        "super + Print" = "SCREENSHOT_GEOMETRY=$(${getMonitorDimensions}) screenshot";
 
         # Take screenshot of all monitors
-        "alt + Print" = ''
-          SCREENSHOT_GEOMETRY=desktop screenshot
-        '';
+        "alt + Print" = "SCREENSHOT_GEOMETRY=desktop screenshot";
 
         # Hardware: {mute, lower, raise} output volume - fn + {f1,f2,f3}
-        "XF86AudioMute" = "ponymix -t sink toggle";
-        "super + XF86AudioMute" = "ponymix -t source toggle";
-        "XF86AudioRaiseVolume" = "ponymix-snap -t sink increase 5";
-        "XF86AudioLowerVolume" = "ponymix-snap -t sink decrease 5";
-        "super + XF86AudioRaiseVolume" = "ponymix-snap -t source increase 5";
-        "super + XF86AudioLowerVolume" = "ponymix-snap -t source decrease 5";
+        "XF86AudioMute" = "ponymix -t sink toggle >/dev/null";
+        # "super + XF86AudioMute" = "ponymix -t source toggle >/dev/null";
+        "shift + XF86AudioMute" = "ponymix-cycle-default sink";
+        "shift + super + XF86AudioMute" = "ponymix-cycle-default source";
 
-        # Hardware: toggle touchpad - super + f1
+        "XF86AudioLowerVolume" = "ponymix-snap -t sink decrease 5 >/dev/null";
+        "XF86AudioRaiseVolume" = "ponymix-snap -t sink increase 5 >/dev/null";
+
+        "shift + XF86AudioLowerVolume" = "ponymix-snap -t source decrease 5 >/dev/null";
+        "shift + XF86AudioRaiseVolume" = "ponymix-snap -t source increase 5 >/dev/null";
+
+        # Hardware: toggle touchpad
         "super + F2" = "xinput-notify touchpad";
       };
   };
