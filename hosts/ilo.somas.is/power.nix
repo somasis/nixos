@@ -57,4 +57,11 @@
   #     hash = "sha256-4JQrSD8HuBDPbBGy2b/uzDvrBUZ8+L9lAnK95rLqASk=";
   #   }}/batenergy.sh "$@"
   # '';
+
+  environment.etc."systemd/system-sleep/wake-xsecurelock".source = pkgs.writeShellScript "wake-xsecurelock" ''
+    if [[ "$1" = "post" ]]; then
+        ${pkgs.procps}/bin/pkill -x -USR2 xsecurelock || :
+    fi
+    exit 0
+  '';
 }

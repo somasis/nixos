@@ -50,11 +50,15 @@ in
 
         Environment = [
           ''"XSECURELOCK_BACKGROUND_COLOR=#000000"''
-          ''"XSECURELOCK_AUTH_BACKGROUND_COLOR=#000000"''
-          ''"XSECURELOCK_AUTH_FOREGROUND_COLOR=${config.xresources.properties."*darkForeground"}"''
-          ''"XSECURELOCK_DATETIME_FORMAT=%%A, %%B %%d, %%I:%%M %%p"''
+
+          ''"XSECURELOCK_AUTH_BACKGROUND_COLOR=${config.xresources.properties."*lightBackground"}"''
+          ''"XSECURELOCK_AUTH_FOREGROUND_COLOR=#000000"''
+
           ''"XSECURELOCK_FONT=monospace:style=bold:size=11"''
-          ''"XSECURELOCK_PASSWORD_PROMPT=time"''
+
+          ''"XSECURELOCK_DATETIME_FORMAT=%%A, %%B %%d, %%I:%%M %%p"''
+          ''"XSECURELOCK_PASSWORD_PROMPT=cursor"''
+
           ''"XSECURELOCK_SHOW_DATETIME=0"''
           ''"XSECURELOCK_SHOW_HOSTNAME=0"''
           ''"XSECURELOCK_SHOW_USERNAME=0"''
