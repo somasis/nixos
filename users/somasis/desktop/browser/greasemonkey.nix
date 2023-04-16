@@ -38,6 +38,89 @@ let
       })
     ];
   };
+
+  mkUserstyle = file:
+    let
+      format = ''
+        ${pkgs.nodePackages.prettier}/bin/prettier \
+            --no-config \
+            --no-editorconfig \
+            --stdin-filepath=userstyle.css
+      '';
+
+      name = builtins.replaceStrings [ "\.css" ] [ "" ] (builtins.baseNameOf file);
+
+      # <https://github.com/stylish-userstyles/stylish/wiki/Valid-@-moz-document-rules>
+      # <https://wiki.greasespot.net/Include_and_exclude_rules>
+      metadata = lib.fileContents
+        (pkgs.runCommand "metadata.js" { inherit file; } ''
+          exec > "$out"
+
+          # Get style's bundled metadata
+          ${format} < "$file" \
+              | ${pkgs.gnused}/bin/sed -En \
+                  -e '/^\/\* ==UserStyle==/,/^==\/UserStyle== \*\// {
+                      /^\/\* ==UserStyle==/b
+                      /^==\/UserStyle== \*\//b
+                      s|^|// |p
+                  }
+              ' \
+              | tee /dev/stderr
+
+          # Convert @-moz-document rules to Greasemonkey @include rules
+          ${format} < "$file" \
+              | ${pkgs.gnused}/bin/sed -E \
+                  -e 's/^ *//' \
+                  -e '/@-moz-document\s/!d' \
+                  -e 's/ *\{$//' \
+                  -e 's/\), /)\n/g' \
+                  -e 's/;$//' \
+                  -e 's/^@-moz-document\s*//' \
+              | ${pkgs.gnused}/bin/sed -E \
+                  -e '/^(domain|url|url-prefix|regexp)\((.+)\)$/!d' \
+                  -e '/^domain\(/ {
+                      s/^domain\("?//
+                      s/"?\)$//
+                      s|^(.*)$|// @include *://\1/*\n// @include *://\*.\1/*|
+                  }' \
+                  -e '/^url\(/ {
+                      s/^url\("?//
+                      s/"?\)$//
+                      s|^(.*)$|// @include \1|
+                  }' \
+                  -e '/^url-prefix\(/ {
+                      s/^url-prefix\("?//
+                      s/"?\)$//
+                      s|^(.*)$|// @include \1*|
+                  }' \
+                  -e '/^regexp\(/ {
+                      s/^regexp\("?//
+                      s/"?\)$//
+                      s|^(.*)$|// @include /\1/|
+                  }
+              ' \
+              | tee /dev/stderr
+        '')
+      ;
+
+      style' = lib.fileContents
+        (pkgs.runCommand "style.css" { inherit file; } ''
+          exec > "$out"
+          ${format} < "$file" \
+              | ${pkgs.gnused}/bin/sed '/^@-moz-document .*{/,/^}/ {
+                  /^@-moz-document .*{/d; $d
+              }' \
+              | ${pkgs.minify}/bin/minify --type css
+        '')
+      ;
+    in
+    pkgs.writeText "${name}.css" ''
+      // ==UserScript==
+      ${metadata}
+      // @grant GM_addStyle
+      // ==/UserScript==
+      GM_addStyle(${builtins.toJSON style'});
+    '';
 in
 {
   # home.persistence."/cache${config.home.homeDirectory}".directories = [ "etc/qutebrowser/greasemonkey/requires" ];
