@@ -1,6 +1,10 @@
-{ config, ... }: {
+{ config
+, lib
+, ...
+}: {
   users = {
     mutableUsers = false;
+
     users = {
       # Disable root login.
       root.hashedPassword = "!";
@@ -11,26 +15,16 @@
         uid = 1000;
 
         extraGroups = [
-          # ./security.nix: doas, polkit
-          # ./nix.nix: trusted-users
-          "wheel"
-
-          # ./networking/wifi.nix
-          "network"
-          "networkmanager"
-
-          # ./hardware/brightness.nix: brillo
-          "video"
-
           # ./users/somasis/games/retroarch.nix: controller detection
           "input"
-
-          # ./hardware/scan.nix
-          "scanner"
-
-          # ./hardware/print.nix
-          "lp"
-        ];
+        ]
+        ++ lib.optional config.security.doas.enable "wheel"
+        ++ lib.optional config.hardware.brillo.enable "video"
+        ++ lib.optionals config.networking.networkmanager.enable [ "network" "networkmanager" ]
+        ++ lib.optional config.hardware.sane.enable "scanner"
+        ++ lib.optional config.services.printing.enable "lp"
+        ++ lib.optional config.programs.adb.enable "adbusers"
+        ;
 
         hashedPassword = "$6$VfKdDqJkx4JrErSl$eJhjdLheyvqDO0hbWE87WKfr6q7qA6pvtmK.EnP.s5wPL7IBZOl1n6YFyrZdpG98HovE7D6X55B0.6c3NYj600";
 
