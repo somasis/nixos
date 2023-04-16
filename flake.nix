@@ -105,7 +105,7 @@
 
   outputs = { self, nixpkgs, home-manager, ... }@inputs: {
     nixosConfigurations.ilo = import ./hosts/ilo.somas.is {
-      inherit inputs nixpkgs;
+      inherit self inputs nixpkgs;
     };
 
     homeConfigurations.somasis = import ./users/somasis;
@@ -114,6 +114,17 @@
       # TODO how do I extend the lib that is used by the nixosConfigurations? :(
       systemdName = lib.replaceStrings [ "@" ":" "\\" "[" "]" ] [ "-" "-" "-" "" "" ];
 
+      # testCase -> TEST_CASE
+      camelCaseToScreamingSnakeCase = x:
+        if lib.toLower x == x then
+          x
+        else
+          lib.replaceStrings
+            (lib.upperChars ++ lib.lowerChars)
+            ((map (c: "_${c}") lib.upperChars) ++ lib.upperChars)
+            x
+      ;
+
       # testCase -> test_case
       camelCaseToSnakeCase = x:
         if lib.toLower x == x then
@@ -121,7 +132,7 @@
         else
           lib.replaceStrings
             (lib.upperChars ++ lib.lowerChars)
-            ((map (c: "_${c}") lib.upperChars) ++ lib.upperChars)
+            ((map (c: "_${c}") lib.lowerChars) ++ lib.lowerChars)
             x
       ;
 
@@ -150,7 +161,7 @@
       ;
 
       # Get the program name and path using the same logic as `nix run`.
-      programName = p: p.meta.metaProgram or p.pname or p.name;
+      programName = p: p.meta.mainProgram or p.pname or p.name;
       programPath = p: "${lib.getBin p}/bin/${lib.programName p}";
     };
   };
