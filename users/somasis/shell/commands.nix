@@ -1,4 +1,7 @@
-{
+{ pkgs
+, lib
+, ...
+}: {
   home.shellAliases = rec {
     # LC_COLLATE=C sorts uppercase before lowercase.
     ls = "LC_COLLATE=C ls --hyperlink=auto --group-directories-first --dereference-command-line-symlink-to-dir -AFlh -b";
@@ -24,9 +27,6 @@
     zstd = "zstd -T0 -19";
     gzip = "pigz -p $(( $(nproc) / 2 )) -9";
 
-    # ... | peek | ...
-    peek = "tee /dev/stderr";
-
     sys = "systemctl -l --legend=false";
     user = "systemctl --user";
     journal = "journalctl -e";
@@ -38,41 +38,51 @@
 
     since = "datediff -f '%Yy %mm %ww %dd %0Hh %0Mm %0Ss'";
 
-    table = "column -t -s $'\t'";
+    number = "nl -b a -d '' -f n -w 1";
   };
+
+  home.packages = [
+    # Strip color codes from stdin/files
+    (pkgs.writeShellApplication {
+      name = "nocolor";
+
+      runtimeInputs = [ (lib.getBin pkgs.gnused) pkgs.coreutils ];
+
+      text = ''
+        if [ -n "''${NO_COLOR:-}" ]; then
+            exec sed -E 's/\x1B\[([0-9]{1,3}(;[0-9]{1,2};?)?)?[mGK]//g' "$@"
+        else
+            exec cat
+        fi
+      '';
+    })
+
+    (pkgs.writeShellApplication {
+      name = "table";
+
+      runtimeInputs = [ pkgs.coreutils pkgs.util-linux ];
+
+      text = ''
+        if [ "$#" -gt 0 ] || [ -t 1 ]; then
+            exec column -s $'\t' -t -L "$@"
+        else
+            exec cat
+        fi
+      '';
+    })
+  ];
 
   programs.bash.initExtra = ''
     edo() { printf '+ %s\n' "$*" >&2; "$@"; }
 
-    # # / $ echo ./nix | p cd; pwd
-    # # /nix
-    # p() {
-    #     local opt cmd args args_count=1 args_max=$(getconf ARG_MAX)
-    #     local null=
-    #     while getopts :N:0 opt >/dev/null 2>&1; do
-    #         case "$opt" in
-    #             N) args_count="$OPTARG" ;;
-    #             0) null=true ;;
-    #         esac
-    #     done
-    #     shift $(( OPTIND - 1 ))
-
-    #     cmd=( "$@" )
-
-    #     [[ $(( args_count - ''${#cmd[@]} )) -gt "$args_max" ]] && args_count="$args_max"
-
-    #     local i=0 maxed_out=
-    #     while IFS= read -r ''${null:+-d $'\0'} arg; do
-    #         [[ -n "$maxed_out" ]] && args=() && maxed_out=
-
-    #         args+=( "$arg" )
-    #         i=$(( i + 1 ))
-
-    #         [[ "$i" -eq "$args_count" ]] \
-    #             && maxed_out=true \
-    #             && "''${cmd[@]}" "''${args[@]}"
-    #     done
-    # }
+    # ... | peek [COMMAND...] | ...
+    peek() {
+        if [[ "$#" -eq 0 ]]; then
+            tee /dev/stderr
+        else
+            tee >("$@" >&2)
+        fi
+    }
 
     # Spawn a new terminal, detached from the current one, inheriting environment and working directory.
     newt() (
