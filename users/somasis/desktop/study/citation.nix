@@ -279,8 +279,8 @@ in
           "extensions.zotero.sync.storage.enabled" = false; # File synchronization is handled by Syncthing.
 
           # ZotFile > Renaming Rules > "Format for all Item Types except Patents"
-          # [author(s) - ]title[ (volume)][ ([year][, book title/journal/publisher/meeting])]
-          "extensions.zotfile.renameFormat" = "{%a - }%t{ (%v)}{ (%y{, %B|, %w})}";
+          # [Last, First - ]title[ (volume)][ ([year][, book title/journal/publisher/meeting])]
+          "extensions.zotfile.renameFormat" = "{%g - }%t{ (%v)}{ (%y{, %B|, %w})}";
 
           # Custom wildcards
           "extensions.zotfile.wildcards.user" = builtins.toString (builtins.toJSON {
