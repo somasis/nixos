@@ -31,18 +31,26 @@
     };
   };
 
-  home.packages = [
-    (pkgs.writeShellScriptBin "open" ''
-      exec xdg-open "$@"
-    '')
-  ];
+  home = {
+    packages = [
+      (pkgs.writeShellScriptBin "open" ''
+        exec xdg-open "$@"
+      '')
+    ];
 
-  # HACK this shouldn't be needed!
-  home.file = {
-    ".cache".source = config.lib.file.mkOutOfStoreSymlink config.xdg.cacheHome;
-    ".config".source = config.lib.file.mkOutOfStoreSymlink config.xdg.configHome;
-    ".local/bin".source = config.lib.file.mkOutOfStoreSymlink "${config.home.homeDirectory}/bin";
-    ".local/share".source = config.lib.file.mkOutOfStoreSymlink config.xdg.dataHome;
-    ".local/state".source = config.lib.file.mkOutOfStoreSymlink config.xdg.stateHome;
+    # HACK this shouldn't be needed!
+    file = {
+      ".cache".source = config.lib.file.mkOutOfStoreSymlink config.xdg.cacheHome;
+      ".config".source = config.lib.file.mkOutOfStoreSymlink config.xdg.configHome;
+      ".local/bin".source = config.lib.file.mkOutOfStoreSymlink "${config.home.homeDirectory}/local/bin";
+      ".local/share".source = config.lib.file.mkOutOfStoreSymlink config.xdg.dataHome;
+      ".local/state".source = config.lib.file.mkOutOfStoreSymlink config.xdg.stateHome;
+    };
+
+    sessionVariables."W3M_DIR" = "${config.xdg.stateHome}/w3m";
+    persistence."/cache${config.home.homeDirectory}".directories = [{
+      directory = "var/lib/w3m";
+      method = "symlink";
+    }];
   };
 }
