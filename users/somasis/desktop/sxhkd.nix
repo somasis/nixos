@@ -313,7 +313,21 @@ in
         "super + g" = "${colorPick} -f hex";
         "super + alt + g" = "${colorPick} -f rgb";
 
-        "super + i" = "xrandr-invert-colors";
+        "super + i" = builtins.toString (pkgs.writeShellScript "xrandr-invert-colors" ''
+          : "''${XDG_RUNTIME_DIR:=/run/user/$(id -un)}"
+
+          if [ -e "$XDG_RUNTIME_DIR/xrandr-invert-colors.lock" ]; then
+              xrandr-invert-colors
+              [ "$(<$XDG_RUNTIME_DIR/xrandr-invert-colors.lock)" = "active" ] \
+                   && ${pkgs.systemd}/bin/systemctl --user start sctd.service
+              exec rm -f "$XDG_RUNTIME_DIR/xrandr-invert-colors.lock"
+          else
+              ${pkgs.systemd}/bin/systemctl --user is-active sctd.service \
+                  > "$XDG_RUNTIME_DIR/xrandr-invert-colors.lock"
+              ${pkgs.systemd}/bin/systemctl --user stop sctd.service
+              exec xrandr-invert-colors
+          fi
+        '');
 
         # Take screenshot of window/selection
         "Print" = ''
