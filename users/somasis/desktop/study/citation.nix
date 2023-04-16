@@ -524,29 +524,20 @@ in
     ];
   };
 
-  systemd.user.services = {
-    # Install the Zotero connector
-    libreoffice.Service.ExecStartPre =
-      let
-        connector = "${config.programs.zotero.package}/usr/lib/zotero-bin-${pkgs.zotero.version}/extensions/zoteroOpenOfficeIntegration@zotero.org/install/Zotero_OpenOffice_Integration.oxt";
-      in
-      [ "${pkgs.libreoffice}/bin/unopkg add -f ${connector}" ];
+  systemd.user.services.zotero = {
+    Unit = {
+      Description = pkgs.zotero.meta.description;
+      PartOf = [ "graphical-session.target" ];
+      After = [ "picom.service" "panel.service" ];
+    };
+    Install.WantedBy = [ "graphical-session.target" ];
 
-    zotero = {
-      Unit = {
-        Description = pkgs.zotero.meta.description;
-        PartOf = [ "graphical-session.target" ];
-        After = [ "picom.service" "panel.service" ];
-      };
-      Install.WantedBy = [ "graphical-session.target" ];
+    Service = {
+      Type = "simple";
+      ExecStart = "${config.programs.zotero.package}/bin/zotero";
+      # KillSignal = "SIGQUIT";
 
-      Service = {
-        Type = "simple";
-        ExecStart = "${config.programs.zotero.package}/bin/zotero";
-        # KillSignal = "SIGQUIT";
-
-        SyslogIdentifier = "zotero";
-      };
+      SyslogIdentifier = "zotero";
     };
   };
 

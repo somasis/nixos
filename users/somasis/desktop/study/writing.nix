@@ -41,7 +41,11 @@ let libreoffice = pkgs.libreoffice-still; in
         # If there is no process matching the pattern, pwait will exit non-zero.
         ExecStartPre = [
           "-${libreofficeWait}"
-        ];
+        ] ++
+        # Install the Zotero connector
+        lib.optional config.programs.zotero.enable
+          "${libreoffice}/bin/unopkg add -f ${config.programs.zotero.package}/usr/lib/zotero-bin-${pkgs.zotero.version}/extensions/zoteroOpenOfficeIntegration@zotero.org/install/Zotero_OpenOffice_Integration.oxt"
+        ;
 
         ExecStart = [ "${libreoffice}/bin/soffice --quickstart --nologo --nodefault" ];
 
