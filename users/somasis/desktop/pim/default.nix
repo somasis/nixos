@@ -142,14 +142,14 @@ in
 
   systemd.user.timers.vdirsyncer = {
     Unit = {
-      Description = "Synchronize calendars and contacts every thirty minutes, and fifteen minutes after startup";
+      Description = "Synchronize calendars and contacts every hour, and fifteen minutes after startup";
       PartOf = [ "pim.target" ];
     };
     Install.WantedBy = [ "pim.target" ];
 
     Timer = {
       OnStartupSec = "900";
-      OnCalendar = "*:0/30";
+      OnCalendar = "*:0";
       RandomizedDelaySec = "5m";
     };
   };
