@@ -395,6 +395,14 @@ in
         info.border = info.bg;
       };
 
+      colors.contextmenu = {
+        menu.bg = "#ffffff";
+        menu.fg = "#5c616c";
+        selected.bg = config.xresources.properties."*colorAccent";
+        selected.fg = "#ffffff";
+        disabled.fg = "#a6a8ae";
+      };
+
       # Window.
       window.title_format = "qutebrowser{title_sep}{current_title}";
 
