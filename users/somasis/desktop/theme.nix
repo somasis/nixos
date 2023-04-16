@@ -9,7 +9,6 @@
 
   home.packages = [
     pkgs.papirus-icon-theme
-    pkgs.qogir-icon-theme
 
     # GTK theming
     pkgs.arc-theme
