@@ -152,7 +152,7 @@ nixpkgs.lib.nixosSystem {
         enableLsColors = false;
       };
 
-      # services.gvfs.enable = lib.mkForce false;
+      services.gvfs.enable = true;
       programs.dconf.enable = true;
 
       system.stateVersion = "22.11";
