@@ -214,35 +214,35 @@ in
     };
   };
 
-  services.xsuspender.rules.discord = {
-    matchWmClassGroupContains = "discord";
-    downclockOnBattery = 0;
-    suspendDelay = 300;
-    resumeEvery = 10;
-    resumeFor = 5;
+  # services.xsuspender.rules.discord = {
+  #   matchWmClassGroupContains = "discord";
+  #   downclockOnBattery = 0;
+  #   suspendDelay = 300;
+  #   resumeEvery = 10;
+  #   resumeFor = 5;
 
-    suspendSubtreePattern = ".";
+  #   suspendSubtreePattern = ".";
 
-    # Only suspend if discord isn't currently open, and no applications
-    # are playing on pulseaudio
-    execSuspend = builtins.toString (pkgs.writeShellScript "suspend" ''
-      ! ${pkgs.xdotool}/bin/xdotool search \
-          --limit 1 \
-          --onlyvisible \
-          --classname \
-          '^discord$' \
-          >/dev/null \
-          && test "$(
-              ${pkgs.ponymix}/bin/ponymix \
-                  --short \
-                  --sink-input \
-                  list \
-                  | wc -l
-              )" \
-              -eq 0
-      e=$?
-      ${pkgs.libnotify}/bin/notify-send -a xsuspender xsuspender "suspending $WM_NAME ($PID, $WID)"
-      exit $e
-    '');
-  };
+  #   # Only suspend if discord isn't currently open, and no applications
+  #   # are playing on pulseaudio
+  #   execSuspend = builtins.toString (pkgs.writeShellScript "suspend" ''
+  #     ! ${pkgs.xdotool}/bin/xdotool search \
+  #         --limit 1 \
+  #         --onlyvisible \
+  #         --classname \
+  #         '^discord$' \
+  #         >/dev/null \
+  #         && test "$(
+  #             ${pkgs.ponymix}/bin/ponymix \
+  #                 --short \
+  #                 --sink-input \
+  #                 list \
+  #                 | wc -l
+  #             )" \
+  #             -eq 0
+  #     e=$?
+  #     ${pkgs.libnotify}/bin/notify-send -a xsuspender xsuspender "suspending $WM_NAME ($PID, $WID)"
+  #     exit $e
+  #   '');
+  # };
 }
