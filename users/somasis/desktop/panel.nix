@@ -9,7 +9,15 @@ in
 {
   home.packages = [
     # panel
-    pkgs.lemonbar-xft
+    (pkgs.lemonbar-xft.overrideAttrs (prev: {
+      patches = [
+        (pkgs.fetchpatch {
+          url = "https://github.com/somasis/lemonbar-xft/commit/2f1243f8d401ad48e55e7ea294362be1e75b31c8.patch";
+          hash = "sha256-qXEolq1Y5FaCIVHlacIsJY7/fcJrnZgklgOguXdiTlM=";
+        })
+      ];
+    }))
+
     pkgs.procps
 
     # panel-title
