@@ -34,7 +34,10 @@ in
   };
 
 
-  home.persistence."/persist${config.home.homeDirectory}".directories = [ "etc/kdeconnect" ];
+  home.persistence."/persist${config.home.homeDirectory}".directories = [{
+    method = "symlink";
+    directory = "etc/kdeconnect";
+  }];
 
   programs.qutebrowser = {
     aliases.kdeconnect = "spawn -u ${kdeconnectShare}";
