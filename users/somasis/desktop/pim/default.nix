@@ -127,8 +127,8 @@ in
       # }";
 
       ExecStart = [
-        "${pkgs.limitcpu}/bin/cpulimit -qf -l 25 -- ${lib.optionalString nixosConfig.services.tor.client.enable "${pkgs.torsocks}/bin/torsocks"} ${pkgs.vdirsyncer}/bin/vdirsyncer -v WARNING metasync"
-        "${pkgs.limitcpu}/bin/cpulimit -qf -l 25 -- ${lib.optionalString nixosConfig.services.tor.client.enable "${pkgs.torsocks}/bin/torsocks"} ${pkgs.vdirsyncer}/bin/vdirsyncer -v WARNING sync"
+        "${pkgs.vdirsyncer}/bin/vdirsyncer -v WARNING metasync"
+        "${pkgs.vdirsyncer}/bin/vdirsyncer -v WARNING sync"
       ];
 
       SyslogIdentifier = "vdirsyncer";
