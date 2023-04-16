@@ -74,6 +74,8 @@ let
           && [ -n "$ocr" ]; then
           xclip -i \
               -selection clipboard \
+              -target UTF8_STRING \
+              -rmlastnl \
               "$b".txt \
               >&- 2>&-
 
@@ -92,6 +94,8 @@ let
 
           xclip -i \
               -selection clipboard \
+              -target UTF8_STRING \
+              -rmlastnl \
               <<<"$barcode_data" \
               >&- 2>&-
 
@@ -103,20 +107,15 @@ let
       else
           xclip -i \
               -selection clipboard \
-              -target image/png \
-              "$b".png \
-              >&- 2>&-
-
-          xclip -i \
-              -selection clipboard \
               -target UTF8_STRING \
+              -rmlastnl \
               <<<"$b.png" \
               >&- 2>&-
 
           xclip -i \
               -selection clipboard \
-              -target text/uri-list \
-              <<<"file://$b.png" \
+              -target image/png \
+              "$b".png \
               >&- 2>&-
 
           notify-send \
