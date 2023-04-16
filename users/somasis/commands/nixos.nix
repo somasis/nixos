@@ -1,4 +1,5 @@
-{ pkgs
+{ lib
+, pkgs
 , config
 , nixosConfig
 , ...
@@ -18,6 +19,8 @@ in
 {
   home.packages = [
     # nixosRepl
+
+    pkgs.nvd
 
     (pkgs.writeShellApplication {
       name = "nixos-search";
@@ -51,7 +54,7 @@ in
                 while read -r f a v d; do
                     printf "%s\t%s\t%s\t%s\n" "$f" "$a" "$v" "$d"
                 done \
-                    | column -t -s "$(printf '\t')" \
+                    | table \
                         -N FLAKE,ATTR,VERSION,DESC \
                         -E FLAKE,ATTR,DESC \
                         -T VERSION \
@@ -78,7 +81,7 @@ in
         export query
 
         # shellcheck disable=SC2016
-        nix flake metadata \
+        nix flake metadata --no-write-lock-file \
             --inputs-from /etc/nixos --json \
             /etc/nixos \
             | jq -r '
@@ -90,7 +93,7 @@ in
             | xe -j "$JOBS" -LF -s '
                 eval "set -- \"$1\" $query"; \
                 printf "%s\t" "$1"; \
-                nix search \
+                nix search --no-write-lock-file \
                     --inputs-from /etc/nixos --json \
                     "$@";
                 printf "\n"
@@ -120,7 +123,24 @@ in
       ];
 
       text = ''
-        nix flake metadata --json /etc/nixos \
+        verbose=
+        debug=
+
+        for a; do
+          shift
+          [ "$a" = "--debug" ] && debug=true && verbose=true&& continue
+          [ "$a" = "--verbose" ] && verbose=true && continue
+          set -- "$@" "$a"
+        done
+
+        verbose() {
+            # shellcheck disable=SC2059,SC2015
+            [ -n "$verbose" ] && printf "$@" >&2 || :
+        }
+
+        [ -n "$debug" ] && set -x
+
+        nix flake metadata --json --no-write-lock-file /etc/nixos \
             | jq -r '
                 .locks.nodes.root[][] as $input
                     | .locks.nodes."\($input)"
@@ -141,9 +161,10 @@ in
                     ~/src/nix/"$basename" \
                     ~/src/"$basename"; do
                     if git -C "$d" diff-index --quiet HEAD -- 2>/dev/null; then
+                        # --atomic is used so the local trees aren't ever left in a weird state.
                         before=$(git -C "$d" rev-parse HEAD) \
-                            && printf "+ git -C \"%s\" pull -q --progress\n" "$d" >&2 \
-                            && git -C "$d" pull -q --progress \
+                            && verbose "+ git -C \"%s\" pull -q --progress -- --atomic\n" "$d" \
+                            && git -C "$d" pull -q --progress -- --atomic \
                             && after=$(git -C "$d" rev-parse HEAD) \
                             && PAGER="cat" git -c color.ui=always -C "$d" \
                                 log --no-merges --reverse --oneline "$before..$after"
@@ -152,8 +173,8 @@ in
                 done
             done
 
-        printf "+ nix flake update /etc/nixos\n" >&2
-        nix flake update /etc/nixos
+        debug "+ nix flake update /etc/nixos\n"
+        exec nix flake update /etc/nixos
       '';
     })
 
@@ -248,53 +269,8 @@ in
     })
 
     (pkgs.writeShellApplication {
-      name = "nixos-diff";
-
-      runtimeInputs = [
-        nixosConfig.nix.package
-        pkgs.gnused
-        pkgs.gnugrep
-        pkgs.util-linux
-      ];
-
-      text = ''
-        set -e
-
-        diff=$(
-            nix store diff-closures "$@" \
-                | sed -E "s/\x1B\[([0-9]{1,3}(;[0-9]{1,2})?)?[mGK]//g" \
-                | sed -E \
-                    -e 's/^/\t/' \
-                    -e '/∅ → /                   { s/→/->/g; s/: ∅ -> /\t/;                     s/^/open/; }' \
-                    -e '/ε → ∅/                  { s/→/->/g; s/: ε -> ∅/\t/;                    s/^/pini/; }' \
-                    -e '/ → ∅/                   { s/→/->/g; s/: /\t/; s/(, [-+]|$)/\t/; s/ε//; s/ -> ∅//g; s/^/weka/; }' \
-                    -e '/ → /                    { s/→/->/g; s/: /\t/;                          s/^/kama sin/; }' \
-                    -e '/: [+-][0-9\.]+ [A-z]+$/ {           s/: /\t/;                          s/^/ante suli/; }' \
-                    -e '/[+-][0-9\.]+ [A-z]+$/   { s/[+-][0-9\.]+ [A-z]+/\t&/; }' \
-                    -e 's/, \t/\t/' \
-                    -e '/(bindMount|unmount-bindMount|unbindOrUnlink|unit-persist)\t/d'
-                    # -e '/ε → ∅/d; /ε$/d; /→ ε,/d' \
-                    # -e "/^[^:]+: [$(printf '\e[31;1m\e[32;1m')]/d" \
-                    # -e "/: ∅ → / { s/^/install:\t/; s/∅ → //; s/: /\t/ }" \
-                    # -e "/ →  ∅/ { s/^/remove:\t/; s/ → ∅//; s/: /\t/ }" \
-                    # -e "/: [^ ]+ → / { s/^/upgrade:\t/; s/→/->/; s/: /\t/ }" \
-                    # -e "/, / s/, /\t/" \
-        )
-
-        tab=$(printf '\t')
-        {
-            printf '%s\n' "$diff" | grep "^open$tab"
-            printf '%s\n' "$diff" | grep "^kama sin$tab"
-            printf '%s\n' "$diff" | grep "^ante suli$tab"
-            printf '%s\n' "$diff" | grep "^pini$tab"
-            printf '%s\n' "$diff" | grep "^weka$tab"
-        } | column -t -s "$(printf '\t')" -W3
-
-      '';
-    })
-
-    (pkgs.writeShellApplication {
       name = "nixos-dev";
+
       runtimeInputs = [
         config.programs.git.package
         config.programs.jq.package
@@ -303,12 +279,8 @@ in
       ];
 
       text = ''
-        set -e
-
-        edo() { printf '+ %s\n' "$*" >&2; "$@"; }
-
         args=$(
-            nix flake metadata --json /etc/nixos \
+            nix flake metadata --json --no-write-lock-file /etc/nixos \
                 | jq -r '
                     .locks.nodes.root[][] as $input
                         | .locks.nodes."\($input)"
@@ -339,62 +311,179 @@ in
                 done | tr '\n' ' '
         )
 
-        eval "exec nixos $args \"\''${@:-switch}\""
+        # --quiet --quiet removes the "updated input" spam
+        eval "exec nixos --quiet --quiet $args \"\''${@:-switch}\""
       '';
     })
 
-    (pkgs.writeShellScriptBin "nixos" ''
-      set -e
+    (pkgs.writeShellApplication {
+      name = "nixos";
+      runtimeInputs = [
+        pkgs.coreutils
+        pkgs.systemd
+        pkgs.nixos-rebuild
+        config.programs.jq.package
+      ];
 
-      edo() { printf '+ %s\n' "$*" >&2; "$@"; }
+      text = ''
+        debug=
+        verbose=
 
-      # Keep the old and new revisions so we can compare them later.
-      _nixos_old_system=$(readlink /run/current-system)
+        for a; do
+          shift
+          [ "$a" = "--debug" ] && debug=true && verbose=true && continue
+          [ "$a" = "--verbose" ] && verbose=true && continue
+          set -- "$@" "$a"
+        done
 
-      [ "$#" -gt 0 ] || set -- switch
+        edo() {
+            # shellcheck disable=SC2015
+            [ -n "$verbose" ] && printf '+ %s\n' "$*" >&2 || :
+            "$@"
+        }
 
-      # Disable logging before the switch, just in case we touch the
-      # log filesystem in a way it doesn't like...
-      if systemctl -q is-active systemd-journald.service; then
-          edo doas journalctl --sync
-          edo doas journalctl --relinquish-var
-      fi
+        [ -n "$debug" ] && set -x
 
-      e=0
-      edo doas nixos-rebuild --no-update-lock-file "$@" || e=$?
+        # Keep the old and new revisions so we can compare them later.
+        _nixos_old_system=/nix/var/nix/profiles/$(readlink /nix/var/nix/profiles/system)
+        _nixos_old_home="$NIX_USER_PROFILE_DIR"/"$(readlink "$NIX_USER_PROFILE_DIR"/home-manager)"
 
-      if systemctl -q is-active systemd-journald.service; then
-          edo doas journalctl --flush
-      fi
+        [ "$#" -gt 0 ] || set -- switch
 
-      [ "$e" -eq 0 ] || exit $e
+        # Disable logging before the switch, just in case we touch the
+        # log filesystem in a way it doesn't like...
+        if systemctl -q is-active systemd-journald.service; then
+            edo doas journalctl --sync
+            edo doas journalctl --relinquish-var
+        fi
 
-      _nixos_new_system=$(readlink /run/current-system)
+        e=0
+        edo doas nixos-rebuild --no-update-lock-file "$@" || e=$?
 
-      case "$1" in
-          switch|test)
-              # Start default.target again, since there might be new additions via home-manager.
-              edo systemctl --user start default.target \
-                  || edo systemctl --user list-dependencies default.target
+        if systemctl -q is-active systemd-journald.service; then
+            edo doas journalctl --flush
+        fi
 
-              # Start graphical-session.target again, if Xorg is running.
-              if [ -n "$DISPLAY" ]; then
-                  edo systemctl --user start graphical-session.target \
-                      || edo systemctl --user list-dependencies graphical-session.target
-              fi
+        [ "$e" -eq 0 ] || exit $e
 
-              journalctl \
-                  --no-pager \
-                  --no-full \
-                  --since="$(systemctl show -P ActiveEnterTimestamp home-manager-$USER.service)" \
-                  -o json \
-                  -u "home-manager-$USER.service" \
-                  | jq -r 'select(._COMM != "systemd") | .MESSAGE'
-              ;;
-      esac
+        _nixos_new_system=/nix/var/nix/profiles/$(readlink /nix/var/nix/profiles/system)
+        _nixos_new_home="$NIX_USER_PROFILE_DIR"/"$(readlink "$NIX_USER_PROFILE_DIR"/home-manager)"
 
-      nixos-diff "$_nixos_old_system" "$_nixos_new_system"
-    '')
+        case "$1" in
+            switch|test)
+                # Start default.target again, since there might be new additions via home-manager.
+                edo systemctl --user start default.target \
+                    || edo systemctl --user list-dependencies default.target
+
+                # Start graphical-session.target again, if Xorg is running.
+                if [ -n "$DISPLAY" ]; then
+                    edo systemctl --user start graphical-session.target \
+                        || edo systemctl --user list-dependencies graphical-session.target
+                fi
+
+                journalctl \
+                    --no-pager \
+                    --no-full \
+                    --since="$(systemctl show -P ActiveEnterTimestamp "home-manager-$USER.service")" \
+                    -o json \
+                    -u "home-manager-$USER.service" \
+                    | jq -r 'select(._COMM != "systemd") | .MESSAGE'
+                ;;
+        esac
+
+        [ "$_nixos_new_system" = "$_nixos_old_system" ] || { edo nixos-diff "$_nixos_old_system" "$_nixos_new_system"; printf '\n'; } >&2
+        [ "$_nixos_new_home" = "$_nixos_old_home" ] || edo nixos-diff "$_nixos_old_home" "$_nixos_new_home" >&2
+      '';
+    })
+
+    (pkgs.writeShellApplication {
+      name = "nixos-diff";
+
+      runtimeInputs = [
+        pkgs.coreutils
+        pkgs.findutils
+        pkgs.gnused
+        pkgs.nvd
+        pkgs.outils
+        pkgs.xe
+      ];
+
+      text = ''
+        usage() {
+            cat >&2 <<EOF
+        usage: nixos-diff OLD NEW
+        EOF
+            exit 69
+        }
+
+        pretty() {
+            local stdin
+            stdin=$(</dev/stdin)
+
+            {
+                printf '%s (%s -> %s)\n' "$1" "$old_generation" "$new_generation" >&2
+                printf '%s\n' "$stdin"
+            } \
+                | vis -ct \
+                | sed -E \
+                    -e '/^((Added|Removed) packages|Version changes):$|^(<<<|>>>) /d' \
+                    -e '/^\[\\\^/ {
+                        s/ +#[0-9]+ +/ /
+                        s/ *\\\^\[\[0m  +/\\\^\[\[0m\\t/
+                    }' \
+                    -e '/^Closure size:/ s/^Closure size: .+\(//; s/\)\.$/\./' \
+                    -e '/^<<< /d' \
+                    -e '/^>>> /d' \
+                | unvis \
+                | nocolor \
+                | table -T 2
+        }
+
+        [ "$#" -gt 0 ] || usage
+
+        old="$1"
+        new="$2"
+
+        old_stem=''${old##*/}
+        old_stem=''${old_stem%-link}
+        old_stem=''${old_stem%-[0-9]*}
+
+        old_generation=''${old##*/}
+        old_generation=''${old_generation%-link}
+        old_generation=''${old_generation##"$stem"-}
+
+        new_generation=''${new##*/}
+        new_generation=''${new_generation%-link}
+        new_generation=''${new_generation##"$stem"-}
+
+        if [ "$#" -eq 2 ]; then
+            nvd --color always diff "$old" "$new" | pretty "$old_stem"
+        elif [ "$#" -eq 0 ]; then
+            find /nix/var/nix/profiles \
+                -mindepth 1 \
+                -maxdepth 1 \
+                -name 'system-*-link' \
+                -type l \
+                | xe -N2 nvd --color always diff \
+                | pretty "$old_stem"
+
+            find /nix/var/nix/profiles/per-user \
+                -mindepth 1 \
+                -maxdepth 1 \
+                -type d \
+                -exec sh -c 'find "$@" \
+                    -mindepth 1 \
+                    -maxdepth 1 \
+                    -name "home-manager-*-link" \
+                    -type l \
+                        | sort \
+                        | tail -n2
+                    ' -- {} \; \
+                | xe -N2 nvd --color always diff \
+                | pretty "$old_stem"
+        fi
+      '';
+    })
 
     # (pkgs.writeShellScriptBin "nixos-watch" ''
     #   nixos "$@"
