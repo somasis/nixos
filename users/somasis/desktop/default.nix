@@ -20,7 +20,6 @@
     ./stw
 
     ./anki.nix
-    ./audacity.nix
     ./automount.nix
     ./autorandr.nix
     ./clipboard.nix

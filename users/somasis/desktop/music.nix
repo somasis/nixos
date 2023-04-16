@@ -5,6 +5,47 @@
 , ...
 }:
 let
+  xdgRuntimeDir = "/run/user/${toString nixosConfig.users.users.${config.home.username}.uid}";
+
+  pass-mpdscribble = pkgs.writeShellApplication {
+    name = "pass-mpdscribble";
+    runtimeInputs = [ config.programs.password-store.package ];
+
+    text = ''
+      cat <<EOF
+      ${mpdscribbleConf}
+      EOF
+    '';
+  };
+
+  mpdscribble = pkgs.symlinkJoin {
+    name = "mpdscribble";
+    paths = [ pkgs.mpdscribble pass-mpdscribble ];
+    buildInputs = [ pkgs.makeWrapper ];
+    postBuild = ''
+      wrapProgram $out/bin/mpdscribble \
+          --add-flags '--conf <(pass-mpdscribble)'
+    '';
+  };
+
+  # INI is shell-expanded as a heredoc, so be careful with special characters
+  mpdscribbleConf = lib.generators.toINIWithGlobalSection { } {
+    globalSection = {
+      log = "-";
+      host = config.services.mpd.network.listenAddress;
+      port = builtins.toString config.services.mpd.network.port;
+      verbose = 1;
+    };
+
+    sections."last.fm" = {
+      journal = "${config.xdg.cacheHome}/mpdscribble/last.fm.journal";
+      url = "https://post.audioscrobbler.com/";
+
+      username = "kyliesomasis";
+      password = "$(pass www/last.fm/kyliesomasis | tr -d '\n' | md5sum - | cut -d' ' -f1)";
+    };
+  };
+
   envtag = pkgs.writeShellScriptBin "envtag" ''
     ${pkgs.ffmpeg-full}/bin/ffprobe -loglevel -32 \
         -of json \
@@ -196,9 +237,9 @@ let
       General.playQueueConfirmClear = false; # "prompt before clearing"
       General.playQueueSearch = true; # "separate action (and shortcut) for play queue search"
 
-      General.playQueueBackground = 1; # background image: "current album cover"
-      General.playQueueBackgroundBlur = 20;
-      General.playQueueBackgroundOpacity = 20;
+      General.playQueueBackground = 0; # background image: "current album cover"
+      # General.playQueueBackgroundBlur = 20;
+      # General.playQueueBackgroundOpacity = 20;
 
       # Interface > Toolbar
       General.showStopButton = true;
@@ -291,22 +332,161 @@ let
     });
 in
 {
-  imports = [
-    ../music/manage
-    ../music/play.nix
-  ];
+  imports = [ ../music/manage ];
+
+  xdg.userDirs.music = "${config.home.homeDirectory}/audio/library";
+
+  services.mpd = {
+    enable = true;
+
+    musicDirectory = "${config.xdg.userDirs.music}/lossy";
+    playlistDirectory = "${config.xdg.userDirs.music}/playlists";
+
+    extraConfig =
+      let
+        tags = [
+          "title"
+          "track"
+          "album"
+          "artist"
+          "performer"
+          "composer"
+          "date"
+          "genre"
+          "label"
+          "disc"
+          "musicbrainz_artistid"
+          "musicbrainz_albumid"
+          "musicbrainz_albumartistid"
+          "musicbrainz_trackid"
+          "musicbrainz_releasetrackid"
+          "musicbrainz_workid"
+        ];
+      in
+      ''
+        metadata_to_use "${lib.concatStringsSep "," tags}"
+
+        auto_update "yes"
+        auto_update_depth "1"
+
+        audio_output {
+          type "pulse"
+          name "PulseAudio"
+          format "48000:24:2"
+          replay_gain_handler "mixer"
+        }
+      '';
+  };
+
+  services.listenbrainz-mpd = {
+    enable = true;
+    settings = {
+      submission.token_file = "${xdgRuntimeDir}/listenbrainz-mpd-secret.fifo";
+      submission.cache_file = "${config.xdg.cacheHome}/listenbrainz-mpd/cache.sqlite3";
+      mpd.address = "${config.services.mpd.network.listenAddress}:${builtins.toString config.services.mpd.network.port}";
+    };
+  };
+
+  systemd.user = {
+    services.listenbrainz-mpd-secret = {
+      Unit = {
+        Description = "Provide a secret to listenbrainz-mpd's secret socket";
+        Before = [ "listenbrainz-mpd.service" ];
+      };
+
+      Install.WantedBy = [ "listenbrainz-mpd.service" ];
+
+      Service = {
+        Type = "oneshot";
+
+        TimeoutStartSec = "infinity";
+
+        StandardInput = "null";
+        StandardOutput = "file:%t/listenbrainz-mpd-secret.fifo";
+
+        Sockets = "listenbrainz-mpd.socket";
+
+        ExecStart = "${config.programs.password-store.package}/bin/pass ${nixosConfig.networking.fqdnOrHostName}/listenbrainz-mpd";
+      };
+    };
+
+    sockets.listenbrainz-mpd-secret.Socket = {
+      ListenFIFO = "%t/listenbrainz-mpd-secret.fifo";
+      SocketMode = "0600";
+      RemoveOnStop = true;
+    };
+
+    services.listenbrainz-mpd = {
+      Unit.After = [ "listenbrainz-mpd-secret.service" "mpd.service" ];
+      Install.WantedBy = [ "mpd.service" ];
+    };
+
+    services.mpdscribble = {
+      Unit = {
+        Description = pkgs.mpdscribble.meta.description;
+        PartOf = [ "default.target" ];
+        After = [ "mpd.service" ];
+      };
+      Install.WantedBy = [ "mpd.service" ];
+
+      Service = {
+        Type = "simple";
+        ExecStart = [ "${mpdscribble}/bin/mpdscribble -D" ];
+      };
+    };
+  };
+
+  services.mpdris2 = {
+    inherit (config.services.mpd) enable;
+    mpd = {
+      inherit (config.services.mpd) musicDirectory;
+      host = config.services.mpd.network.listenAddress;
+    };
+  };
+
+  services.sxhkd.keybindings =
+    let
+      mpc-toggle = pkgs.writeShellScript "mpc-toggle" ''
+        c=$(${pkgs.mpc-cli}/bin/mpc playlist | wc -l)
+        [ "$c" -gt 0 ] || ${pkgs.mpc-cli}/bin/mpc add /
+        ${pkgs.mpc-cli}/bin/mpc toggle
+      '';
+    in
+    {
+      "XF86AudioPlay" = "${mpc-toggle}";
+      "shift + XF86AudioPlay" = "${pkgs.mpc-cli}/bin/mpc stop";
+
+      "XF86AudioPrev" = "${pkgs.mpc-cli}/bin/mpc cdprev";
+      "XF86AudioNext" = "${pkgs.mpc-cli}/bin/mpc next";
+
+      "shift + XF86AudioPrev" = "${pkgs.mpc-cli}/bin/mpc consume";
+      "shift + XF86AudioNext" = "${pkgs.mpc-cli}/bin/mpc random";
+    };
 
   home = {
     persistence = {
-      "/persist${config.home.homeDirectory}".directories = [{ directory = "audio"; method = "symlink"; }];
+      "/persist${config.home.homeDirectory}".directories = [
+        { method = "symlink"; directory = "audio"; }
+        { method = "symlink"; directory = "share/mpd"; }
+        { method = "symlink"; directory = "etc/audacity"; }
+      ];
+
       "/cache${config.home.homeDirectory}".directories = [
-        { directory = "share/cantata"; method = "symlink"; }
-        { directory = "var/cache/cantata"; method = "symlink"; }
+        { method = "symlink"; directory = "share/cantata"; }
+        { method = "symlink"; directory = "var/cache/cantata"; }
+        { method = "symlink"; directory = "var/cache/listenbrainz-mpd"; }
+        { method = "symlink"; directory = "var/cache/mpdscribble"; }
       ];
     };
 
     packages = [
+      envtag
+
+      pkgs.audacity
+
       pkgs.mpc-cli
+
+      mpdscribble
 
       (pkgs.symlinkJoin rec {
         name = "cantata-with-pass";
