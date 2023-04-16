@@ -34,8 +34,6 @@
     };
 
     extraConfig = {
-      rerere.enabled = true;
-
       sendemail = {
         annotate = true;
         smtpserver = "${pkgs.msmtp}/bin/msmtp";
