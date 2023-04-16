@@ -17,8 +17,13 @@ assert nixosConfig.programs.steam.enable;
     Install.WantedBy = [ "graphical-session.target" ];
     Service = {
       Type = "simple";
-      ExecStart = "${nixosConfig.programs.steam.package}/bin/steam -silent";
+      ExecStart = "${nixosConfig.programs.steam.package}/bin/steam -silent -no-browser";
       Restart = "on-failure";
+
+      Nice = 19;
+      CPUSchedulingPolicy = "idle";
+      IOSchedulingClass = "idle";
+      IOSchedulingPriority = 7;
     };
   };
 
