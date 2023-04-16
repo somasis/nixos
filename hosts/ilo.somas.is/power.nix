@@ -23,7 +23,10 @@
 
   # Auto-tune with powertop on boot.
   powerManagement.powertop.enable = true;
-  environment.persistence."/cache".directories = [ "/var/cache/powertop" ];
+  environment.persistence = {
+    "/cache".directories = [ "/var/cache/powertop" ];
+    "/log".directories = [ "/var/lib/upower" ];
+  };
 
   # Manage CPU temperature.
   services.thermald.enable = true;
