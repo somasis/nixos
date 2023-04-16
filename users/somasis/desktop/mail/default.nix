@@ -57,7 +57,7 @@ in
         offlineimap.enable = true;
         imapnotify = rec {
           enable = true;
-          onNotify = "${systemctl} start offlineimap-${systemdName name}.service";
+          onNotify = "${systemctl} start offlineimap@${systemdName name}.service";
           boxes = [ "INBOX" ];
         };
         msmtp.enable = true;
@@ -76,7 +76,7 @@ in
         offlineimap.extraConfig = offlineimapNametransGmail;
         imapnotify = rec {
           enable = true;
-          onNotify = "${systemctl} start offlineimap-${systemdName name}.service";
+          onNotify = "${systemctl} start offlineimap@${systemdName name}.service";
           boxes = [ "INBOX" ];
         };
         msmtp.enable = true;
@@ -94,7 +94,7 @@ in
         offlineimap.extraConfig = offlineimapNametransGmail;
         imapnotify = rec {
           enable = true;
-          onNotify = "${systemctl} start offlineimap-${systemdName name}.service";
+          onNotify = "${systemctl} start offlineimap@${systemdName name}.service";
           boxes = [ "INBOX" ];
         };
         msmtp.enable = true;
@@ -107,7 +107,7 @@ in
   systemd.user = lib.foldr
     (n: a:
       lib.recursiveUpdate a {
-        services."offlineimap-${systemdName n}" = {
+        services."offlineimap@${systemdName n}" = {
           Unit.Description = "Synchronize IMAP boxes for account ${n}";
           Service = {
             Type = "oneshot";
@@ -123,7 +123,7 @@ in
           } // (lib.optionalAttrs nixosConfig.networking.networkmanager.enable { ExecStartPre = [ "${pkgs.networkmanager}/bin/nm-online -q" ]; });
         };
 
-        timers."offlineimap-${systemdName n}" = {
+        timers."offlineimap@${systemdName n}" = {
           Unit.Description = "Synchronize IMAP boxes for account ${n} every two hours, and fifteen minutes after startup";
           Timer = {
             OnCalendar = "1/2:00:00";
@@ -136,7 +136,7 @@ in
           Install.WantedBy = [ "mail.target" ];
         };
 
-        paths."offlineimap-${systemdName n}" = {
+        paths."offlineimap@${systemdName n}" = {
           Unit.Description = "Synchronize IMAP boxes on local changes";
           Path.PathChanged = config.accounts.email.accounts."${n}".maildir.absPath;
 
@@ -144,7 +144,7 @@ in
           Install.WantedBy = [ "mail.target" ];
         };
 
-        services."imapnotify-${systemdName n}" = {
+        services."imapnotify@${systemdName n}" = {
           Unit.PartOf = [ "mail.target" ];
           Install.WantedBy = [ "mail.target" ];
         };
