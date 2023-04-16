@@ -1,7 +1,8 @@
 { config
 , pkgs
 , lib
-, inputs
+, self
+, nixpkgs
 , ...
 }: {
   nix = {
@@ -71,6 +72,10 @@
       dates = "monthly";
       options = "--delete-older-than 14d";
     };
+
+    registry.nixpkgs.flake = nixpkgs;
+    registry.self.flake = self;
+    nixPath = [ "nixpkgs=flake:nixpkgs" ];
   };
 
   programs.ssh.extraConfig = ''

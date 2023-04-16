@@ -1,4 +1,5 @@
-{ inputs
+{ self
+, inputs
 , nixpkgs
 , ...
 }:
@@ -8,7 +9,7 @@ in
 nixpkgs.lib.nixosSystem {
   inherit (nixpkgs) lib;
 
-  specialArgs = { inherit inputs nixpkgs; };
+  specialArgs = { inherit self inputs nixpkgs; };
 
   modules = with inputs; [
     ({ lib, ... }: {
