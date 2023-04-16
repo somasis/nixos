@@ -16,11 +16,7 @@ let
   #   rm -f "$t"
   # '';
   format = pkgs.writeShellScript "format" ''
-    if ${config.nix.package}/bin/nix eval --json --read-only "$(dirname "$1")"#formatter >/dev/null 2>&1; then
-        ${config.nix.package}/bin/nix fmt -- "$@"
-    else
-        ${pkgs.nixpkgs-fmt}/bin/nixpkgs-fmt -- "$@"
-    fi
+    ${config.nix.package}/bin/nix fmt -- "$@" || ${pkgs.nixpkgs-fmt}/bin/nixpkgs-fmt -- "$@"
   '';
 
   lint = pkgs.writeShellScript "lint" ''
