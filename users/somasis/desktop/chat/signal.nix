@@ -5,7 +5,13 @@
 , ...
 }:
 let
-  inherit (lib) concatStringsSep;
+  inherit (lib)
+    concatStringsSep
+    # snakeCaseToCamelCase
+    # programName
+    # programPath
+    ;
+
   snakeCaseToCamelCase = x:
     let
       x' =
@@ -60,7 +66,7 @@ let
     ];
   };
 
-  signalProgram = "${signal'}/bin/${signalMainProgramName}";
+  signalPath = "${signal'}/bin/${programName signal}";
 in
 {
   home.packages = [ signal ];

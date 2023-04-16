@@ -5,7 +5,12 @@
 , ...
 }:
 let
-  # inherit (lib) camelCaseToSnakeCase;
+  # inherit (lib)
+  #   camelCaseToSnakeCase
+  #   programName
+  #   programPath
+  #   ;
+
   camelCaseToSnakeCase = x:
     if lib.toLower x == x then
       x
@@ -15,6 +20,9 @@ let
         ((map (c: "_${c}") lib.upperChars) ++ lib.upperChars)
         x
   ;
+
+  programName = p: p.meta.metaProgram or p.pname or p.name;
+  programPath = p: "${lib.getBin p}/bin/${programName p}";
 
   # TODO Go back to using Replugged once <https://github.com/replugged-org/replugged/issues/205> is resolved
   # discord = inputs.replugged.lib.makeDiscordPlugged {
@@ -51,7 +59,6 @@ let
   # discord = pkgs.discord-canary;
   discord = pkgs.discord-canary.override { withOpenASAR = true; };
   discordDescription = discord.meta.description;
-  discordProgram = "${discord}/bin/${discord.meta.mainProgram}";
 in
 {
   home.packages = [
@@ -155,15 +162,18 @@ in
   };
 
   services.sxhkd.keybindings."super + d" = builtins.toString (pkgs.writeShellScript "discord" ''
-    if ! ${config.home.homeDirectory}/bin/raise -V '^(.+ - Discord|Discord)$';then
-        if ${pkgs.systemd}/bin/systemctl --user is-active -q discord.service; then
-            exec ${discordProgram} >/dev/null 2>&1
-        else
-            ${pkgs.systemd}/bin/systemctl --user start discord.service \
-                && sleep 2 \
-                && exec ${discordProgram} >/dev/null 2>&1
-        fi
+    exec ${programPath discord} 2>/dev/null
+
+    ${config.home.homeDirectory}/bin/raise -cr '^(discord|browser-window)$' && exit || :
+
+    if ${pkgs.systemd}/bin/systemctl --user is-active -q discord.service; then
+        exec ${programPath discord} >/dev/null 2>&1
+    else
+        ${pkgs.systemd}/bin/systemctl --user start discord.service \
+            && sleep 2 \
+            && exec ${programPath discord} >/dev/null 2>&1
     fi
+
   '');
 
   systemd.user.services.discord = {
@@ -179,7 +189,7 @@ in
 
     Service = {
       Type = "simple";
-      ExecStart = "${discordProgram} " + lib.concatStringsSep " " (map (x: "--${x}") [
+      ExecStart = "${programPath discord} " + lib.concatStringsSep " " (map (x: "--${x}") [
         "start-minimized"
 
         # Force GPU-utilizing acceleration
