@@ -30,7 +30,6 @@ in
       Unit = {
         Description = "Run xsecurelock with specified configuration";
         Before = [ "sleep.target" ];
-        After = [ "xsecurelock-dim.service" ];
         # OnFailure = [ "xsecurelock-failure.service" ];
       };
 
@@ -73,29 +72,6 @@ in
       };
     };
 
-    xsecurelock-dim = {
-      Unit = {
-        Description = "Dim the screen and then lock it";
-        OnFailure = [ "xsecurelock.service" ];
-      };
-
-      Service = {
-        Type = "simple";
-
-        Environment = [
-          ''"XSECURELOCK_DIM_TIME_MS=${builtins.toString (1000 * 5)}"'' # milliseconds
-          ''"XSECURELOCK_WAIT_TIME_MS=${builtins.toString (1000 * 15)}"'' # milliseconds
-        ];
-
-        # Avoid a flash after dimming
-        ExecStartPre = builtins.toString (pkgs.writeShellScript "xsecurelock-early" ''
-          sleep $(( $XSECURELOCK_WAIT_TIME_MS - 500 ))
-          ${pkgs.systemd}/bin/systemctl ---user start xsecurelock.service
-        '');
-        ExecStart = "${xsecurelock}/libexec/xsecurelock/until_nonidle ${xsecurelock}/libexec/xsecurelock/dimmer";
-      };
-    };
-
     xsecurelock-failure = {
       Unit.Description = "Bring down the system when xsecurelock fails";
       Service.Type = "oneshot";
@@ -111,12 +87,7 @@ in
 
     inactiveInterval = 15; # minutes
     xss-lock = {
-      extraOptions = [
-        "-l"
-        "-n ${pkgs.writeShellScript "xss-lock" ''
-          ${pkgs.systemd}/bin/systemctl --user start xsecurelock-dim.service
-        ''}"
-      ];
+      extraOptions = [ "-l" ];
       screensaverCycle = 60 * 15;
     };
   };
@@ -133,8 +104,8 @@ in
     timers = [
       {
         delay = 10;
-        command = "${pkgs.systemd}/bin/systemctl start --user xsecurelock-dim.service";
-        canceller = "${pkgs.systemd}/bin/systemctl stop --user xsecurelock-dim.service";
+        command = "${pkgs.systemd}/bin/systemctl start --user xsecurelock.service";
+        canceller = "${pkgs.systemd}/bin/systemctl stop --user xsecurelock.service";
       }
     ];
   };
@@ -159,8 +130,8 @@ in
       ];
 
       text = ''
-        if systemctl --user -q is-active xidlehook.service xss-lock.service; then
-            systemctl --user stop xidlehook.service xss-lock.service \
+        if systemctl --user -q is-active xss-lock.service; then
+            systemctl --user stop xss-lock.service \
                 && exec \
                     notify-send \
                         -a xsecurelock \
@@ -168,7 +139,7 @@ in
                         'xsecurelock' \
                         'Screensaver disabled, screen will not automatically lock.'
         else \
-            systemctl --user start xidlehook.service xss-lock.service \
+            systemctl --user start xss-lock.service \
                 && exec \
                     notify-send \
                         -a xsecurelock \
