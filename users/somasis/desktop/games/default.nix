@@ -27,13 +27,12 @@
     files = [ "etc/kpatrc" ];
 
     directories = [
-      ".lbreakout2"
-      ".zaz"
-      "etc/opentyrian"
-      "etc/pingus-0.8"
-      "share/kpat"
-
-      "etc/PCSX2"
+      { method = "symlink"; directory = ".lbreakout2"; }
+      { method = "symlink"; directory = ".zaz"; }
+      { method = "symlink"; directory = "etc/PCSX2"; }
+      { method = "symlink"; directory = "etc/opentyrian"; }
+      { method = "symlink"; directory = "etc/pingus-0.8"; }
+      { method = "symlink"; directory = "share/kpat"; }
     ];
   };
 }

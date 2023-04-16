@@ -6,7 +6,10 @@
 {
   home.packages = [ pkgs.rclone pkgs.sshfs ];
 
-  home.persistence."/persist${config.home.homeDirectory}".directories = [ "etc/rclone" ];
+  home.persistence."/persist${config.home.homeDirectory}".directories = [{
+    method = "symlink";
+    directory = "etc/rclone";
+  }];
 
   # systemd.user.tmpfiles.rules = [
   #   "L+ ${config.home.homeDirectory}/vault - - - - ${config.home.homeDirectory}/mnt/sftp/spinoza.7596ff.com_raid/backup/vault"

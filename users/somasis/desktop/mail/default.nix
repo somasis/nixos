@@ -24,9 +24,8 @@ in
   accounts.email.maildirBasePath = "mail";
 
   home.persistence."/persist${config.home.homeDirectory}".directories = [
-    "share/offlineimap"
-
-    "mail/sms"
+    { directory = "share/offlineimap"; method = "symlink"; }
+    { directory = "mail/sms"; method = "symlink"; }
   ]
   ++ builtins.map
     (x: { method = "symlink"; directory = "mail/${x.maildir.path}"; })

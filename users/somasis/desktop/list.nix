@@ -7,7 +7,10 @@ let
 in
 {
   home = {
-    persistence."/persist${config.home.homeDirectory}".directories = [ "list" ];
+    persistence."/persist${config.home.homeDirectory}".directories = [{
+      directory = "list";
+      method = "symlink";
+    }];
 
     shellAliases = {
       # Personal todo.txt aliases.

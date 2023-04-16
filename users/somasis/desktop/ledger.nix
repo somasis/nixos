@@ -362,7 +362,10 @@ let
   };
 in
 {
-  home.persistence."/persist${config.home.homeDirectory}".directories = [ "${ledgerRelative}" ];
+  home.persistence."/persist${config.home.homeDirectory}".directories = [{
+    directory = "${ledgerRelative}";
+    method = "symlink";
+  }];
 
   programs.ledger = {
     enable = true;

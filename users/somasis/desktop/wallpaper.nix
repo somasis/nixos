@@ -69,8 +69,14 @@ let
   };
 in
 {
-  home.packages = [ wallpaperctl ];
-  home.persistence."/persist${config.home.homeDirectory}".directories = [ "etc/wallpaper" ];
+  home = {
+    packages = [ wallpaperctl ];
+
+    persistence."/persist${config.home.homeDirectory}".directories = [{
+      method = "symlink";
+      directory = "etc/wallpaper";
+    }];
+  };
 
   systemd.user.services.wallpaper = {
     Unit.Description = "Set wallpaper";

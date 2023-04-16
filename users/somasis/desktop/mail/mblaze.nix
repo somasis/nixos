@@ -35,8 +35,6 @@
     pkgs.rdrview
   ];
 
-  home.persistence."/cache${config.home.homeDirectory}".directories = [ ".mblaze" ];
-
   home.file.".mblaze/profile".text =
     let
       primary = builtins.toString (builtins.map (x: x.address) (builtins.filter (x: x.primary) (builtins.attrValues config.accounts.email.accounts)));

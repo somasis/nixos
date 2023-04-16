@@ -107,5 +107,8 @@
     ];
   };
 
-  home.persistence."/persist${config.home.homeDirectory}".directories = [ "etc/pidgin" ];
+  home.persistence."/persist${config.home.homeDirectory}".directories = [{
+    method = "symlink";
+    directory = "etc/pidgin";
+  }];
 }

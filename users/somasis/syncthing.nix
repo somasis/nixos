@@ -8,10 +8,9 @@ in
   home.persistence."/persist${config.home.homeDirectory}".directories = [
     { method = "symlink"; directory = "etc/syncthing"; }
     { method = "symlink"; directory = "share/syncthing"; }
-
-    "shared"
-    "sync"
-    "tracks"
+    { method = "symlink"; directory = "shared"; }
+    { method = "symlink"; directory = "sync"; }
+    { method = "symlink"; directory = "tracks"; }
   ];
 
   # Make syncthing more amicable to running while other programs are.

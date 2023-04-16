@@ -2,10 +2,10 @@
 , pkgs
 , ...
 }: {
-  home.persistence."/persist${config.home.homeDirectory}".directories = [
-    # "etc/qt5ct"
-    "etc/Kvantum"
-  ];
+  home.persistence."/persist${config.home.homeDirectory}".directories = [{
+    method = "symlink";
+    directory = "etc/Kvantum";
+  }];
 
   home.packages = [
     pkgs.papirus-icon-theme
@@ -16,7 +16,6 @@
 
     # Qt theming
     pkgs.libsForQt5.qtstyleplugin-kvantum
-    # pkgs.libsForQt5.qt5ct
     pkgs.arc-kde-theme
   ];
 

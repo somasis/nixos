@@ -13,7 +13,12 @@
       ];
     })
   ];
-  home.persistence."/persist${config.home.homeDirectory}".directories = [ ".q3a" ];
+
+  home.persistence."/persist${config.home.homeDirectory}".directories = [{
+    directory = ".q3a";
+    method = "symlink";
+  }];
+
   # home.file.".q3a/q3ut4/download" = {
   #   # <http://www.dswp.de/old/wiki/doku.php/tutorials:urban_terror:all-funstuff-ever>
   #   "zzzallfunstuffever.pk3".source = pkgs.fetchurl {

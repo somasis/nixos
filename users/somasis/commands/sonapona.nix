@@ -24,7 +24,10 @@ in
     })
   ];
 
-  home.persistence."/persist${config.home.homeDirectory}".directories = [ "${dir}" ];
+  home.persistence."/persist${config.home.homeDirectory}".directories = [{
+    method = "symlink";
+    inherit directory;
+  }];
 
   somasis.chrome.stw.widgets = [
     {

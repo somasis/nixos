@@ -41,7 +41,11 @@ in
 {
   home = {
     packages = [ mess ];
-    persistence."/persist${config.home.homeDirectory}".directories = [ "mess" ];
+
+    persistence."/persist${config.home.homeDirectory}".directories = [{
+      method = "symlink";
+      directory = "mess";
+    }];
   };
 
   xdg.userDirs = {

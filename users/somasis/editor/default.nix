@@ -422,7 +422,10 @@
     ];
   };
 
-  home.persistence."/cache${config.home.homeDirectory}".directories = [ "share/kak/state-save" ];
+  home.persistence."/cache${config.home.homeDirectory}".directories = [{
+    method = "symlink";
+    directory = "share/kak/state-save";
+  }];
 
   editorconfig = {
     enable = true;

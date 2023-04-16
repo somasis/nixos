@@ -108,7 +108,6 @@
     pkgs.lowdown
     pkgs.mmutils
     pkgs.patchutils
-    pkgs.poedit
     pkgs.wmutils-core
     pkgs.wmutils-opt
     pkgs.xcolor
@@ -168,7 +167,6 @@
     (pkgs.callPackage ../../../pkgs/youplot { })
   ];
 
-  home.persistence."/persist${config.home.homeDirectory}".directories = [ "etc/poedit" ];
   # home.file.".face".source = "${inputs.avatarSomasis}";
 
   xsession = {

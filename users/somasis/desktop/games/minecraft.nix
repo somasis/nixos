@@ -4,7 +4,10 @@
     pkgs.jdk
   ];
 
-  home.persistence."/persist${config.home.homeDirectory}".directories = [ "share/PolyMC" ];
+  home.persistence."/persist${config.home.homeDirectory}".directories = [{
+    method = "symlink";
+    directory = "share/PrismLauncher";
+  }];
 
   # TODO use NixMinecraft?
   # programs.minecraft = {

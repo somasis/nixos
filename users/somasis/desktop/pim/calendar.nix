@@ -1,7 +1,10 @@
 { pkgs, config, ... }: {
   home = {
     # TODO packages = [ pkgs.khal ];
-    persistence."/cache${config.home.homeDirectory}".directories = [ "share/khal" ];
+    persistence."/cache${config.home.homeDirectory}".directories = [{
+      method = "symlink";
+      directory = "share/khal";
+    }];
   };
 
   xdg.configFile."khal/config".text = ''
