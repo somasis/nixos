@@ -9,7 +9,13 @@ in
 {
   home.packages = [
     thunar
+
     pkgs.xfce.tumbler
+    pkgs.webp-pixbuf-loader # .webp
+    pkgs.libgsf # .odf
+    pkgs.nufraw-thumbnailer # .raw
+    pkgs.gnome-epub-thumbnailer # .epub, .mobi
+
     pkgs.xfce.xfconf
 
     pkgs.ffmpegthumbnailer
