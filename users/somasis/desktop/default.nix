@@ -38,7 +38,7 @@
     ./music.nix
     ./notifications.nix
     ./panel.nix
-    ./phone-integration.nix
+    ./phone.nix
     ./photo.nix
     ./power.nix
     ./screen-brightness.nix
