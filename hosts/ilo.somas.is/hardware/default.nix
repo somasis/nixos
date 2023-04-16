@@ -7,6 +7,7 @@
     ./ddcci.nix
     ./fingerprint.nix
     ./fwupd.nix
+    ./phone.nix
     ./print.nix
     ./scan.nix
     ./sensors.nix
