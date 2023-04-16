@@ -4,7 +4,21 @@
 , self
 , nixpkgs
 , ...
-}: {
+}:
+let
+  inherit (config.services.tor.client) socksListenAddress;
+  proxy = "socks5h://${socksListenAddress.addr}:${toString socksListenAddress.port}";
+in
+{
+  systemd.services.nix-daemon.environment = lib.mkIf config.services.tor.client.enable {
+    all_proxy = proxy;
+    ftp_proxy = proxy;
+    http_proxy = proxy;
+    https_proxy = proxy;
+    rsync_proxy = proxy;
+    no_proxy = "127.0.0.1,localhost,.localdomain,192.168.0.0/16";
+  };
+
   nix = {
     daemonCPUSchedPolicy = "idle";
     daemonIOSchedClass = "idle";
@@ -17,7 +31,7 @@
       max-jobs = 8;
       log-lines = 1000;
 
-      connect-timeout = 5;
+      connect-timeout = 30;
 
       auto-optimise-store = true;
       min-free = 1024000000; # 512 MB
@@ -28,6 +42,8 @@
 
       # Quiet the dirty messages when using `nixos-dev`.
       warn-dirty = false;
+
+      builders-use-substitutes = true;
 
       substituters = [
         # Prefer HTTP nix-serve over the SSH tunnel to the server.
