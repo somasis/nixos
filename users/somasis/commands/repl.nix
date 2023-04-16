@@ -1,4 +1,8 @@
-{ pkgs, ... }:
+{ lib
+, nixosConfig
+, pkgs
+, ...
+}:
 let
   repl = pkgs.writeShellScriptBin "repl" ''
     usage() {
@@ -124,5 +128,51 @@ in
             ${nmcli} -a "$@"
       ''
     )
+    (pkgs.writeShellApplication {
+      name = "btcli";
+
+      runtimeInputs = [
+        (lib.getBin nixosConfig.hardware.bluetooth.package)
+        pkgs.gnused
+        pkgs.coreutils
+        pkgs.moreutils
+      ];
+
+      text = ''
+        [ $# -gt 0 ] && exec bluetoothctl "$@"
+
+        : "''${COLUMNS:=$(tput cols)}"
+        e=$(printf '\e')
+
+        # shellcheck disable=SC2140
+        {
+            mapfile -t devices <<<"$(bluetoothctl devices | cut -d ' ' -f2-)"
+            mapfile -t connected <<<"$(bluetoothctl devices Connected | cut -d ' ' -f2-)"
+            # mapfile -t paired <<<"$(bluetoothctl devices Paired | cut -d ' ' -f2-)"
+
+            for d in "''${devices[@]}"; do
+                for c in "''${connected[@]}"; do [[ "$d" == "$c" ]] && c=true || c=; done
+                # for p in "''${paired[@]}"; do [[ "$d" == "$c" ]] && p=true || p=; done
+
+                i=''${d%% *}
+                printf '%b%s%b %b\t%0s%b\n' \
+                    "''${c:+\e[32m\e[1m}" \
+                    "''${d#* }" \
+                    "''${c:+\e[0m}" \
+                    "''${c:+\e[2m}" \
+                    "$i" \
+                    "''${c:+\e[0m}"
+            done \
+                | table -N "DEVICE (''${e}[32mconnected''${e}[39m)","ADDRESS" -R "ADDRESS" -c "''${COLUMNS}" \
+                | sed '1 { s/^/'"$e"'[4m/; s/$/'"$e"'[0m/ }'
+
+            printf '\n'
+        } \
+            | nocolor \
+            | sponge >&2
+
+        exec bluetoothctl
+      '';
+    })
   ];
 }
