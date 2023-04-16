@@ -44,10 +44,10 @@ in
     pkgs.snooze
 
     # panel-power
-    pkgs.rwc
-    pkgs.inotify-tools
     pkgs.pastel
     pkgs.brillo
+    pkgs.upower
+    pkgs.jc
 
     # panel-pulse
     pkgs.ponymix
