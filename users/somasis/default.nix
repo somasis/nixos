@@ -24,8 +24,6 @@
     ./xdg.nix
   ];
 
-  nix.settings.extra-experimental-features = [ "flakes" "nix-command" ];
-
   home.persistence = {
     "/persist${config.home.homeDirectory}" = {
       directories = [

@@ -9,6 +9,8 @@
     daemonIOSchedClass = "idle";
 
     settings = {
+      extra-experimental-features = [ "flakes" "nix-command" ];
+
       trusted-users = [ "@wheel" ];
 
       max-jobs = 8;
