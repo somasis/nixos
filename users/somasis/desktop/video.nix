@@ -75,11 +75,11 @@
       };
     };
 
-    # Use TZ=UTC for `mpv` so that screenshot-template always uses UTC time.
-    # We can't use programs.mpv.scripts because of this being set.
     package = pkgs.wrapMpv pkgs.mpv-unwrapped {
+      # Use TZ=UTC for `mpv` so that screenshot-template always uses UTC time.
       extraMakeWrapperArgs = [ "--set" "TZ" "UTC" ];
 
+      # We can't use programs.mpv.scripts because of this being set.
       scripts = [
         pkgs.mpvScripts.mpris
         pkgs.mpvScripts.sponsorblock
