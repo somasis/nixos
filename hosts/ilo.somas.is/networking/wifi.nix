@@ -28,8 +28,8 @@
 
   # HACK: Restart network stuff after resuming from sleep and at boot
   #       this really shouldn't be necessary.
-  # powerManagement.powerUpCommands = "${pkgs.systemd}/bin/systemctl try-restart resolvconf.service iwd.service";
-  # powerManagement.resumeCommands = "${pkgs.systemd}/bin/systemctl try-restart resolvconf.service iwd.service";
+  # powerManagement.powerUpCommands = "${config.systemd.package}/bin/systemctl try-restart resolvconf.service iwd.service";
+  # powerManagement.resumeCommands = "${config.systemd.package}/bin/systemctl try-restart resolvconf.service iwd.service";
 
   networking.networkmanager = {
     enable = true;

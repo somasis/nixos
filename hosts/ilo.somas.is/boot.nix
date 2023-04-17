@@ -108,7 +108,7 @@
 
           command = pkgs.writeShellScript "startx" ''
             exec \
-                ${pkgs.systemd}/bin/systemd-cat \
+                ${config.systemd.package}/bin/systemd-cat \
                     --identifier=startx \
                     --stderr-priority=err \
                     --level-prefix=true \
@@ -116,7 +116,7 @@
                         -keeptty \
                         -logfile >(
                             ${pkgs.gnused}/bin/sed -E 's/^\[ +[0-9]+\.[0-9]+\] //' \
-                                | ${pkgs.systemd}/bin/systemd-cat -t Xorg --level-prefix=false
+                                | ${config.systemd.package}/bin/systemd-cat -t Xorg --level-prefix=false
                         ) \
                         -logverbose 7 \
                         -verbose 0
