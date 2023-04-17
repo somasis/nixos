@@ -173,7 +173,7 @@ in
                 done
             done
 
-        debug "+ nix flake update /etc/nixos\n"
+        verbose "+ nix flake update /etc/nixos\n"
         exec nix flake update /etc/nixos
       '';
     })
@@ -336,6 +336,8 @@ in
           set -- "$@" "$a"
         done
 
+        export COLUMNS="''${COLUMNS:-$(tput cols || echo 80)}"
+
         edo() {
             # shellcheck disable=SC2015
             [ -n "$verbose" ] && printf '+ %s\n' "$*" >&2 || :
@@ -391,8 +393,12 @@ in
                 ;;
         esac
 
-        [ "$_nixos_new_system" = "$_nixos_old_system" ] || { edo nixos-diff "$_nixos_old_system" "$_nixos_new_system"; printf '\n'; } >&2
-        [ "$_nixos_new_home" = "$_nixos_old_home" ] || edo nixos-diff "$_nixos_old_home" "$_nixos_new_home" >&2
+        {
+            [ "$_nixos_new_system" = "$_nixos_old_system" ] || edo nixos-diff "$_nixos_old_system" "$_nixos_new_system"
+            [ "$_nixos_new_home" = "$_nixos_old_home" ] || edo nixos-diff "$_nixos_old_home" "$_nixos_new_home"
+        } \
+            | sed $'1 { i \\ \n }; $ { a \\ \n }' \
+            | sponge >&2
       '';
     })
 
@@ -403,12 +409,15 @@ in
         pkgs.coreutils
         pkgs.findutils
         pkgs.gnused
+        pkgs.ncurses
         pkgs.nvd
         pkgs.outils
         pkgs.xe
       ];
 
       text = ''
+        export COLUMNS="''${COLUMNS:-$(tput cols || echo 80)}"
+
         usage() {
             cat >&2 <<EOF
         usage: nixos-diff OLD NEW
@@ -450,11 +459,11 @@ in
 
         old_generation=''${old##*/}
         old_generation=''${old_generation%-link}
-        old_generation=''${old_generation##"$stem"-}
+        old_generation=''${old_generation##"$old_stem"-}
 
         new_generation=''${new##*/}
         new_generation=''${new_generation%-link}
-        new_generation=''${new_generation##"$stem"-}
+        new_generation=''${new_generation##"$old_stem"-}
 
         if [ "$#" -eq 2 ]; then
             nvd --color always diff "$old" "$new" | pretty "$old_stem"
