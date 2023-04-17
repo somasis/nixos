@@ -35,8 +35,8 @@ let
       autoplayminusers = -1.0;
       autoplayrequiresamefilenames = true;
 
-      filenameprivacymode = "SendHashed";
-      filesizeprivacymode = "SendHashed";
+      filenameprivacymode = "SendRaw";
+      filesizeprivacymode = "SendRaw";
       loopatendofplaylist = false;
       loopsinglefiles = false;
 
