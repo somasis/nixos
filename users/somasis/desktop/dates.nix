@@ -69,11 +69,7 @@ let
   };
 in
 {
-  xdg.configFile = {
-    "dates/_".source = "${pkgs.tzdata}/share/zoneinfo/America/New_York";
-    "dates/violet".source = "${pkgs.tzdata}/share/zoneinfo/Australia/Adelaide";
-    "dates/zeyla".source = "${pkgs.tzdata}/share/zoneinfo/America/Los_Angeles";
-  };
+  xdg.configFile."dates/_".source = "${pkgs.tzdata}/share/zoneinfo/America/New_York";
 
   home.packages = [ dates ];
 

@@ -370,7 +370,7 @@ in
   home.packages = [ zotero-cli ];
 
   home.persistence."/persist${config.home.homeDirectory}" = {
-    directories = [{ directory = ".zotero/zotero/default"; method = "bindfs"; }];
+    directories = [{ method = "bindfs"; directory = ".zotero/zotero/default"; }];
     files = [ "share/zotero/zotero.sqlite" ];
   };
 

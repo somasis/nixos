@@ -17,6 +17,6 @@
 
   home.persistence."/persist${config.home.homeDirectory}".directories = [
     "etc/wine"
-    { directory = "share/wine"; method = "symlink"; }
+    { method = "symlink"; directory = "share/wine"; }
   ];
 }
