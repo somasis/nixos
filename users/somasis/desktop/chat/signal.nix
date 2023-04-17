@@ -7,24 +7,22 @@
 let
   inherit (lib)
     concatStringsSep
-    # snakeCaseToCamelCase
+    # camelCaseToSnakeCase
     # programName
     # programPath
     ;
 
-  snakeCaseToCamelCase = x:
-    let
-      x' =
-        lib.replaceStrings
-          (map (x: "_${x}") (lib.lowerChars ++ lib.upperChars))
-          (lib.upperChars ++ lib.lowerChars)
-          x
-      ;
-    in
-    "${lib.toLower (builtins.substring 0 1 x)}${builtins.substring 1 ((builtins.stringLength x') - 1) x'}"
+  camelCaseToSnakeCase = x:
+    if lib.toLower x == x then
+      x
+    else
+      lib.replaceStrings
+        (lib.upperChars ++ lib.lowerChars)
+        ((map (c: "_${c}") lib.lowerChars) ++ lib.lowerChars)
+        x
   ;
 
-  programName = p: p.meta.metaProgram or p.pname or p.name;
+  programName = p: p.meta.mainProgram or p.pname or p.name;
   programPath = p: "${lib.getBin p}/bin/${programName p}";
 
   signal = pkgs.signal-desktop-beta;

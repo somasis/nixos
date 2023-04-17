@@ -6,12 +6,12 @@
 }:
 let
   # inherit (lib)
-  #   camelCaseToSnakeCase
+  #   camelCaseToScreamingSnakeCase
   #   programName
   #   programPath
   #   ;
 
-  camelCaseToSnakeCase = x:
+  camelCaseToScreamingSnakeCase = x:
     if lib.toLower x == x then
       x
     else
@@ -21,7 +21,7 @@ let
         x
   ;
 
-  programName = p: p.meta.metaProgram or p.pname or p.name;
+  programName = p: p.meta.mainProgram or (p.pname or p.name);
   programPath = p: "${lib.getBin p}/bin/${programName p}";
 
   # TODO Go back to using Replugged once <https://github.com/replugged-org/replugged/issues/205> is resolved
@@ -86,7 +86,7 @@ in
   # Convert all the attributes to SNAKE_CASE in the generated JSON
   xdg.configFile."discordcanary/settings.json".text = lib.generators.toJSON { }
     (lib.mapAttrs'
-      (name: value: { inherit value; name = camelCaseToSnakeCase name; })
+      (name: value: { inherit value; name = camelCaseToScreamingSnakeCase name; })
       {
         dangerousEnableDevtoolsOnlyEnableIfYouKnowWhatYoureDoing = true;
 

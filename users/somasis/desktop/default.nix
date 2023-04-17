@@ -192,7 +192,6 @@
     debug = true;
   };
 
-
   somasis = {
     chrome.stw.enable = true;
 
