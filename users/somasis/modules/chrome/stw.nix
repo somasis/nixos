@@ -85,11 +85,11 @@ in
               };
 
               opacity = mkOption {
-                type = with types; addCheck types.float (f: f >= 0.0 && f <= 1.0) // {
-                  description = "float between 0.0 and 1.0 (inclusive)";
+                type = with types; nullOr (addCheck types.float (f: f >= 0.0 && f <= 1.0)) // {
+                  description = "null or float between 0.0 and 1.0 (inclusive)";
                 };
                 description = "Widget background opacity";
-                default = 1.0;
+                default = null;
                 example = 0.75;
               };
 
@@ -208,21 +208,23 @@ in
                     ${lib.optionalString (widget.update == "none") "${pkgs.systemd}/bin/systemd-notify --ready"}
                     exec ${widget.command}
                   '';
+
+                  args = with widget; lib.cli.toGNUCommandLineShell { } {
+                    t = window.top;
+                    x = window.position.x;
+                    y = window.position.y;
+                    X = window.position.xRelative;
+                    Y = window.position.yRelative;
+                    a = builtins.head (lib.stringsToCharacters text.align);
+                    f = text.color;
+                    b = window.color;
+                    F = text.font;
+                    B = window.padding;
+                    p = update;
+                    A = window.opacity;
+                  };
                 in
-                "${stw}"
-                + lib.optionalString widget.window.top " -t"
-                + lib.optionalString (widget.window.position.x != null) " -x ${builtins.toString widget.window.position.x}"
-                + lib.optionalString (widget.window.position.y != null) " -y ${builtins.toString widget.window.position.y}"
-                + lib.optionalString (widget.window.position.xRelative != null) " -X ${builtins.toString widget.window.position.xRelative}"
-                + lib.optionalString (widget.window.position.yRelative != null) " -Y ${builtins.toString widget.window.position.yRelative}"
-                + lib.optionalString (widget.text.align != null) " -a ${builtins.head (lib.stringsToCharacters widget.text.align)}"
-                + lib.optionalString (widget.text.color != null) " -f ${widget.text.color}"
-                + lib.optionalString (widget.window.color != null) " -b ${widget.window.color}"
-                + lib.optionalString (widget.text.font != null) " -F ${widget.text.font}"
-                + lib.optionalString (widget.window.padding != null) " -B ${builtins.toString widget.window.padding}"
-                + " -p ${builtins.toString widget.update}"
-                + lib.optionalString (widget.window.opacity != null) " -A ${builtins.toString widget.window.opacity}"
-                + " -- ${command'}"
+                "${stw} ${args} -- ${command'}"
               ;
 
               ExecReload = "${pkgs.procps}/bin/kill -ALRM $MAINPID";
@@ -242,5 +244,7 @@ in
       }
       cfg.widgets
     ;
+
+    home.packages = [ pkg ];
   };
 }

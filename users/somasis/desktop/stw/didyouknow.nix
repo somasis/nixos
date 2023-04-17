@@ -33,6 +33,8 @@
     }];
   };
 
+  home.persistence."/cache${config.home.homeDirectory}".files = [ "var/cache/stw/didyouknow.txt" ];
+
   systemd.user = {
     timers."didyouknow" = {
       Unit.Description = "Fetch Wikipedia's 'Did you know?' text for the current day, every day";
@@ -60,7 +62,7 @@
           : "''${XDG_CACHE_HOME:=$HOME/var/cache}"
           mkdir -p "$XDG_CACHE_HOME/stw"
 
-          dyk=$(curl -fsL "https://en.wikipedia.org/wiki/Template:Did_you_know?action=raw")
+          dyk=$(${pkgs.curl}/bin/curl -fsL "https://en.wikipedia.org/wiki/Template:Did_you_know?action=raw")
 
           [ -n "$dyk" ] || exit 1
 
