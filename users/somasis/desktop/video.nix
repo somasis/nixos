@@ -56,6 +56,11 @@
         osd-margin-x = 24;
         osd-margin-y = 24;
 
+        save-position-on-quit = true;
+        watch-later-directory = "${config.xdg.cacheHome}/mpv/watch_later";
+        resume-playback-check-mtime = true;
+        watch-later-options-remove = commaList [ "volume" "mute" ];
+
         # mpvScripts.thumbnail
         # thumbnail_network = true;
       };
