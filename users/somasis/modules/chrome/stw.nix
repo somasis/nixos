@@ -85,11 +85,11 @@ in
               };
 
               opacity = mkOption {
-                type = types.addCheck types.float (f: f >= 0.0 && f <= 1.0) // {
+                type = with types; addCheck types.float (f: f >= 0.0 && f <= 1.0) // {
                   description = "float between 0.0 and 1.0 (inclusive)";
                 };
                 description = "Widget background opacity";
-                default = null;
+                default = 1.0;
                 example = 0.75;
               };
 
