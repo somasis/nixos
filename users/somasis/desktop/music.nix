@@ -427,6 +427,8 @@ in
     };
   };
 
+  services.mpris-proxy.enable = true;
+
   services.sxhkd.keybindings =
     let
       mpc-toggle = pkgs.writeShellScript "mpc-toggle" ''
