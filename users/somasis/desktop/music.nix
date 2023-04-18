@@ -381,44 +381,27 @@ in
   services.listenbrainz-mpd = {
     enable = true;
     settings = {
-      submission.token_file = "${xdgRuntimeDir}/listenbrainz-mpd-secret.fifo";
+      submission.token_file = "${xdgRuntimeDir}/listenbrainz-mpd.secret";
       submission.cache_file = "${config.xdg.cacheHome}/listenbrainz-mpd/cache.sqlite3";
       mpd.address = "${config.services.mpd.network.listenAddress}:${builtins.toString config.services.mpd.network.port}";
     };
   };
 
   systemd.user = {
-    services.listenbrainz-mpd-secret = {
-      Unit = {
-        Description = "Provide a secret to listenbrainz-mpd's secret socket";
-        Before = [ "listenbrainz-mpd.service" ];
-      };
-
-      Install.WantedBy = [ "listenbrainz-mpd.service" ];
-
-      Service = {
-        Type = "oneshot";
-
-        TimeoutStartSec = "infinity";
-
-        StandardInput = "null";
-        StandardOutput = "file:%t/listenbrainz-mpd-secret.fifo";
-
-        Sockets = "listenbrainz-mpd.socket";
-
-        ExecStart = "${config.programs.password-store.package}/bin/pass ${nixosConfig.networking.fqdnOrHostName}/listenbrainz-mpd";
-      };
-    };
-
-    sockets.listenbrainz-mpd-secret.Socket = {
-      ListenFIFO = "%t/listenbrainz-mpd-secret.fifo";
-      SocketMode = "0600";
-      RemoveOnStop = true;
-    };
-
     services.listenbrainz-mpd = {
-      Unit.After = [ "listenbrainz-mpd-secret.service" "mpd.service" ];
+      Unit.After = [ "mpd.service" ];
       Install.WantedBy = [ "mpd.service" ];
+
+      Service.Environment = [
+        "ENTRY=${nixosConfig.networking.fqdnOrHostName}/listenbrainz-mpd"
+        "PATH=${lib.getBin config.programs.password-store.package}/bin"
+      ];
+      Service.ExecStartPre = builtins.toString (pkgs.writeShellScript "listenbrainz-mpd-secret" ''
+        : ''${XDG_RUNTIME_DIR:?}
+        umask 0077
+        exec pass "$ENTRY" > "$XDG_RUNTIME_DIR/listenbrainz-mpd.secret"
+      '');
+      Service.ExecStopPre = [ "${pkgs.coreutils}/bin/rm -f %t/listenbrainz-mpd.secret" ];
     };
 
     services.mpdscribble = {
