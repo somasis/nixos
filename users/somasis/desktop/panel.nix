@@ -1,5 +1,6 @@
 { config
 , pkgs
+, inputs
 , ...
 }:
 let
@@ -9,14 +10,19 @@ in
 {
   home.packages = [
     # panel
-    (pkgs.lemonbar-xft.overrideAttrs (prev: {
-      patches = [
-        (pkgs.fetchpatch {
-          url = "https://github.com/somasis/lemonbar-xft/commit/2f1243f8d401ad48e55e7ea294362be1e75b31c8.patch";
-          hash = "sha256-qXEolq1Y5FaCIVHlacIsJY7/fcJrnZgklgOguXdiTlM=";
-        })
-      ];
-    }))
+    (pkgs.lemonbar-xft.overrideAttrs (
+      let
+        year = builtins.substring 0 4 inputs.lemonbar.lastModifiedDate;
+        month = builtins.substring 4 2 inputs.lemonbar.lastModifiedDate;
+        day = builtins.substring 6 2 inputs.lemonbar.lastModifiedDate;
+      in
+      prev:
+      {
+        pname = "lemonbar-xft";
+        version = "unstable-${year}-${month}-${day}";
+        src = inputs.lemonbar;
+      }
+    ))
 
     pkgs.procps
 
