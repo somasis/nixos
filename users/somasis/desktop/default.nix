@@ -104,18 +104,15 @@
     pkgs.bmake
     pkgs.ffmpeg-full
     pkgs.gnome.zenity
-    pkgs.lowdown
+    pkgs.hyperfine
     pkgs.mmutils
-    pkgs.patchutils
+    pkgs.nurl
     pkgs.wmutils-core
     pkgs.wmutils-opt
     pkgs.xcolor
     pkgs.xdragon
-    pkgs.xmlstarlet
     pkgs.xorg.xinput
     pkgs.xzoom
-    pkgs.hyperfine
-    pkgs.nurl
 
     (pkgs.libsForQt5.callPackage
       ({ stdenv
