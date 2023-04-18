@@ -394,11 +394,9 @@ in
         esac
 
         {
-            [ "$_nixos_new_system" = "$_nixos_old_system" ] || edo nixos-diff "$_nixos_old_system" "$_nixos_new_system"
-            [ "$_nixos_new_home" = "$_nixos_old_home" ] || edo nixos-diff "$_nixos_old_home" "$_nixos_new_home"
-        } \
-            | sed $'1 { i \\ \n }; $ { a \\ \n }' \
-            | sponge >&2
+            [ "$_nixos_new_system" = "$_nixos_old_system" ] || { printf '\n'; edo nixos-diff "$_nixos_old_system" "$_nixos_new_system"; }
+            [ "$_nixos_new_home" = "$_nixos_old_home" ] || { printf '\n'; edo nixos-diff "$_nixos_old_home" "$_nixos_new_home"; }
+        } | sponge >&2
       '';
     })
 
@@ -429,10 +427,8 @@ in
             local stdin
             stdin=$(</dev/stdin)
 
-            {
-                printf '%s (%s -> %s)\n' "$1" "$old_generation" "$new_generation" >&2
-                printf '%s\n' "$stdin"
-            } \
+            printf '%s (%s -> %s)\n' "$1" "$old_generation" "$new_generation"
+            printf '%s\n' "$stdin" \
                 | vis -ct \
                 | sed -E \
                     -e '/^((Added|Removed) packages|Version changes):$|^(<<<|>>>) /d' \
@@ -453,16 +449,14 @@ in
         old="$1"
         new="$2"
 
-        old_stem=''${old##*/}
+        old_stem=$(basename "$old")
         old_stem=''${old_stem%-link}
         old_stem=''${old_stem%-[0-9]*}
 
-        old_generation=''${old##*/}
-        old_generation=''${old_generation%-link}
+        old_generation=$(basename "$old" -link)
         old_generation=''${old_generation##"$old_stem"-}
 
-        new_generation=''${new##*/}
-        new_generation=''${new_generation%-link}
+        new_generation=$(basename "$new" -link)
         new_generation=''${new_generation##"$old_stem"-}
 
         if [ "$#" -eq 2 ]; then
