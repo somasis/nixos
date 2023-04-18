@@ -112,7 +112,7 @@ in
           Service = {
             Type = "oneshot";
 
-            ExecStart = [ "${pkgs.offlineimap}/bin/offlineimap -o -u syslog -a ${n}" ];
+            ExecStart = [ "${pkgs.limitcpu}/bin/cpulimit -qf -l 25 -- ${pkgs.offlineimap}/bin/offlineimap -o -u syslog -a ${n}" ];
 
             SyslogIdentifier = "offlineimap";
 
