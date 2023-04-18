@@ -1,6 +1,9 @@
-{ pkgs, config, ... }: {
+{ pkgs
+, config
+, ...
+}: {
   home = {
-    # TODO packages = [ pkgs.khal ];
+    packages = [ pkgs.khal ];
     persistence."/cache${config.home.homeDirectory}".directories = [{
       method = "symlink";
       directory = "share/khal";

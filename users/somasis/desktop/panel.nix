@@ -34,7 +34,7 @@ in
     pkgs.mpc-cli
 
     # panel-events
-    # TODO pkgs.khal
+    pkgs.khal
     pkgs.pastel
 
     # panel-anki
