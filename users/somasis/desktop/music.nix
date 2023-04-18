@@ -432,18 +432,18 @@ in
       mpc-toggle = pkgs.writeShellScript "mpc-toggle" ''
         c=$(${pkgs.mpc-cli}/bin/mpc playlist | wc -l)
         [ "$c" -gt 0 ] || ${pkgs.mpc-cli}/bin/mpc add /
-        ${pkgs.mpc-cli}/bin/mpc toggle
+        ${pkgs.mpc-cli}/bin/mpc "$@" toggle
       '';
     in
     {
-      "XF86AudioPlay" = "${mpc-toggle}";
-      "shift + XF86AudioPlay" = "${pkgs.mpc-cli}/bin/mpc stop";
+      "XF86AudioPlay" = "${mpc-toggle} -q";
+      "shift + XF86AudioPlay" = "${pkgs.mpc-cli}/bin/mpc -q stop";
 
-      "XF86AudioPrev" = "${pkgs.mpc-cli}/bin/mpc cdprev";
-      "XF86AudioNext" = "${pkgs.mpc-cli}/bin/mpc next";
+      "XF86AudioPrev" = "${pkgs.mpc-cli}/bin/mpc -q cdprev";
+      "XF86AudioNext" = "${pkgs.mpc-cli}/bin/mpc -q next";
 
-      "shift + XF86AudioPrev" = "${pkgs.mpc-cli}/bin/mpc consume";
-      "shift + XF86AudioNext" = "${pkgs.mpc-cli}/bin/mpc random";
+      "shift + XF86AudioPrev" = "${pkgs.mpc-cli}/bin/mpc -q consume";
+      "shift + XF86AudioNext" = "${pkgs.mpc-cli}/bin/mpc -q random";
     };
 
   home = {
