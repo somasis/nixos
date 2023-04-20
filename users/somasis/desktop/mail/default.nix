@@ -17,9 +17,7 @@ let
   systemctl = "${pkgs.systemd}/bin/systemctl --user";
 in
 {
-  imports = [
-    ./mblaze.nix
-  ];
+  imports = [ ./mblaze.nix ];
 
   accounts.email.maildirBasePath = "mail";
 
