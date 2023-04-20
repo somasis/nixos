@@ -19,8 +19,9 @@ let
   '';
 
   generateUrlTextAnchor = pkgs.writeShellScript "generate-url-text-anchor" ''
-    set -eu
-    set -o pipefail
+    set -euo pipefail
+
+    export PATH=${lib.makeBinPath [ config.programs.jq.package pkgs.gnused ] }
 
     : "''${QUTE_FIFO:?}"
     : "''${QUTE_SELECTED_TEXT:?}"
@@ -31,7 +32,7 @@ let
     textStart=$(
         printf '%s' "''${QUTE_SELECTED_TEXT}" \
             | sed 's/^ *//; s/ *$//' \
-            | ${config.programs.jq.package}/bin/jq -Rr '@uri'
+            | jq -Rr '@uri'
     )
 
     url="''${QUTE_URL%#*}#:~:text=''${textStart}"
