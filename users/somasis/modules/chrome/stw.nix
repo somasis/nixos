@@ -181,9 +181,9 @@ in
           targets."stw" = {
             Unit = {
               Description = "All text widgets on the root window";
-              PartOf = [ "chrome.target" ];
+              PartOf = [ "graphical-session-post.target" ];
             };
-            Install.WantedBy = [ "chrome.target" ];
+            Install.WantedBy = [ "graphical-session-post.target" ];
           };
 
           services."stw@${widget.name}" = {
@@ -236,10 +236,10 @@ in
         targets.stw = {
           Unit = {
             Description = "All text widgets on the root window";
-            PartOf = [ "chrome.target" "default.target" ];
+            PartOf = [ "graphical-session-post.target" "default.target" ];
           };
 
-          Install.WantedBy = [ "chrome.target" "default.target" ];
+          Install.WantedBy = [ "graphical-session-post.target" "default.target" ];
         };
       }
       cfg.widgets

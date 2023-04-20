@@ -11,13 +11,13 @@ let cfg = config.somasis.chrome; in
   ];
 
   config = mkIf cfg.stw.enable {
-    systemd.user.targets.chrome = {
+    systemd.user.targets.graphical-session-post = {
       Unit = {
-        Description = "All services that put something on the screeen supplementary to the desktop";
+        Description = "All services that ought to run after the graphical session is initialized";
         After = [ "picom.service" ];
       };
 
-      # HACK(?): chrome.target is triggered by bspwm's configuration
+      # HACK(?): graphical-session-post.target is triggered by bspwm's configuration
       #          file because we can know for sure that the Xresources have
       #          been read in by the point bspwm is being ran.
       #
@@ -27,19 +27,19 @@ let cfg = config.somasis.chrome; in
       # Install.WantedBy = [ "graphical-session.target" ];
     };
 
-    xsession.windowManager.bspwm.startupPrograms = [
-      "${pkgs.systemd}/bin/systemctl --user start --all chrome.target"
+    xsession.windowManager.bspwm.extraConfig = lib.mkAfter [
+      "${pkgs.systemd}/bin/systemctl --user start --all graphical-session-post.target"
     ];
 
     services.sxhkd.keybindings = {
       "super + F1" = ''
-        ${pkgs.systemd}/bin/systemctl --user -q is-active --all chrome.target \
-            && ${pkgs.systemd}/bin/systemctl --user stop --all chrome.target \
-            || ${pkgs.systemd}/bin/systemctl --user start --all chrome.target
+        ${pkgs.systemd}/bin/systemctl --user -q is-active --all graphical-session-post.target \
+            && ${pkgs.systemd}/bin/systemctl --user stop --all graphical-session-post.target \
+            || ${pkgs.systemd}/bin/systemctl --user start --all graphical-session-post.target
       '';
 
       "super + shift + F1" = ''
-        ${pkgs.systemd}/bin/systemctl --user list-dependencies --plain --state=active chrome.target \
+        ${pkgs.systemd}/bin/systemctl --user list-dependencies --plain --state=active graphical-session-post.target \
             | ${pkgs.gnused}/bin/sed '/\.service$/!d; s/^ *//' \
             | ${pkgs.xe}/bin/xe -N0 ${pkgs.systemd}/bin/systemctl --user reload 2>/dev/null
       '';
