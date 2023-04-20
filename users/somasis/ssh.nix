@@ -5,34 +5,33 @@
 , ...
 }: {
   home.persistence = {
-    "/persist${config.home.homeDirectory}" = {
-      directories = [ ".ssh" ];
-      # files = (map (x: ".ssh/${x}") [ "authorized_keys" "id_ed25519" "id_ed25519.pub" ]);
-    };
-
-    # "/cache${config.home.homeDirectory}".files = [ ".ssh/known_hosts" ];
+    "/persist${config.home.homeDirectory}".directories = [ "etc/ssh" ];
+    "/cache${config.home.homeDirectory}".directories = [ "var/cache/ssh" ];
   };
-
-  # HACK Need this symlink because otherwise ssh replaces the file atomically.
-  # home.file.".ssh/known_hosts".source = config.lib.file.mkOutOfStoreSymlink "${config.xdg.cacheHome}/ssh/known_hosts";
 
   programs.ssh = {
     enable = true;
 
     compression = true;
-    # hashKnownHosts = true;
-    # userKnownHostsFile = "${config.xdg.cacheHome}/ssh/known_hosts";
 
     controlPersist = "5m";
 
     # HACK: I shouldn't have to put my UID here, right?
     controlPath = "/run/user/${toString nixosConfig.users.users.${config.home.username}.uid}/%C.control.ssh";
+    userKnownHostsFile = "${config.xdg.cacheHome}/ssh/known_hosts";
 
     # Send an in-band keep-alive every 30 seconds.
     serverAliveInterval = 30;
 
     matchBlocks = let algoList = lib.concatStringsSep ","; in {
       "*" = {
+        identityFile = [
+          "${config.xdg.configHome}/ssh/${config.home.username}@${nixosConfig.networking.fqdnOrHostName}:id_ed25519"
+          "${config.xdg.configHome}/ssh/${config.home.username}@${nixosConfig.networking.fqdnOrHostName}:id_rsa"
+          "${config.xdg.configHome}/ssh/id_ed25519"
+          "${config.xdg.configHome}/ssh/id_rsa"
+        ];
+
         # Too often, IPv6 is broken on the wifi I'm on.
         addressFamily = "inet";
 
