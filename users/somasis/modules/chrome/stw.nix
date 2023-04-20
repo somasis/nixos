@@ -9,8 +9,32 @@ let
   pkg = cfg.package;
   stw = "${pkg}/bin/stw";
 
-  intOrPercentType = types.either types.int (types.strMatching "^-?[0-9]{2,3}%$");
-  colorType = types.strMatching "^#([0-9a-f]{3}|([0-9a-f]{6}|[a-zA-Z ]+)$)";
+  # We have to special case the -0 since Nix will change it to 0.
+  intOrPercentType = types.oneOf [ (types.strMatching "^-?(100|[0-9][0-9]?)%$|^-0$") types.int ];
+  colorType = types.strMatching "^#([0-9a-f]{3}|[0-9a-f]{6})$|^([a-zA-Z ]+)$";
+
+  mkScript = widget:
+    let
+      args = with widget; lib.cli.toGNUCommandLineShell { } {
+        t = window.top;
+        x = window.position.x;
+        y = window.position.y;
+        X = window.position.xRelative;
+        Y = window.position.yRelative;
+        a = builtins.head (lib.stringToCharacters text.align);
+        f = text.color;
+        b = window.color;
+        F = text.font;
+        B = window.padding;
+        p = update;
+        A = window.opacity;
+      };
+    in
+    pkgs.writeShellScriptBin "stw-widget-${widget.name}" ''
+      ${lib.optionalString (widget.update == 0) "[[ -v NOTIFY_SOCKET ]] && ${pkgs.systemd}/bin/systemd-notify --ready"}
+      exec ${stw} ${args} -- ${widget.command}
+    ''
+  ;
 in
 {
   options.somasis.chrome.stw = {
@@ -26,6 +50,13 @@ in
       type = types.listOf (types.submodule (
         { config, ... }: {
           options = {
+            enable = mkOption {
+              type = types.bool;
+              description = "Whether to start the widget at login or not.";
+              default = true;
+              example = false;
+            };
+
             command = mkOption {
               type = types.str;
               description = "Command to run, whose output will be the widget text";
@@ -37,16 +68,17 @@ in
               type = types.str;
               description = "Pretty name for use by other stuff";
               default = builtins.head (builtins.split " " (builtins.baseNameOf (builtins.toString config.command)));
+              defaultText = "Basename of widget.command";
               example = "fortune";
             };
 
             update = mkOption {
-              type = with types; nullOr (either (enum [ "none" "instant" ]) ints.positive);
+              type = types.addCheck types.int (x: x >= -1);
               description = ''
                 How often to run the command.
 
-                Valid values "none" (only run once), "instant" (run again when command exits),
-                or an integer >0.
+                Valid values are 0 (only run once), -1 (run again after command exits),
+                or an amount of seconds as an integer >0.
               '';
               default = 5;
               example = "instant";
@@ -57,13 +89,13 @@ in
                 # stw(1) just takes "l", "c", and "r" for -a arguments
                 type = with types; nullOr (enum [ "left" "center" "right" ]);
                 description = "Alignment of widget text (left, center, right)";
-                default = null;
-                example = "left";
+                default = "left";
+                example = "right";
               };
 
               color = mkOption {
                 type = with types; nullOr colorType;
-                description = "Color of widget text, as a hex color code (#f0f0f0) or an Xorg color name (alice blue)";
+                description = ''Color of widget text, as a hex color code (#f0f0f0) or an Xorg color name ("alice blue")'';
                 default = null;
                 example = "alice blue";
               };
@@ -79,15 +111,13 @@ in
             window = {
               color = mkOption {
                 type = with types; nullOr colorType;
-                description = "Color of widget background, as a hex color code (#f0f0f0) or an Xorg color name (blue)";
+                description = ''Color of widget background, as a hex color code (#f0f0f0) or an Xorg color name ("blue")'';
                 default = null;
                 example = "#f0f0f0";
               };
 
               opacity = mkOption {
-                type = with types; nullOr (addCheck types.float (f: f >= 0.0 && f <= 1.0)) // {
-                  description = "null or float between 0.0 and 1.0 (inclusive)";
-                };
+                type = with types; nullOr (numbers.between 0.0 1.0);
                 description = "Widget background opacity";
                 default = null;
                 example = 0.75;
@@ -103,28 +133,47 @@ in
               position = {
                 x = mkOption {
                   type = with types; nullOr intOrPercentType;
-                  description = "X position of widget on screen";
+                  description = ''
+                    X position of widget on screen.
+
+                    Due to how Nix handles negative zero, if you want to set this to -0 you must write it as a string.
+                  '';
                   default = 0;
                   example = "50%";
                 };
 
                 y = mkOption {
                   type = with types; nullOr intOrPercentType;
-                  description = "Y position of widget on screen";
+                  description = ''
+                    Y position of widget on screen
+
+                    Due to how Nix handles negative zero, if you want to set this
+                    to -0, you must write it as a string.
+                  '';
                   default = 0;
                   example = "50%";
                 };
 
                 xRelative = mkOption {
                   type = with types; nullOr intOrPercentType;
-                  description = "X position relative to widget width and height";
+                  description = ''
+                    X position relative to widget width and height
+
+                    Due to how Nix handles negative zero, if you want to set this
+                    to -0, you must write it as a string.
+                  '';
                   default = null;
                   example = "-50%";
                 };
 
                 yRelative = mkOption {
                   type = with types; nullOr intOrPercentType;
-                  description = "Y position relative to widget width and height";
+                  description = ''
+                    Y position relative to widget width and height
+
+                    Due to how Nix handles negative zero, if you want to set this
+                    to -0, you must write it as a string.
+                  '';
                   default = 0;
                   example = "-50%";
                 };
@@ -187,46 +236,18 @@ in
           };
 
           services."stw@${widget.name}" = {
-            Unit = {
-              Description = ''${pkg.meta.description}, instance "${widget.name}"'';
-              PartOf = [ "stw.target" ];
-              After = [ "picom.service" ];
-            };
-
-            Install.WantedBy = [ "stw.target" ];
+            Unit.Description = "${pkg.meta.description}, instance '${widget.name}'";
+            Unit.PartOf = lib.optional widget.enable "stw.target";
+            Install.WantedBy = lib.optional widget.enable "stw.target";
 
             Service = {
               Type =
-                if widget.update == "none" then
+                if widget.update == null then
                   "notify"
                 else
                   "simple";
 
-              ExecStart =
-                let
-                  command' = pkgs.writeShellScript "stw-${widget.name}" ''
-                    ${lib.optionalString (widget.update == "none") "${pkgs.systemd}/bin/systemd-notify --ready"}
-                    exec ${widget.command}
-                  '';
-
-                  args = with widget; lib.cli.toGNUCommandLineShell { } {
-                    t = window.top;
-                    x = window.position.x;
-                    y = window.position.y;
-                    X = window.position.xRelative;
-                    Y = window.position.yRelative;
-                    a = builtins.head (lib.stringsToCharacters text.align);
-                    f = text.color;
-                    b = window.color;
-                    F = text.font;
-                    B = window.padding;
-                    p = update;
-                    A = window.opacity;
-                  };
-                in
-                "${stw} ${args} -- ${command'}"
-              ;
-
+              ExecStart = [ "${mkScript widget}/bin/stw-widget-${widget.name}" ];
               ExecReload = "${pkgs.procps}/bin/kill -ALRM $MAINPID";
             };
           };
@@ -245,6 +266,8 @@ in
       cfg.widgets
     ;
 
-    home.packages = [ pkg ];
+    home.packages = [ pkg ]
+      ++ builtins.map (widget: mkScript widget) cfg.widgets
+    ;
   };
 }
