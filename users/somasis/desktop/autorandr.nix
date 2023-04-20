@@ -50,14 +50,16 @@ in
 
   systemd.user.services.xsecurelock.Service.ExecStopPost = [ "-${hook} -c" ];
   services.sxhkd.keybindings."super + p" = "${hook} --cycle";
-  xsession.windowManager.bspwm.startupPrograms = lib.mkBefore [ "${hook} -c" ];
+
+  # Use extraConfig because startupPrograms forks the program,
+  # and we want autorandr to run before startup programs
+  xsession.windowManager.bspwm.extraConfig = lib.mkBefore "${hook} -c";
 
   # Match exclusively based on the fingerprint rather than the display name.
   # The EDID can change based on the location that an expansion port ends up on the USB bus.
-  # xdg.configFile."autorandr/settings.ini".text = ''
-  #   [config]
-  #   match-edid=true
-  # '';
+  # xdg.configFile."autorandr/settings.ini".text = pkgs.generators.toINI { } {
+  #   config.match-edid = true;
+  # };
 
   programs.autorandr = {
     enable = true;
