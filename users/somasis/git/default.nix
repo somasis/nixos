@@ -25,7 +25,7 @@
       amend = "commit --amend";
       amendall = "!git addall; EDITOR=cat git amend";
       com = "commit";
-      commits = "log --branches --not --remotes --oneline --reverse --pretty='%C(auto)%h %C(auto,yellow)(%C(auto,bold)%C(auto,green)%S%C(auto,reset)%C(auto,yellow))%C(auto,reset) %s' @{upstream}..@";
+      commits = "log --reverse --oneline @{upstream}...HEAD";
       patches = "format-patch -M -C -C --stdout origin..HEAD";
       rbc = "rebase --continue";
       re = "rebase";
