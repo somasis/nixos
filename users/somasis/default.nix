@@ -45,6 +45,7 @@
   home.keyboard.options = [ "compose:ralt" ];
 
   home.packages = [
+    pkgs.curl
     pkgs.dateutils
     pkgs.execline
     pkgs.extrace
@@ -69,6 +70,7 @@
     pkgs.snooze
     pkgs.strace
     pkgs.teip
+    pkgs.trurl
     pkgs.uq
     pkgs.xe
     pkgs.xsv

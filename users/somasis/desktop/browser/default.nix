@@ -3,13 +3,18 @@ let
   inherit (nixosConfig.services) tor;
 
   translateUrl = pkgs.writeShellScript "translate-url" ''
-    set -eu
-    set -o pipefail
+    set -euo pipefail
+
+    export PATH=${lib.makeBinPath [ pkgs.trurl ] }
 
     : "''${QUTE_FIFO:?}"
 
     printf 'open -t -r %s\n' \
-        "https://translate.google.com/translate?sl=auto&u=$(${config.programs.jq.package}/bin/jq -Rr '@uri' <<< "$1")" \
+        "$(trurl \
+            --url 'https://translate.google.com/translate' \
+            -a query=sl=auto \
+            -a query=u="$1"
+        )" \
         > "''${QUTE_FIFO}"
   '';
 
