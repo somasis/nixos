@@ -72,9 +72,9 @@
       safe.directory = "*";
 
       url = {
-        "ssh://git@github.com:".insteadOf = "gh:";
-        "ssh://git@gitlab.com:".insteadOf = "gl:";
-        "ssh://git@git.sr.ht:".insteadOf = "srht:";
+        "gh:".insteadOf = "ssh://git@github.com:";
+        "gl:".insteadOf = "ssh://git@gitlab.com:";
+        "srht:".insteadOf = "ssh://git@git.sr.ht:";
       };
     };
   };
