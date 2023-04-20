@@ -6,9 +6,18 @@
     # Sign all commits and tags by default.
     signing.signByDefault = true;
 
-    signing.key = "${config.home.homeDirectory}/.ssh/id_ed25519";
+    extraConfig.gpg.ssh = {
+      # Store trusted signatures.
+      allowedSignersFile = "${config.xdg.configHome}/ssh/allowed_signers";
 
-    # Store trusted signatures.
-    extraConfig.gpg.ssh.allowedSignersFile = "${config.home.homeDirectory}/.ssh/allowed_signers";
+      defaultKeyCommand = builtins.toString (pkgs.writeShellScript "git-default-ssh-key" ''
+        set -- ${lib.escapeShellArgs config.programs.ssh.matchBlocks."*".identityFile}
+
+        for k; do
+            [ -r "$k" ] && printf 'key::%s\n' "$k" && exit
+        done
+        exit 1
+      '');
+    };
   };
 }
