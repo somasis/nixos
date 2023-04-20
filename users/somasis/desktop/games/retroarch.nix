@@ -2,9 +2,7 @@
 , nixosConfig
 , pkgs
 , ...
-}:
-assert (builtins.elem nixosConfig.users.users."${config.home.username}".extraGroups "input");
-{
+}: {
   home.packages = [
     (pkgs.retroarch.override {
       cores = with pkgs.libretro; [
@@ -39,7 +37,8 @@ assert (builtins.elem nixosConfig.users.users."${config.home.username}".extraGro
     monitor = "primary";
   };
 
-  home.persistence."/persist${config.home.homeDirectory}".directories = [
-    { method = "symlink"; directory = "etc/retroarch"; }
-  ];
+  home.persistence."/persist${config.home.homeDirectory}".directories = [{
+    method = "symlink";
+    directory = "etc/retroarch";
+  }];
 }
