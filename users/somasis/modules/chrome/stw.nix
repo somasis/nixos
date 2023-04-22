@@ -38,7 +38,7 @@ let
 in
 {
   options.somasis.chrome.stw = {
-    enable = mkEnableOption "Enable text widgets on the root window";
+    enable = mkEnableOption "text widgets on the root window";
 
     package = mkOption {
       type = types.package;

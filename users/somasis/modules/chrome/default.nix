@@ -27,9 +27,9 @@ let cfg = config.somasis.chrome; in
       # Install.WantedBy = [ "graphical-session.target" ];
     };
 
-    xsession.windowManager.bspwm.extraConfig = lib.mkAfter [
-      "${pkgs.systemd}/bin/systemctl --user start --all graphical-session-post.target"
-    ];
+    xsession.windowManager.bspwm.extraConfig = lib.mkAfter ''
+      ${pkgs.systemd}/bin/systemctl --user start --all graphical-session-post.target
+    '';
 
     services.sxhkd.keybindings = {
       "super + F1" = ''
