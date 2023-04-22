@@ -1,23 +1,18 @@
-{ config, ... }: {
+{ config
+, lib
+, nixosConfig
+, pkgs
+, ...
+}: {
   programs.git = {
     # Use SSH for signing commits, rather than GPG.
     extraConfig.gpg.format = "ssh";
 
     # Sign all commits and tags by default.
     signing.signByDefault = true;
+    signing.key = "${config.xdg.configHome}/ssh/${config.home.username}@${nixosConfig.networking.fqdnOrHostName}:id_ed25519";
 
-    extraConfig.gpg.ssh = {
-      # Store trusted signatures.
-      allowedSignersFile = "${config.xdg.configHome}/ssh/allowed_signers";
-
-      defaultKeyCommand = builtins.toString (pkgs.writeShellScript "git-default-ssh-key" ''
-        set -- ${lib.escapeShellArgs config.programs.ssh.matchBlocks."*".identityFile}
-
-        for k; do
-            [ -r "$k" ] && printf 'key::%s\n' "$k" && exit
-        done
-        exit 1
-      '');
-    };
+    # Store trusted signatures.
+    extraConfig.gpg.ssh.allowedSignersFile = "${config.xdg.configHome}/ssh/allowed_signers";
   };
 }
