@@ -1,4 +1,4 @@
-{
+{ pkgs, ... }: {
   programs.jq.enable = true;
 
   # <https://rosettacode.org/wiki/URL_decoding#jq>
