@@ -182,6 +182,7 @@ in
     (pkgs.fetchurl { hash = "sha256-3WED6Kodom4j27CDr7CBtdPFXBdRUf41iQk/O/Lkaz4="; url = "https://greasyfork.org/scripts/404632-twitter-direct/code/Twitter%20Direct.user.js"; })
     (pkgs.fetchurl { hash = "sha256-/bkWrnzxoG9fHnj1t7Nbr0nFLoyovQAEXkgd/ZuBu1M="; url = "https://greasyfork.org/scripts/405103-twitter-linkify-trends/code/Twitter%20Linkify%20Trends.user.js"; })
     (pkgs.fetchurl { hash = "sha256-tNWUn4LQZxn3ehfSzJ6KFs7H41+I7V8o9773Ua5uQJE="; url = "https://greasyfork.org/scripts/413963-twitter-zoom-cursor/code/Twitter%20Zoom%20Cursor.user.js"; })
+    (pkgs.fetchurl { hash = "sha256-vVd6iKMCV1V5MazeKn8ksfsp7zVt55KOULgkIXt3lms="; url = "https://greasyfork.org/scripts/464506-twitter-advertiser-blocker/code/Twitter%20Advertiser%20Blocker.user.js"; })
 
     # tumblr.com
     (pkgs.fetchurl { hash = "sha256-ArfFzIPFoLIoFVpxKVu5JWOhgmVE58L47ljbcI4yksM="; url = "https://greasyfork.org/scripts/31593-tumblr-images-to-hd-redirector/code/Tumblr%20Images%20to%20HD%20Redirector.user.js"; })
