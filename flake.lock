@@ -19,11 +19,11 @@
     "adblockEasyList": {
       "flake": false,
       "locked": {
-        "lastModified": 1681994528,
-        "narHash": "sha256-9zn72VMyScnkmC6y2lB74rxdDbyOZqrySDGZtnrtkik=",
+        "lastModified": 1682186267,
+        "narHash": "sha256-wZrvSmh26bAUWOqkfxdpf5i3pXOOALEMRVcG8CzTsQs=",
         "owner": "easylist",
         "repo": "easylist",
-        "rev": "5e45ac097d0fbd465cc4c6fab8e67d5f42b2969c",
+        "rev": "bb4733b31a352d1f5d606f459bd41c31491436e6",
         "type": "github"
       },
       "original": {
@@ -51,11 +51,11 @@
     "adblockHosts": {
       "flake": false,
       "locked": {
-        "lastModified": 1681921017,
-        "narHash": "sha256-gk/G6Isy/gCdSBgvjI+TwWEYtGsO2nUDlMSBx0Cswlk=",
+        "lastModified": 1682132388,
+        "narHash": "sha256-I/6ZKaecEJXARw49u0akrISHFN4CImeks+WGm55Ym0k=",
         "owner": "StevenBlack",
         "repo": "hosts",
-        "rev": "f66fe4f833e352a0c7b0f5bb550420e3c8280abe",
+        "rev": "80057472379f4d15a96bc4d62c73a7a3f9e9bf8d",
         "type": "github"
       },
       "original": {
@@ -120,11 +120,11 @@
     "dmenu-flexipatch": {
       "flake": false,
       "locked": {
-        "lastModified": 1681199089,
-        "narHash": "sha256-xs87cczRy34cE6ImEyZ8x8AnmFuhYDV9zEtsSiTS3bM=",
+        "lastModified": 1682063567,
+        "narHash": "sha256-hoROVS3unzHP6DY0N2KMsnF05rVqWUi19dvaqNACexs=",
         "owner": "bakkeby",
         "repo": "dmenu-flexipatch",
-        "rev": "0329c28407217e82e5e5829078a8415e764ae666",
+        "rev": "fc8c1c56c6548660e3b32a18327ca8f0d98e8e33",
         "type": "github"
       },
       "original": {
@@ -140,11 +140,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1681971090,
-        "narHash": "sha256-3j0M63GkG6GGny9e+C//GyuDCx1IwrurD27S0YI+GQY=",
+        "lastModified": 1682176386,
+        "narHash": "sha256-xwYjQ8PjfdHlggi8Dq0PXWby/1oXegSUuNuBvoTcnpA=",
         "owner": "nix-community",
         "repo": "home-manager",
-        "rev": "5160039edca28a7e66bad0cfc72a07c91d6768ad",
+        "rev": "6169690ae38175295605d521bd778d999fbd85cd",
         "type": "github"
       },
       "original": {
@@ -253,11 +253,11 @@
     },
     "nixpkgs": {
       "locked": {
-        "lastModified": 1681828457,
-        "narHash": "sha256-o4Zvs309HOhrNeVloPKqangcKHobsggVt6GFbnEPZlQ=",
+        "lastModified": 1681920287,
+        "narHash": "sha256-+/d6XQQfhhXVfqfLROJoqj3TuG38CAeoT6jO1g9r1k0=",
         "owner": "nixos",
         "repo": "nixpkgs",
-        "rev": "555daa9d339b3df75e58ee558a4fec98ea92521e",
+        "rev": "645bc49f34fa8eff95479f0345ff57e55b53437e",
         "type": "github"
       },
       "original": {
@@ -269,11 +269,11 @@
     },
     "nixpkgsStable": {
       "locked": {
-        "lastModified": 1681759395,
-        "narHash": "sha256-7aaRtLxLAy8qFVIA26ulB+Q5nDVzuQ71qi0s0wMjAws=",
+        "lastModified": 1682134069,
+        "narHash": "sha256-TnI/ZXSmRxQDt2sjRYK/8j8iha4B4zP2cnQCZZ3vp7k=",
         "owner": "nixos",
         "repo": "nixpkgs",
-        "rev": "cd749f58ba83f7155b7062dd49d08e5e47e44d50",
+        "rev": "fd901ef4bf93499374c5af385b2943f5801c0833",
         "type": "github"
       },
       "original": {
@@ -617,11 +617,11 @@
     "uAssets": {
       "flake": false,
       "locked": {
-        "lastModified": 1682001214,
-        "narHash": "sha256-jJ9eN1nTNSLeOhzlQnbMXOlCSXEsnA+6DOqdDfGw0qQ=",
+        "lastModified": 1682186017,
+        "narHash": "sha256-J6+sHSQ3bsCozM8o5aV1cP/1sYWxxTX2IJtB+u5tLlQ=",
         "owner": "uBlockOrigin",
         "repo": "uAssets",
-        "rev": "79cc45bf1a8361ce996ef6ad1ba6f1fcfa528020",
+        "rev": "5a290403dbf2a5aca81b3f72e6aab728099f4cdf",
         "type": "github"
       },
       "original": {
@@ -649,11 +649,11 @@
     "zoteroTranslators": {
       "flake": false,
       "locked": {
-        "lastModified": 1681938596,
-        "narHash": "sha256-9LanrTT6ngHaiO27Pc6/nlJlffnEfGRLmmZyaCMe+yQ=",
+        "lastModified": 1682093187,
+        "narHash": "sha256-1ne/7lZkyZnkbTX9XAnGzcx/2BdhUxQFgNc44YJk5c0=",
         "owner": "zotero",
         "repo": "translators",
-        "rev": "ed47524212070bfd174ebee047176ebb01cbec04",
+        "rev": "9d1a05070bac47c91e1e73ccae371f0f32b7a0ac",
         "type": "github"
       },
       "original": {
