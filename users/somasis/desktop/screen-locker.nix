@@ -49,25 +49,25 @@ in
         # NotifyAccess = "all";
 
         Environment = [
-          ''"XSECURELOCK_BACKGROUND_COLOR=#000000"''
+          "XSECURELOCK_BACKGROUND_COLOR=#000000"
 
-          ''"XSECURELOCK_AUTH_BACKGROUND_COLOR=${config.xresources.properties."*lightBackground"}"''
-          ''"XSECURELOCK_AUTH_FOREGROUND_COLOR=#000000"''
+          "XSECURELOCK_AUTH_BACKGROUND_COLOR=#000000"
+          "XSECURELOCK_AUTH_FOREGROUND_COLOR=#ffffff"
 
-          ''"XSECURELOCK_FONT=monospace:style=bold:size=11"''
+          "XSECURELOCK_FONT=monospace:style=bold:size=11"
 
-          ''"XSECURELOCK_DATETIME_FORMAT=%%A, %%B %%d, %%I:%%M %%p"''
-          ''"XSECURELOCK_PASSWORD_PROMPT=cursor"''
+          "XSECURELOCK_DATETIME_FORMAT=%%A, %%B %%d, %%I:%%M %%p"
+          "XSECURELOCK_PASSWORD_PROMPT=cursor"
 
-          ''"XSECURELOCK_SHOW_DATETIME=0"''
-          ''"XSECURELOCK_SHOW_HOSTNAME=0"''
-          ''"XSECURELOCK_SHOW_USERNAME=0"''
-          ''"XSECURELOCK_SHOW_KEYBOARD_LAYOUT=0"''
+          "XSECURELOCK_SHOW_DATETIME=0"
+          "XSECURELOCK_SHOW_HOSTNAME=0"
+          "XSECURELOCK_SHOW_USERNAME=0"
+          "XSECURELOCK_SHOW_KEYBOARD_LAYOUT=0"
 
-          # ''"XSECURELOCK_NO_PAM_RHOST=1"'' # Necessary to make fprintd work.
+          # "XSECURELOCK_NO_PAM_RHOST=1" # Necessary to make fprintd work.
 
-          ''"XSECURELOCK_AUTH_TIMEOUT=30"''
-          ''"XSECURELOCK_BLANK_TIMEOUT=15"''
+          "XSECURELOCK_AUTH_TIMEOUT=30"
+          "XSECURELOCK_BLANK_TIMEOUT=15"
         ];
 
         ExecStart = "${xsecurelock}/bin/xsecurelock";
