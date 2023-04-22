@@ -161,7 +161,7 @@ in
   };
 
   services.sxhkd.keybindings."super + d" = builtins.toString (pkgs.writeShellScript "discord" ''
-    exec ${programPath discord} 2>/dev/null
+    exec ${programPath discord} >/dev/null
 
     ${config.home.homeDirectory}/bin/raise -cr '^(discord|browser-window)$' && exit || :
 
