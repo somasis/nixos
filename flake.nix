@@ -114,9 +114,16 @@
 
     homeConfigurations.somasis = import ./users/somasis;
 
+    nixosModules = {
+      impermanence = import ./modules/impermanence.nix;
+      home-manager.impermanence = import ./modules/impermanence-hm.nix;
+      lib = { config.lib = self.lib; };
+    };
+
     lib = let inherit (nixpkgs) lib; in {
-      # TODO how do I extend the lib that is used by the nixosConfigurations? :(
-      systemdName = lib.replaceStrings [ "@" ":" "\\" "[" "]" ] [ "-" "-" "-" "" "" ];
+      mkPathSafeName = lib.replaceStrings [ "@" ":" "\\" "[" "]" ] [ "-" "-" "-" "" "" ];
+
+      commaList = lib.concatStringsSep ",";
 
       # testCase -> TEST_CASE
       camelCaseToScreamingSnakeCase = x:
@@ -147,6 +154,17 @@
         else
           lib.replaceStrings
             (lib.upperChars ++ lib.lowerChars)
+            ((map (c: "-${c}") lib.lowerChars) ++ lib.lowerChars)
+            x
+      ;
+
+      # testCase -> TEST-CASE
+      camelCaseToScreamingKebabCase = x:
+        if lib.toLower x == x then
+          x
+        else
+          lib.replaceStrings
+            (lib.upperChars ++ lib.lowerChars)
             ((map (c: "-${c}") lib.upperChars) ++ lib.upperChars)
             x
       ;
@@ -170,4 +188,3 @@
     };
   };
 }
-
