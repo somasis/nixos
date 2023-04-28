@@ -29,10 +29,6 @@ nixpkgs.lib.nixosSystem {
           (final: prev: {
             stable = inputs.nixpkgsStable.legacyPackages."${system}";
           })
-          (final: prev: {
-            # TODO Remove when <https://github.com/NixOS/nixpkgs/issues/205014> merged
-            inherit (final.stable) khal;
-          })
         ];
       };
     })
