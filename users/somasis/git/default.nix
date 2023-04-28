@@ -42,9 +42,6 @@
       init.defaultBranch = "main";
       interactive.singlekey = true;
 
-      # Use the built-in version of `add -p` rather than the Perl script.
-      add.interactive.useBuiltin = true;
-
       commit.verbose = true;
 
       pull.rebase = true;
