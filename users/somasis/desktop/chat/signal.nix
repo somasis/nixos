@@ -7,23 +7,16 @@
 let
   inherit (lib)
     concatStringsSep
-    # camelCaseToSnakeCase
-    # programName
-    # programPath
+    mapAttrs'
+    nameValuePair
+    replaceStrings
     ;
 
-  camelCaseToSnakeCase = x:
-    if lib.toLower x == x then
-      x
-    else
-      lib.replaceStrings
-        (lib.upperChars ++ lib.lowerChars)
-        ((map (c: "_${c}") lib.lowerChars) ++ lib.lowerChars)
-        x
-  ;
-
-  programName = p: p.meta.mainProgram or p.pname or p.name;
-  programPath = p: "${lib.getBin p}/bin/${programName p}";
+  inherit (config.lib.somasis)
+    camelCaseToKebabCase
+    programName
+    programPath
+    ;
 
   signal = pkgs.signal-desktop-beta;
   signalTitle = "Signal Beta";
@@ -72,13 +65,15 @@ in
   persist.directories = [ "etc/${signalTitle}" ];
 
   xdg.configFile."${signalTitle}/ephemeral.json".text = lib.generators.toJSON { }
-    (lib.mapAttrs' (n: v: lib.nameValuePair (camelCaseToSnakeCase n) v) {
+    (mapAttrs' (n: v: nameValuePair (camelCaseToKebabCase n) v) {
       systemTraySetting = "MinimizeToSystemTray";
       shownTrayNotice = true;
 
       themeSetting = "system";
 
-      window.autoHideMenuBar = true;
+      window = mapAttrs' (n: v: nameValuePair (camelCaseToKebabCase n) v) {
+        autoHideMenuBar = true;
+      };
 
       spellCheck = true;
     });

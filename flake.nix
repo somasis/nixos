@@ -113,76 +113,10 @@
     homeConfigurations.somasis = import ./users/somasis;
 
     nixosModules = {
+      lib = import ./modules/lib.nix;
+
       impermanence = import ./modules/impermanence.nix;
       home-manager.impermanence = import ./modules/impermanence-hm.nix;
-      lib = { config.lib = self.lib; };
-    };
-
-    lib = let inherit (nixpkgs) lib; in {
-      mkPathSafeName = lib.replaceStrings [ "@" ":" "\\" "[" "]" ] [ "-" "-" "-" "" "" ];
-
-      commaList = lib.concatStringsSep ",";
-
-      # testCase -> TEST_CASE
-      camelCaseToScreamingSnakeCase = x:
-        if lib.toLower x == x then
-          x
-        else
-          lib.replaceStrings
-            (lib.upperChars ++ lib.lowerChars)
-            ((map (c: "_${c}") lib.upperChars) ++ lib.upperChars)
-            x
-      ;
-
-      # testCase -> test_case
-      camelCaseToSnakeCase = x:
-        if lib.toLower x == x then
-          x
-        else
-          lib.replaceStrings
-            (lib.upperChars ++ lib.lowerChars)
-            ((map (c: "_${c}") lib.lowerChars) ++ lib.lowerChars)
-            x
-      ;
-
-      # testCase -> test-case
-      camelCaseToKebabCase = x:
-        if lib.toLower x == x then
-          x
-        else
-          lib.replaceStrings
-            (lib.upperChars ++ lib.lowerChars)
-            ((map (c: "-${c}") lib.lowerChars) ++ lib.lowerChars)
-            x
-      ;
-
-      # testCase -> TEST-CASE
-      camelCaseToScreamingKebabCase = x:
-        if lib.toLower x == x then
-          x
-        else
-          lib.replaceStrings
-            (lib.upperChars ++ lib.lowerChars)
-            ((map (c: "-${c}") lib.upperChars) ++ lib.upperChars)
-            x
-      ;
-
-      # test_case -> testCase
-      snakeCaseToCamelCase = x:
-        let
-          x' =
-            lib.replaceStrings
-              (map (x: "_${x}") (lib.lowerChars ++ lib.upperChars))
-              (lib.upperChars ++ lib.lowerChars)
-              x
-          ;
-        in
-        "${lib.toLower (builtins.substring 0 1 x)}${builtins.substring 1 ((builtins.stringLength x') - 1) x'}"
-      ;
-
-      # Get the program name and path using the same logic as `nix run`.
-      programName = p: p.meta.mainProgram or p.pname or p.name;
-      programPath = p: "${lib.getBin p}/bin/${lib.programName p}";
     };
   };
 }

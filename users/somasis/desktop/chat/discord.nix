@@ -5,24 +5,16 @@
 , ...
 }:
 let
-  # inherit (lib)
-  #   camelCaseToScreamingSnakeCase
-  #   programName
-  #   programPath
-  #   ;
+  inherit (lib)
+    concatStringsSep
+    mapAttrs'
+    ;
 
-  camelCaseToScreamingSnakeCase = x:
-    if lib.toLower x == x then
-      x
-    else
-      lib.replaceStrings
-        (lib.upperChars ++ lib.lowerChars)
-        ((map (c: "_${c}") lib.upperChars) ++ lib.upperChars)
-        x
-  ;
-
-  programName = p: p.meta.mainProgram or (p.pname or p.name);
-  programPath = p: "${lib.getBin p}/bin/${programName p}";
+  inherit (config.lib.somasis)
+    camelCaseToScreamingSnakeCase
+    programName
+    programPath
+    ;
 
   # TODO Go back to using Replugged once <https://github.com/replugged-org/replugged/issues/205> is resolved
   # discord = inputs.replugged.lib.makeDiscordPlugged {
@@ -85,8 +77,8 @@ in
 
   # Convert all the attributes to SNAKE_CASE in the generated JSON
   xdg.configFile."discordcanary/settings.json".text = lib.generators.toJSON { }
-    (lib.mapAttrs'
-      (name: value: { inherit value; name = camelCaseToScreamingSnakeCase name; })
+    (mapAttrs'
+      (name: value: { name = camelCaseToScreamingSnakeCase name; inherit value; })
       {
         dangerousEnableDevtoolsOnlyEnableIfYouKnowWhatYoureDoing = true;
 
@@ -188,7 +180,7 @@ in
 
     Service = {
       Type = "simple";
-      ExecStart = "${programPath discord} " + lib.concatStringsSep " " (map (x: "--${x}") [
+      ExecStart = "${programPath discord} " + concatStringsSep " " (map (x: "--${x}") [
         "start-minimized"
 
         # Force GPU-utilizing acceleration

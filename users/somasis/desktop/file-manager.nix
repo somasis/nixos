@@ -4,6 +4,16 @@
 , ...
 }:
 let
+  inherit (lib)
+    concatStringsSep
+    escape
+    mapAttrsToList
+    ;
+
+  inherit (config.lib.somasis)
+    commaList
+    ;
+
   thunar = pkgs.xfce.thunar-bare;
 in
 {
@@ -69,8 +79,7 @@ in
 
   xfconf.settings.thunar =
     let
-      constList = lib.concatStringsSep ",";
-      listString = l: lib.concatStringsSep "," (map builtins.toString l);
+      listToCommaStringList = l: commaList (map builtins.toString l);
     in
     {
       # Display > View settings
@@ -118,7 +127,7 @@ in
       # View defaults: details view
       last-details-view-zoom-level = "THUNAR_ZOOM_LEVEL_38_PERCENT";
 
-      last-details-view-column-order = constList [
+      last-details-view-column-order = commaList [
         "THUNAR_COLUMN_NAME"
         "THUNAR_COLUMN_DATE_MODIFIED"
         "THUNAR_COLUMN_PERMISSIONS"
@@ -135,7 +144,7 @@ in
         "THUNAR_COLUMN_RECENCY"
         "THUNAR_COLUMN_DATE_DELETED"
       ];
-      last-details-view-visible-columns = constList [
+      last-details-view-visible-columns = commaList [
         "THUNAR_COLUMN_NAME"
         "THUNAR_COLUMN_DATE_MODIFIED"
         "THUNAR_COLUMN_PERMISSIONS"
@@ -159,7 +168,7 @@ in
       last-menubar-visible = false; # View > Menubar
 
       # Toolbar items
-      last-toolbar-item-order = listString [
+      last-toolbar-item-order = listToCommaStringList [
         14 # Location bar
         10 # Icon view
         11 # Details view
@@ -180,7 +189,7 @@ in
         16
         17
       ];
-      last-toolbar-visible-buttons = listString [
+      last-toolbar-visible-buttons = listToCommaStringList [
         1 # Location bar
         1 # Icon view
         1 # Details view

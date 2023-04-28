@@ -37,6 +37,8 @@ nixpkgs.lib.nixosSystem {
       };
     })
 
+    nixosModules.lib
+
     disko.nixosModules.disko
 
     impermanence.nixosModules.impermanence
@@ -174,9 +176,11 @@ nixpkgs.lib.nixosSystem {
         useGlobalPkgs = true;
         useUserPackages = true;
 
-        extraSpecialArgs = { inherit inputs nixpkgs; };
+        extraSpecialArgs = { inherit self inputs nixpkgs; };
 
-        sharedModules = with inputs; [
+        sharedModules = with self; with inputs; [
+          nixosModules.lib
+
           impermanence.nixosModules.home-manager.impermanence
           nixosModules.home-manager.impermanence
 
