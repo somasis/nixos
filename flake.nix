@@ -106,8 +106,6 @@
   };
 
   outputs = { self, nixpkgs, home-manager, ... }@inputs: {
-    inherit self;
-
     nixosConfigurations.ilo = import ./hosts/ilo.somas.is {
       inherit self inputs nixpkgs;
     };
