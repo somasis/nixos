@@ -2,20 +2,14 @@
 let
   inherit (nixosConfig.services) tor;
 
-  translateUrl = pkgs.writeShellScript "translate-url" ''
+  translate = pkgs.writeShellScript "translate" ''
     set -euo pipefail
 
-    export PATH=${lib.makeBinPath [ pkgs.trurl ] }
-
     : "''${QUTE_FIFO:?}"
+    PATH=${lib.makeBinPath [ pkgs.translate-shell ] }:"$PATH"
 
-    printf 'open -t -r %s\n' \
-        "$(trurl \
-            --url 'https://translate.google.com/translate' \
-            -a query=sl=auto \
-            -a query=u="$1"
-        )" \
-        > "''${QUTE_FIFO}"
+    url=$(trans -no-browser -- "$1")
+    printf 'open -t -r %s\n' "$url" > "''${QUTE_FIFO}"
   '';
 
   yankTextAnchor = pkgs.writeShellScript "yank-text-anchor" ''
@@ -450,7 +444,7 @@ in
 
     # enableDefaultBindings = false;
     aliases = {
-      translate = "spawn -u ${translateUrl} {url}";
+      translate = "spawn -u ${translate} {url}";
       yank-text-anchor = "spawn -u ${yankTextAnchor}";
     };
 
