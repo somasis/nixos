@@ -5,6 +5,8 @@
 , ...
 }:
 let
+  inherit (config.lib.somasis) commaList;
+
   xdgRuntimeDir = "/run/user/${toString nixosConfig.users.users.${config.home.username}.uid}";
 
   pass-mpdscribble = pkgs.writeShellApplication {
@@ -364,7 +366,7 @@ in
         ];
       in
       ''
-        metadata_to_use "${lib.concatStringsSep "," tags}"
+        metadata_to_use "${commaList tags}"
 
         auto_update "yes"
         auto_update_depth "1"
@@ -387,29 +389,30 @@ in
     };
   };
 
-  systemd.user = {
-    services.listenbrainz-mpd = {
+  systemd.user.services = {
+    listenbrainz-mpd = {
       Unit.After = [ "mpd.service" ];
+      Unit.BindsTo = [ "mpd.service" ];
       Install.WantedBy = [ "mpd.service" ];
 
       Service.Environment = [
         "ENTRY=${nixosConfig.networking.fqdnOrHostName}/listenbrainz-mpd"
         "PATH=${lib.getBin config.programs.password-store.package}/bin"
       ];
-      Service.ExecStartPre = builtins.toString (pkgs.writeShellScript "listenbrainz-mpd-secret" ''
+
+      Service.ExecStartPre = pkgs.writeShellScript "listenbrainz-mpd-secret" ''
         : ''${XDG_RUNTIME_DIR:?}
         umask 0077
         exec pass "$ENTRY" > "$XDG_RUNTIME_DIR/listenbrainz-mpd.secret"
-      '');
+      '';
       Service.ExecStopPre = [ "${pkgs.coreutils}/bin/rm -f %t/listenbrainz-mpd.secret" ];
     };
 
-    services.mpdscribble = {
-      Unit = {
-        Description = pkgs.mpdscribble.meta.description;
-        PartOf = [ "default.target" ];
-        After = [ "mpd.service" ];
-      };
+    mpdscribble = {
+      Unit.Description = pkgs.mpdscribble.meta.description;
+      Unit.PartOf = [ "default.target" ];
+      Unit.BindsTo = [ "mpd.service" ];
+      Unit.After = [ "mpd.service" ];
       Install.WantedBy = [ "mpd.service" ];
 
       Service = {
