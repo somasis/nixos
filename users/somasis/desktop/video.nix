@@ -5,23 +5,18 @@
 }: {
   xdg.userDirs.videos = "${config.home.homeDirectory}/video";
 
-  persist.directories = [
-    { directory = "video"; method = "symlink"; }
-  ];
+  persist.directories = [{ directory = "video"; method = "symlink"; }];
+  cache.directories = [{ directory = "var/cache/mpv"; method = "symlink"; }];
 
-  cache.directories = [
-    { directory = "var/cache/mpv"; method = "symlink"; }
-  ];
+  programs.mpv =
+    let
+      pathList = lib.concatStringsSep ":";
+      commaList = lib.concatStringsSep ",";
+    in
+    {
+      enable = true;
 
-  programs.mpv = {
-    enable = true;
-
-    config =
-      let
-        pathList = lib.concatStringsSep ":";
-        commaList = lib.concatStringsSep ",";
-      in
-      {
+      config = {
         hwdec = "auto-safe";
 
         # Use yt-dlp's format preference.
@@ -63,31 +58,31 @@
         # thumbnail_network = true;
       };
 
-    scriptOpts = {
-      # thumbnail.osc = false;
+      scriptOpts = {
+        # thumbnail.osc = false;
 
-      # https://github.com/po5/mpv_sponsorblock/issues/31
-      sponsorblock = {
-        local_database = false;
-        server_address = "https://sponsor.ajay.app";
+        # https://github.com/po5/mpv_sponsorblock/issues/31
+        sponsorblock = {
+          local_database = false;
+          server_address = "https://sponsor.ajay.app";
+        };
+      };
+
+      package = pkgs.wrapMpv pkgs.mpv-unwrapped {
+        # Use TZ=UTC for `mpv` so that screenshot-template always uses UTC time.
+        extraMakeWrapperArgs = [ "--set" "TZ" "UTC" ];
+
+        # We can't use programs.mpv.scripts because of this being set.
+        scripts = [
+          pkgs.mpvScripts.mpris
+          pkgs.mpvScripts.sponsorblock
+          # pkgs.mpvScripts.thumbnail
+
+          # Conflicts with mpvScripts.thumbnail
+          pkgs.mpvScripts.youtube-quality
+        ];
       };
     };
-
-    package = pkgs.wrapMpv pkgs.mpv-unwrapped {
-      # Use TZ=UTC for `mpv` so that screenshot-template always uses UTC time.
-      extraMakeWrapperArgs = [ "--set" "TZ" "UTC" ];
-
-      # We can't use programs.mpv.scripts because of this being set.
-      scripts = [
-        pkgs.mpvScripts.mpris
-        pkgs.mpvScripts.sponsorblock
-        # pkgs.mpvScripts.thumbnail
-
-        # Conflicts with mpvScripts.thumbnail
-        # pkgs.mpvScripts.youtube-quality
-      ];
-    };
-  };
 
   xdg.mimeApps.defaultApplications."video/*" = "mpv.desktop";
 
