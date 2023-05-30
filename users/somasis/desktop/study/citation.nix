@@ -574,8 +574,11 @@ in
   programs.qutebrowser = {
     aliases.zotero = "spawn -u ${qute-zotero}/bin/qute-zotero";
     aliases.Zotero = "hint links userscript ${qute-zotero}/bin/qute-zotero";
-    keyBindings.normal."zpz" = "zotero";
-    keyBindings.normal."zpZ" = "Zotero";
+    keyBindings.normal = let open = x: "open -rt ${x}"; in {
+      "zpz" = "zotero";
+      "zpZ" = "Zotero";
+      "rz" = open "${proxy}?qurl={url}";
+    };
 
     searchEngines = {
       "!library" = "${proxy}?qurl=http%3A%2F%2Fsearch.ebscohost.com%2Flogin.aspx%3Fdirect%3Dtrue%26site%3Deds-live%26scope%3Dsite%26group%3Dmain%26profile%3Deds%26authtime%3Dcookie%2Cip%2Cuid%26bQuery%3D{quoted}";
