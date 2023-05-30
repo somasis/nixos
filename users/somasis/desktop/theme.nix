@@ -122,26 +122,6 @@
       "panel.font4" = "monospace:size=10:style=heavy";
     };
 
-  services.xsettingsd = {
-    enable = true;
-    settings = {
-      "Net/ThemeName" = config.gtk.theme.name;
-      "Net/IconThemeName" = config.gtk.iconTheme.name;
-      "Gtk/CursorThemeName" = config.home.pointerCursor.name;
-      "Gtk/FontName" = config.gtk.font.name;
-      "Gtk/FontSize" = config.gtk.font.size;
-
-      "Net/EnableEventSounds" = 0;
-      "Net/EnableInputFeedbackSounds" = 0;
-      "Gtk/EnableAnimations" = 0;
-      "Gtk/OverlayScrolling" = false;
-
-      "Gtk/ApplicationPreferDarkTheme" = false;
-      "Gtk/PrimaryButtonWarpsSlider" = true;
-      "Gtk/MenuImages" = 1;
-    };
-  };
-
   home.pointerCursor = {
     name = "Hackneyed";
     package = pkgs.hackneyed;
@@ -185,17 +165,14 @@
     size = "24x24";
   };
 
-  # Necessary to make Qt apps not scale like shit
   home.sessionVariables = {
+    # Necessary to make Qt apps not scale like shit
     QT_AUTO_SCREEN_SCALE_FACTOR = 0;
     QT_AUTO_SCREEN_SCALE_FACTORS = 1.5;
 
     QT_STYLE_OVERRIDE = config.qt.style.name; # TODO: why is this necessary
 
-    # QT_QPA_PLATFORMTHEME = "qt5ct";
-    # QT_SCALE_FACTOR = "1.5";
-    # QT_FONT_DPI = config.xresources.properties."Xft.dpi";
-    # QT_AUTO_SCREEN_SCALE_FACTOR=0 QT_SCALE_FACTOR= QT_SCREEN_SCALE_FACTORS=1.5 QT_FONT_DPI=
+    _JAVA_OPTIONS = "-Dawt.useSystemAAFontSettings=on";
   };
 
   qt = {
@@ -203,6 +180,25 @@
     style = {
       name = "kvantum";
       package = pkgs.libsForQt5.kvantum;
+    };
+  };
+
+  services.xsettingsd = {
+    enable = true;
+    settings = {
+      "Net/ThemeName" = config.gtk.theme.name;
+      "Net/IconThemeName" = config.gtk.iconTheme.name;
+      "Gtk/CursorThemeName" = config.home.pointerCursor.name;
+      "Gtk/FontName" = config.gtk.font.name;
+      "Gtk/FontSize" = config.gtk.font.size;
+
+      "Net/EnableEventSounds" = 0;
+      "Net/EnableInputFeedbackSounds" = 0;
+      "Gtk/EnableAnimations" = 0;
+      "Gtk/OverlayScrolling" = false;
+
+      "Gtk/PrimaryButtonWarpsSlider" = true;
+      "Gtk/MenuImages" = 1;
     };
   };
 }
