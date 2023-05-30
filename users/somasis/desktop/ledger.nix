@@ -370,11 +370,11 @@ in
   programs.ledger = {
     enable = true;
 
-    extraConfig = ''
-      --strict
-      --date-format %Y-%m-%d
-      --time-colon
-    '';
+    settings = {
+      strict = true;
+      date-format = "%Y-%m-%d";
+      time-colon = true;
+    };
 
     package = pkgs.symlinkJoin {
       name = "ledger-final";
