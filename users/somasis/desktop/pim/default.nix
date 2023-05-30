@@ -148,7 +148,7 @@ in
     Install.WantedBy = [ "pim.target" ];
 
     Timer = {
-      OnStartupSec = "900";
+      OnStartupSec = 900;
       OnCalendar = "*:0";
       RandomizedDelaySec = "5m";
     };

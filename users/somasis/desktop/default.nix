@@ -31,7 +31,6 @@
     ./didyouknow.nix
     ./dmenu.nix
     ./file-manager.nix
-    ./fonts.nix
     ./ledger.nix
     ./list.nix
     ./mess.nix
