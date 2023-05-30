@@ -25,4 +25,5 @@ rec
   qute-pass = callPackage ./qute-pass { };
 
   ffsclient = callPackage ./ffsclient { };
+  qutebrowser-sync = callPackage ./qutebrowser-sync { };
 }

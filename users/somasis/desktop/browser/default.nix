@@ -544,4 +544,6 @@ in
     { name = "kodi-remote"; location = 45780; remote = "somasis@spinoza.7596ff.com"; remoteLocation = 8080; }
     { name = "kodi-websockets"; location = 9090; remote = "somasis@spinoza.7596ff.com"; remoteLocation = 9090; }
   ];
+
+  home.packages = [ pkgs.qutebrowser-sync ];
 }
