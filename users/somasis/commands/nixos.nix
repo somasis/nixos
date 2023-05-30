@@ -179,93 +179,45 @@ in
       '';
     })
 
-    (pkgs.writeShellScriptBin "nixos-edit" ''
-      session_active() {
-          kak -c nixos-edit -ui dummy -e quit >/dev/null 2>&1
-      }
-
-      if session_active; then
-          exec kak -c nixos-edit "$@"
-      else
-          cd /etc/nixos
-          nohup kak -s nixos-edit -d >/dev/null 2>&1 &
-
-          find . \
-              \( \
-                  -type f \
-                  -perm -000 \
-                  ! -name 'flake.lock' \
-                  ! -path '*/.*' \
-              \) \
-              -printf '%d\t%h\tedit %p\n' \
-              | LC_COLLATE=C sort -t "$(printf '\t')" -k2 \
-              | cut -f3- \
-              | tac \
-              | kak -p nixos-edit
-
-          exec kak -c nixos-edit "$@"
-      fi
-    '')
-
     (pkgs.writeShellApplication {
-      name = "nixos-source";
+      name = "nixos-edit";
 
       runtimeInputs = [
-        config.programs.jq.package
-        nixosConfig.nix.package
         pkgs.coreutils
+        pkgs.findutils
+        pkgs.gnugrep
+        pkgs.playtime
       ];
 
       text = ''
-        # $ nixos-source nixpkgs#pkg
+        playtime || exit $?
 
-        args=( )
+        session_active() {
+            kak -l 2>/dev/null | grep -Fq "nixos-edit" \
+                && kak -c nixos-edit -ui dummy -e quit >/dev/null 2>&1
+        }
 
-        for a; do
-            flake=''${a%%#*}
-            pkg=''${a#*#}
+        if session_active; then
+            exec kak -c nixos-edit "$@"
+        else
+            cd /etc/nixos
+            nohup kak -s nixos-edit -d >/dev/null 2>&1 &
 
-            flakePath=$(nix flake metadata --inputs-from /etc/nixos --json "$flake" | jq -r .path)
-            # flakeResolved=$(nix flake metadata --inputs-from /etc/nixos --json "$flake" | jq -r .resolvedUrl)
-            # pkgPath=$(nix path-info --inputs-from /etc/nixos "$flake#$pkg")
-            pkgResolved=$(nix eval --inputs-from /etc/nixos --raw "$flake#$pkg.meta.position")
+            find . \
+                \( \
+                    -type f \
+                    -perm -000 \
+                    ! -name 'flake.lock' \
+                    ! -path '*/.*' \
+                \) \
+                -printf '%d\t%h\tedit %p\n' \
+                | LC_COLLATE=C sort -t "$(printf '\t')" -k2 \
+                | cut -f3- \
+                | tac \
+                | kak -p nixos-edit
 
-            pkgSource=$(printf '%s\n' "$pkgResolved" | sed "s|^$flakePath/||")
-
-            pkgSourceLine=''${pkgSource##*:}
-            pkgSource=''${pkgSource%:*}
-
-            pkgFile=$(
-                nix flake metadata --json /etc/nixos \
-                    | jq -r '
-                        .locks.nodes.root[][] as $input
-                            | .locks.nodes."\($input)"
-                            | (
-                                .original.repo
-                                    // (
-                                        (.original.url // .original.path)
-                                            | scan("^.*/(.*)")[]
-                                    )?
-                            ) as $name
-                            | (.original.ref // "") as $ref
-                            | "\($input)\t\($name)\t\($ref)"' \
-                    | while IFS=$(printf '\t') read -r input source;do
-                        basename=$(basename "$source" .git)
-                        for d in \
-                            ~/src/nix/"$input/$pkgSource" \
-                            ~/src/"$input/$pkgSource" \
-                            ~/src/nix/"$basename/$pkgSource" \
-                            ~/src/"$basename/$pkgSource"; do
-                            [ -e "$d" ] && printf '%s\n' "$d" && break
-                        done
-                    done
-            )
-
-            args+=( "$pkgFile" )
-            [[ "$#" -gt 1 ]] || args+=( "+''${pkgSourceLine:++$pkgSource}" )
-        done
-
-        ''${EDITOR:-vi} "''${args[@]}"
+            exec kak -c nixos-edit "$@"
+        fi
       '';
     })
 
@@ -323,11 +275,14 @@ in
         pkgs.coreutils
         pkgs.systemd
         pkgs.nixos-rebuild
+        pkgs.playtime
         pkgs.table
         config.programs.jq.package
       ];
 
       text = ''
+        playtime || exit $?
+
         debug=
         verbose=
 

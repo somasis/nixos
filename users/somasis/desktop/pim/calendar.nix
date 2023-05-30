@@ -2,7 +2,11 @@
 , config
 , ...
 }: {
-  home.packages = [ pkgs.khal ];
+  home.packages = [
+    pkgs.khal
+    pkgs.playtime
+  ];
+
   cache.directories = [{
     method = "symlink";
     directory = "share/khal";
