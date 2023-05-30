@@ -4,6 +4,8 @@
 , ...
 }:
 let
+  inherit (config.lib.somasis) camelCaseToScreamingSnakeCase;
+
   xsecurelock = pkgs.xsecurelock.overrideAttrs (prev: {
     version = "unstable-2023-01-16";
     src = pkgs.fetchFromGitHub {
@@ -48,29 +50,35 @@ in
         # PassEnvironment = [ "NOTIFY_SOCKET" ];
         # NotifyAccess = "all";
 
-        Environment = [
-          "XSECURELOCK_BACKGROUND_COLOR=#000000"
+        Environment = lib.mapAttrsToList (n: v: "\"XSECURELOCK_${camelCaseToScreamingSnakeCase n}=${lib.escape [ "\"" ] (builtins.toString v)}\"") {
+          backgroundColor = "#000000";
 
-          "XSECURELOCK_AUTH_BACKGROUND_COLOR=#000000"
-          "XSECURELOCK_AUTH_FOREGROUND_COLOR=#ffffff"
+          authBackgroundColor = "#000000";
+          authForegroundColor = "#ffffff";
 
-          "XSECURELOCK_FONT=monospace:style=bold:size=11"
+          font = "monospace:style=bold:size=11";
 
-          "XSECURELOCK_DATETIME_FORMAT=%%A, %%B %%d, %%I:%%M %%p"
-          "XSECURELOCK_PASSWORD_PROMPT=cursor"
+          datetimeFormat = "%%a, %%b %%d, %%i:%%m %%p";
+          passwordPrompt = "time";
 
-          "XSECURELOCK_SHOW_DATETIME=0"
-          "XSECURELOCK_SHOW_HOSTNAME=0"
-          "XSECURELOCK_SHOW_USERNAME=0"
-          "XSECURELOCK_SHOW_KEYBOARD_LAYOUT=0"
+          showDatetime = 0;
+          showHostname = 0;
+          showUsername = 0;
+          showKeyboardLayout = 0;
 
-          # "XSECURELOCK_NO_PAM_RHOST=1" # Necessary to make fprintd work.
+          # noPamRhost = 1; # necessary to make fprintd work.
 
-          "XSECURELOCK_AUTH_TIMEOUT=30"
-          "XSECURELOCK_BLANK_TIMEOUT=15"
-        ];
+          authTimeout = 30;
+          blankTimeout = 15;
+        }
+          # ++ lib.mapAttrsToList (key: command: "XSECURELOCK_KEY_${key}_COMMAND=${builtins.toString command}") {
 
-        ExecStart = "${xsecurelock}/bin/xsecurelock";
+          # }
+        ;
+
+        ExecStartPre = [ "${pkgs.xorg.setxkbmap}/bin/setxkbmap -option srvrkeys:none" ];
+        ExecStart = [ "${xsecurelock}/bin/xsecurelock" ];
+        ExecStopPost = [ "${pkgs.systemd}/bin/systemctl --user start setxkbmap.service" ];
         Restart = "on-failure";
         RestartSec = 0;
       };
@@ -114,23 +122,13 @@ in
     ];
   };
 
-  services.sxhkd.keybindings = {
-    # Session: lock screen - super + l
-    "super + l" = "${pkgs.systemd}/bin/loginctl lock-session";
-
-    # Session: toggle screensaver on/off - super + shift + l
-    "super + shift + l" = "toggle-xsecurelock";
-  };
-
   home.packages = [
     (pkgs.writeShellApplication {
-      name = "xsecurelock-toggle";
+      name = "toggle-xsecurelock";
 
       runtimeInputs = [
-        pkgs.gnugrep
         pkgs.libnotify
         pkgs.systemd
-        pkgs.xorg.xset
       ];
 
       text = ''
@@ -155,7 +153,7 @@ in
     })
 
     (pkgs.writeShellApplication {
-      name = "dpms-toggle";
+      name = "toggle-dpms";
 
       runtimeInputs = [
         pkgs.gnugrep
@@ -184,4 +182,12 @@ in
       '';
     })
   ];
+
+  services.sxhkd.keybindings = {
+    "super + l" = "${pkgs.systemd}/bin/loginctl lock-session";
+
+    "super + shift + l" = "toggle-xsecurelock";
+    "super + ctrl + l" = "toggle-dpms";
+  };
+
 }
