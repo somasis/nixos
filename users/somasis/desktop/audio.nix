@@ -1,6 +1,5 @@
 { pkgs, ... }: {
-  home.package = [
-    pkgs.sony-headphones-client
+  home.packages = [
     pkgs.ponymix
 
     (pkgs.writeShellScriptBin "ponymix-snap" ''
