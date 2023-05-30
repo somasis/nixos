@@ -32,9 +32,8 @@ let
     in
     pkgs.writeShellScriptBin "stw-widget-${widget.name}" ''
       ${lib.optionalString (widget.update == 0) "[[ -v NOTIFY_SOCKET ]] && ${pkgs.systemd}/bin/systemd-notify --ready"}
-      exec ${stw} ${args} -- ${widget.command}
-    ''
-  ;
+      exec ${stw} ${args} -- ${pkgs.writeShellScript "stw-widget-${widget.name}-command" widget.command}
+    '';
 in
 {
   options.somasis.chrome.stw = {
