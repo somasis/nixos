@@ -181,14 +181,6 @@
   somasis = {
     chrome.stw.enable = true;
 
-    tunnels = {
-      enable = true;
-      tunnels = [{
-        name = "kodi";
-        location = 45780;
-        remote = "somasis@spinoza.7596ff.com";
-        remoteLocation = 8080;
-      }];
-    };
+    tunnels.enable = true;
   };
 }
