@@ -13,6 +13,7 @@
 
     ./browser
     ./chat
+    ./feeds
     ./games
     ./mail
     ./pim
@@ -28,7 +29,6 @@
     ./dates.nix
     ./diary.nix
     ./dmenu.nix
-    ./feeds.nix
     ./file-manager.nix
     ./fonts.nix
     ./ledger.nix
