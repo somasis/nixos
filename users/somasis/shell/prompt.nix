@@ -16,7 +16,7 @@
             _*) return ;;
         esac
 
-        printf '\e]0%s\a' "''${SSH_CONNECTION:+$USER@$HOSTNAME: }''${_before_command_command}"
+        printf '\e]0;%s\a' "''${SSH_CONNECTION:+$USER@$HOSTNAME: }''${_before_command_command}"
         # stty echo >&2
     }
 
