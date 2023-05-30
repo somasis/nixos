@@ -198,7 +198,45 @@ in
 
     # youtube.com
     (pkgs.fetchurl { hash = "sha256-pKxroIOn19WvcvBKA5/+ZkkA2YxXkdTjN3l2SLLcC0A="; url = "https://gist.githubusercontent.com/codiac-killer/87e027a2c4d5d5510b4af2d25bca5b01/raw/764a0821aa248ec4126b16cdba7516c7190d287d/youtube-autoskip.user.js"; })
-    (pkgs.fetchurl { hash = "sha256-zXkIH+FNLh2m7rb7s+bztRUM6aPZwvqj9OvW/uTeb74="; url = "https://raw.githubusercontent.com/mchangrh/sb.js/v1.3.1/docs/sb-loader.user.js"; })
+    (
+      let
+        version = "1.3.1";
+      in
+      pkgs.runCommandLocal "sb.js"
+        {
+          settings = lib.concatStringsSep "\n" (lib.mapAttrsToList (k: v: "const ${k} = ${builtins.toJSON v}") {
+            categories = [ "sponsor" ];
+            actionTypes = [ "skip" ];
+            skipThreshold = [ 0.2 1 ];
+            serverEndpoint = "https://sponsor.ajay.app";
+            skipTracking = true;
+            highlightKey = "Enter";
+          });
+
+          sb_nosettings = pkgs.fetchurl {
+            url = "https://raw.githubusercontent.com/mchangrh/sb.js/v${version}/docs/sb-nosettings.min.js";
+            hash = "sha256-GIQS9iPMmpB1cJPHzLLYMSTo3EdNT8hd2llVnp87k4o=";
+          };
+        }
+        ''
+          cat - $sb_nosettings <<EOF > $out
+          // ==UserScript==
+          // @name         sb.js userscript
+          // @description  SponsorBlock userscript
+          // @namespace    mchang.name
+          // @homepage     https://github.com/mchangrh/sb.js
+          // @icon         https://mchangrh.github.io/sb.js/icon.png
+          // @version      ${version}
+          // @license      LGPL-3.0-or-later
+          // @match        https://www.youtube.com/watch*
+          // @connect      sponsor.ajay.app
+          // @grant        none
+          // ==/UserScript==
+          $settings
+          EOF
+        ''
+    )
+    (pkgs.fetchurl { hash = "sha256-5JC3vrPj+kJq68AFtEWwriyCc7sD8nIpqc6dLbjPGso="; url = "https://raw.githubusercontent.com/Anarios/return-youtube-dislike/main/Extensions/UserScript/Return%20Youtube%20Dislike.user.js"; })
 
     # wikipedia.org / wikipesija.org
     (pkgs.writeText "mediawiki-anchors.js" ./userscripts/mediawiki-anchors.js)
