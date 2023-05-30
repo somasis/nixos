@@ -16,40 +16,8 @@ let
     programPath
     ;
 
-  # TODO Go back to using Replugged once <https://github.com/replugged-org/replugged/issues/205> is resolved
-  # discord = inputs.replugged.lib.makeDiscordPlugged {
-  #   inherit pkgs;
-
-  #   extraElectronArgs = "--disable-smooth-scrolling";
-  #   withOpenAsar = true;
-
-  #   plugins = {
-  #     inherit (inputs)
-  #       repluggedPluginBetterCodeblocks
-  #       repluggedPluginBotInfo
-  #       repluggedPluginCanaryLinks
-  #       repluggedPluginChannelTyping
-  #       repluggedPluginClickableEdits
-  #       repluggedPluginCutecord
-  #       repluggedPluginEmojiUtility
-  #       repluggedPluginPersistSettings
-  #       repluggedPluginSitelenPona
-  #       repluggedPluginThemeToggler
-  #       repluggedPluginTimestampSender
-  #       repluggedPluginTokiPona
-  #       repluggedPluginWordFilter
-  #       ;
-  #   };
-  #   themes = {
-  #     inherit (inputs)
-  #       repluggedThemeCustom
-  #       repluggedThemeIrc
-  #       ;
-  #   };
-  # };
-
-  # discord = pkgs.discord-canary;
-  discord = pkgs.discord-canary.override { withOpenASAR = true; };
+  discord = pkgs.armcord;
+  discordWindowClassName = "ArmCord";
   discordDescription = discord.meta.description;
 in
 {
@@ -68,39 +36,56 @@ in
     pkgs.xe
   ];
 
-  persist.directories = [
-    "etc/discordcanary"
-    # "etc/powercord"
-  ];
+  persist.directories = [ "etc/ArmCord" ];
 
-  # cache.directories = [ "var/cache/powercord" ];
+  xdg.configFile = {
+    "ArmCord/storage/settings.json".text = lib.generators.toJSON { } {
+      doneSetup = true;
 
-  # Convert all the attributes to SNAKE_CASE in the generated JSON
-  xdg.configFile."discordcanary/settings.json".text = lib.generators.toJSON { }
-    (mapAttrs'
-      (name: value: { name = camelCaseToScreamingSnakeCase name; inherit value; })
-      {
-        dangerousEnableDevtoolsOnlyEnableIfYouKnowWhatYoureDoing = true;
+      channel = "canary";
 
-        # The nixpkgs Discord package messes with settings.json if it doesn't have
-        # SKIP_HOST_UPDATE set in it already.
-        skipHostUpdate = true;
+      armcordCSP = true;
+      mods = "vencord";
+      inviteWebsocket = true;
+      spellcheck = true;
 
-        openasar = {
-          setup = true;
-          cmdPreset = "balanced";
-          themeSync = true;
-          quickstart = true;
+      skipSplash = true;
+      startMinimized = true;
+      windowStyle = "native";
+      mobileMode = false;
 
-          css = lib.fileContents (pkgs.runCommandLocal "discord-css" { } ''
-            ${pkgs.coreutils}/bin/cat \
-                "${inputs.repluggedThemeCustom}/custom.css" \
-                "${inputs.repluggedThemeIrc}/irc.css" \
-                | ${pkgs.minify}/bin/minify --type css > "$out"
-          '');
-        };
-      }
-    );
+      minimizeToTray = true;
+      trayIcon = "dsc-tray";
+
+      performanceMode = "battery";
+    };
+
+    "ArmCord/storage/lang.json".text = lib.generators.toJSON { } {
+      lang = "en-US";
+    };
+  };
+
+  systemd.user.services.discord = {
+    Unit = {
+      Description = discordDescription;
+      PartOf = [ "graphical-session.target" ];
+
+      StartLimitIntervalSec = 1;
+      StartLimitBurst = 1;
+      StartLimitAction = "none";
+    };
+    Install.WantedBy = [ "graphical-session.target" ];
+
+    Service = {
+      Type = "simple";
+
+      ExecStart = "${programPath discord} " + lib.cli.toGNUCommandLineShell { } {
+        start-minimized = true;
+      };
+
+      Restart = "on-abnormal";
+    };
+  };
 
   services.mpd-discord-rpc = {
     inherit (config.services.mpd) enable;
@@ -116,7 +101,7 @@ in
 
   services.dunst.settings = {
     zz-discord = {
-      appname = "discord.*";
+      desktop_entry = discordWindowClassName;
 
       # Discord blue
       background = "#6654ec";
@@ -124,28 +109,28 @@ in
     };
 
     zz-discord-cassie = {
-      appname = "discord";
+      desktop_entry = discordWindowClassName;
       summary = "jan Kasi";
       background = "#7596ff";
       foreground = "#ffffff";
     };
 
     zz-discord-jes = {
-      appname = "discord";
+      desktop_entry = discordWindowClassName;
       summary = "jan Jes";
       background = "#ae82e9";
       foreground = "#ffffff";
     };
 
     zz-discord-zeyla = {
-      appname = "discord";
+      desktop_entry = discordWindowClassName;
       summary = "jan Seja";
       background = "#df7422";
       foreground = "#ffffff";
     };
 
     zz-discord-phidica = {
-      appname = "discord";
+      desktop_entry = discordWindowClassName;
       summary = "Phidica*";
       background = "#aa8ed6";
       foreground = "#ffffff";
@@ -153,57 +138,16 @@ in
   };
 
   services.sxhkd.keybindings."super + d" = builtins.toString (pkgs.writeShellScript "discord" ''
-    exec ${programPath discord} >/dev/null
-
-    ${config.home.homeDirectory}/bin/raise -cr '^(discord|browser-window)$' && exit || :
-
-    if ${pkgs.systemd}/bin/systemctl --user is-active -q discord.service; then
-        exec ${programPath discord} >/dev/null 2>&1
-    else
-        ${pkgs.systemd}/bin/systemctl --user start discord.service \
-            && sleep 2 \
-            && exec ${programPath discord} >/dev/null 2>&1
+    if ! ${pkgs.jumpapp}/bin/jumpapp -c ${lib.escapeShellArg discordWindowClassName} -f ${lib.escapeShellArg (programName discord)} 2>/dev/null; then
+        if ${pkgs.systemd}/bin/systemctl --user is-active -q discord.service; then
+            exec ${programPath discord} >/dev/null 2>&1
+        else
+            ${pkgs.systemd}/bin/systemctl --user start discord.service \
+                && sleep 2 \
+                && exec ${programPath discord} >/dev/null 2>&1
+        fi
     fi
   '');
-
-  systemd.user.services.discord = {
-    Unit = {
-      Description = discordDescription;
-      PartOf = [ "graphical-session.target" ];
-
-      StartLimitIntervalSec = 1;
-      StartLimitBurst = 1;
-      StartLimitAction = "none";
-    };
-    Install.WantedBy = [ "graphical-session.target" ];
-
-    Service = {
-      Type = "simple";
-      ExecStart = "${programPath discord} " + concatStringsSep " " (map (x: "--${x}") [
-        "start-minimized"
-
-        # Force GPU-utilizing acceleration
-        # <https://wiki.archlinux.org/title/Chromium#Force_GPU_acceleration>
-        "ignore-gpu-blocklist"
-        "enable-gpu-rasterization"
-        "enable-zero-copy"
-
-        # Enable hardware video acceleration
-        # <https://wiki.archlinux.org/title/Chromium#Hardware_video_acceleration>
-        "enable-features=VaapiVideoDecoder"
-        "enable-accelerated-mjpeg-decode"
-        "enable-accelerated-video-decode"
-      ]);
-
-      Restart = "on-abnormal";
-
-      # It seems this is required because otherwise Discord moans about options.json being read-only
-      # in the journal every time I run `discord` to open the already-running client.
-      # As does OpenASAR, about settings.json.
-      StandardError = "null";
-      StandardOutput = "null";
-    };
-  };
 
   # services.xsuspender.rules.discord = {
   #   matchWmClassGroupContains = "discord";
