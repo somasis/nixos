@@ -1,19 +1,12 @@
 { pkgs, ... }: {
   security = {
-    sudo.enable = false;
-    doas = {
+    sudo = {
       enable = true;
+      execWheelOnly = true;
       wheelNeedsPassword = false;
-
-      extraRules = [{
-        groups = [ "wheel" ];
-        cmd = "${pkgs.nixos-rebuild}/bin/nixos-rebuild";
-        noPass = true;
-        keepEnv = true;
-      }];
     };
 
-    # Bring polkit's rules into harmony with doas.
+    # Bring polkit's rules into harmony with sudo.
     polkit.extraConfig = ''
       polkit.addRule(function(action, subject) {
           if (subject.isInGroup("wheel")) {

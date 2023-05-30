@@ -6,7 +6,7 @@
         # stty -echo >&2
         local _before_command_command="''${BASH_COMMAND%% *}"
         case "$_before_command_command" in
-            'doas '*|'sudo '*|'edo '*)
+            'sudo '*|'edo '*)
                 _before_command_command="''${_before_command_command#* }"
                 ;;
             '$'*)

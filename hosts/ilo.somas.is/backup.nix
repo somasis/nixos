@@ -149,7 +149,7 @@ in
         printf '::letterboxd-%s-%s\n' "$a" "$d"
 
         bsdtar -cf - "''$1" \
-            | doas borg-job-spinoza \
+            | sudo borg-job-spinoza \
                 import-tar \
                     ${extraArgs} \
                     --stats -p \
@@ -157,13 +157,13 @@ in
                     "::letterboxd-''${a}-''${d}.failed" \
                     -
 
-        doas borg-job-spinoza \
+        sudo borg-job-spinoza \
             rename \
                 ${extraArgs} \
                 "::letterboxd-''${a}-''${d}.failed" \
                 "letterboxd-''${a}-''${d}"
 
-        doas borg-job-spinoza \
+        sudo borg-job-spinoza \
             prune \
                 ${extraArgs} \
                 --keep-monthly=12 --keep-yearly=4 \
@@ -217,7 +217,7 @@ in
         printf '::tumblr-%s-%s (%s)\n' "$a" "$date" "$d"
 
         bsdtar -cf - --format=ustar "''${files[@]}" \
-            | doas borg-job-spinoza \
+            | sudo borg-job-spinoza \
                 import-tar \
                     ${extraArgs} \
                     --stats -p \
@@ -226,13 +226,13 @@ in
                     "::tumblr-''${a}-''${date}.failed" \
                     -
 
-        doas borg-job-spinoza \
+        sudo borg-job-spinoza \
             rename \
                 ${extraArgs} \
                 "::tumblr-''${a}-''${date}.failed" \
                 "tumblr-''${a}-''${date}"
 
-        doas borg-job-spinoza \
+        sudo borg-job-spinoza \
             prune \
                 ${extraArgs} \
                 --keep-monthly=12 --keep-yearly=4 \
@@ -285,7 +285,7 @@ in
         printf '::twitter-%s-%s (%s)\n' "$a" "$date" "$d"
 
         bsdtar -cf - --format=ustar "''${files[@]}" \
-            | doas borg-job-spinoza \
+            | sudo borg-job-spinoza \
                 import-tar \
                     ${extraArgs} \
                     --stats -p \
@@ -294,13 +294,13 @@ in
                     "::twitter-''${a}-''${date}.failed" \
                     -
 
-        doas borg-job-spinoza \
+        sudo borg-job-spinoza \
             rename \
                 ${extraArgs} \
                 "::twitter-''${a}-''${date}.failed" \
                 "twitter-''${a}-''${date}"
 
-        doas borg-job-spinoza \
+        sudo borg-job-spinoza \
             prune \
                 ${extraArgs} \
                 --keep-monthly=12 --keep-yearly=4 \
@@ -354,7 +354,7 @@ in
         printf '::google-%s-%s (%s)\n' "$a" "$date" "$d"
 
         bsdtar -cf - --format=ustar "''${files[@]}" \
-            | doas borg-job-spinoza \
+            | sudo borg-job-spinoza \
                 import-tar \
                     ${extraArgs} \
                     --stats -p \
@@ -363,13 +363,13 @@ in
                     "::google-''${a}-''${date}.failed" \
                     -
 
-            doas borg-job-spinoza \
+            sudo borg-job-spinoza \
                 rename \
                     ${extraArgs} \
                     "::google-''${a}-''${date}.failed" \
                     "google-''${a}-''${date}"
 
-            doas borg-job-spinoza \
+            sudo borg-job-spinoza \
                 prune \
                     ${extraArgs} \
                     --keep-monthly=12 --keep-yearly=4 \

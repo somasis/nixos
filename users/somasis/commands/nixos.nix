@@ -354,17 +354,12 @@ in
 
         # Disable logging before the switch, just in case we touch the
         # log filesystem in a way it doesn't like...
-        if systemctl -q is-active systemd-journald.service; then
-            edo doas journalctl --sync
-            edo doas journalctl --relinquish-var
-        fi
+        systemctl -q is-active systemd-journald.service && edo sudo journalctl --sync --relinquish-var
 
         e=0
-        edo doas nixos-rebuild --no-update-lock-file "$@" || e=$?
+        edo nixos-rebuild --use-remote-sudo --no-update-lock-file "$@" || e=$?
 
-        if systemctl -q is-active systemd-journald.service; then
-            edo doas journalctl --flush
-        fi
+        systemctl -q is-active systemd-journald.service && edo sudo journalctl --flush
 
         [ "$e" -eq 0 ] || exit $e
 

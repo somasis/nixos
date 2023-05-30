@@ -18,7 +18,7 @@
           # ./users/somasis/games/retroarch.nix: controller detection
           "input"
         ]
-        ++ lib.optional config.security.doas.enable "wheel"
+        ++ lib.optional config.security.sudo.enable "wheel"
         ++ lib.optional config.hardware.brillo.enable "video"
         ++ lib.optionals config.networking.networkmanager.enable [ "network" "networkmanager" ]
         ++ lib.optional config.hardware.sane.enable "scanner"
