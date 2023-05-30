@@ -39,88 +39,87 @@ let
     ];
   };
 
-  mkUserstyle = file:
-    let
-      format = ''
-        ${pkgs.nodePackages.prettier}/bin/prettier \
-            --no-config \
-            --no-editorconfig \
-            --stdin-filepath=userstyle.css
-      '';
+  # TODO
+  # mkUserstyle = file:
+  #   let
+  #     name = builtins.replaceStrings [ "\.user" "\.css" ] [ "" "" ] (file.name or "${builtins.toString file}");
 
-      name = builtins.replaceStrings [ "\.css" ] [ "" ] (builtins.baseNameOf file);
+  #     css = pkgs.runCommandLocal "formatted.css" { inherit file; } ''
+  #       ${pkgs.nodePackages.prettier}/bin/prettier \
+  #           --no-config \
+  #           --no-editorconfig \
+  #           --stdin-filepath=userstyle.css \
+  #           < "$file" > "$out"
+  #     '';
 
-      # <https://github.com/stylish-userstyles/stylish/wiki/Valid-@-moz-document-rules>
-      # <https://wiki.greasespot.net/Include_and_exclude_rules>
-      metadata = lib.fileContents
-        (pkgs.runCommand "metadata.js" { inherit file; } ''
-          exec > "$out"
+  #     # <https://github.com/stylish-userstyles/stylish/wiki/Valid-@-moz-document-rules>
+  #     # <https://wiki.greasespot.net/Include_and_exclude_rules>
+  #     metadata = pkgs.runCommandLocal "metadata.js" { inherit css; } ''
+  #       set -x
+  #       set -euo pipefail
 
-          # Get style's bundled metadata
-          ${format} < "$file" \
-              | ${pkgs.gnused}/bin/sed -En \
-                  -e '/^\/\* ==UserStyle==/,/^==\/UserStyle== \*\// {
-                      /^\/\* ==UserStyle==/b
-                      /^==\/UserStyle== \*\//b
-                      s|^|// |p
-                  }
-              ' \
-              | tee /dev/stderr
+  #       # Get style's bundled metadata
+  #       sed -En \
+  #           -e '
+  #               /^\/\* ==UserStyle==/,/^==\/UserStyle== \*\// {
+  #                   /^\/\* ==UserStyle==/b
+  #                   /^==\/UserStyle== \*\//b
+  #                   s|^|// |p
+  #               }
+  #           ' \
+  #           "$css" > "$out"
 
-          # Convert @-moz-document rules to Greasemonkey @include rules
-          ${format} < "$file" \
-              | ${pkgs.gnused}/bin/sed -E \
-                  -e 's/^ *//' \
-                  -e '/@-moz-document\s/!d' \
-                  -e 's/ *\{$//' \
-                  -e 's/\), /)\n/g' \
-                  -e 's/;$//' \
-                  -e 's/^@-moz-document\s*//' \
-              | ${pkgs.gnused}/bin/sed -E \
-                  -e '/^(domain|url|url-prefix|regexp)\((.+)\)$/!d' \
-                  -e '/^domain\(/ {
-                      s/^domain\("?//
-                      s/"?\)$//
-                      s|^(.*)$|// @include *://\1/*\n// @include *://\*.\1/*|
-                  }' \
-                  -e '/^url\(/ {
-                      s/^url\("?//
-                      s/"?\)$//
-                      s|^(.*)$|// @include \1|
-                  }' \
-                  -e '/^url-prefix\(/ {
-                      s/^url-prefix\("?//
-                      s/"?\)$//
-                      s|^(.*)$|// @include \1*|
-                  }' \
-                  -e '/^regexp\(/ {
-                      s/^regexp\("?//
-                      s/"?\)$//
-                      s|^(.*)$|// @include /\1/|
-                  }
-              ' \
-              | tee /dev/stderr
-        '')
-      ;
+  #       # Convert @-moz-document rules to Greasemonkey @include rules
+  #       sed -E \
+  #           -e 's/^ *//' \
+  #           -e '/@-moz-document\s/!d' \
+  #           -e 's/ *\{$//' \
+  #           -e 's/\), /)\n/g' \
+  #           -e 's/;$//' \
+  #           -e 's/^@-moz-document\s*//' \
+  #           "$css" \
+  #           | sed -E \
+  #               -e '/^(domain|url|url-prefix|regexp)\((.+)\)$/!d' \
+  #               -e '/^domain\(/ {
+  #                   s/^domain\("?//
+  #                   s/"?\)$//
+  #                   s|^(.*)$|// @include *://\1/*\n// @include *://\*.\1/*|
+  #               }' \
+  #               -e '/^url\(/ {
+  #                   s/^url\("?//
+  #                   s/"?\)$//
+  #                   s|^(.*)$|// @include \1|
+  #               }' \
+  #               -e '/^url-prefix\(/ {
+  #                   s/^url-prefix\("?//
+  #                   s/"?\)$//
+  #                   s|^(.*)$|// @include \1*|
+  #               }' \
+  #               -e '/^regexp\(/ {
+  #                   s/^regexp\("?//
+  #                   s/"?\)$//
+  #                   s|^(.*)$|// @include /\1/|
+  #               }' \
+  #           | sed '/^$/d' >> "$out"
+  #     '';
 
-      style' = lib.fileContents
-        (pkgs.runCommand "style.css" { inherit file; } ''
-          exec > "$out"
-          ${format} < "$file" \
-              | ${pkgs.gnused}/bin/sed '/^@-moz-document .*{/,/^}/ {
-                  /^@-moz-document .*{/d; $d
-              }' \
-              | ${pkgs.minify}/bin/minify --type css
-        '')
-      ;
-    in
-    pkgs.writeText "${name}.css" ''
-      // ==UserScript==
-      ${metadata}
-      // @grant GM_addStyle
-      // ==/UserScript==
-      GM_addStyle(${builtins.toJSON style'});
-    '';
+  #     style = pkgs.runCommandLocal "style.css" { inherit css; } ''
+  #       set -x
+  #       set -euo pipefail
+
+  #       sed \
+  #           '/^@-moz-document .*{/,/^}/ { /^@-moz-document .*{/d; $d; }' \
+  #           "$css" \
+  #           | ${pkgs.minify}/bin/minify --type css > "$out"
+  #     '';
+  #   in
+  #   pkgs.writeText "userstyle-${name}.user.js" ''
+  #     // ==UserScript==
+  #     ${builtins.readFile metadata}
+  #     // @grant GM_addStyle
+  #     // ==/UserScript==
+  #     GM_addStyle(${builtins.toJSON (builtins.readFile style)});
+  #   '';
 in
 {
   cache.directories = [ "share/qutebrowser/greasemonkey/requires" ];
@@ -135,6 +134,9 @@ in
     (pkgs.fetchurl { hash = "sha256-4nDL4vPOki+qpQmCKqLEVUc1Bh0uO3eJ8OpB8CuhJgs="; url = "https://greasyfork.org/scripts/32-show-password-onmouseover/code/Show%20Password%20onMouseOver.user.js"; })
     (pkgs.fetchurl { hash = "sha256-FshnFfKDwdCAam4Ikq0GlYcoJ0/a7B5vs8QMytLTqig="; url = "https://openuserjs.org/install/SelaoO/Ctrl+Enter_is_submit_everywhere.user.js"; })
     (pkgs.fetchurl { hash = "sha256-jDHXF0tV5yVACfwdMrRl65Ihl7SG/Xs+0WrNywseB0g="; url = "https://userscripts.adtidy.org/release/disable-amp/1.0/disable-amp.user.js"; })
+
+    # <https://userstyles.world/style/8283/unround-everything-everywhere>
+    # (mkUserstyle (pkgs.fetchurl { hash = "sha256-mn1yXTdPvESPrabYrwXtp0Y5FiZKaNQ7+Lv19tZvY7U="; url = "https://userstyles.world/api/style/8283.user.css"; name = "unround-everything-everywhere.user.css"; }))
 
     # musicbrainz.com
     # loujine-musicbrainz
