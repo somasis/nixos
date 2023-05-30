@@ -1,4 +1,7 @@
-{ pkgs, ... }: {
+{ lib
+, pkgs
+, ...
+}: {
   console = {
     useXkbConfig = true;
 
