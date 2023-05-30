@@ -148,19 +148,15 @@ in
     # <https://github.com/windingwind/zotero-pdf-preview>
     # <https://github.com/wshanks/Zutilo>
 
-    package = pkgs.symlinkJoin {
-      name = "zotero-final";
-
-      buildInputs = [ pkgs.makeWrapper ];
-      paths = [ pkgs.zotero ];
+    package = pkgs.wrapCommand {
+      package = pkgs.zotero;
 
       # Ensure that there isn't a mismatch between extension settings
       # (which could get modified during runtime, and then be written
       # to prefs.js by Zotero) and our user.js.
-      postBuild =
+      beforeCommand =
         let
           prefs = "${config.home.homeDirectory}/.zotero/zotero/${config.programs.zotero.profiles.default.path}/prefs.js";
-
           managedPrefs = lib.concatStringsSep " " (map (x: "-e 'user_pref(\"${x}\", '") (builtins.attrNames config.programs.zotero.profiles.default.settings));
 
           startService = pkgs.writeShellScript "start-zotero-service" ''
@@ -198,13 +194,12 @@ in
             grep -vF ${managedPrefs} "${prefs}" | sponge "${prefs}"
           '';
         in
-        ''
-          wrapProgram $out/bin/zotero \
-              --run '[ -z "$_skip" ] && . ${startService}' \
-              --run "[ -z "$_skip" ] && . ${unhideZotero}" \
-              --run "[ -z "$_skip" ] && ${filterPrefs}" \
-              --run "[ -z "$_skip" ] || unset _skip" \
-        '';
+        [
+          ''[ -z "$_skip" ] && . ${startService}''
+          ''[ -z "$_skip" ] && . ${unhideZotero}''
+          ''[ -z "$_skip" ] && ${filterPrefs}''
+          ''[ -n "$_skip" ] && unset _skip''
+        ];
     };
 
     profiles.default = {

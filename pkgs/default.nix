@@ -4,6 +4,8 @@ let
 in
 rec
 {
+  wrapCommand = callPackage ./wrapCommand;
+
   screenshot = callPackage ./screenshot { };
   xinput-notify = callPackage ./xinput-notify { };
 
