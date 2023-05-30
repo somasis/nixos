@@ -20,4 +20,6 @@ rec
   dmenu-pass = callPackage ./dmenu-pass { };
   dmenu-run = callPackage ./dmenu-run { };
   dmenu-session = callPackage ./dmenu-session { };
+
+  pass-meta = callPackage ./pass-meta { };
 }
