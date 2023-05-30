@@ -1,10 +1,44 @@
 { config
 , lib
+, pkgs
 , ...
-}: {
-  programs.qutebrowser = {
-    searchEngines = rec {
-      "DEFAULT" = "https://duckduckgo.com/?q={}";
+}:
+let
+  inherit (lib)
+    makeBinPath
+    mapAttrs'
+    nameValuePair
+    replaceStrings
+    ;
+
+  memento = pkgs.writeShellScript "qutebrowser-memento" ''
+    export PATH=${makeBinPath [ pkgs.coreutils pkgs.dateutils ] }
+
+    usage() {
+        cat <<EOF >&2
+    usage: QUTE_FIFO=... qutebrowser-memento [date [URL]]
+    EOF
+        exit 69
+    }
+
+    [[ $# -le 2 ]] || usage
+
+    : "''${QUTE_FIFO:?}"
+    exec > "$QUTE_FIFO"
+
+    timetravel="https://timetravel.mementoweb.org/memento"
+    date=$(dateconv -z UTC -f "%Y%m%d%H%M%S" "''${1:-now}")
+
+    printf 'open -r %s/%s/%s\n' \
+        "$timetravel" \
+        "$date" \
+        "''${QUTE_URL:-$2}"
+  '';
+in
+{
+  programs.qutebrowser = rec {
+    searchEngines = {
+      "DEFAULT" = "https://html.duckduckgo.com/html/?q={}";
       "!" = "https://duckduckgo.com/?q=!+{}";
       "!i" = "https://duckduckgo.com/?q={}&ia=images&iax=images";
 
@@ -22,7 +56,7 @@
       "!bookfinder" = "https://www.bookfinder.com/search/?keywords={}";
       "!abebooks" = "https://www.abebooks.com/servlet/SearchResults?kn={}";
       "!plato" = "https://plato.stanford.edu/search/searcher.py?query={}";
-      "!iep" = lib.replaceStrings [ "{}" ] [ "site:https://iep.utm.edu+{}" ] DEFAULT;
+      "!iep" = replaceStrings [ "{}" ] [ "site:https://iep.utm.edu+{}" ] searchEngines.DEFAULT;
       "!doi" = "https://doi.org/{unquoted}";
 
       "!pkg" = "https://parcelsapp.com/en/tracking/{}";
@@ -65,6 +99,7 @@
 
       "!greasyfork" = "https://greasyfork.org/en/scripts?q={}";
       "!openuserjs" = "https://openuserjs.org/?q={}";
+      "!userstyles" = "https://userstyles.world/search?q={}";
 
       "!twitter" = "https://twitter.com/search?q={}";
       "!whosampled" = "https://www.whosampled.com/search/?q={}";
@@ -74,8 +109,12 @@
       "!wiki#es" = "https://www.wikipedia.org/search-redirect.php?family=wikipedia&language=es&go=Go&search={}";
       "!wiki#tok" = "https://wikipesija.org/index.php?go=o+tawa&search={}";
 
-      "!en" = "https://en.wiktionary.org/wiki/{}#English";
-      "!es" = "https://en.wiktionary.org/wiki/{}#Spanish";
+      "!wikt" = "https://en.wiktionary.org/wiki/{}";
+      "!en" = "${searchEngines."!wikt"}#English";
+      "!es" = "${searchEngines."!wikt"}#Spanish";
+      "!esen" = "https://www.wordreference.com/es/en/translation.asp?spen={}";
+      "!enes" = "https://www.wordreference.com/es/translation.asp?tranword={}";
+
       "!tok" = "https://wikipesija.org/wiki/nimi:{}";
       "!linku" = "https://lipu-linku.github.io/?q={}";
 
@@ -83,9 +122,9 @@
       "!archpkgs" = "https://archlinux.org/packages/?sort=&q={}";
       "!archwiki" = "https://wiki.archlinux.org/index.php?title=Special%3ASearch&search={}";
 
-      # "!archive" = "https://archive.ph/{unquoted}";
       "!ia" = "https://archive.org/search?query={}";
-      "!wayback" = "https://web.archive.org/web/*/{unquoted}";
+      "!a" = "https://web.archive.org/web/*/{unquoted}";
+      "!A" = "https://archive.today/web/*/{unquoted}";
 
       "!adb" = "http://adb.arcadeitalia.net/dettaglio_mame.php?game_name={}&arcade_only=0&autosearch=1";
       "!cdromance" = "https://cdromance.com/?s={}";
@@ -94,9 +133,40 @@
       "!vimm" = "https://vimm.net/vault/?p=list&q={}";
     };
 
-    keyBindings.normal = let open = x: "open -rt ${x}"; in {
-      "r1" = open "https://12ft.io/api/proxy?q={url}";
-      "ra" = open "https://web.archive.org/web/{url}";
-    };
+    aliases =
+      let
+        searchWithSelection = pkgs.writeShellScript "search-with-selection" ''
+          PATH=${lib.makeBinPath [ pkgs.s6-portable-utils ]}:"$PATH"
+          : "''${QUTE_FIFO:?}"
+          : "''${QUTE_SELECTED_TEXT:?}"
+
+          args=( "$@" "$QUTE_SELECTED_TEXT" )
+          i=0
+          until [[ "$i" -gt "''${#args[@]}" ]]; do
+              args[$i]=( "$(s6-quote -d '"' "\"''${args[$i]}")\"" )
+              i=$(( i + 1 ))
+          done
+          printf 'open -rt %s\n' "''${args[*]}" > "$QUTE_FIFO"
+        '';
+      in
+      {
+        memento = "spawn -u ${memento}";
+        search-with-selection = "spawn -u ${searchWithSelection}";
+      };
+
+    keyBindings.normal = { "gsw" = "search-with-selection !wikt"; }
+      // (
+      let
+        open = x: "open -r ${x}";
+        openNewTab = x: "open -rt ${x}";
+      in
+      mapAttrs' (n: v: nameValuePair "r${n}" v) {
+        "1" = open "https://12ft.io/api/proxy?q={url}";
+        "a" = open "https://web.archive.org/web/id_/{url}";
+        "A" = open "https://archive.is/{url}";
+        "m" = "memento";
+        "M" = "memento now";
+      }
+    );
   };
 }
