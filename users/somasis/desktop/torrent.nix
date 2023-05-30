@@ -54,24 +54,22 @@ let
 
       usage() {
           cat >&2 <<EOF
-      usage: ''${0##*/} [-a USER:PASS] [-d DEST] [-h HOST] [-H USER@HOST] IDS...
+      usage: ''${0##*/} [-d DEST] [-H USER@HOST] IDS...
       EOF
           exit 69
       }
 
-      export NQDIR="''${XDG_CACHE_HOME:-''${HOME}/.cache}/nq/tpull"
-      mkdir -p "''${NQDIR}"
+      export NQDIR="''${XDG_CACHE_HOME:-$HOME/.cache}/nq/tpull"
+      mkdir -p "$NQDIR"
 
       [[ $# -gt 0 ]] || exec fq
 
       dest=./
       mode=download
-      transmission_auth=
-      transmission_host=localhost
-      while getopts :Da:d:h:H: arg >/dev/null 2>&1; do
-          case "''${arg}" in
+      while getopts :Dd:h:H: arg >/dev/null 2>&1; do
+          case "$arg" in
               d)
-                  dest="''${OPTARG}"
+                  dest="$OPTARG"
                   ;;
               D)
                   # NOTE: only meant for script-internal use
@@ -80,14 +78,8 @@ let
                   # to the torrent data files.
                   mode=rsync
                   ;;
-              a)
-                  transmission_auth="''${OPTARG}"
-                  ;;
-              h)
-                  transmission_host="''${OPTARG}"
-                  ;;
               H)
-                  ssh_host="''${OPTARG}"
+                  ssh_host="$OPTARG"
                   ;;
               *)
                   usage
@@ -96,9 +88,9 @@ let
       done
       shift $((OPTIND - 1))
 
-      : "''${ssh_host:=''${transmission_host}}"
+      : "''${ssh_host:=localhost}"
 
-      case "''${mode}" in
+      case "$mode" in
           rsync)
               if rsync -ruvs --delete-delay  --exclude "*.part" "$1" "$2"; then
                   exec \
@@ -117,26 +109,22 @@ let
       esac
 
       while [[ $# -gt 0 ]]; do
-          details=$(
-              transmission-remote ''${transmission_auth:+-n "''${transmission_auth}"} \
-                  "''${transmission_host}" \
-                  -t "$1" -i
-          )
+          details=$(transmission-remote -t "$1" -i)
 
-          location=$(printf '%s' "''${details}" | grep -E '^\s+Location:' | cut -c 13-)
-          name=$(printf '%s' "''${details}" | grep -E '^\s+Name:' | cut -c 9-)
+          location=$(<<<"$details" grep -E '^\s+Location:' | cut -c 13-)
+          name=$(<<<"$details" grep -E '^\s+Name:' | cut -c 9-)
 
-          if [[ -z "''${location}" ]] || [[ -z "''${name}" ]]; then
+          if [[ -z "$location" ]] || [[ -z "$name" ]]; then
               continue
           fi
 
-          path="''${location}/''${name}"
+          path="$location/$name"
 
-          nq -c "$0" -D "''${ssh_host}:''${path}" "''${dest}" "''${name}"
+          nq -c "$0" -D "$ssh_host:$path" "$dest" "$name"
 
           amt=$(fq -nq | wc -l)
           notify-send -a "tpull" -i transmission-remote-gtk \
-              "tpull" "''${amt} download(s) enqueued. Run \`tpull\` to see progress."
+              "tpull" "$amt download(s) enqueued. Run \`tpull\` to see progress."
           shift
       done
     '';
