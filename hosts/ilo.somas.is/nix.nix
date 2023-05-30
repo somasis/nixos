@@ -30,6 +30,9 @@
       warn-dirty = false;
 
       substituters = [
+        # Prefer HTTP nix-serve over the SSH tunnel to the server.
+        # Faster for multiple missing-path queries.
+        "http://localhost:5000"
         "ssh-ng://nix-ssh@spinoza.7596ff.com"
 
         # Use binary cache for nonfree packages

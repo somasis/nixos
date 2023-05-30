@@ -181,6 +181,13 @@
   somasis = {
     chrome.stw.enable = true;
 
-    tunnels.enable = true;
+    tunnels = {
+      enable = true;
+      tunnels = [{
+        name = "nix-serve-http";
+        location = 5000;
+        remote = "somasis@spinoza.7596ff.com";
+      }];
+    };
   };
 }
