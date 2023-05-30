@@ -70,37 +70,57 @@ in
 
     # panel-sctd
     pkgs.systemd-wait
+
+    # panel-tray
+    pkgs.stalonetray
+    pkgs.snixembed
+    pkgs.xorg.xwininfo
   ];
 
   programs.autorandr.hooks = {
-    preswitch."panel" = "${pkgs.systemd}/bin/systemctl --user stop panel.service";
-    postswitch."panel" = "${pkgs.systemd}/bin/systemctl --user start panel.service";
+    preswitch.panel = "${pkgs.systemd}/bin/systemctl --user stop panel.service";
+    postswitch.panel = "${pkgs.systemd}/bin/systemctl --user start panel.service";
   };
 
-  systemd.user.services.panel = {
-    Unit = {
-      Description = "lemonbar(1) based panel";
-      PartOf = [ "chrome.target" ];
+  systemd.user.services = {
+    panel = {
+      Unit = {
+        Description = "lemonbar(1) based panel";
+        PartOf = [ "graphical-session.target" "tray.target" ];
+        StartLimitInterval = 0;
+      };
+      Install.WantedBy = [ "graphical-session.target" "tray.target" ];
+
+      Service = {
+        Type = "simple";
+        ExecStart = [ "${config.home.homeDirectory}/bin/panel" ];
+        ExecStartPost = [
+          "${bspc} config top_padding ${builtins.toString bspwm.settings.top_padding}"
+          "${bspc} config border_width ${builtins.toString bspwm.settings.border_width}"
+          "${bspc} config window_gap ${builtins.toString bspwm.settings.window_gap}"
+        ];
+        ExecStopPost = [
+          "${bspc} config top_padding 0"
+          "${bspc} config border_width 0"
+          "${bspc} config window_gap 0"
+        ];
+
+        Restart = "on-success";
+      };
     };
-    Install.WantedBy = [ "chrome.target" ];
 
-    Service = {
-      Type = "simple";
-      ExecStart = [ "${config.home.homeDirectory}/bin/panel" ];
-      ExecStartPost = [
-        "${bspc} config top_padding ${builtins.toString bspwm.settings.top_padding}"
-        "${bspc} config border_width ${builtins.toString bspwm.settings.border_width}"
-        "${bspc} config window_gap ${builtins.toString bspwm.settings.window_gap}"
-      ];
-      ExecStopPost = [
-        "${bspc} config top_padding 0"
-        "${bspc} config border_width 0"
-        "${bspc} config window_gap 0"
-      ];
+    snixembed = {
+      Unit = {
+        Description = pkgs.snixembed.meta.description;
+        PartOf = [ "tray.target" ];
+        After = [ "panel.service" ];
+      };
+      Install.WantedBy = [ "tray.target" ];
 
-      Restart = "on-success";
+      Service = {
+        Type = "simple";
+        ExecStart = [ "${pkgs.snixembed}/bin/snixembed" ];
+      };
     };
-
-    Unit.StartLimitInterval = 0;
   };
 }
