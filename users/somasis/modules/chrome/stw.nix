@@ -21,7 +21,7 @@ let
         y = window.position.y;
         X = window.position.xRelative;
         Y = window.position.yRelative;
-        a = builtins.head (lib.stringToCharacters text.align);
+        a = builtins.substring 0 1 text.align;
         f = text.color;
         b = window.color;
         F = text.font;
