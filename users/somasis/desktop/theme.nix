@@ -66,6 +66,7 @@
       color13 = "#f97cac";
       color14 = "#30d0f2";
       color15 = "#e0d6d6";
+      colorAccent = "#5294e2";
     in
     {
       # "Xft.dpi" = 144; # 96 * 1.5
@@ -109,7 +110,7 @@
       "*color13" = color13;
       "*color14" = color14;
       "*color15" = color15;
-      "*colorAccent" = "#5294e2";
+      "*colorAccent" = colorAccent;
       # "*colorAccent" = color3;
 
       "panel.background" = darkBackground;
