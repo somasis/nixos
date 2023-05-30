@@ -68,6 +68,8 @@ in
   # };
 
   home.packages = [
+    pkgs.jumpapp
+
     (pkgs.writeShellScriptBin "bspwm-hide-or-close" ''
       # If we're closing a window,
 
