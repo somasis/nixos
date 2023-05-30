@@ -7,6 +7,4 @@
       inhibit_screensaver = "0";
     };
   };
-
-  programs.steam.enable = true;
 }
