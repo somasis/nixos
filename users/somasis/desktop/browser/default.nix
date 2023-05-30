@@ -114,24 +114,6 @@ in
       # Clear default aliases
       aliases = { };
 
-      qt.args = [
-        # Force GPU-utilizing acceleration
-        # <https://wiki.archlinux.org/title/Chromium#Force_GPU_acceleration>
-        "ignore-gpu-blocklist"
-        "enable-gpu-rasterization"
-        "enable-zero-copy"
-
-        # Enable hardware video acceleration
-        # <https://wiki.archlinux.org/title/Chromium#Hardware_video_acceleration>
-        # <https://community.frame.work/t/guide-linux-battery-life-tuning/6665/303>
-        "enable-features=VaapiVideoDecoder,VaapiVideoEncoder"
-        "enable-accelerated-mjpeg-decode"
-        "enable-accelerated-video-decode"
-        "disable-gpu-driver-bug-workarounds"
-        "use-gl=egl"
-        "disable-features=UseChromeOSDirectVideoDecoder"
-      ];
-
       # Always restore open sites when qutebrowser is reopened.
       # Equivalent of Firefox's "Restore previous session" setting.
       auto_save.session = true;
@@ -189,7 +171,7 @@ in
         prefers_reduced_motion = true;
 
         # List of user stylesheet filenames to use. These apply globally.
-        user_stylesheets = builtins.map builtins.toString [
+        user_stylesheets = map builtins.toString [
           (pkgs.writeText "fonts.user.css" ''
             @font-face {
                 font-family: ui-sans-serif;
@@ -495,69 +477,65 @@ in
     };
   };
 
-  systemd.user = {
-    timers = {
-      qutebrowser-vacuum = {
-        Unit = {
-          Description = "${config.systemd.user.services.qutebrowser-vacuum.Unit.Description} every week";
-          PartOf = [ "timers.target" ];
-        };
-        Install.WantedBy = [ "timers.target" ];
+  systemd.user = rec {
+    services.qutebrowser-vacuum = {
+      Unit.Description = "Vacuum the qutebrowser database";
 
-        Timer = {
-          OnCalendar = "weekly";
-          Persistent = true;
-          AccuracySec = "15m";
-          RandomizedDelaySec = "5m";
-        };
+      Service = {
+        Type = "oneshot";
+
+        # Use an ExecCondition to prevent from doing maintenance while
+        # qutebrowser is running.
+        #
+        # systemd.service(5):
+        # > The behavior is like an ExecStartPre= and condition check hybrid:
+        # > when an ExecCondition= command exits with exit code 1 through 254
+        # > (inclusive), the remaining commands are skipped and the unit is not
+        # > marked as failed. However, if an ExecCondition= command exits with
+        # > 255 or abnormally (e.g. timeout, killed by a signal, etc.), the
+        # > unit will be considered failed (and remaining commands will be
+        # > skipped). Exit code of 0 or those matching SuccessExitStatus= will
+        # > continue execution to the next command(s).
+        ExecCondition = pkgs.writeShellScript "wait-for-qutebrowser" ''
+          set -eu
+          set -- $(${pkgs.procps}/bin/pgrep -u "''${USER:-$(${pkgs.coreutils}/bin/id -un)}" "qutebrowser")
+
+          [ "$#" -gt 0 ] || exit 0
+          ${pkgs.procps}/bin/pwait "$@"
+        '';
+
+        ExecStart = pkgs.writeShellScript "qutebrowser-vacuum" ''
+          set -eu
+
+          PATH="${lib.makeBinPath [ pkgs.sqlite pkgs.xe ]}:$PATH"
+
+          for db in ${lib.escapeShellArgs [ "${config.xdg.dataHome}/qutebrowser/history.sqlite" ]}; do
+              sqlite3 "$db" <<'EOF'
+          .timeout ${builtins.toString (60 * 1000)}
+          VACUUM;
+          EOF
+          done
+        '';
+
+        Nice = 19;
+        CPUSchedulingPolicy = "idle";
+        IOSchedulingClass = "idle";
+        IOSchedulingPriority = 7;
       };
     };
 
-    services = rec {
-      qutebrowser-vacuum = {
-        Unit.Description = "Vacuum the qutebrowser database";
+    timers.qutebrowser-vacuum = {
+      Unit = {
+        Description = "${services.qutebrowser-vacuum.Unit.Description} every week";
+        PartOf = [ "timers.target" ];
+      };
+      Install.WantedBy = [ "timers.target" ];
 
-        Service = {
-          Type = "oneshot";
-
-          # Use an ExecCondition to prevent from doing maintenance while
-          # qutebrowser is running.
-          #
-          # systemd.service(5):
-          # > The behavior is like an ExecStartPre= and condition check hybrid:
-          # > when an ExecCondition= command exits with exit code 1 through 254
-          # > (inclusive), the remaining commands are skipped and the unit is not
-          # > marked as failed. However, if an ExecCondition= command exits with
-          # > 255 or abnormally (e.g. timeout, killed by a signal, etc.), the
-          # > unit will be considered failed (and remaining commands will be
-          # > skipped). Exit code of 0 or those matching SuccessExitStatus= will
-          # > continue execution to the next command(s).
-          ExecCondition = builtins.toString (pkgs.writeShellScript "wait-for-qutebrowser" ''
-            set -eu
-            set -- $(${pkgs.procps}/bin/pgrep -u "''${USER:-$(${pkgs.coreutils}/bin/id -un)}" "qutebrowser")
-
-            [ "$#" -gt 0 ] || exit 0
-            ${pkgs.extrace}/bin/pwait "$@"
-          '');
-
-          ExecStart = builtins.toString (pkgs.writeShellScript "qutebrowser-vacuum" ''
-            set -eu
-
-            PATH="${lib.makeBinPath [ pkgs.sqlite pkgs.xe ]}:$PATH"
-
-            for db in ${lib.escapeShellArgs [ "${config.xdg.dataHome}/qutebrowser/history.sqlite" ]}; do
-                sqlite3 "$db" <<'EOF'
-            .timeout ${builtins.toString (60 * 1000)}
-            VACUUM;
-            EOF
-            done
-          '');
-
-          Nice = 19;
-          CPUSchedulingPolicy = "idle";
-          IOSchedulingClass = "idle";
-          IOSchedulingPriority = 7;
-        };
+      Timer = {
+        OnCalendar = "weekly";
+        Persistent = true;
+        AccuracySec = "15m";
+        RandomizedDelaySec = "5m";
       };
     };
   };
