@@ -71,6 +71,36 @@ with lib;
     programName = p: p.meta.mainProgram or p.pname or p.name;
     programPath = p: "${getBin p}/bin/${programName p}";
 
+    generators = {
+      toXML = attrs:
+        let
+          # xq requires that there be one XML root element; it must be specified as a command argument otherwise
+          xml =
+            if (builtins.length (builtins.attrNames attrs)) == 1 then
+              pkgs.runCommand "xml"
+                { json = pkgs.writeText "xml.json" (builtins.toJSON attrs); }
+                ''
+                  ${pkgs.yq-go}/bin/yq \
+                      --indent 0 \
+                      --input-format json \
+                      --output-format xml \
+                      --xml-strict-mode \
+                      < "$json" \
+                      > xml.xml
+
+                  ${pkgs.xmlstarlet}/bin/xmlstarlet validate -e -b xml.xml
+
+                  ${pkgs.xmlstarlet}/bin/xmlstarlet c14n xml.xml > canonical.xml
+                  ${pkgs.xmlstarlet}/bin/xmlstarlet format -n canonical.xml > "$out"
+                ''
+            else
+              abort "generators.toXML: only one XML root element is allowed"
+          ;
+        in
+        lib.fileContents xml
+      ;
+    };
+
     feeds = rec {
       urls = rec {
         special =
