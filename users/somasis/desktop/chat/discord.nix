@@ -164,7 +164,6 @@ in
             && sleep 2 \
             && exec ${programPath discord} >/dev/null 2>&1
     fi
-
   '');
 
   systemd.user.services.discord = {

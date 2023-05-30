@@ -2,8 +2,7 @@
 , lib
 , pkgs
 , ...
-}:
-{
+}: {
   services.sxhkd.keybindings = {
     "super + b" = "alacritty";
     # "super + shift + b" = builtins.toString (pkgs.writeShellScript "sxhkd-terminal-at-window-cwd" ''

@@ -46,7 +46,6 @@ let
       python3Packages.buildPythonApplication rec {
         pname = "zotero-cli";
         version = "unstable-2022-02-11";
-
         format = "setuptools";
 
         src = fetchFromGitHub {

@@ -2,8 +2,7 @@
 , nixosConfig
 , pkgs
 , ...
-}:
-{
+}: {
   programs.gh = {
     enable = true;
     settings = {

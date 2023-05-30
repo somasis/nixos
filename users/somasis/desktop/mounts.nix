@@ -2,8 +2,7 @@
 , pkgs
 , lib
 , ...
-}:
-{
+}: {
   home.packages = [ pkgs.rclone pkgs.sshfs ];
 
   persist.directories = [{

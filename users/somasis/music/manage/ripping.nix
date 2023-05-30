@@ -3,8 +3,7 @@
 , lib
 , music
 , ...
-}:
-{
+}: {
   home.packages = [ pkgs.whipper ];
 
   xdg.configFile."whipper/whipper.conf".text = lib.generators.toINI

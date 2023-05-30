@@ -118,7 +118,7 @@ in
     package = pkgs.qutebrowser.override { withPdfReader = false; };
 
     loadAutoconfig = true;
-    settings = rec {
+    settings = let xres = config.xresources.properties; in rec {
       # Clear default aliases
       aliases = { };
 
@@ -280,12 +280,14 @@ in
         };
       };
 
+      colors.webpage.bg = "";
+
       # Downloads bar.
       downloads.position = "top";
-      colors.downloads.start.bg = config.xresources.properties."*darkBackground";
-      colors.downloads.stop.bg = config.xresources.properties."*color2";
-      colors.downloads.error.bg = config.xresources.properties."*color1";
-      colors.downloads.bar.bg = config.xresources.properties."*darkBackground";
+      colors.downloads.start.bg = xres."*darkBackground";
+      colors.downloads.stop.bg = xres."*color2";
+      colors.downloads.error.bg = xres."*color1";
+      colors.downloads.bar.bg = xres."*darkBackground";
 
       # Statusbar.
       statusbar.position = "top";
@@ -298,54 +300,54 @@ in
         "filesystem"
       ];
 
-      colors.statusbar.normal.bg = config.xresources.properties."*background";
-      colors.statusbar.normal.fg = config.xresources.properties."*foreground";
+      colors.statusbar.normal.bg = xres."*background";
+      colors.statusbar.normal.fg = xres."*foreground";
 
-      colors.statusbar.command.bg = config.xresources.properties."*lightBackground";
-      colors.statusbar.command.fg = config.xresources.properties."*lightForeground";
+      colors.statusbar.command.bg = xres."*lightBackground";
+      colors.statusbar.command.fg = xres."*lightForeground";
 
-      colors.statusbar.insert.bg = config.xresources.properties."*color2";
-      colors.statusbar.insert.fg = config.xresources.properties."*foreground";
+      colors.statusbar.insert.bg = xres."*color2";
+      colors.statusbar.insert.fg = xres."*foreground";
 
-      colors.statusbar.passthrough.bg = config.xresources.properties."*color4";
-      colors.statusbar.passthrough.fg = config.xresources.properties."*foreground";
+      colors.statusbar.passthrough.bg = xres."*color4";
+      colors.statusbar.passthrough.fg = xres."*foreground";
 
-      colors.statusbar.private.bg = config.xresources.properties."*color5";
-      colors.statusbar.private.fg = config.xresources.properties."*foreground";
+      colors.statusbar.private.bg = xres."*color5";
+      colors.statusbar.private.fg = xres."*foreground";
 
-      colors.statusbar.progress.bg = config.xresources.properties."*color2";
+      colors.statusbar.progress.bg = xres."*color2";
 
-      colors.statusbar.url.fg = config.xresources.properties."*color4";
-      colors.statusbar.url.error.fg = config.xresources.properties."*color9";
-      colors.statusbar.url.hover.fg = config.xresources.properties."*color4";
-      colors.statusbar.url.success.http.fg = config.xresources.properties."*color4";
-      colors.statusbar.url.success.https.fg = config.xresources.properties."*color4";
-      colors.statusbar.url.warn.fg = config.xresources.properties."*color3";
+      colors.statusbar.url.fg = xres."*color4";
+      colors.statusbar.url.error.fg = xres."*color9";
+      colors.statusbar.url.hover.fg = xres."*color4";
+      colors.statusbar.url.success.http.fg = xres."*color4";
+      colors.statusbar.url.success.https.fg = xres."*color4";
+      colors.statusbar.url.warn.fg = xres."*color3";
 
       # Prompts.
 
-      colors.prompts.bg = config.xresources.properties."*lightBackground";
-      colors.prompts.fg = config.xresources.properties."*lightForeground";
-      colors.prompts.border = "1px solid ${config.xresources.properties."*lightBorderColor"}";
-      colors.prompts.selected.bg = config.xresources.properties."*colorAccent";
-      colors.prompts.selected.fg = config.xresources.properties."*foreground";
+      colors.prompts.bg = xres."*lightBackground";
+      colors.prompts.fg = xres."*lightForeground";
+      colors.prompts.border = "1px solid ${xres."*lightBorderColor"}";
+      colors.prompts.selected.bg = xres."*colorAccent";
+      colors.prompts.selected.fg = xres."*foreground";
 
       # Completion.
 
-      colors.completion.category.bg = config.xresources.properties."*lightBackground";
-      colors.completion.category.fg = config.xresources.properties."*lightForeground";
-      colors.completion.category.border.bottom = config.xresources.properties."*lightBackground";
-      colors.completion.category.border.top = config.xresources.properties."*lightBackground";
-      colors.completion.even.bg = config.xresources.properties."*lightBackground";
-      colors.completion.odd.bg = config.xresources.properties."*lightBackground";
-      colors.completion.fg = config.xresources.properties."*lightForeground";
-      colors.completion.item.selected.bg = config.xresources.properties."*colorAccent";
-      colors.completion.item.selected.border.bottom = config.xresources.properties."*colorAccent";
-      colors.completion.item.selected.border.top = config.xresources.properties."*colorAccent";
-      colors.completion.item.selected.fg = config.xresources.properties."*foreground";
-      colors.completion.item.selected.match.fg = config.xresources.properties."*foreground";
-      colors.completion.scrollbar.bg = config.xresources.properties."*lightBackground";
-      colors.completion.scrollbar.fg = config.xresources.properties."*darkBackground";
+      colors.completion.category.bg = xres."*lightBackground";
+      colors.completion.category.fg = xres."*lightForeground";
+      colors.completion.category.border.bottom = xres."*lightBackground";
+      colors.completion.category.border.top = xres."*lightBackground";
+      colors.completion.even.bg = xres."*lightBackground";
+      colors.completion.odd.bg = xres."*lightBackground";
+      colors.completion.fg = xres."*lightForeground";
+      colors.completion.item.selected.bg = xres."*colorAccent";
+      colors.completion.item.selected.border.bottom = xres."*colorAccent";
+      colors.completion.item.selected.border.top = xres."*colorAccent";
+      colors.completion.item.selected.fg = xres."*foreground";
+      colors.completion.item.selected.match.fg = xres."*foreground";
+      colors.completion.scrollbar.bg = xres."*lightBackground";
+      colors.completion.scrollbar.fg = xres."*darkBackground";
 
       # Tabs.
       tabs.position = "left";
@@ -370,27 +372,27 @@ in
       colors.tabs.odd.bg = "#353946";
       colors.tabs.even.bg = "#353946";
 
-      # colors.tabs.even.fg = config.xresources.properties."*background";
-      # colors.tabs.odd.fg = config.xresources.properties."*background";
-      # colors.tabs.selected.even.fg = config.xresources.properties."*foreground";
-      # colors.tabs.selected.odd.fg = config.xresources.properties."*foreground";
-      colors.tabs.even.fg = config.xresources.properties."*foreground";
-      colors.tabs.odd.fg = config.xresources.properties."*foreground";
-      colors.tabs.selected.even.fg = config.xresources.properties."*foreground";
-      colors.tabs.selected.odd.fg = config.xresources.properties."*foreground";
+      # colors.tabs.even.fg = xres."*background";
+      # colors.tabs.odd.fg = xres."*background";
+      # colors.tabs.selected.even.fg = xres."*foreground";
+      # colors.tabs.selected.odd.fg = xres."*foreground";
+      colors.tabs.even.fg = xres."*foreground";
+      colors.tabs.odd.fg = xres."*foreground";
+      colors.tabs.selected.even.fg = xres."*foreground";
+      colors.tabs.selected.odd.fg = xres."*foreground";
 
-      colors.tabs.pinned.even.bg = config.xresources.properties."*background";
-      colors.tabs.pinned.odd.bg = config.xresources.properties."*background";
-      colors.tabs.pinned.selected.even.bg = config.xresources.properties."*colorAccent";
-      colors.tabs.pinned.selected.odd.bg = config.xresources.properties."*colorAccent";
-      colors.tabs.selected.even.bg = config.xresources.properties."*colorAccent";
-      colors.tabs.selected.odd.bg = config.xresources.properties."*colorAccent";
+      colors.tabs.pinned.even.bg = xres."*background";
+      colors.tabs.pinned.odd.bg = xres."*background";
+      colors.tabs.pinned.selected.even.bg = xres."*colorAccent";
+      colors.tabs.pinned.selected.odd.bg = xres."*colorAccent";
+      colors.tabs.selected.even.bg = xres."*colorAccent";
+      colors.tabs.selected.odd.bg = xres."*colorAccent";
 
       colors.messages = rec {
-        error.bg = config.xresources.properties."*color1";
-        warning.bg = config.xresources.properties."*color3";
-        info.bg = config.xresources.properties."*colorAccent";
-        info.fg = config.xresources.properties."*foreground";
+        error.bg = xres."*color1";
+        warning.bg = xres."*color3";
+        info.bg = xres."*colorAccent";
+        info.fg = xres."*foreground";
 
         error.border = error.bg;
         warning.border = warning.bg;
@@ -400,7 +402,7 @@ in
       colors.contextmenu = {
         menu.bg = "#ffffff";
         menu.fg = "#5c616c";
-        selected.bg = config.xresources.properties."*colorAccent";
+        selected.bg = xres."*colorAccent";
         selected.fg = "#ffffff";
         disabled.fg = "#a6a8ae";
       };

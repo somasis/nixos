@@ -2,8 +2,7 @@
 , pkgs
 , nixosConfig
 , ...
-}:
-{
+}: {
   home.packages = [
     pkgs.winetricks
     pkgs.wineWowPackages.stagingFull

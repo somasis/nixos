@@ -18,9 +18,9 @@
       systemd-boot = {
         enable = true;
         editor = false;
-
         configurationLimit = 25;
       };
+
       timeout = 0;
     };
 
@@ -84,7 +84,7 @@
     };
   };
 
-  # log.files = [ "/var/log/X.0.log" ];
+  # log.files = [ "var/log/X.0.log" ];
 
   services = {
     xserver = {
@@ -106,6 +106,7 @@
             lib.filterAttrs (_: v: v.isNormalUser) config.users.users
           ));
 
+          # Log Xorg/startx/etc. to systemd journal.
           command = pkgs.writeShellScript "startx" ''
             exec \
                 ${config.systemd.package}/bin/systemd-cat \

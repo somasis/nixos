@@ -62,7 +62,7 @@ in
   # };
   # systemd.services.resolvconf.before = [ "unbound.service" ];
   # systemd.services.iwd.after = [ "unbound.service" ];
-  # persist.directories = [ "/var/lib/unbound" ];
+  # persist.directories = [ "var/lib/unbound" ];
 
   # TODO: use DNS over Tor
   #       I can't quite figure out yet why this doesn't work...

@@ -1,8 +1,7 @@
 { config
 , pkgs
 , ...
-}:
-{
+}: {
   imports = [
     ./gh.nix
 
