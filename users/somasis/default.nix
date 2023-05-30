@@ -1,7 +1,8 @@
-{ config
+{ self
+, config
+, lib
 , pkgs
 , nixosConfig
-, lib
 , ...
 }: {
   imports = [
@@ -51,6 +52,7 @@
     pkgs.execline
     pkgs.file
     pkgs.jdupes
+    pkgs.limitcpu
     pkgs.lr
     pkgs.ltrace
     pkgs.moreutils
