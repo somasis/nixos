@@ -46,8 +46,8 @@
     mappings = {
       "<F1>" = "toggle_statusbar";
 
-      "Space" = "navigate next";
-      "Esc" = "navigate next";
+      "<Space>" = "navigate next";
+      "<Esc>" = "navigate next";
 
       "<A-Left>" = "navigate previous";
       "<A-Right>" = "navigate next";
@@ -62,6 +62,7 @@
       "i" = "recolor";
 
       "=" = "adjust_window best-fit";
+      "_" = "adjust_window width";
       "d" = "toggle_page_mode";
     };
   };
