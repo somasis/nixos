@@ -2,10 +2,23 @@
 , pkgs
 , nixosConfig
 , inputs
+, lib
 , ...
 }:
-# TODO: write catgirl configuration templating
 let
+  mkConfig = lib.generators.toKeyValue {
+    listsAsDuplicateKeys = true;
+    mkKeyValue = k: v:
+      if builtins.isBool v then
+        if v then
+          "${lib.escape [ ''='' ] k}"
+        else
+          ""
+      else
+        lib.generators.mkKeyValueDefault { } " = " k v
+    ;
+  };
+
   catgirl = pkgs.catgirl.overrideAttrs (
     let
       year = builtins.substring 0 4 inputs.catgirl.lastModifiedDate;
@@ -31,83 +44,83 @@ let
     ];
 
     text = ''
-        : "''${XDG_CONFIG_HOME:=$HOME/.config}"
+      : "''${XDG_CONFIG_HOME:=$HOME/.config}"
 
-        mode=tmux
+      mode=tmux
 
-        while getopts :cn arg >/dev/null 2>&1; do
-            case "$arg" in
-                c) mode=catgirl ;;
-                n) mode=notify ;;
-                *)
-                    printf '%s\n' 'usage: catgirls [-cn] [catgirl arguments/notification arguments]' >&2
-                    exit 69
-                    ;;
-            esac
-        done
-        shift $((OPTIND - 1))
+      while getopts :cn arg >/dev/null 2>&1; do
+          case "$arg" in
+              c) mode=catgirl ;;
+              n) mode=notify ;;
+              *)
+                  printf '%s\n' 'usage: catgirls [-cn] [catgirl arguments/notification arguments]' >&2
+                  exit 69
+                  ;;
+          esac
+      done
+      shift $((OPTIND - 1))
 
-        case "$mode" in
-            catgirl)
-                exec catgirl \
-                    -u "${nixosConfig.networking.fqdnOrHostName}" \
-                    -c "$XDG_CONFIG_HOME/catgirl/client-${nixosConfig.networking.fqdnOrHostName}.crt" \
-                    -N "$0 -n" \
-                    "$@"
-                ;;
+      case "$mode" in
+          catgirl)
+              exec catgirl \
+                  -u "${nixosConfig.networking.fqdnOrHostName}" \
+                  -c "$XDG_CONFIG_HOME/catgirl/client-${nixosConfig.networking.fqdnOrHostName}.crt" \
+                  -N "$0 -n" \
+                  "$@"
+              ;;
 
-            notify)
-                server=$(tr '\0' '\n' < /proc/"$PPID"/cmdline | tail -n1)
-                server="''${server##*/}"; server="''${server%%.conf}"
+          notify)
+              server=$(tr '\0' '\n' < /proc/"$PPID"/cmdline | tail -n1)
+              server="''${server##*/}"; server="''${server%%.conf}"
 
-                chat="$1"; shift
-                if printf '%s\n' "$*" | grep -E "^(<\S+>|\* \S+)$(printf '\t')"; then
-                    sender=$(printf '%s' "$1" \
-                        | cut -f1 \
-                        | sed -E '/^\* / s/^\* (\S+)/\1/; /^<\S+>/ s/^<(\S+)>/\1/')
-                    message=$(printf '%s' "$1" | cut -f2-)
-                else
-                    sender=
-                    message="$*"
-                fi
-                shift
+              chat="$1"; shift
+              if printf '%s\n' "$*" | grep -E "^(<\S+>|\* \S+)$(printf '\t')"; then
+                  sender=$(printf '%s' "$1" \
+                      | cut -f1 \
+                      | sed -E '/^\* / s/^\* (\S+)/\1/; /^<\S+>/ s/^<(\S+)>/\1/')
+                  message=$(printf '%s' "$1" | cut -f2-)
+              else
+                  sender=
+                  message="$*"
+              fi
+              shift
 
-                [[ "$chat" == "$sender" ]] && sender=
-                message=$(printf '%s' "$message" | sed 's/</\&lt;/g;s/>/\&gt;/g')
+              [[ "$chat" == "$sender" ]] && sender=
+              message=$(printf '%s' "$message" | sed 's/</\&lt;/g;s/>/\&gt;/g')
 
-                id=$(
-                    printf '%s' "$chat" \
-                        | sha1sum \
-                        | tr -cd '1-9' \
-                        | cut -c-8
-                )
+              id=$(
+                  printf '%s' "$chat" \
+                      | sha1sum \
+                      | tr -cd '1-9' \
+                      | cut -c-8
+              )
 
-                action=$(
-                   notify-send \
-                        -a catgirl \
-                        -i irc-chat \
-                        -A 'Read' \
-                        -r "$id" \
-                        -- \
-                        "$chat" \
-                        "''${sender:+&lt;$sender&gt; }$message"
-                ) || exit 0
+              action=$(
+                 notify-send \
+                      -a catgirl \
+                      -i irc-chat \
+                      -A 'Read' \
+                      -r "$id" \
+                      -- \
+                      "$chat" \
+                      "''${sender:+&lt;$sender&gt; }$message"
+              ) || exit 0
 
-                exec >/dev/null 2>&1
+              exec >/dev/null 2>&1
 
-                # oh this is disgusting i LOVE IT
-                case "$action" in
-                    'Read')
-                        "$0" find-window -N "$server" \; send-keys Down Enter
-                        "$0" send-keys M-0 End C-u
-                        "$0" send-keys -l "/window $chat"
-                        "$0" send-keys Enter C-y
-                        raise "^catgirl: .+$" terminal "$0"
-                        ;;
-                esac
+              # oh this is disgusting i LOVE IT
+              case "$action" in
+                  'Read')
+                      "$0" find-window -N "$server" \; send-keys Down Enter
+                      "$0" send-keys M-0 End C-u
+                      "$0" send-keys -l "/window $chat"
+                      "$0" send-keys Enter C-y
+                      jumpapp -t catgirl -c catgirl alacritty --class catgirl -T catgirl -e "$0"
+                      ;;
+              esac
 
-                exit $?
-                ;;
+              exit $?
+              ;;
       esac
 
       [[ $# -eq 0 ]] && set -- attach-session
@@ -531,36 +544,43 @@ in
     #   highlight = root!*@* PRIVMSG #twitter_* You: \[[0123456789abcdef][0123456789abcdef]->[0123456789abcdef][0123456789abcdef]\]
     # '';
 
-    "catgirl/libera.pounce.somas.is.conf".text = ''
-      host = libera.pounce.somas.is
-      sasl-external
-      save = libera.pounce.somas.is.buf
-      ignore = * [JPQM][OAU][IRD][NTE] #*
-    '';
+    "catgirl/libera.pounce.somas.is.conf".text = mkConfig {
+      host = "libera.pounce.somas.is";
+      sasl-external = true;
 
-    "catgirl/oftc.pounce.somas.is.conf".text = ''
-      host = oftc.pounce.somas.is
-      user = kylie
-      sasl-external
-      save = oftc.pounce.somas.is.buf
-      ignore = * [JPQM][OAU][IRD][NTE] #*
-    '';
+      save = "libera.pounce.somas.is.buf";
 
-    "catgirl/tilde.pounce.somas.is.conf".text = ''
-      host = tilde.pounce.somas.is
-      sasl-external
-      save = tilde.pounce.somas.is.buf
+      ignore = [ "* [JPQM][OAU][IRD][NTE] #*" ];
+    };
 
-      ignore = * [JPQM][OAU][IRD][NTE] #*
-      ignore = tildebot!*@* PRIVMSG * \[*Karma*\]*
-      ignore = tildebot!*@* PRIVMSG * \[*Demojize*\]*
-      ignore = tildebot!*@* PRIVMSG * \[*Ducks*\]*
-      ignore = tildebot!*@* PRIVMSG * \[*Sed*\]*
-      ignore = sedbot
-      ignore = downgrade
-      ignore = tildebot!*@* PRIVMSG #meta \[*Tilderadio*\]*
-      ignore = tildecraft_mc_bot_v1!*@* PRIVMSG #minecraft *
-    '';
+    "catgirl/oftc.pounce.somas.is.conf".text = mkConfig {
+      host = "oftc.pounce.somas.is";
+      user = "kylie";
+      sasl-external = true;
+
+      save = "oftc.pounce.somas.is.buf";
+
+      ignore = [ "* [JPQM][OAU][IRD][NTE] #*" ];
+    };
+
+    "catgirl/tilde.pounce.somas.is.conf".text = mkConfig {
+      host = "tilde.pounce.somas.is";
+      sasl-external = true;
+
+      save = "tilde.pounce.somas.is.buf";
+
+      ignore = [
+        "* [JPQM][OAU][IRD][NTE] #*"
+        "tildebot!*@* PRIVMSG * \[*Karma*\]*"
+        "tildebot!*@* PRIVMSG * \[*Demojize*\]*"
+        "tildebot!*@* PRIVMSG * \[*Ducks*\]*"
+        "tildebot!*@* PRIVMSG * \[*Sed*\]*"
+        "sedbot"
+        "downgrade"
+        "tildebot!*@* PRIVMSG #meta \[*Tilderadio*\]*"
+        "tildecraft_mc_bot_v1!*@* PRIVMSG #minecraft *"
+      ];
+    };
   };
 
   services.dunst.settings = {
@@ -605,5 +625,5 @@ in
     remote = "somasis@lacan.somas.is";
   }];
 
-  services.sxhkd.keybindings."super + c" = "${config.home.homeDirectory}/bin/raise \"^catgirl: .+$\" terminal catgirls";
+  services.sxhkd.keybindings."super + c" = "${pkgs.jumpapp}/bin/jumapp -t catgirl -c catgirl alacritty --class catgirl -T catgirl -e catgirls";
 }
