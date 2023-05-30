@@ -56,13 +56,6 @@ in
               example = false;
             };
 
-            command = mkOption {
-              type = types.str;
-              description = "Command to run, whose output will be the widget text.";
-              default = null;
-              example = "fortune";
-            };
-
             name = mkOption {
               type = types.str;
               default = name;
@@ -70,6 +63,13 @@ in
               description = ''
                 Name used by `stw-widget-<name>` and stw@<name>.service
               '';
+            };
+
+            command = mkOption {
+              type = types.str;
+              description = "Command to run, whose output will be the widget text.";
+              default = null;
+              example = "fortune";
             };
 
             update = mkOption {
