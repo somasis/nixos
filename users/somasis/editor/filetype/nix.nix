@@ -16,7 +16,7 @@ let
   #   rm -f "$t"
   # '';
   format = pkgs.writeShellScript "format" ''
-    ${config.nix.package}/bin/nix fmt -- "$@" || ${pkgs.nixpkgs-fmt}/bin/nixpkgs-fmt -- "$@"
+    ${config.nix.package}/bin/nix fmt -- "$@" 2>/dev/null || ${pkgs.nixpkgs-fmt}/bin/nixpkgs-fmt -- "$@"
   '';
 
   lint = pkgs.writeShellScript "lint" ''
