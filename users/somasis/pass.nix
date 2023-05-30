@@ -8,8 +8,8 @@
 , ...
 }:
 let
-  # TODO move into NixOS configuration
-  qute-pass = "${config.home.homeDirectory}/bin/qute-pass";
+  inherit (config.lib.somasis) programPath;
+  inherit (pkgs) qute-pass;
 in
 {
   persist.directories = [
@@ -326,7 +326,7 @@ in
       '';
     in
     {
-      aliases."pass" = "spawn -u ${qute-pass}";
+      aliases."pass" = "spawn -u ${programPath qute-pass}";
       aliases."pass-generate" = "spawn -u ${passGenerateCmd} ${passGenerate}";
 
       # -n: Don't automatically enter into insert mode, so as to match the input.insert_mode.* settings.

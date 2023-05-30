@@ -22,4 +22,5 @@ rec
   dmenu-session = callPackage ./dmenu-session { };
 
   pass-meta = callPackage ./pass-meta { };
+  qute-pass = callPackage ./qute-pass { };
 }
