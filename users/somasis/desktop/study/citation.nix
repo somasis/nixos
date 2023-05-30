@@ -361,8 +361,6 @@ in
     };
   };
 
-  home.packages = [ zotero-cli ];
-
   persist = {
     directories = [{ method = "bindfs"; directory = ".zotero/zotero/default"; }];
     files = [ "share/zotero/zotero.sqlite" ];
