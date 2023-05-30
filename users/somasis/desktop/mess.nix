@@ -109,4 +109,6 @@ in
     historyFileSize = -1;
     shellOptions = [ "histappend" ];
   };
+
+  home.sessionVariables.SCREENSHOT_DIR = "${messDir}/current/screenshots";
 }
