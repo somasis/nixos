@@ -56,6 +56,7 @@ nixpkgs.lib.nixosSystem {
         ./backup.nix
         ./boot.nix
         ./console.nix
+        ./documentation.nix
         ./filesystems.nix
         ./fonts.nix
         ./games.nix
@@ -100,26 +101,6 @@ nixpkgs.lib.nixosSystem {
       };
 
       services.xserver.enable = true;
-
-      documentation = {
-        info.enable = false;
-        doc.enable = false;
-        dev.enable = true;
-        nixos = {
-          enable = true; # Provides `nixos-help`.
-          includeAllModules = true;
-        };
-
-        man = {
-          enable = true;
-          generateCaches = true;
-          man-db.enable = false;
-          mandoc = {
-            enable = true;
-            # manPath = [ "share/man/tok" ];
-          };
-        };
-      };
 
       programs.command-not-found.enable = false;
       environment = {
