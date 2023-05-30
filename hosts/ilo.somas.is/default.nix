@@ -1,6 +1,7 @@
 { self
 , inputs
 , nixpkgs
+, overlays
 , ...
 }:
 let
@@ -22,14 +23,10 @@ nixpkgs.lib.nixosSystem {
           isx86_64 = true;
 
           # isMusl = true;
-          # useLLVM = true;
+          # isLLVM = true;
         };
 
-        overlays = [
-          (final: prev: {
-            stable = inputs.nixpkgsStable.legacyPackages."${system}";
-          })
-        ];
+        inherit overlays;
       };
     })
 
