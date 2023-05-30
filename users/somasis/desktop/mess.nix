@@ -58,10 +58,11 @@ in
       Service = {
         Type = "oneshot";
         ExecStart = "${mess}/bin/mess";
-        ExecStartPost = [
-          ''${pkgs.coreutils}/bin/mkdir -p "${messDir}/current/incoming"''
-          ''${pkgs.coreutils}/bin/mkdir -p "${messDir}/current/src"''
-          ''${pkgs.coreutils}/bin/mkdir -p "${messDir}/current/screenshots"''
+        ExecStartPost = map (x: "${pkgs.coreutils}/bin/mkdir -p \"${messDir}/current/${x}\"") [
+          "incoming"
+          "projects"
+          "src"
+          "screenshots"
         ];
 
         StandardOutput = "null";
