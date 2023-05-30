@@ -28,6 +28,8 @@
   '';
 
   home.packages = [
+    pkgs.json2nix
+
     (pkgs.symlinkJoin {
       name = "jc-with-completion";
 
