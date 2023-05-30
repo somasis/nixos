@@ -1,8 +1,8 @@
 { pkgs, ... }: {
   programs.jq.enable = true;
 
-  # <https://rosettacode.org/wiki/URL_decoding#jq>
   home.file.".jq".text = ''
+    # <https://rosettacode.org/wiki/URL_decoding#jq>
     def uri_decode:
       # The helper function converts the input string written in the given
       # "base" to an integer
@@ -28,7 +28,23 @@
   '';
 
   home.packages = [
+    pkgs.fx
+    pkgs.html-tidy
     pkgs.json2nix
+    pkgs.lowdown
+    pkgs.patchutils
+    pkgs.xmlstarlet
+
+    (pkgs.symlinkJoin {
+      name = "yq-go-with-completion";
+
+      paths = [ pkgs.yq-go ];
+
+      postBuild = ''
+        install -d $out/share/bash-completion/completions
+        ${pkgs.yq-go}/bin/yq shell-completion bash > $out/share/bash-completion/completions/yq
+      '';
+    })
 
     (pkgs.symlinkJoin {
       name = "jc-with-completion";

@@ -52,7 +52,7 @@ let
     runtimeInputs = [
       config.programs.jq.package
       config.programs.password-store.package
-      pkgs.yq
+      pkgs.yq-go
     ];
 
     text = ''
@@ -77,7 +77,7 @@ let
               | jq -Rc '{ lyrics: { google_API_key: . } }'
       )
 
-      jq -sc 'add' <<<"$output" | yq -y
+      jq -sc 'add' <<<"$output" | yq --input-format json --output-format yaml
     '';
   };
 

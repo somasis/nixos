@@ -77,7 +77,6 @@
     pkgs.xe
     pkgs.xsv
     pkgs.xz
-    pkgs.yq
     pkgs.zstd
 
     # autocurl - curl for use by background/automatically running services
