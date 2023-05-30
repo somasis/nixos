@@ -57,7 +57,7 @@ let
 
     text = ''
       fail() {
-          [[ "$1" -ne 0 ]] && printf 'pass-beets: "failed"\n'
+          [[ "$1" -ne 0 ]] && printf 'pass-beets: "failed"\n' && exit 0
       }
 
       trap 'fail $?' ERR
@@ -240,6 +240,8 @@ let
       };
     };
   };
+
+  notServer = nixosConfig.networking.fqdnOrHostName != "spinoza.7596ff.com";
 in
 {
   imports = [
@@ -251,10 +253,10 @@ in
 
   xdg.userDirs.music = "${config.home.homeDirectory}/audio/library";
 
-  systemd.user.tmpfiles.rules = lib.optionals (nixosConfig.networking.fqdnOrHostName != "spinoza.7596ff.com") [
-    "L+ ${config.xdg.userDirs.music}/source - - - - ${config.home.homeDirectory}/mnt/sftp/spinoza.7596ff.com/audio/library/source"
-    "L+ ${config.xdg.userDirs.music}/lossless - - - - ${config.home.homeDirectory}/mnt/sftp/spinoza.7596ff.com/audio/library/lossless"
-  ];
+  home.file = lib.optionalAttrs notServer {
+    "audio/library/source".source = config.lib.file.mkOutOfStoreSymlink "${config.home.homeDirectory}/mnt/sftp/spinoza.7596ff.com_raid/somasis/audio/library/source";
+    "audio/library/lossless".source = config.lib.file.mkOutOfStoreSymlink "${config.home.homeDirectory}/mnt/sftp/spinoza.7596ff.com_raid/somasis/audio/library/lossless";
+  };
 
   home.packages = [
     bandcamp-collection-downloader
