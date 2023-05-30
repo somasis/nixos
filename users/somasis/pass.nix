@@ -30,7 +30,6 @@ in
     settings.PASSWORD_STORE_CLIP_TIME = builtins.toString 60;
 
     package = pkgs.pass-nodmenu.withExtensions (exts: with exts; [
-      pass-audit
       pass-checkup
       pass-update
 
