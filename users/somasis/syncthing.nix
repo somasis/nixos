@@ -1,9 +1,13 @@
 { config, nixosConfig, lib, ... }:
 let
   inherit (nixosConfig.services) tor;
+  inherit (lib.cli) toGNUCommandLineShell;
 in
 {
-  services.syncthing.enable = true;
+  services.syncthing = {
+    enable = true;
+    extraOptions = [ "--no-default-folder" ];
+  };
 
   persist.directories = [
     { method = "symlink"; directory = "etc/syncthing"; }
@@ -16,11 +20,9 @@ in
   # Make syncthing more amicable to running while other programs are.
   systemd.user.services.syncthing = {
     Service = {
-      Environment = [
-        "GOMAXPROCS=1"
-      ]
-      # Use Tor to get around filters.
-      ++ lib.optionals (tor.enable && tor.client.enable)
+      Environment = [ "GOMAXPROCS=1" ]
+        # Use Tor to get around filters.
+        ++ lib.optionals (tor.enable && tor.client.enable)
         [
           "all_proxy=socks5://${tor.client.socksListenAddress.addr}:${toString tor.client.socksListenAddress.port}"
 
