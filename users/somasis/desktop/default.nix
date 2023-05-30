@@ -28,6 +28,7 @@
     ./compositing.nix
     ./dates.nix
     ./diary.nix
+    ./didyouknow.nix
     ./dmenu.nix
     ./file-manager.nix
     ./fonts.nix
