@@ -69,7 +69,7 @@ in
 {
   home.packages = [ signal ];
 
-  home.persistence."/persist${config.home.homeDirectory}".directories = [ "etc/${signalTitle}" ];
+  persist.directories = [ "etc/${signalTitle}" ];
 
   xdg.configFile."${signalTitle}/ephemeral.json".text = lib.generators.toJSON { }
     (lib.mapAttrs' (n: v: lib.nameValuePair (camelCaseToSnakeCase n) v) {

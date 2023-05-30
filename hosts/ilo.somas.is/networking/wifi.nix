@@ -44,12 +44,12 @@
     # dns = "unbound";
   };
 
-  environment.persistence."/persist".directories = [
+  persist.directories = [
     "/etc/NetworkManager/system-connections"
     # "/var/lib/iwd"
   ];
 
-  environment.persistence."/cache".directories = [
+  cache.directories = [
     "/var/lib/NetworkManager"
     # "/var/db/dhcpcd"
   ];

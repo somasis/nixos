@@ -23,7 +23,7 @@
     pkgs.pcsx2
   ];
 
-  home.persistence."/persist${config.home.homeDirectory}" = {
+  persist = {
     files = [ "etc/kpatrc" ];
 
     directories = [

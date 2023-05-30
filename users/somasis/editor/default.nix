@@ -422,7 +422,7 @@
     ];
   };
 
-  home.persistence."/cache${config.home.homeDirectory}".directories = [{
+  cache.directories = [{
     method = "symlink";
     directory = "share/kak/state-save";
   }];

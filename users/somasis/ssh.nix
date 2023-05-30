@@ -4,10 +4,8 @@
 , lib
 , ...
 }: {
-  home.persistence = {
-    "/persist${config.home.homeDirectory}".directories = [ "etc/ssh" ];
-    "/cache${config.home.homeDirectory}".directories = [ "var/cache/ssh" ];
-  };
+  persist.directories = [ "etc/ssh" ];
+  cache.directories = [ "var/cache/ssh" ];
 
   programs.ssh = {
     enable = true;

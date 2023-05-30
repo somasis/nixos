@@ -25,21 +25,23 @@
     ./xdg.nix
   ];
 
-  home.persistence = {
-    "/persist${config.home.homeDirectory}" = {
-      directories = [
-        { method = "symlink"; directory = "bin"; }
-        { method = "symlink"; directory = "logs"; }
-      ];
+  persist = {
+    allowOther = true;
+    directories = [
+      { method = "symlink"; directory = "bin"; }
+    ];
+  };
 
-      allowOther = true;
-    };
+  cache = {
+    allowOther = true;
+    directories = [{ method = "symlink"; directory = "var/cache/nix"; }];
+  };
 
-    "/cache${config.home.homeDirectory}" = {
-      directories = [{ method = "symlink"; directory = "var/cache/nix"; }];
-
-      allowOther = true;
-    };
+  log = {
+    allowOther = true;
+    directories = [
+      { method = "symlink"; directory = "logs"; }
+    ];
   };
 
   home.keyboard.options = [ "compose:ralt" ];

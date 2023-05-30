@@ -19,7 +19,7 @@
     };
   };
 
-  environment.persistence."/persist" = {
+  persist = {
     files = [
       "/etc/ssh/host_ed25519"
       "/etc/ssh/host_ed25519.pub"

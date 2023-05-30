@@ -4,9 +4,7 @@
 }:
 assert nixosConfig.programs.steam.enable;
 {
-  home.persistence."/persist${config.home.homeDirectory}" = {
-    directories = [ "share/Steam" ];
-  };
+  persist.directories = [ "share/Steam" ];
 
   systemd.user.services.steam = {
     Unit = {

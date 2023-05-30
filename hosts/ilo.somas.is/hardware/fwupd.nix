@@ -7,5 +7,5 @@
     extraRemotes = [ "lvfs-testing" ];
   };
 
-  environment.persistence."/cache".directories = [ "/var/lib/fwupd" ];
+  cache.directories = [ "/var/lib/fwupd" ];
 }

@@ -25,7 +25,7 @@
 
   systemd.services.ipfs.serviceConfig.stopWhenUnneeded = true;
 
-  environment.persistence."/persist".directories = [{
+  persist.directories = [{
     directory = "/var/lib/ipfs";
     user = "ipfs";
     group = "ipfs";

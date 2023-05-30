@@ -38,5 +38,5 @@
   # Needed for bluetooth and wifi connectivity.
   security.lockKernelModules = false;
 
-  environment.persistence."/persist".directories = [ "/var/lib/bluetooth" ];
+  persist.directories = [ "/var/lib/bluetooth" ];
 }

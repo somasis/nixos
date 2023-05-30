@@ -5,15 +5,13 @@
 }: {
   xdg.userDirs.videos = "${config.home.homeDirectory}/video";
 
-  home.persistence = {
-    "/persist${config.home.homeDirectory}".directories = [
-      { directory = "video"; method = "symlink"; }
-    ];
+  persist.directories = [
+    { directory = "video"; method = "symlink"; }
+  ];
 
-    "/cache${config.home.homeDirectory}".directories = [
-      { directory = "var/cache/mpv"; method = "symlink"; }
-    ];
-  };
+  cache.directories = [
+    { directory = "var/cache/mpv"; method = "symlink"; }
+  ];
 
   programs.mpv = {
     enable = true;

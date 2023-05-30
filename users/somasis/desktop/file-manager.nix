@@ -271,9 +271,10 @@ in
     '';
   };
 
-  home.persistence."/cache${config.home.homeDirectory}".directories = [
-    { method = "symlink"; directory = "var/cache/thumbnails"; }
-  ];
+  cache.directories = [{
+    method = "symlink";
+    directory = "var/cache/thumbnails";
+  }];
 
   xdg.mimeApps.defaultApplications = {
     "inode/directory" = "thunar.desktop";

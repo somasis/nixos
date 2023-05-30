@@ -6,9 +6,7 @@
     ./writing.nix
   ];
 
-  home.persistence."/persist${config.home.homeDirectory}".directories = [
-    { method = "symlink"; directory = "study"; }
-  ];
+  persist.directories = [{ method = "symlink"; directory = "study"; }];
 
   xdg.userDirs.documents = "${config.home.homeDirectory}/study/current";
 

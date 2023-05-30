@@ -76,12 +76,12 @@ in
     pkgs.xe
   ];
 
-  home.persistence."/persist${config.home.homeDirectory}".directories = [
+  persist.directories = [
     "etc/discordcanary"
     # "etc/powercord"
   ];
 
-  # home.persistence."/cache${config.home.homeDirectory}".directories = [ "var/cache/powercord" ];
+  # cache.directories = [ "var/cache/powercord" ];
 
   # Convert all the attributes to SNAKE_CASE in the generated JSON
   xdg.configFile."discordcanary/settings.json".text = lib.generators.toJSON { }

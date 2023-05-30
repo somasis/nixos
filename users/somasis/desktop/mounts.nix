@@ -6,7 +6,7 @@
 {
   home.packages = [ pkgs.rclone pkgs.sshfs ];
 
-  home.persistence."/persist${config.home.homeDirectory}".directories = [{
+  persist.directories = [{
     method = "symlink";
     directory = "etc/rclone";
   }];

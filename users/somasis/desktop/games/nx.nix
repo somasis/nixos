@@ -7,7 +7,7 @@ let
   # nxapiProxy = "127.0.0.1:8472";
 in
 {
-  home.persistence."/persist${config.home.homeDirectory}".directories = [ "share/nxapi-nodejs" ];
+  persist.directories = [ "share/nxapi-nodejs" ];
   home.packages = [
     nxapi
     # (pkgs.symlinkJoin {

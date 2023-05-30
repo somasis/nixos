@@ -6,58 +6,56 @@ let
   list = "${config.home.homeDirectory}/list/todo.txt";
 in
 {
-  home = {
-    persistence."/persist${config.home.homeDirectory}".directories = [{
-      directory = "list";
-      method = "symlink";
-    }];
+  persist.directories = [{
+    directory = "list";
+    method = "symlink";
+  }];
 
-    shellAliases = {
-      # Personal todo.txt aliases.
-      todo-add = "list-add -f ${list}";
-      todo-query = "list-query -f ${list}";
-      todo-edit = "$EDITOR ${list}";
-      todo = "todo-query -U";
+  home.shellAliases = {
+    # Personal todo.txt aliases.
+    todo-add = "list-add -f ${list}";
+    todo-query = "list-query -f ${list}";
+    todo-edit = "$EDITOR ${list}";
+    todo = "todo-query -U";
 
-      # Task list.
-      task-query = "todo-query -l task";
-      task-add = "todo-add -l task";
-      task = "task-query -U";
+    # Task list.
+    task-query = "todo-query -l task";
+    task-add = "todo-add -l task";
+    task = "task-query -U";
 
-      # University list.
-      uni-query = "todo-query -l uni";
-      uni-add = "todo-add -l uni";
-      uni = "uni-query -U";
+    # University list.
+    uni-query = "todo-query -l uni";
+    uni-add = "todo-add -l uni";
+    uni = "uni-query -U";
 
-      # Grocery list.
-      grocery-query = "todo-query -l grocery";
-      grocery-add = "todo-add -l grocery";
-      grocery = "grocery-query -U";
+    # Grocery list.
+    grocery-query = "todo-query -l grocery";
+    grocery-add = "todo-add -l grocery";
+    grocery = "grocery-query -U";
 
-      # Wish list.
-      wish-query = "todo-query -l wish";
-      wish-add = "todo-add -l wish";
-      wish = "wish-query -U";
+    # Wish list.
+    wish-query = "todo-query -l wish";
+    wish-add = "todo-add -l wish";
+    wish = "wish-query -U";
 
-      # Queue list.
-      queue-query = "todo-query -l queue";
-      queue-add = "todo-add -l queue";
-      queue = "queue-query -U";
-      listen-query = "todo-query -l queue -t listen";
-      listen-add = "todo-add -l queue -t listen";
-      listen = "listen-query -U";
-      film-query = "todo-query -l queue -t film";
-      film-add = "todo-add -l queue -t film";
-      film = "film-query -U";
-      tv-query = "todo-query -l queue -t tv";
-      tv-add = "todo-add -l queue -t tv";
-      tv = "tv-query -U";
+    # Queue list.
+    queue-query = "todo-query -l queue";
+    queue-add = "todo-add -l queue";
+    queue = "queue-query -U";
+    listen-query = "todo-query -l queue -t listen";
+    listen-add = "todo-add -l queue -t listen";
+    listen = "listen-query -U";
+    film-query = "todo-query -l queue -t film";
+    film-add = "todo-add -l queue -t film";
+    film = "film-query -U";
+    tv-query = "todo-query -l queue -t tv";
+    tv-add = "todo-add -l queue -t tv";
+    tv = "tv-query -U";
 
-      # Trip list.
-      trip-query = "todo-query -l trip";
-      trip-add = "todo-add -l trip";
-      trip = "trip-query -U";
-    };
+    # Trip list.
+    trip-query = "todo-query -l trip";
+    trip-add = "todo-add -l trip";
+    trip = "trip-query -U";
   };
 
   programs.bash.initExtra = ''

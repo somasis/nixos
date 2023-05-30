@@ -73,6 +73,9 @@ in
 
   home.packages = [ dates ];
 
+  persist.directories = [ "etc/dates" ];
+  xdg.configFile."dates/_".source = "${pkgs.tzdata}/share/zoneinfo/${nixosConfig.time.timeZone}";
+
   somasis.chrome.stw.widgets = [
     {
       command = ''

@@ -1,7 +1,7 @@
 { pkgs, ... }: {
   # Enable ALSA and preserve the mixer state across boots.
   sound.enable = true;
-  environment.persistence."/cache".directories = [ "/var/lib/alsa" ];
+  cache.directories = [ "/var/lib/alsa" ];
 
   # Necessary for realtime usage.
   security.rtkit.enable = true;

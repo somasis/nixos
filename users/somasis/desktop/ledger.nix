@@ -362,7 +362,7 @@ let
   };
 in
 {
-  home.persistence."/persist${config.home.homeDirectory}".directories = [{
+  persist.directories = [{
     directory = "${ledgerRelative}";
     method = "symlink";
   }];

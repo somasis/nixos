@@ -123,7 +123,7 @@ let
     '';
 in
 {
-  # home.persistence."/cache${config.home.homeDirectory}".directories = [ "etc/qutebrowser/greasemonkey/requires" ];
+  # cache.directories = [ "etc/qutebrowser/greasemonkey/requires" ];
 
   programs.qutebrowser.greasemonkey = [
     # Global

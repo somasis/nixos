@@ -28,7 +28,7 @@ in
   };
   location.provider = "geoclue2";
 
-  environment.persistence."/cache".directories = [ "/var/lib/geoclue" ];
+  cache.directories = [ "/var/lib/geoclue" ];
 
   # TODO: o kepeken toki pona
   #       ilo glibc nanpa 2.36 li jo e sona pi toki pona.

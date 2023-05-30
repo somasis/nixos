@@ -84,7 +84,7 @@
     };
   };
 
-  # environment.persistence."/log".files = [ "/var/log/X.0.log" ];
+  # log.files = [ "/var/log/X.0.log" ];
 
   services = {
     xserver = {

@@ -37,7 +37,7 @@
     monitor = "primary";
   };
 
-  home.persistence."/persist${config.home.homeDirectory}".directories = [{
+  persist.directories = [{
     method = "symlink";
     directory = "etc/retroarch";
   }];

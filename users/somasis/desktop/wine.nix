@@ -15,7 +15,7 @@
 
   xsession.windowManager.bspwm.rules."fl64.exe:*:FL Studio 21".state = "tiled";
 
-  home.persistence."/persist${config.home.homeDirectory}".directories = [
+  persist.directories = [
     "etc/wine"
     { method = "symlink"; directory = "share/wine"; }
   ];

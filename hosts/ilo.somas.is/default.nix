@@ -11,8 +11,8 @@ nixpkgs.lib.nixosSystem {
 
   specialArgs = { inherit self inputs nixpkgs; };
 
-  modules = with inputs; [
-    ({ lib, ... }: {
+  modules = with self; with inputs; [
+    ({ self, ... }: {
       nixpkgs = {
         config.allowUnfree = true;
 
@@ -38,7 +38,10 @@ nixpkgs.lib.nixosSystem {
     })
 
     disko.nixosModules.disko
+
     impermanence.nixosModules.impermanence
+    nixosModules.impermanence
+
     nixos-hardware.nixosModules.framework
 
     nix-index-database.nixosModules.nix-index
@@ -69,12 +72,12 @@ nixpkgs.lib.nixosSystem {
         ./wine.nix
       ];
 
-      environment.persistence."/persist" = {
+      persist = {
         hideMounts = true;
         directories = [ "/etc/nixos" ];
       };
 
-      environment.persistence."/cache" = {
+      cache = {
         hideMounts = true;
         directories = [
           "/var/lib/systemd/timers"
@@ -84,7 +87,7 @@ nixpkgs.lib.nixosSystem {
         files = [ "/var/lib/systemd/random-seed" ];
       };
 
-      environment.persistence."/log" = {
+      log = {
         hideMounts = true;
         directories = [
           "/var/lib/systemd/catalog"
@@ -175,6 +178,8 @@ nixpkgs.lib.nixosSystem {
 
         sharedModules = with inputs; [
           impermanence.nixosModules.home-manager.impermanence
+          nixosModules.home-manager.impermanence
+
           nix-index-database.hmModules.nix-index
           # hyprland.homeManagerModules.default
         ];

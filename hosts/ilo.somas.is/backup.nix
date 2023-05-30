@@ -376,5 +376,5 @@ in
     })
   ];
 
-  environment.persistence."/cache".directories = [{ directory = "/root/.cache/borg"; mode = "0770"; }];
+  cache.directories = [{ directory = "/root/.cache/borg"; mode = "0770"; }];
 }

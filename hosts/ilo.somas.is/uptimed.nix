@@ -1,4 +1,4 @@
 {
   services.uptimed.enable = true;
-  environment.persistence."/persist".directories = [ "/var/lib/uptimed" ];
+  persist.directories = [ "/var/lib/uptimed" ];
 }

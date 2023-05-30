@@ -50,7 +50,7 @@
   #   '';
   # };
 
-  environment.persistence."/persist".directories = [
+  persist.directories = [
     # Used for keeping declared users' UIDs and GIDs consistent across boots.
     { directory = "/var/lib/nixos"; user = "root"; group = "root"; mode = "0755"; }
   ];

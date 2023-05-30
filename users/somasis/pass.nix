@@ -12,7 +12,7 @@ let
   qute-pass = "${config.home.homeDirectory}/bin/qute-pass";
 in
 {
-  home.persistence."/persist${config.home.homeDirectory}".directories = [
+  persist.directories = [
     ".gnupg"
     { method = "symlink"; directory = "share/password-store"; }
   ];

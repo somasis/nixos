@@ -48,7 +48,7 @@
   #   IPCAllowedGroups = [ "wheel" ];
   # };
 
-  # environment.persistence."/cache".directories = [
+  # cache.directories = [
   #   {
   #     directory = "/var/lib/usbguard";
   #     mode = "0775";

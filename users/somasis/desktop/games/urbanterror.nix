@@ -14,7 +14,7 @@
     })
   ];
 
-  home.persistence."/persist${config.home.homeDirectory}".directories = [{
+  persist.directories = [{
     directory = ".q3a";
     method = "symlink";
   }];

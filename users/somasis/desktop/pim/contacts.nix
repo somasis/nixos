@@ -1,7 +1,7 @@
 { pkgs, config, ... }: {
   home = {
     packages = [ pkgs.khard ];
-    # persistence."/cache${config.home.homeDirectory}".directories = [ "share/khal" ];
+    # cache.directories = [ "share/khal" ];
   };
 
   #   xdg.configFile."khal/config".text = ''

@@ -50,71 +50,67 @@ in
     ./search.nix
   ];
 
-  home = {
-    persistence = {
-      "/persist${config.home.homeDirectory}" = {
-        directories = [
-          "etc/qutebrowser"
-          # "etc/qutebrowser/userscripts"
-          # "etc/qutebrowser/userstyles"
-        ];
+  persist = {
+    directories = [
+      "etc/qutebrowser"
+      # "etc/qutebrowser/userscripts"
+      # "etc/qutebrowser/userstyles"
+    ];
 
-        # files = [
-        #   # BUG(?): Can't make autoconfig.yml an impermanent file; I think qutebrowser
-        #   #         modifies it atomically (write new file -> rename to replace) so I
-        #   #         think that it gets upset when a bind mount is used.
-        #   # "etc/qutebrowser/autoconfig.yml"
-        #   # "etc/qutebrowser/bookmarks/urls"
-        #   # "etc/qutebrowser/quickmarks"
-        # ];
-      };
-
-      "/cache${config.home.homeDirectory}" = {
-        directories = [
-          "share/qutebrowser/qtwebengine_dictionaries"
-          "share/qutebrowser/sessions"
-          "share/qutebrowser/webengine"
-          "var/cache/qutebrowser"
-        ];
-
-        files = [
-          "share/qutebrowser/cmd-history"
-          "share/qutebrowser/cookies"
-          "share/qutebrowser/history.sqlite"
-          "share/qutebrowser/state"
-        ];
-      };
-    };
-
-    # activation."qutebrowser-dict" = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
-    #   set -e
-
-    #   dictcli() { ${config.programs.qutebrowser.package}/share/qutebrowser/scripts/dictcli.py "$@"; }
-
-    #   set -- ${lib.escapeShellArgs config.programs.qutebrowser.settings.spellcheck.languages}
-
-    #   dictcli list \
-    #       | sed 's/   */\t/g' \
-    #       | while IFS=$(printf '\t') read -r lang _ remote local; do
-    #           for l; do
-    #               [ "$lang" = "$l" ] || continue
-    #               case "$local" in
-    #                   -)
-    #                       $DRY_RUN_CMD dictcli install "$l"
-    #                       ;;
-    #                   "$remote")
-    #                       continue
-    #                       ;;
-    #                   *)
-    #                       $DRY_RUN_CMD dictcli update "$l"
-    #                       ;;
-    #               esac
-    #           done
-    #       done
-    # '';
-
-    sessionVariables."BROWSER" = "qutebrowser";
+    # files = [
+    #   # BUG(?): Can't make autoconfig.yml an impermanent file; I think qutebrowser
+    #   #         modifies it atomically (write new file -> rename to replace) so I
+    #   #         think that it gets upset when a bind mount is used.
+    #   # "etc/qutebrowser/autoconfig.yml"
+    #   # "etc/qutebrowser/bookmarks/urls"
+    #   # "etc/qutebrowser/quickmarks"
+    # ];
   };
+
+  cache = {
+    directories = [
+      "share/qutebrowser/qtwebengine_dictionaries"
+      "share/qutebrowser/sessions"
+      "share/qutebrowser/webengine"
+      "var/cache/qutebrowser"
+    ];
+
+    files = [
+      "share/qutebrowser/cmd-history"
+      "share/qutebrowser/cookies"
+      "share/qutebrowser/history.sqlite"
+      "share/qutebrowser/state"
+    ];
+  };
+
+  # activation."qutebrowser-dict" = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
+  #   set -e
+
+  #   dictcli() { ${config.programs.qutebrowser.package}/share/qutebrowser/scripts/dictcli.py "$@"; }
+
+  #   set -- ${lib.escapeShellArgs config.programs.qutebrowser.settings.spellcheck.languages}
+
+  #   dictcli list \
+  #       | sed 's/   */\t/g' \
+  #       | while IFS=$(printf '\t') read -r lang _ remote local; do
+  #           for l; do
+  #               [ "$lang" = "$l" ] || continue
+  #               case "$local" in
+  #                   -)
+  #                       $DRY_RUN_CMD dictcli install "$l"
+  #                       ;;
+  #                   "$remote")
+  #                       continue
+  #                       ;;
+  #                   *)
+  #                       $DRY_RUN_CMD dictcli update "$l"
+  #                       ;;
+  #               esac
+  #           done
+  #       done
+  # '';
+
+  home.sessionVariables."BROWSER" = "qutebrowser";
 
   programs.qutebrowser = {
     enable = true;

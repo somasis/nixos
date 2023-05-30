@@ -5,16 +5,12 @@
 }:
 let libreoffice = pkgs.libreoffice-still; in
 {
-  home = {
-    packages = [ libreoffice ];
+  home.packages = [ lo ];
 
-    # See for more details:
-    # <https://wiki.documentfoundation.org/UserProfile#User_profile_content>
-    persistence."/persist${config.home.homeDirectory}".directories = [{
-      method = "symlink";
-      directory = "etc/libreoffice";
-    }];
-  };
+  # See for more details:
+  # <https://wiki.documentfoundation.org/UserProfile#User_profile_content>
+  persist.directories = [{ method = "symlink"; directory = "etc/libreoffice"; }];
+
 
   xdg.mimeApps.associations.removed = lib.genAttrs [ "text/plain" ] (_: "libreoffice.desktop");
 

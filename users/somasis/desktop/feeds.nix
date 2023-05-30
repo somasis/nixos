@@ -559,7 +559,7 @@ in
     '';
 
 
-  home.persistence."/cache${config.home.homeDirectory}".directories = [{ method = "symlink"; directory = "var/cache/newsboat"; }];
+  cache.directories = [{ method = "symlink"; directory = "var/cache/newsboat"; }];
 
   systemd.user = {
     targets.feeds = {

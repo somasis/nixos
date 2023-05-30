@@ -2,7 +2,7 @@
 , pkgs
 , ...
 }: {
-  home.persistence."/persist${config.home.homeDirectory}".directories = [{
+  persist.directories = [{
     method = "symlink";
     directory = "diary";
   }];

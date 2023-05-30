@@ -48,9 +48,10 @@
     };
 
     sessionVariables."W3M_DIR" = "${config.xdg.stateHome}/w3m";
-    persistence."/cache${config.home.homeDirectory}".directories = [{
-      directory = "var/lib/w3m";
-      method = "symlink";
-    }];
   };
+
+  cache.directories = [{
+    directory = "var/lib/w3m";
+    method = "symlink";
+  }];
 }

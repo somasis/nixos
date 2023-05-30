@@ -448,70 +448,66 @@ in
       "shift + XF86AudioNext" = "${pkgs.mpc-cli}/bin/mpc -q random";
     };
 
-  home = {
-    persistence = {
-      "/persist${config.home.homeDirectory}".directories = [
-        { method = "symlink"; directory = "audio"; }
-        { method = "symlink"; directory = "share/mpd"; }
-        { method = "symlink"; directory = "etc/audacity"; }
+  persist.directories = [
+    { method = "bindfs"; directory = "audio"; }
+    { method = "symlink"; directory = "share/mpd"; }
+    { method = "symlink"; directory = "etc/audacity"; }
+  ];
+
+  cache.directories = [
+    { method = "symlink"; directory = "share/cantata"; }
+    { method = "symlink"; directory = "var/cache/cantata"; }
+    { method = "symlink"; directory = "var/cache/listenbrainz-mpd"; }
+    { method = "symlink"; directory = "var/cache/mpdscribble"; }
+  ];
+
+  home.packages = [
+    envtag
+
+    pkgs.audacity
+
+    pkgs.mpc-cli
+
+    mpdscribble
+
+    (pkgs.symlinkJoin rec {
+      name = "cantata-with-pass";
+
+      runtimeInputs = [ config.programs.password-store.package pkgs.coreutils ];
+
+      paths = [
+        # Can't use a FIFO for the configuration- cantata seems to do something
+        # funky at program start that causes it to need an additional write after
+        # being closed for the first time; and after that, it does more r/w...
+        (pkgs.writeShellScriptBin "cantata" ''
+          export PATH="${lib.makeBinPath runtimeInputs}:$PATH"
+
+          : "''${XDG_CONFIG_HOME:=$HOME/.config}"
+          : "''${XDG_RUNTIME_DIR:=/run/user/$(id -un)}"
+
+          set -eu
+          set -o pipefail
+
+          mkdir -m 700 -p "$XDG_CONFIG_HOME/cantata" "$XDG_RUNTIME_DIR/cantata"
+          touch "$XDG_RUNTIME_DIR/cantata/cantata.conf"
+          chmod 700 "$XDG_RUNTIME_DIR/cantata/cantata.conf"
+
+          cat ${cantataConf} - > "$XDG_RUNTIME_DIR"/cantata/cantata.conf <<EOF
+          [Scrobbling]
+          sessionKey=$(pass ${nixosConfig.networking.fqdnOrHostName}/cantata/last.fm)
+          EOF
+
+          ln -sf "$XDG_RUNTIME_DIR/cantata/cantata.conf" "$XDG_CONFIG_HOME/cantata/cantata.conf"
+
+          # -n: don't allow fetching things over the network
+          e=0
+          (exec -a cantata ${cantata}/bin/cantata -n "$@"); e=$?
+          rm -f "$XDG_CONFIG_HOME/cantata/cantata.conf"
+          exit "$e"
+        '')
+
+        cantata
       ];
-
-      "/cache${config.home.homeDirectory}".directories = [
-        { method = "symlink"; directory = "share/cantata"; }
-        { method = "symlink"; directory = "var/cache/cantata"; }
-        { method = "symlink"; directory = "var/cache/listenbrainz-mpd"; }
-        { method = "symlink"; directory = "var/cache/mpdscribble"; }
-      ];
-    };
-
-    packages = [
-      envtag
-
-      pkgs.audacity
-
-      pkgs.mpc-cli
-
-      mpdscribble
-
-      (pkgs.symlinkJoin rec {
-        name = "cantata-with-pass";
-
-        runtimeInputs = [ config.programs.password-store.package pkgs.coreutils ];
-
-        paths = [
-          # Can't use a FIFO for the configuration- cantata seems to do something
-          # funky at program start that causes it to need an additional write after
-          # being closed for the first time; and after that, it does more r/w...
-          (pkgs.writeShellScriptBin "cantata" ''
-            export PATH="${lib.makeBinPath runtimeInputs}:$PATH"
-
-            : "''${XDG_CONFIG_HOME:=$HOME/.config}"
-            : "''${XDG_RUNTIME_DIR:=/run/user/$(id -un)}"
-
-            set -eu
-            set -o pipefail
-
-            mkdir -m 700 -p "$XDG_CONFIG_HOME/cantata" "$XDG_RUNTIME_DIR/cantata"
-            touch "$XDG_RUNTIME_DIR/cantata/cantata.conf"
-            chmod 700 "$XDG_RUNTIME_DIR/cantata/cantata.conf"
-
-            cat ${cantataConf} - > "$XDG_RUNTIME_DIR"/cantata/cantata.conf <<EOF
-            [Scrobbling]
-            sessionKey=$(pass ${nixosConfig.networking.fqdnOrHostName}/cantata/last.fm)
-            EOF
-
-            ln -sf "$XDG_RUNTIME_DIR/cantata/cantata.conf" "$XDG_CONFIG_HOME/cantata/cantata.conf"
-
-            # -n: don't allow fetching things over the network
-            e=0
-            (exec -a cantata ${cantata}/bin/cantata -n "$@"); e=$?
-            rm -f "$XDG_CONFIG_HOME/cantata/cantata.conf"
-            exit "$e"
-          '')
-
-          cantata
-        ];
-      })
-    ];
-  };
+    })
+  ];
 }

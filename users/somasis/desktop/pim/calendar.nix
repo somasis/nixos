@@ -2,13 +2,11 @@
 , config
 , ...
 }: {
-  home = {
-    packages = [ pkgs.khal ];
-    persistence."/cache${config.home.homeDirectory}".directories = [{
-      method = "symlink";
-      directory = "share/khal";
-    }];
-  };
+  home.packages = [ pkgs.khal ];
+  cache.directories = [{
+    method = "symlink";
+    directory = "share/khal";
+  }];
 
   xdg.configFile."khal/config".text = ''
     [calendars]

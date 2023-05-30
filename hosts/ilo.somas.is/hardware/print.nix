@@ -12,6 +12,6 @@
     nssmdns = true;
   };
 
-  environment.persistence."/cache".directories = [ "/var/cache/cups" ];
-  environment.persistence."/log".directories = [ "/var/log/cups" ];
+  cache.directories = [ "/var/cache/cups" ];
+  log.directories = [ "/var/log/cups" ];
 }

@@ -33,7 +33,7 @@
     }];
   };
 
-  home.persistence."/cache${config.home.homeDirectory}".files = [ "var/cache/stw/didyouknow.txt" ];
+  cache.files = [ "var/cache/stw/didyouknow.txt" ];
 
   systemd.user = {
     timers."didyouknow" = {

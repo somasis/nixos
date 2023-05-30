@@ -21,7 +21,7 @@ in
 
   accounts.email.maildirBasePath = "mail";
 
-  home.persistence."/persist${config.home.homeDirectory}".directories = [
+  persist.directories = [
     { method = "symlink"; directory = "share/offlineimap"; }
     { method = "symlink"; directory = "mail/sms"; }
   ]

@@ -515,7 +515,7 @@ in
     ];
   };
 
-  home.persistence."/persist${config.home.homeDirectory}".files = [
+  persist.files = [
     "etc/catgirl/client-${nixosConfig.networking.fqdnOrHostName}.crt"
     # "share/catgirl/bitlbee.pounce.somas.is.buf"
     "share/catgirl/libera.pounce.somas.is.buf"

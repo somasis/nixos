@@ -5,7 +5,7 @@ in
 {
   services.syncthing.enable = true;
 
-  home.persistence."/persist${config.home.homeDirectory}".directories = [
+  persist.directories = [
     { method = "symlink"; directory = "etc/syncthing"; }
     { method = "symlink"; directory = "share/syncthing"; }
     { method = "symlink"; directory = "shared"; }

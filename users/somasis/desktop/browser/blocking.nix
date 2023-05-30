@@ -3,7 +3,7 @@ let
   uriList = builtins.map (x: "file://${builtins.toString x}");
 in
 {
-  home.persistence."/cache${config.home.homeDirectory}".files = [
+  cache.files = [
     "share/qutebrowser/adblock-cache.dat"
     "share/qutebrowser/blocked-hosts"
   ];

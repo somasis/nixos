@@ -15,7 +15,7 @@
     pkgs.wl-clipboard
   ];
 
-  # home.persistence."/persist${config.home.homeDirectory}" = {
+  # persist = {
   #   directories = [
   #     "etc/kdedefaults"
   #   ];
@@ -62,7 +62,7 @@
   #   ];
   # };
 
-  # home.persistence."/cache${config.home.homeDirectory}" = {
+  # cache = {
   #   directories = [
   #     "share/baloo"
   #     "share/dolphin"
