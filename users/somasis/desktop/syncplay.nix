@@ -4,6 +4,8 @@
 , ...
 }:
 let
+  inherit (pkgs) syncplay;
+
   mkList = list: "[" + (lib.concatStringsSep "," (map (x: ''"${x}"'') list)) + "]";
 
   mpv = "${config.programs.mpv.package}/bin/mpv";
@@ -155,7 +157,7 @@ in
     };
   };
 
-  home.packages = [ pass-syncplay pkgs.syncplay ];
+  home.packages = [ pass-syncplay syncplay ];
 
   xdg.configFile = {
     "Syncplay/MainWindow.conf".text = lib.generators.toINI { } {
