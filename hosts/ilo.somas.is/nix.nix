@@ -69,8 +69,9 @@
 
     gc = {
       automatic = true;
-      dates = "monthly";
-      options = "--delete-older-than 14d";
+      dates = "Sun 08:00:00";
+      randomizedDelaySec = "1h";
+      options = "--delete-older-than 7d";
     };
 
     registry.nixpkgs.flake = nixpkgs;
