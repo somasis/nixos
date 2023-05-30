@@ -264,8 +264,28 @@ in
                 done | tr '\n' ' '
         )
 
+        level=-2
+        for a; do
+          shift
+          [[ "$a" = "--quiet" ]] && level=$(( level - 1 )) && continue
+          [[ "$a" = "--verbose" ]] && level=$(( level + 1 )) && continue
+          set -- "$@" "$a"
+        done
+
+        if [[ "$level" -ge 0 ]]; then
+            while [[ "$level" -ge 0 ]]; do
+                args="$args --verbose"
+                level=$(( level - 1 ))
+            done
+        else
+            while [[ "$level" -le 0 ]]; do
+                args="$args --quiet"
+                level=$(( level + 1 ))
+            done
+        fi
+
         # --quiet --quiet removes the "updated input" spam
-        eval "exec nixos --quiet --quiet $args \"\''${@:-switch}\""
+        eval "exec nixos $args \"\''${@:-switch}\""
       '';
     })
 
