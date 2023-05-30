@@ -111,18 +111,6 @@ in
         # Take screenshot of all monitors
         "alt + Print" = "SCREENSHOT_GEOMETRY=desktop screenshot";
 
-        # Hardware: {mute, lower, raise} output volume - fn + {f1,f2,f3}
-        "XF86AudioMute" = "ponymix -t sink toggle >/dev/null";
-        # "super + XF86AudioMute" = "ponymix -t source toggle >/dev/null";
-        "shift + XF86AudioMute" = "ponymix-cycle-default sink";
-        "shift + super + XF86AudioMute" = "ponymix-cycle-default source";
-
-        "XF86AudioLowerVolume" = "ponymix-snap -t sink decrease 5 >/dev/null";
-        "XF86AudioRaiseVolume" = "ponymix-snap -t sink increase 5 >/dev/null";
-
-        "shift + XF86AudioLowerVolume" = "ponymix-snap -t source decrease 5 >/dev/null";
-        "shift + XF86AudioRaiseVolume" = "ponymix-snap -t source increase 5 >/dev/null";
-
         # Hardware: toggle touchpad
         "super + F2" = "xinput-notify touchpad";
       };
