@@ -141,12 +141,12 @@ in
     # <https://github.com/dcartertod/zotero-plugins>
     # <https://github.com/diegodlh/zotero-cita>
     # <https://github.com/jlegewie/zotfile>
-    # <https://github.com/leonkt/zotero-memento>
     # <https://github.com/retorquere/zotero-auto-index>
     # <https://github.com/retorquere/zotero-open-pdf>
     # <https://github.com/retorquere/zotero-storage-scanner>
     # <https://github.com/windingwind/zotero-pdf-preview>
     # <https://github.com/wshanks/Zutilo>
+    # <https://robustlinks.mementoweb.org/zotero/>
 
     package = pkgs.wrapCommand {
       package = pkgs.zotero;
