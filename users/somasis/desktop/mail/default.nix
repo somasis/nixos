@@ -5,6 +5,7 @@
 , ...
 }:
 let
+  inherit (lib) getBin foldr recursiveUpdate optionalAttrs;
   inherit (config.lib.somasis) mkPathSafeName;
 
   offlineimapNametransGmail = {
@@ -12,7 +13,7 @@ let
     local.nametrans = "lambda f: '[Gmail]/' + f if f in ['Drafts', 'Starred', 'Important', 'Spam', 'Trash', 'All Mail', 'Sent Mail'] else f";
   };
 
-  passCmd = "${config.programs.password-store.package}/bin/pass";
+  pass = "${getBin config.programs.password-store.package}/bin/pass";
   systemctl = "${pkgs.systemd}/bin/systemctl --user";
 in
 {
@@ -24,22 +25,38 @@ in
     { method = "symlink"; directory = "share/offlineimap"; }
     { method = "symlink"; directory = "mail/sms"; }
   ]
-  ++ builtins.map
+  ++ map
     (x: { method = "symlink"; directory = "mail/${x.maildir.path}"; })
     (builtins.attrValues config.accounts.email.accounts)
   ;
 
   accounts.email.accounts =
     let
-      realName = "Kylie McClain";
+      account = address: extraAttrs:
+        lib.recursiveUpdate
+          {
+            "${address}" = let acc = config.accounts.email.accounts."${address}"; in {
+              inherit address;
+
+              realName = "Kylie McClain";
+              passwordCommand = "${pass} show ${nixosConfig.networking.fqdnOrHostName}/nixos/${address}";
+
+              offlineimap.enable = true;
+
+              imapnotify = {
+                enable = true;
+                onNotify = "${systemctl} start offlineimap-${mkPathSafeName address}.service";
+                boxes = [ "INBOX" ];
+              };
+
+              msmtp.enable = true;
+            };
+          }
+          { "${address}" = extraAttrs; }
+      ;
     in
-    {
-      "kylie@somas.is" = { name, ... }: rec {
-        address = name;
-        passwordCommand = "${passCmd} show ${nixosConfig.networking.fqdnOrHostName}/nixos/${address}";
-
-        inherit realName;
-
+    lib.mkMerge [
+      (account "kylie@somas.is" {
         primary = true;
 
         aliases = [
@@ -50,66 +67,34 @@ in
         ];
 
         flavor = "fastmail.com";
+      })
 
-        offlineimap.enable = true;
-        imapnotify = rec {
-          enable = true;
-          onNotify = "${systemctl} start offlineimap@${mkPathSafeName name}.service";
-          boxes = [ "INBOX" ];
-        };
-        msmtp.enable = true;
-      };
-
-      "mcclainkj@appstate.edu" = { name, ... }: {
-        inherit realName;
-        address = name;
-        passwordCommand = "${passCmd} show www/appstate.edu/mcclainkj";
-
+      (account "mcclainkj@appstate.edu" {
+        passwordCommand = "${pass} show www/appstate.edu/mcclainkj";
         aliases = [ "mcclainhj@appstate.edu" ];
-
         flavor = "gmail.com";
-
-        offlineimap.enable = true;
         offlineimap.extraConfig = offlineimapNametransGmail;
-        imapnotify = rec {
-          enable = true;
-          onNotify = "${systemctl} start offlineimap@${mkPathSafeName name}.service";
-          boxes = [ "INBOX" ];
-        };
-        msmtp.enable = true;
-      };
+      })
 
-      "somasissounds@gmail.com" = { name, ... }: rec {
-        address = name;
-        passwordCommand = "${passCmd} show ${nixosConfig.networking.fqdnOrHostName}/nixos/${address}";
-
-        inherit realName;
-
+      (account "somasissounds@gmail.com" {
         flavor = "gmail.com";
-
-        offlineimap.enable = true;
         offlineimap.extraConfig = offlineimapNametransGmail;
-        imapnotify = rec {
-          enable = true;
-          onNotify = "${systemctl} start offlineimap@${mkPathSafeName name}.service";
-          boxes = [ "INBOX" ];
-        };
-        msmtp.enable = true;
-      };
-    };
+      })
+    ]
+  ;
 
   programs.offlineimap.enable = true;
   programs.msmtp.enable = true;
 
-  systemd.user = lib.foldr
+  systemd.user = foldr
     (n: a:
-      lib.recursiveUpdate a {
-        services."offlineimap@${mkPathSafeName n}" = {
+      recursiveUpdate a {
+        services."offlineimap-${mkPathSafeName n}" = {
           Unit.Description = "Synchronize IMAP boxes for account ${n}";
           Service = {
             Type = "oneshot";
 
-            ExecStart = [ "${pkgs.limitcpu}/bin/cpulimit -qf -l 25 -- ${pkgs.offlineimap}/bin/offlineimap -o -u syslog -a ${n}" ];
+            ExecStart = [ "${pkgs.limitcpu}/bin/cpulimit -qf -l 25 -- ${pkgs.offlineimap}/bin/offlineimap -o -u quiet -a ${n}" ];
 
             SyslogIdentifier = "offlineimap";
 
@@ -117,14 +102,14 @@ in
             CPUSchedulingPolicy = "idle";
             IOSchedulingClass = "idle";
             IOSchedulingPriority = 7;
-          } // (lib.optionalAttrs nixosConfig.networking.networkmanager.enable { ExecStartPre = [ "${pkgs.networkmanager}/bin/nm-online -q" ]; });
+          } // (optionalAttrs nixosConfig.networking.networkmanager.enable { ExecStartPre = [ "${pkgs.networkmanager}/bin/nm-online -q" ]; });
         };
 
-        timers."offlineimap@${mkPathSafeName n}" = {
+        timers."offlineimap-${mkPathSafeName n}" = {
           Unit.Description = "Synchronize IMAP boxes for account ${n} every two hours, and fifteen minutes after startup";
           Timer = {
             OnCalendar = "1/2:00:00";
-            OnStartupSec = builtins.toString (60 * 15);
+            OnStartupSec = 60 * 15;
             Persistent = true;
             RandomizedDelaySec = "1m";
           };
@@ -133,7 +118,7 @@ in
           Install.WantedBy = [ "mail.target" ];
         };
 
-        paths."offlineimap@${mkPathSafeName n}" = {
+        paths."offlineimap-${mkPathSafeName n}" = {
           Unit.Description = "Synchronize IMAP boxes on local changes";
           Path.PathChanged = config.accounts.email.accounts."${n}".maildir.absPath;
 
@@ -141,7 +126,7 @@ in
           Install.WantedBy = [ "mail.target" ];
         };
 
-        services."imapnotify@${mkPathSafeName n}" = {
+        services."imapnotify-${mkPathSafeName n}" = {
           Unit.PartOf = [ "mail.target" ];
           Install.WantedBy = [ "mail.target" ];
         };

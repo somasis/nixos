@@ -1,15 +1,15 @@
 { pkgs, config, inputs, ... }: {
   home.packages = [
     (pkgs.mblaze.overrideAttrs (
+      prev:
       let
         year = builtins.substring 0 4 inputs.mblaze.lastModifiedDate;
         month = builtins.substring 4 2 inputs.mblaze.lastModifiedDate;
         day = builtins.substring 6 2 inputs.mblaze.lastModifiedDate;
       in
-      oldAttrs:
       {
-        version = "unstable-${year}-${month}-${day}";
         src = inputs.mblaze;
+        version = "unstable-${year}-${month}-${day}";
       }
     ))
 
