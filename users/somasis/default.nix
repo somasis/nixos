@@ -82,21 +82,22 @@
       let
         inherit (nixosConfig.services) tor;
 
-        userAgent = [ "-A" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/97.0.4692.99 Safari/537.36" ];
-        proxy = lib.optionals (tor.enable && tor.client.enable) (
-          let
-            proxyProtocol = if tor.client.dns.enable then "socks5h" else "socks5";
-            proxyAddress =
-              if (builtins.substring 0 1 tor.client.socksListenAddress.addr) == "/" then
-                "${tor.client.socksListenAddress.addr}:${toString tor.client.socksListenAddress.port}"
-              else
-                "localhost/${tor.client.socksListenAddress.addr}";
-          in
-          [
-            "-x"
-            "${proxyProtocol}://${proxyAddress}"
-          ]
-        );
+        args = lib.cli.toGNUCommandLineShell { } ({
+          disable = true;
+          silent = true;
+          show-error = true;
+          globoff = true;
+          disallow-username-in-url = true;
+          connect-timeout = 60;
+          max-time = 60;
+          retry = 10;
+          limit-rate = "512K";
+          parallel = true;
+          parallel-max = 4;
+          user-agent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/97.0.4692.99 Safari/537.36";
+        } // lib.optionalAttrs (tor.enable && tor.client.enable) {
+          proxy = "${if tor.client.dns.enable then ''socks5h'' else ''socks5''}://${tor.client.socksListenAddress.addr}:${toString tor.client.socksListenAddress.port}";
+        });
       in
       pkgs.writeShellApplication {
         name = "autocurl";
@@ -109,20 +110,8 @@
         ;
 
         text = ''
-          ${lib.optionalString nixosConfig.networking.networkmanager.enable "nm-online -t 60 || exit 7"}
-          exec curl \
-              --disable \
-              --silent \
-              --show-error \
-              --globoff \
-              --disallow-username-in-url \
-              --connect-timeout 60 \
-              --max-time 60 \
-              --retry 10 \
-              --limit-rate 512K \
-              --parallel \
-              --parallel-max 4 \
-              ${lib.escapeShellArgs [ userAgent proxy ]} "$@"
+          ${lib.optionalString nixosConfig.networking.networkmanager.enable "nm-online -t 60 -q || exit 7"}
+          exec curl ${args} "$@"
         '';
       }
     )
