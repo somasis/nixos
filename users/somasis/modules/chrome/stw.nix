@@ -47,8 +47,8 @@ in
     };
 
     widgets = mkOption {
-      type = types.listOf (types.submodule (
-        { config, ... }: {
+      type = types.attrsOf (types.submodule (
+        { name, config, ... }: {
           options = {
             enable = mkOption {
               type = types.bool;
@@ -66,12 +66,11 @@ in
 
             name = mkOption {
               type = types.str;
+              default = name;
+              readOnly = true;
               description = ''
                 Name used by `stw-widget-<name>` and stw@<name>.service
               '';
-              default = builtins.head (builtins.split " " (builtins.baseNameOf (builtins.toString config.command)));
-              defaultText = "Basename of widget.command";
-              example = "fortune";
             };
 
             update = mkOption {
@@ -194,11 +193,10 @@ in
 
       description = "List of widgets to create.";
 
-      default = [ ];
-      defaultText = literalExpression "[]";
+      default = { };
 
-      example = [
-        {
+      example = {
+        dates = {
           command = ''
             ${literalExpression "${pkgs.coreutils}"}/bin/date +"%Y-%m-%d %I:%M %p"
           '';
@@ -218,8 +216,8 @@ in
           };
 
           update = 60;
-        }
-      ];
+        };
+      };
     };
   };
 
@@ -265,11 +263,11 @@ in
           Install.WantedBy = [ "graphical-session-post.target" "default.target" ];
         };
       }
-      cfg.widgets
+      (lib.mapAttrsToList (n: v: v) cfg.widgets)
     ;
 
     home.packages = [ pkg ]
-      ++ builtins.map (widget: mkScript widget) cfg.widgets
+      ++ (lib.mapAttrsToList (n: v: mkScript v) cfg.widgets)
     ;
   };
 }
