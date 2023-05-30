@@ -4,8 +4,10 @@
 }: {
   home.shellAliases = rec {
     # LC_COLLATE=C sorts uppercase before lowercase.
-    ls = "LC_COLLATE=C ls --hyperlink=auto --group-directories-first --dereference-command-line-symlink-to-dir -AFlh -b";
+    ls = "LC_COLLATE=C ls --hyperlink=auto --group-directories-first --dereference-command-line-symlink-to-dir --color -AFlh -b";
     vi = "$EDITOR";
+
+    ip = "ip --color=auto";
 
     # Quick ssh aliases
     "ascii.town" = "ssh play@ascii.town";
