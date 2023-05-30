@@ -19,7 +19,7 @@ let
     ;
 
   signal = pkgs.signal-desktop-beta;
-  signalTitle = "Signal Beta";
+  signalWindowName = "Signal Beta";
 
   signalDescription = signal.meta.description;
 
@@ -32,9 +32,9 @@ let
 
         entry="${nixosConfig.networking.fqdnOrHostName}/signal-desktop"
 
-        mkdir -m 700 -p "''${XDG_CONFIG_HOME:=$HOME/.config}/${signalTitle}"
-        rm -f "$XDG_CONFIG_HOME/${signalTitle}"/config.json
-        mkfifo "$XDG_CONFIG_HOME/${signalTitle}"/config.json
+        mkdir -m 700 -p "''${XDG_CONFIG_HOME:=$HOME/.config}/${signalWindowName}"
+        rm -f "$XDG_CONFIG_HOME/${signalWindowName}"/config.json
+        mkfifo "$XDG_CONFIG_HOME/${signalWindowName}"/config.json
 
         ${config.programs.password-store.package}/bin/pass "$entry" \
             | ${config.programs.jq.package}/bin/jq -R '{
@@ -42,10 +42,10 @@ let
                 mediaPermissions: true,
                 mediaCameraPermissions: true
             }' \
-            > "$XDG_CONFIG_HOME/${signalTitle}"/config.json &
+            > "$XDG_CONFIG_HOME/${signalWindowName}"/config.json &
 
-        ${pkgs.rwc}/bin/rwc -p "$XDG_CONFIG_HOME/${signalTitle}"/config.json \
-            | ${pkgs.xe}/bin/xe -s 'rm -f "$XDG_CONFIG_HOME/${signalTitle}"/config.json' &
+        ${pkgs.rwc}/bin/rwc -p "$XDG_CONFIG_HOME/${signalWindowName}"/config.json \
+            | ${pkgs.xe}/bin/xe -s 'rm -f "$XDG_CONFIG_HOME/${signalWindowName}"/config.json' &
 
         e=0
         (exec -a ${programName signal} ${programPath signal} "$@") || e=$?
@@ -62,9 +62,9 @@ in
 {
   home.packages = [ signal ];
 
-  persist.directories = [ "etc/${signalTitle}" ];
+  persist.directories = [ "etc/${signalWindowName}" ];
 
-  xdg.configFile."${signalTitle}/ephemeral.json".text = lib.generators.toJSON { }
+  xdg.configFile."${signalWindowName}/ephemeral.json".text = lib.generators.toJSON { }
     (mapAttrs' (n: v: nameValuePair (camelCaseToKebabCase n) v) {
       systemTraySetting = "MinimizeToSystemTray";
       shownTrayNotice = true;
@@ -87,7 +87,7 @@ in
   };
 
   services.sxhkd.keybindings."super + s" = builtins.toString (pkgs.writeShellScript "signal" ''
-    if ! ${config.home.homeDirectory}/bin/raise -V '^(.+ - ${signalTitle}|${signalTitle})$';then
+    if ! ${pkgs.jumpapp}/bin/jumpapp -c ${lib.escapeShellArg signalWindowName} -f ${lib.escapeShellArg (programName signal)} 2>/dev/null; then
         if ${pkgs.systemd}/bin/systemctl --user is-active -q signal.service; then
             exec ${signalPath} >/dev/null 2>&1
         else
