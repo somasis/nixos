@@ -210,8 +210,8 @@ in
     profiles.default = {
       settings =
         let
-          # Chicago Manual of Style 17th edition (note, with "Ibid.")
-          style = "http://www.zotero.org/styles/chicago-note-bibliography-with-ibid";
+          # Chicago Manual of Style [latest] edition (note)
+          style = "http://www.zotero.org/styles/chicago-note-bibliography";
           locale = "en-US";
         in
         rec
