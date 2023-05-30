@@ -1,6 +1,6 @@
 { pkgs, ... }: {
   services.kubo = {
-    enable = true;
+    enable = false;
     emptyRepo = true;
 
     startWhenNeeded = true;
