@@ -18,9 +18,6 @@
     bc = "bc -q";
     diff = "diff --color";
 
-    youtube-dl = "yt-dlp";
-    ytmp3 = "yt-dlp --extract-audio --audio-format=mp3";
-
     g = "find -L ./ -type f \! -path '*/.*/*' -print0 | xe -0 -N0 grep -n";
 
     xz = "xz -T0 -9 -e";

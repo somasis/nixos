@@ -95,4 +95,6 @@
       # audio-multistreams = true;
     };
   };
+
+  home.shellAliases.ytaudio = "yt-dlp --format bestaudio --extract-audio --audio-format wav";
 }
