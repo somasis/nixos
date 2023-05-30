@@ -169,6 +169,15 @@
 
             "¬" # Used by Kakoune for the newline indicator
             ";"
+
+            "‘"
+            "’"
+            "‚"
+            "‛"
+            "“"
+            "”"
+            "„"
+            "‟"
           ];
         };
       };
