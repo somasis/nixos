@@ -23,4 +23,6 @@ rec
 
   pass-meta = callPackage ./pass-meta { };
   qute-pass = callPackage ./qute-pass { };
+
+  ffsclient = callPackage ./ffsclient { };
 }
