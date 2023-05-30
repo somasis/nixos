@@ -119,235 +119,236 @@ in
         '';
       })
 
-      (pkgs.writeTextFile {
-        name = "pass-link";
+      # (pkgs.writeTextFile {
+      #   name = "pass-link";
 
-        executable = true;
-        destination = "/lib/password-store/extensions/link.bash";
+      #   executable = true;
+      #   destination = "/lib/password-store/extensions/link.bash";
 
-        text = ''
-          #!${pkgs.bash}
+      #   text = ''
+      #     #!${pkgs.bash}
 
-          export PATH="${lib.makeBinPath [ pkgs.coreutils pkgs.gawk pkgs.moreutils pkgs.rsync ]}:$PATH"
+      #     export PATH="${lib.makeBinPath [ pkgs.coreutils pkgs.gawk pkgs.moreutils pkgs.rsync ]}:$PATH"
 
-          usage() {
-              cat >&2 <<EOF
-          usage: pass link [-nu] SOURCE TARGET...
-                 pass link [-nu]
-          EOF
-              exit 69
-          }
+      #     usage() {
+      #         cat >&2 <<EOF
+      #     usage: pass link [-nu] SOURCE TARGET...
+      #            pass link [-nu]
+      #     EOF
+      #         exit 69
+      #     }
 
-          set -eu
-          set -o pipefail
+      #     set -eu
+      #     set -o pipefail
 
-          : "''${PASSWORD_STORE_DIR:=$HOME/.password-store}"
-          links="$PASSWORD_STORE_DIR/.pass-link"
+      #     : "''${PASSWORD_STORE_DIR:=$HOME/.password-store}"
+      #     links="$PASSWORD_STORE_DIR/.pass-link"
 
-          dry_run=
-          target_may_update_source=false
+      #     dry_run=
+      #     target_may_update_source=false
 
-          while getopts :nu arg >/dev/null 2>&1; do
-              case "$arg" in
-                  n) dry_run=dry_run ;;
-                  u) target_may_update_source=true ;;
-                  *) usage ;;
-              esac
-          done
-          shift $(( OPTIND - 1 ))
+      #     while getopts :nu arg >/dev/null 2>&1; do
+      #         case "$arg" in
+      #             n) dry_run=dry_run ;;
+      #             u) target_may_update_source=true ;;
+      #             *) usage ;;
+      #         esac
+      #     done
+      #     shift $(( OPTIND - 1 ))
 
-          [[ "$#" -eq 1 ]] && usage
+      #     [[ "$#" -eq 1 ]] && usage
 
-          success=true
+      #     success=true
 
-          dry_run() {
-              echo "$@" >&2
-          }
+      #     dry_run() {
+      #         echo "$@" >&2
+      #     }
 
-          canonicalize_links_file() {
-              sort -t $'\t' -k1 \
-                  | while IFS=$'\t' read -r -a items; do
-                      for target in "''${items[@]:1}";do
-                          printf '%s\t%s\n' "''${items[0]}" "''${target}"
-                      done
-                  done \
-                  | uniq
-          }
+      #     canonicalize_links_file() {
+      #         sort -t $'\t' -k1 \
+      #             | while IFS=$'\t' read -r -a items; do
+      #                 for target in "''${items[@]:1}";do
+      #                     printf '%s\t%s\n' "''${items[0]}" "''${target}"
+      #                 done
+      #             done \
+      #             | uniq
+      #     }
 
-          compress_canonicalized_links_file() {
-              awk -F $'\t' '
-                  $1==last_source { printf "\t%s",$2; next }
-                  NR>1 { print ""; }
-                  { last_source=$1; printf "%s",$0; }
-                  END { print ""; }
-              '
-          }
+      #     compress_canonicalized_links_file() {
+      #         awk -F $'\t' '
+      #             $1==last_source { printf "\t%s",$2; next }
+      #             NR>1 { print ""; }
+      #             { last_source=$1; printf "%s",$0; }
+      #             END { print ""; }
+      #         '
+      #     }
 
-          update_link() {
-              source="$1"; shift
+      #     update_link() {
+      #         source="$1"; shift
 
-              for target; do
-                  source_path="$PASSWORD_STORE_DIR/$source"
-                  target_path="$PASSWORD_STORE_DIR/$target"
+      #         for target; do
+      #             source_path="$PASSWORD_STORE_DIR/$source"
+      #             target_path="$PASSWORD_STORE_DIR/$target"
 
-                  if [[ -d "$PASSWORD_STORE_DIR/$source" ]] && [[ -d "$PASSWORD_STORE_DIR/$target" ]]; then
-                      rsync ''${dry_run:+--dry-run} -u -LKk --delay-updates -r --mkpath --delete --delete-delay "$PASSWORD_STORE_DIR/$source"/ "$PASSWORD_STORE_DIR/$target"/
-                  elif [[ -d "$PASSWORD_STORE_DIR/$source" ]] && ! [[ -e "$PASSWORD_STORE_DIR/$target" ]]; then
-                      mkdir -p "$PASSWORD_STORE_DIR/''${target%/*}"
-                      cp -fpR "$PASSWORD_STORE_DIR/$source"/ "$PASSWORD_STORE_DIR/$target"/
-                  else
-                      source_path="$source_path".gpg
-                      target_path="$target_path".gpg
+      #             if [[ -d "$PASSWORD_STORE_DIR/$source" ]] && [[ -d "$PASSWORD_STORE_DIR/$target" ]]; then
+      #                 rsync ''${dry_run:+--dry-run} -u -LKk --delay-updates -r --mkpath --delete --delete-delay "$PASSWORD_STORE_DIR/$source"/ "$PASSWORD_STORE_DIR/$target"/
+      #             elif [[ -d "$PASSWORD_STORE_DIR/$source" ]] && ! [[ -e "$PASSWORD_STORE_DIR/$target" ]]; then
+      #                 mkdir -p "$PASSWORD_STORE_DIR/''${target%/*}"
+      #                 cp -fpR "$PASSWORD_STORE_DIR/$source"/ "$PASSWORD_STORE_DIR/$target"/
+      #             else
+      #                 source_path="$source_path".gpg
+      #                 target_path="$target_path".gpg
 
-                      from_path="$source_path"
-                      to_path="$target_path"
+      #                 from_path="$source_path"
+      #                 to_path="$target_path"
 
-                      if ! [[ -e "$source_path" ]]; then
-                          printf "error: '%s' does not exist\n" "$source" >&2
-                          exit 1
-                      elif [[ -e "$target_path" ]]; then
-                          if [[ "$(pass show "$target" | sha256sum -)" != "$(pass show "$source" | sha256sum -)" ]]; then
-                              if "$target_may_update_source"; then
-                                  from_path="$target_path"
-                                  to_path="$source_path"
-                              elif ! [[ -e "$target_path" ]]; then
-                                  printf "warning: '%s' is newer than its source '%s', not overwriting\n" "$target" "$source" >&2
-                                  success=false
-                                  continue
-                              fi
-                          fi
-                      fi
+      #                 if ! [[ -e "$source_path" ]]; then
+      #                     printf "error: '%s' does not exist\n" "$source" >&2
+      #                     exit 1
+      #                 elif [[ -e "$target_path" ]]; then
+      #                     if [[ "$(pass show "$target" | sha256sum -)" != "$(pass show "$source" | sha256sum -)" ]]; then
+      #                         if "$target_may_update_source"; then
+      #                             from_path="$target_path"
+      #                             to_path="$source_path"
+      #                         elif ! [[ -e "$target_path" ]]; then
+      #                             printf "warning: '%s' is newer than its source '%s', not overwriting\n" "$target" "$source" >&2
+      #                             success=false
+      #                             continue
+      #                         fi
+      #                     fi
+      #                 fi
 
-                      cmp -s "$from_path" "$to_path" || $dry_run cp -f "$from_path" "$to_path"
-                  fi
-                  printf '%s\t%s\n' "$source" "$target"
-              done
-          }
+      #                 cmp -s "$from_path" "$to_path" || $dry_run cp -f "$from_path" "$to_path"
+      #             fi
+      #             printf '%s\t%s\n' "$source" "$target"
+      #         done
+      #     }
 
-          check_sneaky_paths "$@"
+      #     check_sneaky_paths "$@"
 
-          items=()
-          targets=()
+      #     items=()
+      #     targets=()
 
-          (
-              cat "$links"
+      #     (
+      #         cat "$links"
 
-              if [[ "$#" -ge 2 ]]; then
-                  arg_source="$1"; shift
-                  printf '%s\t%s\n' "$arg_source" "$@"
-              fi
-          )   | canonicalize_links_file \
-              | while IFS=$'\t' read -r -a items; do
-                  for target in "''${items[@]:1}";do
-                      update_link "''${items[0]}" "''${target}"
-                  done
-              done \
-              | compress_canonicalized_links_file \
-              | sponge "$links"
+      #         if [[ "$#" -ge 2 ]]; then
+      #             arg_source="$1"; shift
+      #             printf '%s\t%s\n' "$arg_source" "$@"
+      #         fi
+      #     )   | canonicalize_links_file \
+      #         | while IFS=$'\t' read -r -a items; do
+      #             for target in "''${items[@]:1}";do
+      #                 update_link "''${items[0]}" "''${target}"
+      #             done
+      #         done \
+      #         | compress_canonicalized_links_file \
+      #         | sponge "$links"
 
-          "$success" || exit 1
-        '';
-      })
-      (pkgs.writeTextFile {
-        name = "pass-unlink";
+      #     "$success" || exit 1
+      #   '';
+      # })
 
-        destination = "/lib/password-store/extensions/unlink.bash";
-        executable = true;
+      # (pkgs.writeTextFile {
+      #   name = "pass-unlink";
 
-        text = ''
-          #!${pkgs.bash}
-          export PATH="${lib.makeBinPath [ pkgs.coreutils pkgs.gawk pkgs.moreutils pkgs.rsync ]}:$PATH"
+      #   destination = "/lib/password-store/extensions/unlink.bash";
+      #   executable = true;
 
-          usage() {
-              cat >&2 <<EOF
-          usage: pass unlink [-n] TARGET...
-          EOF
-              exit 69
-          }
+      #   text = ''
+      #     #!${pkgs.bash}
+      #     export PATH="${lib.makeBinPath [ pkgs.coreutils pkgs.gawk pkgs.moreutils pkgs.rsync ]}:$PATH"
 
-          set -eu
-          set -o pipefail
+      #     usage() {
+      #         cat >&2 <<EOF
+      #     usage: pass unlink [-n] TARGET...
+      #     EOF
+      #         exit 69
+      #     }
 
-          : "''${PASSWORD_STORE_DIR:=$HOME/.password-store}"
-          links="$PASSWORD_STORE_DIR/.pass-link"
+      #     set -eu
+      #     set -o pipefail
 
-          dry_run=
-          target_may_update_source=false
+      #     : "''${PASSWORD_STORE_DIR:=$HOME/.password-store}"
+      #     links="$PASSWORD_STORE_DIR/.pass-link"
 
-          while getopts :nu arg >/dev/null 2>&1; do
-              case "$arg" in
-                  n) dry_run=dry_run ;;
-                  *) usage ;;
-              esac
-          done
-          shift $(( OPTIND - 1 ))
+      #     dry_run=
+      #     target_may_update_source=false
 
-          [[ "$#" -ge 1 ]] || usage
+      #     while getopts :nu arg >/dev/null 2>&1; do
+      #         case "$arg" in
+      #             n) dry_run=dry_run ;;
+      #             *) usage ;;
+      #         esac
+      #     done
+      #     shift $(( OPTIND - 1 ))
 
-          success=true
+      #     [[ "$#" -ge 1 ]] || usage
 
-          dry_run() {
-              echo "$@" >&2
-          }
+      #     success=true
 
-          canonicalize_links_file() {
-              sort -t $'\t' -k1 \
-                  | while IFS=$'\t' read -r -a items; do
-                      for target in "''${items[@]:1}";do
-                          printf '%s\t%s\n' "''${items[0]}" "''${target}"
-                      done
-                  done \
-                  | uniq
-          }
+      #     dry_run() {
+      #         echo "$@" >&2
+      #     }
 
-          compress_canonicalized_links_file() {
-              awk -F $'\t' '
-                  $1==last_source { printf "\t%s",$2; next }
-                  NR>1 { print ""; }
-                  { last_source=$1; printf "%s",$0; }
-                  END { print ""; }
-              '
-          }
+      #     canonicalize_links_file() {
+      #         sort -t $'\t' -k1 \
+      #             | while IFS=$'\t' read -r -a items; do
+      #                 for target in "''${items[@]:1}";do
+      #                     printf '%s\t%s\n' "''${items[0]}" "''${target}"
+      #                 done
+      #             done \
+      #             | uniq
+      #     }
 
-          remove_link() {
-              remove="$1"
+      #     compress_canonicalized_links_file() {
+      #         awk -F $'\t' '
+      #             $1==last_source { printf "\t%s",$2; next }
+      #             NR>1 { print ""; }
+      #             { last_source=$1; printf "%s",$0; }
+      #             END { print ""; }
+      #         '
+      #     }
 
-              while read -r source targets; do
-                  printf '%s' "$source"
+      #     remove_link() {
+      #         remove="$1"
 
-                  remove_path="$PASSWORD_STORE_DIR/$remove"
-                  [[ -d "$remove_path" ]] || remove_path="$remove_path.gpg"
+      #         while read -r source targets; do
+      #             printf '%s' "$source"
 
-                  found=false
-                  for target in $targets; do
-                      if [[ "$target" == "$remove" ]]; then
-                          found=true
-                          pass rm "$target" >&2
-                      else
-                          printf '\t%s' "$target"
-                      fi
-                  done
+      #             remove_path="$PASSWORD_STORE_DIR/$remove"
+      #             [[ -d "$remove_path" ]] || remove_path="$remove_path.gpg"
 
-                  if "$success" && ! "$found"; then
-                      printf "warning: '%s' does not exist in the target list\n" "$remove" >&2
-                      success=false
-                  fi
+      #             found=false
+      #             for target in $targets; do
+      #                 if [[ "$target" == "$remove" ]]; then
+      #                     found=true
+      #                     pass rm "$target" >&2
+      #                 else
+      #                     printf '\t%s' "$target"
+      #                 fi
+      #             done
 
-                  printf '\n'
-              done
-          }
+      #             if "$success" && ! "$found"; then
+      #                 printf "warning: '%s' does not exist in the target list\n" "$remove" >&2
+      #                 success=false
+      #             fi
 
-          check_sneaky_paths "$@"
+      #             printf '\n'
+      #         done
+      #     }
 
-          <"$links" canonicalize_links_file \
-              | remove_link "$1" \
-              | canonicalize_links_file \
-              | compress_canonicalized_links_file \
-              | sponge "$links"
+      #     check_sneaky_paths "$@"
 
-          "$success" || exit 1
-        '';
-      })
+      #     <"$links" canonicalize_links_file \
+      #         | remove_link "$1" \
+      #         | canonicalize_links_file \
+      #         | compress_canonicalized_links_file \
+      #         | sponge "$links"
+
+      #     "$success" || exit 1
+      #   '';
+      # })
     ]);
   };
 
