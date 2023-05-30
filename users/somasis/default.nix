@@ -3,8 +3,7 @@
 , nixosConfig
 , lib
 , ...
-}:
-{
+}: {
   imports = [
     ./commands
     ./editor
