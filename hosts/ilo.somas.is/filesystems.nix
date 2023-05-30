@@ -69,7 +69,9 @@
     autoScrub = {
       enable = true;
       pools = [ config.networking.fqdnOrHostName ];
-      interval = "Sun, 05:00";
+
+      # Scrub on the first Sunday of each month at 8am.
+      interval = "Sun *-*-01..07 08:00:00";
     };
 
     autoSnapshot = {
