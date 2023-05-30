@@ -3,16 +3,27 @@
     pkgs.hunspell
     pkgs.hunspellDicts.en-us-large
     pkgs.hunspellDicts.en-gb-ise
+    pkgs.hunspellDicts.en-au-large
+
     pkgs.hunspellDicts.es-any
     pkgs.hunspellDicts.es-es
     pkgs.hunspellDicts.es-mx
-    # pkgs.hunspellDicts.tok
+
+    pkgs.hunspellDicts.de-de
+    pkgs.hunspellDicts.fr-any
+
+    pkgs.hunspellDicts.tok
 
     # aspell is still used by kakoune's spell.kak, unfortunately.
     pkgs.aspellDicts.en
     pkgs.aspellDicts.en-computers
     pkgs.aspellDicts.en-science
+
     pkgs.aspellDicts.es
+    pkgs.aspellDicts.de
+    pkgs.aspellDicts.fr
+
+    pkgs.aspellDicts.la
 
     (pkgs.writeShellApplication {
       name = "spell";
