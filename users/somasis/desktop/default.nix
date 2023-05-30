@@ -179,8 +179,6 @@
   };
 
   somasis = {
-    chrome.stw.enable = true;
-
     tunnels = {
       enable = true;
       tunnels = [{
