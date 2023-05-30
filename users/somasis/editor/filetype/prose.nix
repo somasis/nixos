@@ -2,18 +2,18 @@
 let
   lint = pkgs.writeShellScript "lint" ''
     ${pkgs.proselint}/bin/proselint -j "$1" \
-        | ${config.programs.jq.package}/bin/jq -r '.data.errors[]
-            | (
-                (.line|@text) + ":" +
-                (.column|@text) + ": " +
-                .severity + ": " +
-                .message +
-                " [" + .check + "]"
-            )
-        ' \
-        | while read -r line; do
-            printf '%s:%s\n' "$1" "$line"
-        done
+        | ${config.programs.jq.package}/bin/jq -r \
+            --arg buffer "$1" '
+                .data.errors[]
+                    | (
+                        "\($ARGS.named.buffer):" +
+                        + "\(.line|@text):"
+                        + "\(.column|@text): "
+                        + "\(.severity): "
+                        + .message
+                        + " [\(.check)]"
+                    )
+        '
   '';
 in
 {
