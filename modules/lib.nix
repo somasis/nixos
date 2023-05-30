@@ -71,6 +71,45 @@ with lib;
     programName = p: p.meta.mainProgram or p.pname or p.name;
     programPath = p: "${getBin p}/bin/${programName p}";
 
+    writeJqScript =
+      name: args: text:
+      let
+        jq = programPath (if config.programs.jq.package != null then
+          config.programs.jq.package
+        else
+          pkgs.jq
+        );
+
+        args' = lib.cli.toGNUCommandLineShell { }
+          (args // {
+            from-file = pkgs.writeScript "jq-script-${name}.jq" ''
+              #!${jq} -f
+              ${text}
+            '';
+          });
+      in
+      pkgs.writeTextFile {
+        inherit name;
+        executable = true;
+
+        checkPhase = ''
+          e=0
+          ${jq} -n ${args'} || e=$?
+
+          if [[ "$e" -eq 3 ]]; then
+              exit 1
+          else
+              exit 0
+          fi
+        '';
+
+        text = ''
+          #!${pkgs.runtimeShell}
+          exec ${jq} ${args'} "$@"
+        '';
+      }
+    ;
+
     generators = {
       toXML = attrs:
         let
