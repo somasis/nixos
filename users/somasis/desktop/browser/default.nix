@@ -18,10 +18,10 @@ let
         > "''${QUTE_FIFO}"
   '';
 
-  generateUrlTextAnchor = pkgs.writeShellScript "generate-url-text-anchor" ''
+  yankTextAnchor = pkgs.writeShellScript "yank-text-anchor" ''
     set -euo pipefail
 
-    export PATH=${lib.makeBinPath [ config.programs.jq.package pkgs.gnused ] }
+    PATH=${lib.makeBinPath [ config.programs.jq.package pkgs.gnused ] }
 
     : "''${QUTE_FIFO:?}"
     : "''${QUTE_SELECTED_TEXT:?}"
@@ -30,9 +30,7 @@ let
     exec >>"''${QUTE_FIFO}"
 
     textStart=$(
-        printf '%s' "''${QUTE_SELECTED_TEXT}" \
-            | sed 's/^ *//; s/ *$//' \
-            | jq -Rr '@uri'
+        sed 's/^ *//; s/ *$//' <<< "$QUTE_SELECTED_TEXT" | jq -Rr '@uri'
     )
 
     url="''${QUTE_URL%#*}#:~:text=''${textStart}"
@@ -453,13 +451,13 @@ in
     # enableDefaultBindings = false;
     aliases = {
       translate = "spawn -u ${translateUrl} {url}";
-      generate-text-anchor = "spawn -u ${generateUrlTextAnchor}";
+      yank-text-anchor = "spawn -u ${yankTextAnchor}";
     };
 
     keyBindings = {
       normal = {
         "zpt" = "translate";
-        "ya" = "generate-text-anchor";
+        "ya" = "yank-text-anchor";
 
         "qa" = "set-cmd-text :quickmark-add {url} \"{title}\"";
         "ql" = "set-cmd-text -s :quickmark-load";
