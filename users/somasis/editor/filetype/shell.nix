@@ -1,11 +1,18 @@
-{ pkgs, ... }:
+{ config
+, lib
+, pkgs
+, ...
+}:
 let
+  inherit (config.lib.somasis) commaList;
+
   shellcheckfmt = pkgs.writeShellApplication {
     name = "shellcheckfmt";
+
     runtimeInputs = [
-      pkgs.shellcheck
       pkgs.coreutils
       pkgs.diffutils
+      pkgs.shellcheck
     ];
 
     text = ''
@@ -79,7 +86,6 @@ let
 
     runtimeInputs = [
       pkgs.checkbashisms
-      pkgs.coreutils
       pkgs.shellcheck
     ];
 
@@ -87,17 +93,15 @@ let
       : "''${SHLINT_SHELL:=sh}"
 
       (
-          (
-              set +e
-              checkbashisms -l "$@" 2>/dev/null
-              e=$?
-              [[ "$e" -ne 4 ]] || exit "$e" # exit 4 == "No bashisms were detected in a bash script."
-              exit 0
-          ) &
+          set +e
+          checkbashisms -l "$@" 2>/dev/null
+          e=$?
+          [[ "$e" -ne 4 ]] || exit "$e" # exit 4 == "No bashisms were detected in a bash script."
+          exit 0
+      ) &
 
-          shellcheck ''${SHLINT_SHELL:+-s "$SHLINT_SHELL"} -f gcc -x "$@" &
-          wait
-      ) | sort
+      shellcheck ''${SHLINT_SHELL:+-s "$SHLINT_SHELL"} -f gcc -x "$@" &
+      wait
     '';
   };
 in
@@ -125,10 +129,21 @@ in
     }
   ];
 
-  home.file.".shellcheckrc".text = ''
-    enable=all
-    disable=SC2249
-  '';
+  xdg.configFile."shellcheckrc".text =
+    # Don't use `enable = "all"`; it enables warnings about using Bashisms
+    # in bash scripts, which is annoying and unhelpful.
+    ''
+      enable=${commaList [
+        "avoid-nullary-conditions"
+        "check-extra-masked-returns"
+        "check-set-e-suppressed"
+        "deprecate-which"
+        "quote-safe-variables"
+        "require-double-brackets"
+        "require-variable-braces"
+      ]}
+    ''
+  ;
 
   home.packages = [
     pkgs.checkbashisms
