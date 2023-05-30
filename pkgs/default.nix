@@ -5,4 +5,5 @@ in
 rec
 {
   screenshot = callPackage ./screenshot { };
+  xinput-notify = callPackage ./xinput-notify { };
 }
