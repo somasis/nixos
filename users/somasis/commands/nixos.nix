@@ -334,7 +334,7 @@ in
         systemctl -q is-active systemd-journald.service && edo sudo journalctl --sync --relinquish-var
 
         e=0
-        edo nixos-rebuild --use-remote-sudo --no-update-lock-file "$@" || e=$?
+        edo nixos-rebuild --use-remote-sudo --no-update-lock-file "''${@:-switch}" || e=$?
 
         systemctl -q is-active systemd-journald.service && edo sudo journalctl --flush
 
