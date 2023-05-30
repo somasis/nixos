@@ -39,10 +39,11 @@
   systemd.services.ananicy-cpp.serviceConfig.StandardOutput = "null";
 
   systemd.shutdown."wine-kill" = pkgs.writeShellScript "wine-kill" ''
-    ${pkgs.procps}/bin/pkill '^winedevice\.exe$'
-    if [ -n "$(${pkgs.procps}/bin/pgrep '^winedevice\.exe$')" ]; then
-        ${pkgs.procps}/bin/pkill -e -9 '^winedevice\.exe$'
+    ${pkgs.procps}/bin/pkill '^winedevice\.exe$' || :
+    if [[ -n "$(${pkgs.procps}/bin/pgrep '^winedevice\.exe$')" ]]; then
+        ${pkgs.procps}/bin/pkill -e -9 '^winedevice\.exe$' || :
     fi
+    exit 0
   '';
 
   # Stolen from <https://github.com/ncfavier/config/blob/0c12d8559f7b2aa2ea0ddc9cb2cec5066469cabe/modules/station/default.nix>
