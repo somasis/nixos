@@ -59,50 +59,52 @@ in
 
             command = mkOption {
               type = types.str;
-              description = "Command to run, whose output will be the widget text";
+              description = "Command to run, whose output will be the widget text.";
               default = null;
               example = "fortune";
             };
 
             name = mkOption {
               type = types.str;
-              description = "Pretty name for use by other stuff";
+              description = ''
+                Name used by `stw-widget-<name>` and stw@<name>.service
+              '';
               default = builtins.head (builtins.split " " (builtins.baseNameOf (builtins.toString config.command)));
               defaultText = "Basename of widget.command";
               example = "fortune";
             };
 
             update = mkOption {
-              type = types.addCheck types.int (x: x >= -1);
+              type = with types; addCheck int (x: x >= -1);
               description = ''
                 How often to run the command.
 
-                Valid values are 0 (only run once), -1 (run again after command exits),
+                Valid values are 0 (only run once; reload service or send SIGALRM to update), -1 (run again after command exits),
                 or an amount of seconds as an integer >0.
               '';
               default = 5;
-              example = "instant";
+              example = -1;
             };
 
             text = {
               align = mkOption {
                 # stw(1) just takes "l", "c", and "r" for -a arguments
                 type = with types; nullOr (enum [ "left" "center" "right" ]);
-                description = "Alignment of widget text (left, center, right)";
+                description = "Alignment of widget text (left, center, right).";
                 default = "left";
                 example = "right";
               };
 
               color = mkOption {
                 type = with types; nullOr colorType;
-                description = ''Color of widget text, as a hex color code (#f0f0f0) or an Xorg color name ("alice blue")'';
+                description = ''Color of widget text, as a hex color code (#f0f0f0) or an Xorg color name ("alice blue").'';
                 default = null;
                 example = "alice blue";
               };
 
               font = mkOption {
                 type = with types; nullOr str;
-                description = "Font of widget text";
+                description = "Font of widget text.";
                 default = null;
                 example = "monospace:size=20";
               };
@@ -111,21 +113,21 @@ in
             window = {
               color = mkOption {
                 type = with types; nullOr colorType;
-                description = ''Color of widget background, as a hex color code (#f0f0f0) or an Xorg color name ("blue")'';
+                description = ''Color of widget background, as a hex color code (#f0f0f0) or an Xorg color name ("blue").'';
                 default = null;
                 example = "#f0f0f0";
               };
 
               opacity = mkOption {
                 type = with types; nullOr (numbers.between 0.0 1.0);
-                description = "Widget background opacity";
+                description = "Widget background opacity.";
                 default = null;
                 example = 0.75;
               };
 
               padding = mkOption {
                 type = with types; nullOr int;
-                description = "Gap between widget border or text";
+                description = "Gap between widget border or text.";
                 default = null;
                 example = 4;
               };
@@ -145,7 +147,7 @@ in
                 y = mkOption {
                   type = with types; nullOr intOrPercentType;
                   description = ''
-                    Y position of widget on screen
+                    Y position of widget on screen.
 
                     Due to how Nix handles negative zero, if you want to set this
                     to -0, you must write it as a string.
@@ -157,7 +159,7 @@ in
                 xRelative = mkOption {
                   type = with types; nullOr intOrPercentType;
                   description = ''
-                    X position relative to widget width and height
+                    X position relative to widget width and height.
 
                     Due to how Nix handles negative zero, if you want to set this
                     to -0, you must write it as a string.
@@ -169,7 +171,7 @@ in
                 yRelative = mkOption {
                   type = with types; nullOr intOrPercentType;
                   description = ''
-                    Y position relative to widget width and height
+                    Y position relative to widget width and height.
 
                     Due to how Nix handles negative zero, if you want to set this
                     to -0, you must write it as a string.
@@ -190,7 +192,7 @@ in
         }
       ));
 
-      description = "List of widgets to create";
+      description = "List of widgets to create.";
 
       default = [ ];
       defaultText = literalExpression "[]";
