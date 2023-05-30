@@ -95,21 +95,26 @@ let
         maintainers = with maintainers; [ somasis ];
       };
     };
-
-  busybox = pkgs.busybox.override { enableStatic = true; };
-  toybox = pkgs.toybox.override { enableStatic = true; };
 in
 {
   home.packages = [
+    (pkgs.busybox.override {
+      enableStatic = true;
+
+      # Otherwise the symlinks replace the coreutils in my environment.
+      enableAppletSymlinks = false;
+    })
+
+    # (pkgs.toybox.override { enableStatic = true; })
+
     bfs
 
     libarchive
-    # bsdunzip
 
     # sbase
     # ubase
 
-    # (pkgs.writeShellScriptBin ''sbase'' ''
+    # (pkgs.writeShellScriptBin "sbase" ''
     #   c="$1";
     #   exec $(PATH=${sbase}/bin:${ubase}/bin command -v "$c") "$@"
     # '')
