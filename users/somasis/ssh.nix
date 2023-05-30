@@ -65,7 +65,10 @@
         user = "git";
       };
 
-      "git.causal.agency".port = 2222;
+      "git.causal.agency" = {
+        identityFile = "${config.xdg.configHome}/ssh/${config.home.username}@trotsky.somas.is:id_ed25519";
+        port = 2222;
+      };
 
       # Use GitHub SSH over the HTTPS port, to trick firewalls.
       # <https://help.github.com/articles/using-ssh-over-the-https-port/>
