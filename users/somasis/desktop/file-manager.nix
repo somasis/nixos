@@ -14,9 +14,43 @@ let
     commaList
     ;
 
-  thunar = pkgs.xfce.thunar-bare;
+  thunar = pkgs.xfce.thunar-bare.overrideAttrs (prev: {
+    configureFlags = prev.configureFlags ++ [
+      # "--disable-gio-unix"
+      # "--disable-gudev"
+      "--disable-notifications"
+      "--disable-wallpaper-plugin"
+    ];
+  });
 in
 {
+  gtk.gtk3.bookmarks = map (x: "file://${x}") [
+    "/home/somasis/mess/current"
+    "/home/somasis/mess/current/incoming"
+    "/home/somasis/mess/current/screenshots"
+    "/home/somasis/mess/current/src"
+    "/home/somasis/audio"
+    "/home/somasis/audio/library/lossless"
+    "/home/somasis/diary"
+    "/home/somasis/ledger"
+    "/home/somasis/list"
+    "/home/somasis/mnt/gdrive"
+    "/home/somasis/mnt/gphotos"
+    "/home/somasis/mnt/sftp"
+    "/home/somasis/pictures"
+    "/home/somasis/shared"
+    "/home/somasis/src"
+    "/home/somasis/study/current"
+    "/home/somasis/sync"
+    "/home/somasis/tracks"
+    "/home/somasis/video"
+    "/home/somasis/video/film"
+    "/home/somasis/video/tv"
+    "/cache"
+    "/log"
+    "/persist"
+  ];
+
   home.packages = [
     thunar
 
@@ -51,7 +85,6 @@ in
 
   xdg.desktopEntries.mount-archive = {
     name = "Archive mounter";
-    genericName = "ilo pi open poki";
     icon = "archive-manager";
     exec = "mount-archive %f";
     categories = [ "Utility" "Archiving" "Compression" ];
@@ -163,7 +196,7 @@ in
       last-icon-view-zoom-level = "THUNAR_ZOOM_LEVEL_150_PERCENT";
       misc-highlighting-enabled = true; # Use different highlight style (hidden)
 
-      last-location-bar = "ThunarLocationButtons"; # View > Location selector > Buttons style
+      last-location-bar = "ThunarLocationEntry"; # View > Location selector > Buttons style
       last-side-pane = "void"; # View > Side pane
       last-menubar-visible = false; # View > Menubar
 
@@ -226,59 +259,208 @@ in
     }
   '';
 
-  xdg.configFile = {
-    "Thunar/uca.xml".text = ''
-      <?xml version="1.0" encoding="UTF-8"?>
-      <actions>
-        <action>
-          <icon>terminal</icon>
-          <name>Open terminal here</name>
-          <unique-id>1646950665388581-1</unique-id>
-          <command>${pkgs.execline}/bin/execline-cd %f terminal</command>
-          <description>Open a terminal in the selected or current directory</description>
-          <patterns>*</patterns>
-          <startup-notify/>
-          <directories/>
-        </action>
-        <action>
-          <icon>cs-backgrounds</icon>
-          <name>Set as wallpaper</name>
-          <unique-id>1646951605736596-2</unique-id>
-          <command>wallpaperctl set -cover %f</command>
-          <description>Set the selected image as the wallpaper</description>
-          <patterns>*</patterns>
-          <image-files/>
-        </action>
-      </actions>
-    '';
+  xdg.configFile =
+    let
+      mkAccels = attrs: concatStringsSep "\n" (mapAttrsToList
+        (action: key:
+          let
+            quote = escape [ "\"" ];
+            key' =
+              if key == null then
+                quote ""
+              else
+                quote key
+            ;
+            action' = quote action;
+          in
+          ''(gtk_accel_path "<Actions>/${action'}" "${key'}")''
+        )
+        attrs
+      );
 
-    "Thunar/accels.scm".text = ''
-      (gtk_accel_path "<Actions>/ThunarStandardView/invert-selection" "<Primary>i")
-      (gtk_accel_path "<Actions>/ThunarStandardView/back-alt" "")
-      (gtk_accel_path "<Actions>/ThunarActionManager/open-in-new-tab" "")
-      (gtk_accel_path "<Actions>/ThunarWindow/switch-next-tab" "")
-      (gtk_accel_path "<Actions>/ThunarStandardView/properties" "grave")
-      (gtk_accel_path "<Actions>/ThunarStandardView/sort-by-mtime" "<Alt>4")
-      (gtk_accel_path "<Actions>/ThunarStandardView/select-by-pattern" "<Primary>f")
-      (gtk_accel_path "<Actions>/ThunarShortcutsPane/sendto-shortcuts" "")
-      (gtk_accel_path "<Actions>/ThunarWindow/close-tab" "")
-      (gtk_accel_path "<Actions>/ThunarWindow/view-side-pane-tree" "")
-      (gtk_accel_path "<Actions>/ThunarWindow/toggle-side-pane" "")
-      (gtk_accel_path "<Actions>/ThunarWindow/open-home" "<Shift>asciitilde")
-      (gtk_accel_path "<Actions>/ThunarWindow/open-location-alt" "")
-      (gtk_accel_path "<Actions>/ThunarWindow/search" "<Shift>exclam")
-      (gtk_accel_path "<Actions>/ThunarStandardView/sort-by-type" "<Alt>3")
-      (gtk_accel_path "<Actions>/ThunarWindow/switch-previous-tab" "")
-      (gtk_accel_path "<Actions>/ThunarWindow/view-side-pane-shortcuts" "")
-      (gtk_accel_path "<Actions>/ThunarWindow/close-window" "")
-      (gtk_accel_path "<Actions>/ThunarStandardView/toggle-sort-order" "<Alt>grave")
-      (gtk_accel_path "<Actions>/ThunarWindow/close-all-windows" "<Primary>q")
-      (gtk_accel_path "<Actions>/ThunarWindow/view-menubar" "F1")
-      (gtk_accel_path "<Actions>/ThunarWindow/new-tab" "")
-      (gtk_accel_path "<Actions>/ThunarStandardView/sort-by-size" "<Alt>2")
-      (gtk_accel_path "<Actions>/ThunarStandardView/sort-by-name" "<Alt>1")
-    '';
-  };
+      copy-file-contents = pkgs.writeShellScript "copy-file-contents" ''
+        ${pkgs.xclip}/bin/xclip \
+            -selection clipboard \
+            -target "$(${pkgs.file}/bin/file -bL --mime-type "$1")" \
+            -in "$1"
+      '';
+
+      ffmpeg = pkgs.writeShellScript "ffmpeg" ''
+        export PATH=${lib.makeBinPath [ pkgs.coreutils pkgs.libnotify pkgs.nq pkgs.ffmpeg-full pkgs.xdg-utils ]}
+
+        : "''${XDG_RUNTIME_DIR:=/run/user/$(id -u)}"
+        export NQDIR="$XDG_RUNTIME_DIR/ffmpeg"
+        mkdir -p "$NQDIR"
+        jobs=$(fq -qn | wc -l)
+        job_number=$(( jobs + 1 ))
+
+        notification=$(
+            notify-send -p \
+                -a ffmpeg \
+                -i "soundconverter" \
+                "ffmpeg" \
+                "Starting job #''${job_number}."
+        )
+        job=$(nq -c ffmpeg -y -hide_banner -nostdin "$@")
+
+        {
+            action=$(
+                notify-send \
+                    -r "$notification" \
+                    -a "ffmpeg" \
+                    -i "soundconverter" \
+                    -A "View log" \
+                    "ffmpeg" \
+                    "Started job #''${job_number}."
+            )
+
+            case "$action" in
+                'View log')
+                    exec alacritty -T "ffmpeg" --hold fq "$job"
+                    ;;
+            esac
+        } &
+
+
+        nq -w "$job"
+
+        if [ -e "$NQDIR/$job" ]; then
+            notify-send \
+                -r "$notification" \
+                -a ffmpeg \
+                -i "soundconverter" \
+                "ffmpeg" \
+                "Job #''${job_number} completed successfully."
+        else
+            action=$(
+                notify-send \
+                    -r "$notification" \
+                    -a ffmpeg \
+                    -i "soundconverter" \
+                    -A "View log" \
+                    "ffmpeg" \
+                    "Job #''${job_number} failed to complete."
+            )
+
+            case "$action" in
+                'View log')
+                    xdg-open "$NQDIR/$job"
+                    ;;
+            esac
+        fi
+      '';
+    in
+    {
+      "Thunar/uca.xml".text = config.lib.somasis.generators.toXML {
+        actions = {
+          action =
+            let
+              path = "%f";
+              paths = "%F";
+              parentDirectory = "%d";
+              parentDirectories = "%D";
+              file = "%n";
+              files = "%N";
+            in
+            [
+              {
+                command = "${copy-file-contents} ${path}";
+                description = "Copy the contents of the selected file to the clipboard.";
+                icon = "edit-copy";
+                name = "Copy file contents to clipboard";
+                patterns = "*";
+                audio-files = true;
+                image-files = true;
+                text-files = true;
+                video-files = true;
+                other-files = true;
+                unique-id = "copy-file-contents";
+              }
+              {
+                command = "${pkgs.execline}/bin/execline-cd ${path} alacritty";
+                description = "Open a terminal in the selected or current directory";
+                directories = false;
+                icon = "terminal";
+                name = "Open terminal here";
+                patterns = "*";
+                unique-id = "terminal";
+              }
+              {
+                command = "wallpaperctl set -cover ${path}";
+                description = "Set the selected image as the wallpaper";
+                icon = "cs-backgrounds";
+                image-files = true;
+                name = "Set as wallpaper";
+                patterns = "*";
+                unique-id = "wallpaper";
+              }
+              {
+                command = "${ffmpeg} -i ${path} -vn -b:a 320k ${path}.mp3";
+                description = "Convert the selected audio file to a 320kbps MP3 file";
+                audio-files = true;
+                unique-id = "ffmpeg-mp3-320kbps";
+                icon = "soundconverter";
+                name = "Convert to MP3-320";
+              }
+              {
+                command = "${ffmpeg} -i ${path} -vn -q:a 0 ${path}.mp3";
+                description = "Convert the selected audio file to a VBR 0 MP3 file";
+                audio-files = true;
+                unique-id = "ffmpeg-mp3-V0";
+                icon = "soundconverter";
+                name = "Convert to MP3-V0";
+              }
+              {
+                command = "${ffmpeg} -i ${path} -vn -q:a 2 ${path}.mp3";
+                description = "Convert the selected audio file to a VBR 2 MP3 file";
+                audio-files = true;
+                unique-id = "ffmpeg-mp3-V2";
+                icon = "soundconverter";
+                name = "Convert to MP3-V2";
+              }
+              {
+                command = "${ffmpeg} -i ${path} -vn -acodec libopus -ab 96k -ar 48000 ${path}.opus";
+                description = "Convert the selected audio file to a 96k Opus file";
+                audio-files = true;
+                unique-id = "ffmpeg-opus-96k";
+                icon = "soundconverter";
+                name = "Convert to Opus (96k)";
+              }
+            ];
+        };
+      };
+
+      "Thunar/accels.scm".text = mkAccels {
+        "ThunarWindow/view-menubar" = "F1";
+        "ThunarWindow/close-all-windows" = "<Primary>q";
+
+        "ThunarStandardView/properties" = "grave";
+        "ThunarStandardView/select-by-pattern" = "<Primary>f";
+
+        "ThunarWindow/open-home" = "<Shift>asciitilde";
+        "ThunarWindow/search" = "<Shift>exclam";
+
+        "ThunarStandardView/toggle-sort-order" = "<Alt>grave";
+        "ThunarStandardView/sort-by-name" = "<Alt>1";
+        "ThunarStandardView/sort-by-size" = "<Alt>2";
+        "ThunarStandardView/sort-by-type" = "<Alt>3";
+        "ThunarStandardView/sort-by-mtime" = "<Alt>4";
+        "ThunarStandardView/invert-selection" = "<Primary>i";
+
+        "ThunarStandardView/back-alt" = null;
+        "ThunarActionManager/open-in-new-tab" = null;
+        "ThunarWindow/switch-next-tab" = null;
+        "ThunarShortcutsPane/sendto-shortcuts" = null;
+        "ThunarWindow/close-tab" = null;
+        "ThunarWindow/view-side-pane-tree" = null;
+        "ThunarWindow/toggle-side-pane" = null;
+        "ThunarWindow/open-location-alt" = null;
+        "ThunarWindow/switch-previous-tab" = null;
+        "ThunarWindow/view-side-pane-shortcuts" = null;
+        "ThunarWindow/close-window" = null;
+        "ThunarWindow/new-tab" = null;
+      };
+    };
 
   cache.directories = [{
     method = "symlink";
