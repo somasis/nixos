@@ -50,7 +50,6 @@
     pkgs.curl
     pkgs.dateutils
     pkgs.execline
-    pkgs.extrace
     pkgs.file
     pkgs.jdupes
     pkgs.lr

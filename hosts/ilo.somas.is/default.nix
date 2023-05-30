@@ -108,8 +108,8 @@ nixpkgs.lib.nixosSystem {
 
         systemPackages = [
           # Necessary for `nixos-rebuild`'s git stuff
+          pkgs.extrace
           pkgs.git
-
           pkgs.gparted
         ];
 
@@ -121,6 +121,13 @@ nixpkgs.lib.nixosSystem {
           XDG_LIB_HOME = "\${HOME}/local/lib";
           XDG_STATE_HOME = "\${HOME}/var/lib";
         };
+      };
+
+      security.wrappers.extrace = {
+        source = "${pkgs.extrace}/bin/extrace";
+        capabilities = "cap_net_admin+ep";
+        owner = "root";
+        group = "root";
       };
 
       # Force is required because services.xserver forces xdg.*.enable to true.
