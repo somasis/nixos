@@ -98,6 +98,7 @@ in
       };
     };
   };
+  systemd.user.services.mpd-discord-rpc.Unit.BindsTo = lib.optional config.services.mpd.enable "mpd.service";
 
   services.dunst.settings = {
     zz-discord = {
