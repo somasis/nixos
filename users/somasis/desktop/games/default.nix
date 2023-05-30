@@ -1,8 +1,7 @@
 { config
 , pkgs
 , ...
-}:
-{
+}: {
   imports = [
     ./minecraft.nix
     # TODO ./nx.nix

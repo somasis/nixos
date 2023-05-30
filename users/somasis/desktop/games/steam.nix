@@ -1,21 +1,22 @@
 { config
+, lib
 , nixosConfig
 , ...
 }:
-assert nixosConfig.programs.steam.enable;
-{
+let inherit (nixosConfig.programs) steam; in
+lib.mkIf steam.enable {
   persist.directories = [ "share/Steam" ];
 
   systemd.user.services.steam = {
     Unit = {
-      Description = "Keep Steam client running in the background";
+      Description = steam.package.meta.description;
       PartOf = [ "graphical-session.target" ];
     };
 
     Install.WantedBy = [ "graphical-session.target" ];
     Service = {
       Type = "simple";
-      ExecStart = "${nixosConfig.programs.steam.package}/bin/steam -silent -no-browser";
+      ExecStart = "${steam.package}/bin/steam -silent -no-browser";
       Restart = "on-failure";
 
       Nice = 19;
