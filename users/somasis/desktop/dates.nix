@@ -1,96 +1,89 @@
-{ config, pkgs, ... }:
+{ nixosConfig
+, config
+, lib
+, pkgs
+, ...
+}:
 let
-  dates = pkgs.writeShellApplication {
-    name = "dates";
+  makeDatesCalendar = pkgs.writeShellScript "make-dates-calendar" ''
+    PATH=${lib.makeBinPath [ pkgs.coreutils pkgs.dates pkgs.khal pkgs.moreutils pkgs.rwc pkgs.snooze ]}:"$PATH"
 
-    runtimeInputs = [ pkgs.coreutils ];
+    : "''${XDG_RUNTIME_DIR:=/run/user/$(id -u)}"
+    output="$XDG_RUNTIME_DIR/dates-calendar.txt"
 
-    text = ''
-      : "''${XDG_CONFIG_HOME:=''${HOME}/.config}"
+    khal=$(mktemp)
+    dates=$(mktemp)
 
-      format='%-19s %s\n'
-      date_format=
-      show_local=true
+    trap 'trap - TERM EXIT; rm -f "$khal" "$dates" "$output"' EXIT INT TERM QUIT HUP
 
-      usage() {
-          cat >&2 <<EOF
-      usage: ''${0##*/} [-L] [-f FORMAT] [+DATE_FORMAT] [NAMES...]
-      EOF
-          exit 69
-      }
+    {
+        while [ -e "$khal" ]; do
+            khal calendar today -f "" --day-format "" -o \
+                | head -n +8 \
+                | cut -c-25 \
+                | sponge "$khal"
+            snooze
+        done
+    } &
 
-      mkdir -p "''${XDG_CONFIG_HOME}"/dates
-      cd "''${XDG_CONFIG_HOME}"/dates || exit $?
+    {
+        while [ -e "$dates" ]; do
+            dates -r | sponge "$dates"
+            snooze -H'*' -M'*' -S'*'
+        done
+    } &
 
-      while getopts :Lf: arg >/dev/null 2>&1; do
-          case "''${arg}" in
-              L) show_local=false ;;
-              f) format="''${OPTARG}" ;;
-              ?) usage ;;
-          esac
-      done
-      shift $((OPTIND - 1))
+    touch "$khal" "$dates" "$output"
+    while rwc -ep "$khal" "$dates" >/dev/null; do
+        paste "$khal" "$dates" | tr '\t' ' ' | sponge "$output"
+    done
+  '';
 
-      case "''${1:-}" in
-          +*)
-              date_format="''${1}"
-              shift
-              ;;
-      esac
-
-      [[ "$#" -gt 0 ]] || set -- *
-
-      while [[ $# -gt 0 ]]; do
-          name="''${1}"
-
-          if [[ "$1" = _ ]]; then
-              if [[ "''${show_local}" = true ]]; then
-                  name=local
-              else
-                  shift
-                  continue
-              fi
-          elif [[ -f /etc/zoneinfo/"''${1}" ]]; then
-              TZ="''${1}"
-          elif [[ -e "''${1}" ]]; then
-              TZ=:"$(readlink -f "''${1}")"
-          else
-              printf 'error: timezone "%s" does not exist\n' "''${name}" >&2
-              exit 1
-          fi
-          export TZ
-
-          # Don't yell about us using ''${variables} in printf's format, it's meant to be user-customized.
-          # shellcheck disable=SC2059,SC2312
-          printf "''${format}" "''${name}" "$(date ''${date_format:+"''${date_format}"})"
-          shift
-      done
-    '';
-  };
+  datesCalendar = pkgs.writeShellScriptBin "dates-calendar" ''
+    PATH=${lib.makeBinPath [ pkgs.coreutils pkgs.snooze ]}:"$PATH"
+    : "''${XDG_RUNTIME_DIR:=/run/user/$(id -u)}"
+    output="$XDG_RUNTIME_DIR/dates-calendar.txt"
+    cat "$output"
+    [ -t 1 ] || snooze -H'*' -M'*' -S'*'
+  '';
 in
 {
-  xdg.configFile."dates/_".source = "${pkgs.tzdata}/share/zoneinfo/America/New_York";
-
-  home.packages = [ dates ];
+  home.packages = [ pkgs.dates datesCalendar ];
 
   persist.directories = [ "etc/dates" ];
   xdg.configFile."dates/_".source = "${pkgs.tzdata}/share/zoneinfo/${nixosConfig.time.timeZone}";
 
-  somasis.chrome.stw.widgets = [
-    {
-      command = ''
-        ${dates}/bin/dates -L -f "%-10s%s\n" +"%Y-%m-%d %I:%M %p"
-      '';
+  somasis.chrome.stw.widgets.dates = {
+    enable = false;
 
-      text.font = "monospace:style=heavy:size=10";
-      window.color = config.xresources.properties."*color4";
-      text.color = config.xresources.properties."*darkForeground";
-      window.opacity = 0.15;
-      window.position.x = -24;
-      window.position.y = 72;
-      window.padding = 12;
-      update = 60;
-    }
-  ];
+    command = ''
+      dates-calendar
+    '';
+
+    text.font = "monospace:size=10";
+    window.color = config.xresources.properties."*color8";
+    text.color = config.xresources.properties."*foreground";
+    window.position.x = "-0";
+    window.position.y = 48;
+    window.padding = 12;
+    update = -1;
+
+    window.top = true;
+  };
+
+  systemd.user.services = {
+    "stw@dates" = {
+      Unit.BindsTo = [ "panel.service" ];
+      Unit.Requires = [ "make-dates-calendar.service" ];
+    };
+
+    "make-dates-calendar" = {
+      Unit.BindsTo = [ "stw@dates.service" ];
+      Service = {
+        Type = "simple";
+        ExecStart = "${makeDatesCalendar}";
+        StopWhenUnneeded = true;
+      };
+    };
+  };
 }
-
