@@ -151,55 +151,59 @@ in
     package = pkgs.wrapCommand {
       package = pkgs.zotero;
 
-      # Ensure that there isn't a mismatch between extension settings
-      # (which could get modified during runtime, and then be written
-      # to prefs.js by Zotero) and our user.js.
-      beforeCommand =
-        let
-          prefs = "${config.home.homeDirectory}/.zotero/zotero/${config.programs.zotero.profiles.default.path}/prefs.js";
-          managedPrefs = lib.concatStringsSep " " (map (x: "-e 'user_pref(\"${x}\", '") (builtins.attrNames config.programs.zotero.profiles.default.settings));
+      wrappers = [{
+        command = "/bin/zotero";
 
-          startService = pkgs.writeShellScript "start-zotero-service" ''
-            ${pkgs.systemd}/bin/systemctl --user is-active -q zotero.service \
-                || ${pkgs.systemd}/bin/systemctl --user start zotero.service
-          '';
+        # Ensure that there isn't a mismatch between extension settings
+        # (which could get modified during runtime, and then be written
+        # to prefs.js by Zotero) and our user.js.
+        beforeCommand =
+          let
+            prefs = "${config.home.homeDirectory}/.zotero/zotero/${config.programs.zotero.profiles.default.path}/prefs.js";
+            managedPrefs = lib.concatStringsSep " " (map (x: "-e 'user_pref(\"${x}\", '") (builtins.attrNames config.programs.zotero.profiles.default.settings));
 
-          unhideZotero = pkgs.writeShellScript "zotero-unhide" ''
-            export PATH=${lib.makeBinPath [ pkgs.xdotool config.xsession.windowManager.bspwm.package ]}:"$PATH"
+            startService = pkgs.writeShellScript "start-zotero-service" ''
+              ${pkgs.systemd}/bin/systemctl --user is-active -q zotero.service \
+                  || ${pkgs.systemd}/bin/systemctl --user start zotero.service
+            '';
 
-            # Get only a window that matches class=zotero and role=browser,
-            # which matches to the main Zotero window.
-            if wid=$(xdotool search --limit 1 --all --class --role 'zotero|browser'); then
-                if [ -n "$(bspc query -N "$wid"'.hidden')" ]; then # window isn't hidden
-                    # If the window is hidden on a different desktop, bspwm
-                    # will not unhide and refocus it on the current desktop-
-                    # it will unhide and then focus its own desktop. This
-                    # is different from, say, activating a running instance
-                    # of Discord, so it trips me up. Move it to the focused
-                    # desktop when this is the case.
-                    bspc node "$wid" -g hidden=off -d focused -f
-                else
-                    # If it is not hidden, just focus it on the desktop it is on.
-                    bspc node "$wid" -g hidden=off -f
-                fi
+            unhideZotero = pkgs.writeShellScript "zotero-unhide" ''
+              export PATH=${lib.makeBinPath [ pkgs.xdotool config.xsession.windowManager.bspwm.package ]}:"$PATH"
 
-                _skip=true
-            fi
-          '';
+              # Get only a window that matches class=zotero and role=browser,
+              # which matches to the main Zotero window.
+              if wid=$(xdotool search --limit 1 --all --class --role 'zotero|browser'); then
+                  if [ -n "$(bspc query -N "$wid"'.hidden')" ]; then # window isn't hidden
+                      # If the window is hidden on a different desktop, bspwm
+                      # will not unhide and refocus it on the current desktop-
+                      # it will unhide and then focus its own desktop. This
+                      # is different from, say, activating a running instance
+                      # of Discord, so it trips me up. Move it to the focused
+                      # desktop when this is the case.
+                      bspc node "$wid" -g hidden=off -d focused -f
+                  else
+                      # If it is not hidden, just focus it on the desktop it is on.
+                      bspc node "$wid" -g hidden=off -f
+                  fi
 
-          filterPrefs = pkgs.writeShellScript "filter-prefs" ''
-            export PATH="${lib.makeBinPath [ pkgs.coreutils pkgs.gnugrep pkgs.moreutils ]}:$PATH"
+                  _skip=true
+              fi
+            '';
 
-            touch "${prefs}"
-            grep -vF ${managedPrefs} "${prefs}" | sponge "${prefs}"
-          '';
-        in
-        [
-          ''[ -z "$_skip" ] && . ${startService}''
-          ''[ -z "$_skip" ] && . ${unhideZotero}''
-          ''[ -z "$_skip" ] && ${filterPrefs}''
-          ''[ -n "$_skip" ] && unset _skip''
-        ];
+            filterPrefs = pkgs.writeShellScript "filter-prefs" ''
+              export PATH="${lib.makeBinPath [ pkgs.coreutils pkgs.gnugrep pkgs.moreutils ]}:$PATH"
+
+              touch "${prefs}"
+              grep -vF ${managedPrefs} "${prefs}" | sponge "${prefs}"
+            '';
+          in
+          [
+            ''[ -z "$_skip" ] && . ${startService}''
+            ''[ -z "$_skip" ] && . ${unhideZotero}''
+            ''[ -z "$_skip" ] && ${filterPrefs}''
+            ''[ -n "$_skip" ] && unset _skip''
+          ];
+      }];
     };
 
     profiles.default = {

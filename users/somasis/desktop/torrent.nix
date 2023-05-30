@@ -7,25 +7,29 @@ let
   transmission = pkgs.wrapCommand {
     package = pkgs.transmission;
 
-    beforeCommand = [
-      ''
-        entry=www/whatbox.ca/somasis
+    wrappers = [{
+      command = "/bin/transmission-remote";
 
-        case "$-" in
-            *x*)
-                set +x
-                TR_AUTH="$(${config.programs.password-store.package}/bin/pass meta "$entry" username):$(pass "$entry")"
-                set -x
-                ;;
-            *)
-                TR_AUTH="$(${config.programs.password-store.package}/bin/pass meta "$entry" username):$(pass "$entry")"
-                ;;
-        esac
-        export TR_AUTH
-      ''
-    ];
+      beforeCommand = [
+        ''
+          entry=www/whatbox.ca/somasis
 
-    prependFlags = "--authenv";
+          case "$-" in
+              *x*)
+                  set +x
+                  TR_AUTH="$(${config.programs.password-store.package}/bin/pass meta "$entry" username):$(pass "$entry")"
+                  set -x
+                  ;;
+              *)
+                  TR_AUTH="$(${config.programs.password-store.package}/bin/pass meta "$entry" username):$(pass "$entry")"
+                  ;;
+          esac
+          export TR_AUTH
+        ''
+      ];
+
+      prependFlags = "--authenv";
+    }];
   };
 
   tpull = pkgs.writeShellApplication {

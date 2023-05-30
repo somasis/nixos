@@ -37,5 +37,8 @@ wrapCommand {
     };
   };
 
-  setEnvironmentDefault.DMENU_EMOJI_LIST = "${unicode-emoji}/share/unicode/emoji/emoji-test.txt";
+  wrappers = [{
+    command = "/bin/dmenu-emoji";
+    setEnvironmentDefault.DMENU_EMOJI_LIST = "${unicode-emoji}/share/unicode/emoji/emoji-test.txt";
+  }];
 }
