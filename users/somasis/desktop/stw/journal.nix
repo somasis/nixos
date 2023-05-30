@@ -17,7 +17,7 @@
 
         ${pkgs.systemd}/bin/journalctl "$@" -n "$height" -o json \
             | ${config.programs.jq.package}/bin/jq -r '"\(._SOURCE_REALTIME_TIMESTAMP // .__REALTIME_TIMESTAMP | tonumber | strflocaltime("%H:%M:%S %p"))\t\(.SYSLOG_IDENTIFIER // (._CMDLINE | sub(".*/"; "")))\(if ._PID != null then "[" + ._PID + "]" else "" end)\t\(.MESSAGE)"' \
-            | ${pkgs.util-linux}/bin/column -s "$(printf '\t')" -t -c "$width" -R 2 -W 3 \
+            | ${pkgs.table}/bin/table -c "$width" -R 2 -W 3 \
             | tail -n "$height"
       '';
     in

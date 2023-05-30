@@ -24,7 +24,7 @@
     #         | msort -dUS \
     #         | mseq -S \
     #         | mscan -f ' %n\t%u%r%t%c\t%s\t%f\t%d ' \
-    #         | column -t -s "$(printf '\t')" -o ' │ ' \
+    #         | ${pkgs.table}/bin/table -o ' │ ' \
     #             -N ID,~,SUBJECT,SENDER,DATE \
     #             -R ID \
     #             -E SUBJECT \

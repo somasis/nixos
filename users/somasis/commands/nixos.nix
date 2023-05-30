@@ -35,6 +35,7 @@ in
         pkgs.s6-portable-utils
         pkgs.util-linux
         pkgs.xe
+        pkgs.table
       ];
 
       text = ''
@@ -322,6 +323,7 @@ in
         pkgs.coreutils
         pkgs.systemd
         pkgs.nixos-rebuild
+        pkgs.table
         config.programs.jq.package
       ];
 
@@ -388,9 +390,29 @@ in
                 ;;
         esac
 
+        diff_system=
+        diff_home=
         {
-            [ "$_nixos_new_system" = "$_nixos_old_system" ] || { printf '\n'; edo nixos-diff "$_nixos_old_system" "$_nixos_new_system"; }
-            [ "$_nixos_new_home" = "$_nixos_old_home" ] || { printf '\n'; edo nixos-diff "$_nixos_old_home" "$_nixos_new_home"; }
+            [ "$_nixos_new_system" = "$_nixos_old_system" ] || diff_system=$(NIXOS_DIFF_TABLE=false edo nixos-diff "$_nixos_old_system" "$_nixos_new_system")
+            [ "$_nixos_new_home" = "$_nixos_old_home" ] || diff_home=$(NIXOS_DIFF_TABLE=false edo nixos-diff "$_nixos_old_home" "$_nixos_new_home")
+
+            [ -n "$diff_home" ] && [ -n "$diff_system" ] \
+                && diff_system=$(
+                    grep -Fxv \
+                        -f <(
+                            printf '%s\n' "$diff_system" "$diff_home" \
+                                | grep -v -e '^[A-Za-z0-9]' -e '^$' \
+                                | sort -u \
+                                | uniq -d
+                        ) \
+                        <<<"$diff_system"
+                ) \
+                && printf '\n'
+
+            {
+                [ -n "$diff_system" ] && printf '%s\n' "$diff_system" ""
+                [ -n "$diff_home" ] && printf '%s\n' "$diff_home"
+            } | table -T2
         } | sponge >&2
       '';
     })
@@ -405,10 +427,14 @@ in
         pkgs.ncurses
         pkgs.nvd
         pkgs.outils
+        pkgs.teip
         pkgs.xe
+        pkgs.table
       ];
 
       text = ''
+        : "''${NIXOS_DIFF_TABLE:=true}"
+
         export COLUMNS="''${COLUMNS:-$(tput cols || echo 80)}"
 
         usage() {
@@ -435,8 +461,15 @@ in
                     -e '/^<<< /d' \
                     -e '/^>>> /d' \
                 | unvis \
+                | NO_COLOR=true teip -d $'\t' -f2 -- nocolor \
                 | nocolor \
-                | table -T 2
+                | {
+                    if [[ "$NIXOS_DIFF_TABLE" == 'true' ]]; then
+                        table -T2
+                    else
+                        cat
+                    fi
+                }
         }
 
         [ "$#" -gt 0 ] || usage
@@ -463,7 +496,7 @@ in
                 -name 'system-*-link' \
                 -type l \
                 | xe -N2 nvd --color always diff \
-                | pretty "$old_stem"
+                | pretty 'system'
 
             find /nix/var/nix/profiles/per-user \
                 -mindepth 1 \
@@ -478,7 +511,7 @@ in
                         | tail -n2
                     ' -- {} \; \
                 | xe -N2 nvd --color always diff \
-                | pretty "$old_stem"
+                | pretty 'home-manager'
         fi
       '';
     })

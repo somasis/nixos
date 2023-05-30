@@ -41,34 +41,8 @@
   };
 
   home.packages = [
-    # Strip color codes from stdin/files
-    (pkgs.writeShellApplication {
-      name = "nocolor";
-
-      runtimeInputs = [ (lib.getBin pkgs.gnused) pkgs.coreutils ];
-
-      text = ''
-        if [ -n "''${NO_COLOR:-}" ]; then
-            exec sed -E 's/\x1B\[([0-9]{1,3}(;[0-9]{1,2};?)?)?[mGK]//g' "$@"
-        else
-            exec cat
-        fi
-      '';
-    })
-
-    (pkgs.writeShellApplication {
-      name = "table";
-
-      runtimeInputs = [ pkgs.coreutils pkgs.util-linux ];
-
-      text = ''
-        if [ "$#" -gt 0 ] || [ -t 1 ]; then
-            exec column -s $'\t' -t -L "$@"
-        else
-            exec cat
-        fi
-      '';
-    })
+    pkgs.nocolor
+    pkgs.table
   ];
 
   programs.bash.initExtra = ''

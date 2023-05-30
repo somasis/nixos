@@ -136,6 +136,7 @@ in
         pkgs.gnused
         pkgs.coreutils
         pkgs.moreutils
+        pkgs.table
       ];
 
       text = ''
