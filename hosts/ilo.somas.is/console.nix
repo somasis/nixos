@@ -21,4 +21,12 @@
       "e0d6d6" # color15: bright grey
     ];
   };
+
+  # Show the system journal on tty12.
+  services.journald.console = "/dev/tty12";
+
+  # Don't create any virtual terminals except the one used by Xorg.
+  services.logind.extraConfig = lib.generators.toKeyValue { } {
+    NAutoVTs = 1;
+  };
 }

@@ -99,8 +99,6 @@ nixpkgs.lib.nixosSystem {
         ];
       };
 
-      services.journald.console = "/dev/tty12";
-
       services.xserver.enable = true;
 
       documentation = {
