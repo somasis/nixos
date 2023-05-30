@@ -13,25 +13,24 @@
     #   url = "https://www.gravatar.com/avatar/a187e38560bb56f5231cd19e45ad80f6?s=512&d=https%3A%2F%2Favatars.githubusercontent.com%2Fsomasis%3Fsize%3D512";
     # };
 
-    nix-filter.url = "github:numtide/nix-filter";
-
     nixpkgs.url = "github:nixos/nixpkgs?ref=nixos-unstable";
     nixpkgsStable.url = "github:nixos/nixpkgs?ref=nixos-22.11";
+
+    nixos-hardware.url = "github:nixos/nixos-hardware";
+
+    home-manager.url = "github:nix-community/home-manager";
+    home-manager.inputs.nixpkgs.follows = "nixpkgs";
 
     # Use a pre-built nix-index database
     nix-index-database.url = "github:Mic92/nix-index-database";
     nix-index-database.inputs.nixpkgs.follows = "nixpkgs";
 
-    nixos-hardware.url = "github:nixos/nixos-hardware";
-
     impermanence.url = "github:nix-community/impermanence";
+
     disko.url = "github:nix-community/disko";
     disko.inputs.nixpkgs.follows = "nixpkgs";
 
-    home-manager.url = "github:nix-community/home-manager";
-    home-manager.inputs.nixpkgs.follows = "nixpkgs";
-
-    # nixMinecraft.url = "github:12Boti/nix-minecraft";
+    nix-filter.url = "github:numtide/nix-filter";
 
     catgirl.flake = false;
     catgirl.url = "git+https://git.causal.agency/catgirl?ref=somasis/tokipona";
@@ -46,39 +45,36 @@
     ubase.flake = false;
     ubase.url = "github:michaelforney/ubase";
 
-    replugged.url = "github:LunNova/replugged-nix-flake";
-    replugged.inputs.nixpkgs.follows = "nixpkgs";
-
-    repluggedPluginBetterCodeblocks.flake = false;
-    repluggedPluginBetterCodeblocks.url = "github:replugged-org/better-codeblocks";
-    repluggedPluginBotInfo.flake = false;
-    repluggedPluginBotInfo.url = "github:IRONM00N/bot-details";
-    repluggedPluginCanaryLinks.flake = false;
-    repluggedPluginCanaryLinks.url = "github:asportnoy/CanaryLinks";
-    repluggedPluginChannelTyping.flake = false;
-    repluggedPluginChannelTyping.url = "github:powercord-community/channel-typing";
-    repluggedPluginClickableEdits.flake = false;
-    repluggedPluginClickableEdits.url = "github:replugged-org/clickable-edits";
-    repluggedPluginCutecord.flake = false;
-    repluggedPluginCutecord.url = "github:powercord-community/cutecord";
-    repluggedPluginEmojiUtility.flake = false;
-    repluggedPluginEmojiUtility.url = "github:replugged-org/emoji-utility";
-    repluggedPluginPersistSettings.flake = false;
-    repluggedPluginPersistSettings.url = "github:venplugs/persistsettings";
-    repluggedPluginSitelenPona.flake = false;
-    repluggedPluginSitelenPona.url = "github:dzshn/powercord-sitelen-pona";
-    repluggedPluginThemeToggler.flake = false;
-    repluggedPluginThemeToggler.url = "github:redstonekasi/theme-toggler";
-    repluggedPluginTimestampSender.flake = false;
-    repluggedPluginTimestampSender.url = "github:Anime-Forevere/Timestamp-Sender";
-    repluggedPluginTokiPona.flake = false;
-    repluggedPluginTokiPona.url = "github:somasis/discord-tokipona";
-    repluggedPluginWordFilter.flake = false;
-    repluggedPluginWordFilter.url = "github:A-Trash-Coder/wordfilter";
-    repluggedThemeCustom.flake = false;
-    repluggedThemeCustom.url = "path:/home/somasis/src/discord-theme-custom";
-    repluggedThemeIrc.flake = false;
-    repluggedThemeIrc.url = "github:somasis/discord-theme-irc";
+    # replugged.url = "github:LunNova/replugged-nix-flake";
+    # replugged.inputs.nixpkgs.follows = "nixpkgs";
+    # repluggedPluginBetterCodeblocks.flake = false;
+    # repluggedPluginBetterCodeblocks.url = "github:replugged-org/better-codeblocks";
+    # repluggedPluginBotInfo.flake = false;
+    # repluggedPluginBotInfo.url = "github:IRONM00N/bot-details";
+    # repluggedPluginCanaryLinks.flake = false;
+    # repluggedPluginCanaryLinks.url = "github:asportnoy/CanaryLinks";
+    # repluggedPluginChannelTyping.flake = false;
+    # repluggedPluginChannelTyping.url = "github:powercord-community/channel-typing";
+    # repluggedPluginClickableEdits.flake = false;
+    # repluggedPluginClickableEdits.url = "github:replugged-org/clickable-edits";
+    # repluggedPluginCutecord.flake = false;
+    # repluggedPluginCutecord.url = "github:powercord-community/cutecord";
+    # repluggedPluginEmojiUtility.flake = false;
+    # repluggedPluginEmojiUtility.url = "github:replugged-org/emoji-utility";
+    # repluggedPluginPersistSettings.flake = false;
+    # repluggedPluginPersistSettings.url = "github:venplugs/persistsettings";
+    # repluggedPluginThemeToggler.flake = false;
+    # repluggedPluginThemeToggler.url = "github:redstonekasi/theme-toggler";
+    # repluggedPluginTimestampSender.flake = false;
+    # repluggedPluginTimestampSender.url = "github:Anime-Forevere/Timestamp-Sender";
+    # repluggedPluginTokiPona.flake = false;
+    # repluggedPluginTokiPona.url = "github:somasis/discord-tokipona";
+    # repluggedPluginWordFilter.flake = false;
+    # repluggedPluginWordFilter.url = "github:A-Trash-Coder/wordfilter";
+    # repluggedThemeCustom.flake = false;
+    # repluggedThemeCustom.url = "path:/home/somasis/src/discord-theme-custom";
+    # repluggedThemeIrc.flake = false;
+    # repluggedThemeIrc.url = "github:somasis/discord-theme-irc";
 
     csl.flake = false;
     csl.url = "github:citation-style-language/styles";
@@ -105,18 +101,36 @@
     adblockHosts.url = "github:StevenBlack/hosts";
   };
 
-  outputs = { self, nixpkgs, home-manager, ... }@inputs: {
-    nixosConfigurations.ilo = import ./hosts/ilo.somas.is {
-      inherit self inputs nixpkgs;
+  outputs = { self, nixpkgs, home-manager, ... }@inputs:
+    let
+      inherit (nixpkgs) lib;
+      system = builtins.currentSystem or "x86_64-linux";
+    in
+    {
+      overlays.default = final: prev: import ./pkgs { inherit (prev) pkgs; };
+      packages = lib.genAttrs lib.systems.flakeExposed (system: import ./pkgs { pkgs = nixpkgs.legacyPackages.${system}; });
+
+      nixosConfigurations.ilo = import ./hosts/ilo.somas.is {
+        inherit self inputs nixpkgs;
+        overlays = [
+          (final: prev: {
+            stable = inputs.nixpkgsStable.legacyPackages."${system}";
+          })
+
+          self.overlays.default
+        ];
+      };
+
+      homeConfigurations.somasis = home-manager.lib.homeManagerConfiguration {
+        pkgs = nixpkgs.legacyPackages.${system};
+        modules = [ ./users/somasis ];
+      };
+
+      nixosModules = {
+        lib = import ./modules/lib.nix;
+
+        impermanence = import ./modules/impermanence.nix;
+        home-manager.impermanence = import ./modules/impermanence-hm.nix;
+      };
     };
-
-    homeConfigurations.somasis = import ./users/somasis;
-
-    nixosModules = {
-      lib = import ./modules/lib.nix;
-
-      impermanence = import ./modules/impermanence.nix;
-      home-manager.impermanence = import ./modules/impermanence-hm.nix;
-    };
-  };
 }
