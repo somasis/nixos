@@ -35,11 +35,11 @@ let
     onthisday=$(
         jq -r '
             .onthisday
+              | sort_by(.year)
               | map(
                 (.year | if . >= 0 then . else "\(. * -1) BC" end) as $year
                   | "\($year):\t\(.text)"
               )
-              | reverse[]
             ' <<< "$featured" \
             | teip -d $'\t' -f2 -s -- fixtext \
             | table -R1 -o $'\t'
