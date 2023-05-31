@@ -45,6 +45,9 @@
   home.packages = [
     pkgs.nocolor
     pkgs.table
+    (pkgs.writeShellScriptBin "pe" ''
+      ${pkgs.xe}/bin/xe -LL -j0 "$@" | sort -snk1 | cut -d' ' -f2-
+    '')
   ];
 
   programs.bash.initExtra = ''
