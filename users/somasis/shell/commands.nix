@@ -38,6 +38,8 @@
     since = "datediff -f '%Yy %mm %ww %dd %0Hh %0Mm %0Ss'";
 
     number = "nl -b a -d '' -f n -w 1";
+
+    doas = lib.optionalString nixosConfig.security.sudo.enable "sudo";
   };
 
   home.packages = [
