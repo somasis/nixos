@@ -6,8 +6,6 @@
 let
   runas_user = "somasis";
   runas = ''
-    export PATH=${lib.makeBinPath [ pkgs.bash pkgs.coreutils pkgs.s6 ]}:"$PATH"
-
     runas() {
         local runas_user
 
@@ -15,7 +13,7 @@ let
         if test "$(id -un)" = "$runas_user"; then
             "$@"; return $?
         else
-            s6-setuidgid "$runas_user" sh -lc '"$@"' -- "$@"; return $?
+            su -l - "$runas_user" sh -c '"$@"' -- "$@"; return $?
         fi
     }
 
