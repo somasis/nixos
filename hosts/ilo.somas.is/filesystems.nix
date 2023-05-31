@@ -79,8 +79,10 @@
       monthly = 3;
       weekly = 4;
 
-      # Use UTC for snapshot naming to avoid possible jumps due to timezone changes, DST, etc.
-      flags = "-k -p --utc";
+      # -k: Keep empty snapshots.
+      # -p: Create snapshots in parallel.
+      # -u: Use UTC for snapshot naming to avoid possible jumps due to timezone changes, DST, etc.
+      flags = "-p -u";
     };
   };
 
