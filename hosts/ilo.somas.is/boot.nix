@@ -11,17 +11,18 @@
 
   console.earlySetup = true;
 
+  persist.directories = [ "/etc/secureboot" ];
+
   boot = {
-    loader = {
-      efi.canTouchEfiVariables = true;
+    loader.efi.canTouchEfiVariables = true;
+    # loader.systemd-boot.enable = lib.mkForce false;
+    loader.systemd-boot.editor = false;
+    loader.systemd-boot.configurationLimit = 25;
+    loader.timeout = 0;
 
-      systemd-boot = {
-        enable = true;
-        editor = false;
-        configurationLimit = 25;
-      };
-
-      timeout = 0;
+    lanzaboote = {
+      enable = true;
+      pkiBundle = "/etc/secureboot";
     };
 
     # Silent boot.

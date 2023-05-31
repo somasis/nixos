@@ -17,6 +17,8 @@
     nixpkgsStable.url = "github:nixos/nixpkgs?ref=nixos-22.11";
 
     nixos-hardware.url = "github:nixos/nixos-hardware";
+    lanzaboote.url = "github:nix-community/lanzaboote";
+    lanzaboote.inputs.nixpkgs.follows = "nixpkgs";
 
     home-manager.url = "github:nix-community/home-manager";
     home-manager.inputs.nixpkgs.follows = "nixpkgs";

@@ -12,7 +12,7 @@ in
     dev.enable = true;
     nixos = {
       enable = true; # Provides `nixos-help`.
-      includeAllModules = true;
+      # includeAllModules = true; # TODO lanzaboote
     };
 
     man = {
