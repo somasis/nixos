@@ -84,59 +84,31 @@ let
     withDevices = false;
   };
 
-  # TODO There ought to be a JSON <-> QSettings converter
-  # It seems like it ought to be doable with PySide...
-  # <https://doc.qt.io/qtforpython-5/PySide2/QtCore/QSettings.html>
-  # <https://doc.qt.io/qtforpython-5/PySide2/QtCore/QJsonDocument.html>
-  # <https://doc.qt.io/qtforpython-5/PySide2/QtCore/QJsonValue.html>
-  mkCantata = lib.generators.toINI {
-    mkKeyValue = k: v:
-      let
-        v' =
-          if builtins.isList v && v == [ ] then
-            "@Invalid()"
-          else if builtins.isBool v then
-            lib.boolToString v
-          else if builtins.isList v then
-            lib.concatStringsSep '', '' v
-          else
-            builtins.toString v
-        ;
-      in
-      "${k}=${v'}"
-    ;
-  };
+  cantata-delete-cover-art = pkgs.writeShellScript "cantata-delete-cover-art" ''
+    ${pkgs.findutils}/bin/find "$@" -name 'cover.*' -delete
+    ${pkgs.coreutils}/bin/rm -rf "''${XDG_CACHE_HOME:=$HOME/.cache}/cantata/covers-scaled"
+  '';
 
-  cantataConf = pkgs.writeText "cantata-config"
-    (mkCantata {
-      # TODO this in setting particular should be functionalized, this is annoying
-      CustomActions =
-        let
-          cantata-delete-cover-art = pkgs.writeShellScript "cantata-delete-cover-art" ''
-            ${pkgs.findutils}/bin/find "$@" -name 'cover.*' -delete
-            ${pkgs.coreutils}/bin/rm -rf "''${XDG_CACHE_HOME:=$HOME/.cache}/cantata/covers-scaled"
-          '';
+  cantata-beets-open = pkgs.writeShellScript "cantata-beets-open" ''
+    set -eu -o pipefail
+    export PATH=${lib.makeBinPath [ envtag config.programs.beets.package pkgs.openssh pkgs.s6-portable-utils pkgs.xdg-utils pkgs.xe ]}:"$PATH"
 
-          cantata-beets-open = pkgs.writeShellScript "cantata-beets-open" ''
-            set -eu -o pipefail
-            export PATH=${lib.makeBinPath [ envtag config.programs.beets.package pkgs.openssh pkgs.s6-portable-utils pkgs.xdg-utils pkgs.xe ]}:"$PATH"
+    {
+        eval "$(envtag "$1")"
 
-            {
-                eval "$(envtag "$1")"
+        for a in \
+            beet list -f '$path' -a \
+                "mb_albumartistid:$musicbrainz_albumartistid" \
+                "mb_albumid:$musicbrainz_albumid"; do
+                printf '%s ' "$(s6-quote -d "'" -- "$a")"
+        done
+        printf '\n'
+    } \
+        | ssh spinoza sh -l - \
+        | xe -N1 xdg-open
+  '';
 
-                for a in \
-                    beet list -f '$path' -a \
-                        "mb_albumartistid:$musicbrainz_albumartistid" \
-                        "mb_albumid:$musicbrainz_albumid"; do
-                        printf '%s ' "$(s6-quote -d "'" -- "$a")"
-                done
-                printf '\n'
-            } \
-                | ssh spinoza sh -l - \
-                | xe -N1 xdg-open
-          '';
-
-          cantata-musicbrainz-open = pkgs.writeShellScript "cantata-musicbrainz-open" ''i
+  cantata-musicbrainz-open = pkgs.writeShellScript "cantata-musicbrainz-open" ''i
             set -eu -o pipefail
             export PATH=${lib.makeBinPath [ envtag pkgs.xdg-utils pkgs.xe ]}:"$PATH"
 
@@ -164,45 +136,99 @@ let
             printf '%s\0' "''${urls[@]}" | xe -0 -N1 xdg-open
           '';
 
-          cantata-search-youtube = pkgs.writeShellScript "cantata-search-youtube" ''
-            set -eu -o pipefail
-            export PATH=${lib.makeBinPath [ envtag config.programs.jq.package pkgs.xdg-utils ]}:"$PATH"
+  cantata-search-youtube = pkgs.writeShellScript "cantata-search-youtube" ''
+    set -eu -o pipefail
+    export PATH=${lib.makeBinPath [ envtag config.programs.jq.package pkgs.xdg-utils ]}:"$PATH"
 
-            eval "$(envtag "$1")"
-            url=$(
-                jq -n '
-                    ("\(env.artist_credit // env.artist) \(env.title)") as $query
-                        | "https://www.youtube.com/results?search_query=\($query | @uri)"
-                '
-            )
-            xdg-open "$url"
-          '';
-        in
+    eval "$(envtag "$1")"
+    url=$(
+        jq -n '
+            ("\(env.artist_credit // env.artist) \(env.title)") as $query
+                | "https://www.youtube.com/results?search_query=\($query | @uri)"
+        '
+    )
+    xdg-open "$url"
+  '';
+
+  # TODO There ought to be a JSON <-> QSettings converter
+  # It seems like it ought to be doable with PySide...
+  # <https://doc.qt.io/qtforpython-5/PySide2/QtCore/QSettings.html>
+  # <https://doc.qt.io/qtforpython-5/PySide2/QtCore/QJsonDocument.html>
+  # <https://doc.qt.io/qtforpython-5/PySide2/QtCore/QJsonValue.html>
+  mkCantata = lib.generators.toINI {
+    mkKeyValue = k: v:
+      let
+        v' =
+          if builtins.isList v && v == [ ] then
+            "@Invalid()"
+          else if builtins.isBool v then
+            lib.boolToString v
+          else if builtins.isList v then
+            lib.concatStringsSep ", " v
+          else
+            builtins.toString v
+        ;
+      in
+      "${k}=${v'}"
+    ;
+  };
+
+  mkCantataActions = actions:
+    let
+      actions' = lib.foldr
+        (prev: final: prev // final)
+        { }
+        (lib.imap0 (i: v: { "${toString i}_cmd" = v.command; "${toString i}_name" = v.name; }) actions);
+      count = builtins.length actions';
+    in
+    actions' // { inherit count; }
+  ;
+
+  cantataConf = pkgs.writeText "cantata-config"
+    (mkCantata {
+      CustomActions = mkCantataActions [
+        # %f file list, %d directory list, else list of files is appended to command
         {
-          # %f file list, %d directory list, else list of files is appended to command
-          "0_cmd" = "${cantata-delete-cover-art} %d";
-          "0_name" = "Delete cover art";
-          "1_cmd" = "${cantata-beets-open} %f";
-          "1_name" = "beets: open in library";
-          "2_cmd" = "${cantata-musicbrainz-open} albumartist %f";
-          "2_name" = "MusicBrainz: album artist";
-          "3_cmd" = "${cantata-musicbrainz-open} artist %f";
-          "3_name" = "MusicBrainz: artist";
-          "4_cmd" = "${cantata-musicbrainz-open} recording %f";
-          "4_name" = "MusicBrainz: recording";
-          "5_cmd" = "${cantata-musicbrainz-open} releasegroup %f";
-          "5_name" = "MusicBrainz: release group";
-          "6_cmd" = "${cantata-musicbrainz-open} releasetrack %f";
-          "6_name" = "MusicBrainz: release track";
-          "7_cmd" = "${cantata-musicbrainz-open} release %f";
-          "7_name" = "MusicBrainz: release";
-          "8_cmd" = "${cantata-musicbrainz-open} work %f";
-          "8_name" = "MusicBrainz: work";
-          "9_cmd" = "${cantata-search-youtube} %f";
-          "9_name" = "YouTube: search for track";
-
-          count = 8;
-        };
+          name = "Delete cover art";
+          command = "${cantata-delete-cover-art} %d";
+        }
+        {
+          name = "beets: open in library";
+          command = "${cantata-beets-open} %f";
+        }
+        {
+          name = "MusicBrainz: album artist";
+          command = "${cantata-musicbrainz-open} albumartist %f";
+        }
+        {
+          name = "MusicBrainz: artist";
+          command = "${cantata-musicbrainz-open} artist %f";
+        }
+        {
+          name = "MusicBrainz: recording";
+          command = "${cantata-musicbrainz-open} recording %f";
+        }
+        {
+          name = "MusicBrainz: release group";
+          command = "${cantata-musicbrainz-open} releasegroup %f";
+        }
+        {
+          name = "MusicBrainz: release track";
+          command = "${cantata-musicbrainz-open} releasetrack %f";
+        }
+        {
+          name = "MusicBrainz: release";
+          command = "${cantata-musicbrainz-open} release %f";
+        }
+        {
+          name = "MusicBrainz: work";
+          command = "${cantata-musicbrainz-open} work %f";
+        }
+        {
+          name = "YouTube: search for track";
+          command = "${cantata-search-youtube} %f";
+        }
+      ];
 
       General.version = cantata.version; # necessary to avoid the first-start dialog
 
