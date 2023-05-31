@@ -6,9 +6,10 @@
 let
   runas_user = "somasis";
   runas = ''
+    export PATH=${config.security.wrapperDir}:"$PATH"
+
     runas() {
         local runas_user
-
         ${lib.toShellVar "runas_user" runas_user}
         if test "$(id -un)" = "$runas_user"; then
             "$@"; return $?
