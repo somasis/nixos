@@ -30,7 +30,7 @@
     xclip
   ];
 
-  text = builtins.readFile ./dmenu-pass.sh;
+  text = builtins.readFile ./dmenu-pass.bash;
 }) // {
   meta = with lib; {
     description = "Access the password store with dmenu";
