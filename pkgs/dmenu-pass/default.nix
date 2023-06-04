@@ -1,16 +1,16 @@
 { lib
 , writeShellApplication
 
-  # , pass-nodmenu
+, pass-nodmenu
 
 , coreutils
-  # , dmenu
+, dmenu
 , findutils
 , gnugrep
 , gnused
 , libnotify
 , moreutils
-  # , pass ? pass-nodmenu
+, pass ? pass-nodmenu
 , uq
 , xclip
 }:
@@ -19,13 +19,13 @@
 
   runtimeInputs = [
     coreutils
-    # dmenu
+    dmenu
     findutils
     gnugrep
     gnused
     libnotify
     moreutils
-    # pass
+    pass
     uq
     xclip
   ];
