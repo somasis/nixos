@@ -26,7 +26,7 @@
     uq
   ];
 
-  text = builtins.readFile ./dmenu-run.sh;
+  text = builtins.readFile ./dmenu-run.bash;
 }) // {
   meta = with lib; {
     description = "An application runner that uses dmenu";
