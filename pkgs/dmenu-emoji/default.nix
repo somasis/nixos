@@ -28,7 +28,7 @@ wrapCommand {
       xdotool
     ];
 
-    text = builtins.readFile ./dmenu-emoji.sh;
+    text = builtins.readFile ./dmenu-emoji.bash;
   }) // {
     meta = with lib; {
       description = "An emoji picker that uses dmenu";
