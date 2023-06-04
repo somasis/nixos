@@ -14,6 +14,7 @@ rec
   nocolor = callPackage ./nocolor { };
   playtime = callPackage ./playtime { };
   table = callPackage ./table { };
+  wcal = callPackage ./wcal { };
 
   dmenu = callPackage ./dmenu { };
   dmenu-emoji = callPackage ./dmenu-emoji { };
