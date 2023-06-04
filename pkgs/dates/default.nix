@@ -12,7 +12,7 @@
     table
   ];
 
-  text = builtins.readFile ./dates.sh;
+  text = builtins.readFile ./dates.bash;
 }) // {
   meta = with lib; {
     description = "Show the current time/date in multiple timezones";
