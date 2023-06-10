@@ -2,10 +2,10 @@
 , writeShellApplication
 
 , coreutils
-  # , dmenu
-  # , dmenu-pass
+, dmenu-pass
 , gnused
-  # , pass
+, pass
+, trurl
 , util-linux
 , xdotool
 }:
@@ -14,15 +14,15 @@
 
   runtimeInputs = [
     coreutils
-    # dmenu
-    # dmenu-pass
+    dmenu-pass
     gnused
-    # pass
+    pass
+    trurl
     util-linux
     xdotool
   ];
 
-  text = builtins.readFile ./qute-pass.sh;
+  text = builtins.readFile ./qute-pass.bash;
 }) // {
   meta = with lib; {
     description = "Glue qutebrowser to pass and dmenu-pass";
