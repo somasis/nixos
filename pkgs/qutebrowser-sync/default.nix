@@ -30,7 +30,7 @@
     yq-go
   ];
 
-  text = builtins.readFile ./qutebrowser-sync.sh;
+  text = builtins.readFile ./qutebrowser-sync.bash;
 }) // {
   meta = with lib; {
     description = "Synchronize qutebrowser profile with Firefox Sync";

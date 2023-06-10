@@ -18,8 +18,9 @@ log() {
     level="$1"
     shift
 
-    [[ "${QUTEBROWSER_SYNC_VERBOSITY}" -gt "${level}" ]] && printf '%s\n' "$@" >&2
-    return
+    if [[ "${QUTEBROWSER_SYNC_VERBOSITY}" -gt "${level}" ]]; then
+        printf '%s\n' "$@" >&2
+    fi
 }
 
 edo() {
@@ -321,7 +322,6 @@ sync_tabs() {
         record=$(jq --arg session "${remote_session}" 'map(select(.data.clientName == $session))[]' <<<"${remote_tabs[@]}")
 
         remote_session_name=$(jq -r '.data.clientName' <<<"${record}")
-        remote_session_name=${remote_session_name// /_}
 
         touch "${QUTEBROWSER_SESSIONS}"/"${remote_session_name}".yml
 
