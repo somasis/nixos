@@ -14,9 +14,6 @@
     "2048" = "ssh -t play@ascii.town 2048";
     "snake" = "ssh -t play@ascii.town snake";
 
-    # Quick text editing aliases
-    note = ''$EDITOR "$(make -C ~/src/www/somas.is -s note-new)"'';
-
     bc = "bc -q";
     diff = "diff --color";
 

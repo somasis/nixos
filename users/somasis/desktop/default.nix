@@ -55,6 +55,7 @@
     ./wallpaper.nix
     ./window-manager.nix
     ./wine.nix
+    ./www.nix
   ];
 
   home.extraOutputsToInstall = [ "doc" "devdoc" "man" ];
@@ -88,7 +89,6 @@
       };
     })
 
-    pkgs.asciidoctor
     pkgs.bc
     pkgs.bmake
     pkgs.ffmpeg-full
