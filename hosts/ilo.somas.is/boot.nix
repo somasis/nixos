@@ -78,6 +78,9 @@
 
     plymouth = {
       enable = true;
+      themePackages = [ pkgs.nixos-bgrt-plymouth ];
+      theme = "nixos-bgrt";
+
       extraConfig = ''
         DeviceScale=1
       '';
