@@ -14,7 +14,7 @@
     # };
 
     nixpkgs.url = "github:nixos/nixpkgs?ref=nixos-unstable";
-    nixpkgsStable.url = "github:nixos/nixpkgs?ref=nixos-22.11";
+    nixpkgsStable.url = "github:nixos/nixpkgs?ref=nixos-23.05";
 
     nixos-hardware.url = "github:nixos/nixos-hardware";
     lanzaboote.url = "github:nix-community/lanzaboote";
@@ -22,6 +22,9 @@
 
     home-manager.url = "github:nix-community/home-manager";
     home-manager.inputs.nixpkgs.follows = "nixpkgs";
+
+    nixd.url = "github:nix-community/nixd";
+    nixd.inputs.nixpkgs.follows = "nixpkgsStable";
 
     # Use a pre-built nix-index database
     nix-index-database.url = "github:Mic92/nix-index-database";
@@ -115,6 +118,10 @@
       nixosConfigurations.ilo = import ./hosts/ilo.somas.is {
         inherit self inputs nixpkgs;
         overlays = [
+          self.overlays.default
+
+          inputs.nixd.overlays.default
+
           (final: prev: {
             stable = inputs.nixpkgsStable.legacyPackages."${system}";
           })
