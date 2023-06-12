@@ -17,6 +17,8 @@
     ./feeds
     ./games
     ./mail
+    ./music
+    ./panel
     ./pim
     ./study
     ./stw
@@ -38,7 +40,6 @@
     ./mounts.nix
     ./mouse.nix
     ./notifications.nix
-    ./panel.nix
     ./phone.nix
     ./photo.nix
     ./power.nix
