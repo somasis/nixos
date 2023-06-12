@@ -3,7 +3,13 @@ let
 in
 {
   # NOTE: systemd-resolved actually breaks `hostname -f`!
-  services.resolved.enable = true;
+  services.resolved = {
+    enable = true;
+    dnssec = "false"; # slow as fuck
+    # extraConfig = ''
+    #   DNSOverTLS=opportunistic
+    # '';
+  };
 
   # FIXME: Disabled while trying to fix network issues in my bedroom.
   # networking.resolvconf = {
