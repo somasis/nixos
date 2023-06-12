@@ -57,23 +57,12 @@
     # Tweak allowed sysrq key actions
     # <https://docs.kernel.org/admin-guide/sysrq.html>
     kernel.sysctl."kernel.sysrq" = builtins.foldl' (x: y: x + y) 0 [
-      # enable keyboard controls
-      4
-
-      # enable filesystem syncing
-      16
-
-      # enable remounting filesystems read-only
-      32
-
-      # enable signalling processes
-      64
-
-      # enable reboot/poweroff
-      128
-
-      # enable renicing all realtime tasks
-      256
+      4 # enable keyboard controls
+      16 # enable filesystem syncing
+      32 # enable remounting filesystems read-only
+      64 # enable signalling processes
+      128 # enable reboot/poweroff
+      256 # enable renicing all realtime tasks
     ];
 
     plymouth = {
