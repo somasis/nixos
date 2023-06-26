@@ -20,6 +20,8 @@
     # pkgs.zaz # TODO broken because of SDL.h
 
     pkgs.pcsx2
+
+    pkgs.space-cadet-pinball
   ];
 
   persist = {
