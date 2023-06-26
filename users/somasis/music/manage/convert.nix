@@ -25,7 +25,9 @@
 
       format = "opus";
       formats.opus = {
-        command = "${pkgs.ffmpeg-full}/bin/ffmpeg -i $source -y -vn -acodec libopus -ab 96k $dest";
+        # Set the sample rate to 48kHz so that anything above that isn't converted
+        # with its original sample rate, which wastes space for lossy audio
+        command = "${pkgs.ffmpeg-full}/bin/ffmpeg -i $source -y -vn -acodec libopus -ab 96k -ar 48000 $dest";
         extension = "opus";
       };
 
