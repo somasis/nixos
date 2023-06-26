@@ -52,6 +52,7 @@
   imports = [
     ./filetype
     ./plugins
+    # ./lsp.nix
   ];
 
   home.packages = [
@@ -327,8 +328,6 @@
       }
 
       add-highlighter global/user-highlight-cursor-word dynregex '%opt{user_cursor_word}' 0:UserCursorWord
-
-      set-option global windowing_modules 'tmux' 'wayland' 'x11'
 
       # Disable startup changelog unless development version.
       set-option global startup_info_version -1

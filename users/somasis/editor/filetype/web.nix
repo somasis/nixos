@@ -1,13 +1,12 @@
 { lib, pkgs, config, ... }:
 let
-  format = lib.concatStringsSep " " [
-    "${pkgs.nodePackages.prettier}/bin/prettier"
-    "--tab-width=%opt{indentwidth}"
-    "--print-width=%opt{autowrap_column}"
-    "--config-precedence"
-    "prefer-file"
-    "--stdin-filepath=%val{buffile}"
-  ];
+  format = ''
+    ${pkgs.nodePackages.prettier}/bin/prettier \
+        --tab-width %opt{tabstop}  \
+        --print-width %opt{autowrap_column} \
+        --config-precedence prefer-file \
+        --stdin-filepath %var{buffile}
+  '';
 
   # CSS
   # TODO Need a new CSS linting tool; stylelint is broken with recent NixOS updates, it seems, due to
@@ -41,7 +40,7 @@ in
       name = "WinSetOption";
       option = "filetype=(javascript|yaml)";
       commands = ''
-        set-option window formatcmd "${format}"
+        set-option window formatcmd ${format}
       '';
     }
 
@@ -50,7 +49,7 @@ in
       name = "WinSetOption";
       option = "filetype=(css|html)";
       commands = ''
-        set-option window formatcmd "${format}"
+        set-option window formatcmd ${format}
       '';
     }
 
@@ -59,7 +58,7 @@ in
       name = "WinSetOption";
       option = "filetype=javascript";
       commands = ''
-        set-option window lintcmd "${lintJavaScript}"
+        set-option window lintcmd ${lintJavaScript}
       '';
     }
 
@@ -69,8 +68,8 @@ in
       option = "filetype=json";
       commands = ''
         set-option window tabstop 2
-        set-option window formatcmd "${formatJSON}"
-        set-option window lintcmd "${lintJSON}"
+        set-option window formatcmd ${formatJSON}
+        set-option window lintcmd ${lintJSON}
       '';
     }
   ];

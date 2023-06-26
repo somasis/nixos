@@ -1,6 +1,6 @@
 { pkgs, ... }:
 let
-  format = "${pkgs.clang-tools}/bin/clang-format";
+  format = "${pkgs.clang-tools}/bin/clang-format -style=file";
   lint = pkgs.writeShellScript "lint" ''
     ${pkgs.clang-tools}/bin/clang-tidy --quiet "$@" 2>/dev/null
   '';

@@ -1,8 +1,8 @@
 { pkgs, ... }:
 let
   lint = pkgs.writeShellScript "lint" ''
-    ${pkgs.yamllint}/bin/yamllint -f parsable "$1" \
-        | sed "s/ \[\(.*\)\] / \1: /"
+    ${pkgs.yamllint}/bin/yamllint -f parsable -s "$1" \
+        | sed -E "s/ \[\(.*\)\] / \1: /"
   '';
 in
 {
