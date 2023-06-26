@@ -49,8 +49,8 @@ if [ "${SCREENSHOT_OCR}" = true ] \
     notify-send \
         -a screenshot \
         -i scanner \
-        "screenshot" \
-        "Scanned ${#ocr} characters: \"${ocr}\""
+        "Scanned ${#ocr} characters" \
+        "\"${ocr}\""
 
 # Barcode data is not saved since it may contain sensitive information.
 elif [ "${SCREENSHOT_BARCODE}" = true ] \
@@ -76,8 +76,8 @@ elif [ "${SCREENSHOT_BARCODE}" = true ] \
     notify-send \
         -a screenshot \
         -i view-barcode-qr \
-        "screenshot" \
-        "Scanned barcode (${barcode_type}): \"${barcode_data}\""
+        "Scanned barcode (${barcode_type})" \
+        "\"${barcode_data}\""
 else
     xclip -i \
         -selection clipboard \
@@ -98,8 +98,8 @@ else
             -i accessories-screenshot \
             -A "file=Open" \
             -A "directory=Open containing directory" \
-            "screenshot" \
-            "Took screenshot: \"${b}.png\""
+            "Took screenshot" \
+            "\"${b}.png\""
     )
 
     case "${action}" in
