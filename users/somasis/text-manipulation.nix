@@ -30,6 +30,7 @@
   home.packages = [
     pkgs.fx
     pkgs.html-tidy
+    pkgs.ijq
     pkgs.json2nix
     pkgs.lowdown
     pkgs.patchutils

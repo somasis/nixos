@@ -12,7 +12,6 @@
     ./modules
     ./shell
 
-    ./jq.nix
     ./less.nix
     ./man.nix
     ./monitor.nix
@@ -21,6 +20,7 @@
     ./spell.nix
     ./ssh.nix
     ./syncthing.nix
+    ./text-manipulation.nix
     ./tmux.nix
     ./xdg.nix
   ];
