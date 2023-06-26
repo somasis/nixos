@@ -111,23 +111,22 @@ let
         done
     done
   '';
+
+  nmcli = "${pkgs.networkmanager}/bin/nmcli";
 in
 {
   home.packages = [
     repl
-    (
-      let nmcli = "${pkgs.networkmanager}/bin/nmcli"; in
-      pkgs.writeShellScriptBin "nmctl" ''
-        [ $# -gt 0 ] && exec ${nmcli} -a "$@"
+    (pkgs.writeShellScriptBin "nmctl" ''
+      [ $# -gt 0 ] && exec ${nmcli} -a "$@"
 
-        export PAGER=cat
+      export PAGER=cat
 
-        ${nmcli} -o
-        exec ${repl}/bin/repl \
-            -p '\e[34mnm \e[33m∴ \e[0m' \
-            ${nmcli} -a "$@"
-      ''
-    )
+      ${nmcli} -o
+      exec ${repl}/bin/repl \
+          -p '\e[34mnm \e[33m∴ \e[0m' \
+          ${nmcli} -a "$@"
+    '')
     (pkgs.writeShellApplication {
       name = "btcli";
 
@@ -140,7 +139,7 @@ in
       ];
 
       text = ''
-        [ $# -gt 0 ] && exec bluetoothctl "$@"
+        [[ $# -gt 0 ]] && exec bluetoothctl "$@"
 
         : "''${COLUMNS:=$(tput cols)}"
         e=$(printf '\e')
