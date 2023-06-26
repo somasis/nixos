@@ -267,6 +267,7 @@ let
         destinations = [
           { dir = "/home/somasis/files/audio/library/source/torrent"; label = "audio/source"; }
           { dir = "/home/somasis/files/audio/misc"; label = "audio/misc"; }
+          { dir = "/home/somasis/files/video/anime"; label = "video/anime"; }
           { dir = "/home/somasis/files/video/film"; label = "video/film"; }
           { dir = "/home/somasis/files/video/tv"; label = "video/tv"; }
           { dir = "/home/somasis/files/misc"; label = "misc"; }

@@ -56,8 +56,10 @@ let
       mediasearchdirectories = mkList [
         config.xdg.userDirs.download
         "${config.home.homeDirectory}/mess/current"
+        "${config.xdg.userDirs.videos}/anime"
         "${config.xdg.userDirs.videos}/film"
         "${config.xdg.userDirs.videos}/tv"
+        "${config.home.homeDirectory}/mnt/sftp/genesis.whatbox.ca/files/video/anime"
         "${config.home.homeDirectory}/mnt/sftp/genesis.whatbox.ca/files/video/film"
         "${config.home.homeDirectory}/mnt/sftp/genesis.whatbox.ca/files/video/tv"
       ];

@@ -44,6 +44,7 @@ in
     "/home/somasis/sync"
     "/home/somasis/tracks"
     "/home/somasis/video"
+    "/home/somasis/video/anime"
     "/home/somasis/video/film"
     "/home/somasis/video/tv"
     "/cache"
