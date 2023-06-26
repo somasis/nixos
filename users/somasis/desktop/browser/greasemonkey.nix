@@ -201,7 +201,7 @@ lib.mkIf (options.programs.qutebrowser ? greasemonkey) {
     (pkgs.fetchurl { hash = "sha256-pKxroIOn19WvcvBKA5/+ZkkA2YxXkdTjN3l2SLLcC0A="; url = "https://gist.githubusercontent.com/codiac-killer/87e027a2c4d5d5510b4af2d25bca5b01/raw/764a0821aa248ec4126b16cdba7516c7190d287d/youtube-autoskip.user.js"; })
     (
       let
-        version = "1.3.1";
+        version = "1.3.2";
       in
       pkgs.runCommandLocal "sb.js"
         {
@@ -214,10 +214,15 @@ lib.mkIf (options.programs.qutebrowser ? greasemonkey) {
             highlightKey = "Enter";
           });
 
-          sb_nosettings = pkgs.fetchurl {
-            url = "https://raw.githubusercontent.com/mchangrh/sb.js/v${version}/docs/sb-nosettings.min.js";
-            hash = "sha256-GIQS9iPMmpB1cJPHzLLYMSTo3EdNT8hd2llVnp87k4o=";
-          };
+          sb_nosettings =
+            (pkgs.fetchFromGitHub {
+              owner = "mchangrh";
+              repo = "sb.js";
+              rev = "v${version}";
+              hash = "sha256-rRA4Djq47LwXhPTpIOMix0/fsHs9CDgQI0KQavcpw34";
+            })
+            + "/docs/sb-nosettings.min.js"
+          ;
         }
         ''
           cat - $sb_nosettings <<EOF > $out
