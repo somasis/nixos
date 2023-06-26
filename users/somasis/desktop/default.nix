@@ -37,7 +37,6 @@
     ./mess.nix
     ./mounts.nix
     ./mouse.nix
-    ./music.nix
     ./notifications.nix
     ./panel.nix
     ./phone.nix
