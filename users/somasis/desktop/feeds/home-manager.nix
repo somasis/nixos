@@ -4,10 +4,9 @@
 , ...
 }:
 let
-  inherit (pkgs) runCommandLocal writeText;
+  inherit (pkgs) runCommandLocal writeJqScript writeText;
   inherit (lib) makeBinPath;
   inherit (builtins) toJSON;
-  inherit (config.lib.somasis) writeJqScript;
 in
 {
   news.display = "silent";

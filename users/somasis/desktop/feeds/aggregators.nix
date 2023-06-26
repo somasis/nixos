@@ -5,8 +5,8 @@
 }:
 let
   inherit (lib) getBin makeBinPath;
-  inherit (config.lib.somasis) feeds writeJqScript;
-  inherit (pkgs) writeScript writeShellScript;
+  inherit (config.lib.somasis) feeds;
+  inherit (pkgs) writeJqScript writeShellScript;
 
   filterSubredditJson = writeJqScript "filter-subreddit" { } ''
     .data.children |= map(

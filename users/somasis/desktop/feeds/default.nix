@@ -67,7 +67,7 @@ in
 
         # newsboat(1): "Configure a high number to keep the selected item in the center"
         scrolloff 100000
-        
+
         show-keymap-hint no
 
         text-width 100
@@ -157,6 +157,21 @@ in
         title = "hisham.hm";
         tags = [ "blog" "computer" ];
       }
+      {
+        url = "https://utcc.utoronto.ca/~cks/space/blog/?atom";
+        title = "Wandering Thoughts: Chris Siebenmann";
+        tags = [ "blog" "computer" ];
+      }
+      {
+        url = "https://susam.net/blog/feed.xml";
+        title = "Susam Pal";
+        tags = [ "blog" "computer" ];
+      }
+      {
+        url = "https://susam.net/maze/feed.xml";
+        title = "Susam Pal: maze";
+        tags = [ "blog" "computer" ];
+      }
 
       # Comics
       {
@@ -224,6 +239,10 @@ in
         url = "https://constantlyhating.substack.com/feed";
         tags = [ "review" "music" ];
       }
+      {
+        url = "https://expandingdan.substack.comfeed";
+        tags = [ "music" ];
+      }
 
       # News
       {
@@ -281,6 +300,11 @@ in
         url = "https://feeds.feedburner.com/HCPress";
         title = "High Country Press";
         tags = [ "news" "local" ];
+      }
+
+      {
+        url = feeds.urls.filter "https://www.avclub.com/rss" feeds.filters.discardContent;
+        tags = [ "news" "media" "film" ];
       }
 
       # Notifications
@@ -388,83 +412,127 @@ in
         title = "Urban Terror: blogs";
         tags = [ "urbanterror" "blog" ];
       }
+
+      {
+        url = "https://mentalhellth.xyz/feed";
+        title = "Mental Hellth";
+        tags = [ "blog" "health" "philosophy" "psychoanalysis" ];
+      }
     ];
   };
 
   cache.directories = [{ method = "symlink"; directory = "var/cache/newsboat"; }];
 
-  systemd.user = {
-    services.feeds = {
-      Unit = {
-        Description = "Update feeds (if not during working hours)";
-        StartLimitIntervalSec = 1;
-        StartLimitBurst = 1;
-        StartLimitAction = "none";
+  systemd.user =
+    let
+      if-network = pkgs.writeShellScript "if-network-online" ''
+        ${pkgs.networkmanager}/bin/nm-online -q || exit $e
+      '';
+
+      if-newsboat-not-running = pkgs.writeShellScript ''if-newsboat-not-running'' ''
+        if ${pkgs.procps}/bin/pgrep -u "$USER" -x newsboat >/dev/null; then
+            exit 255 # unit will fail
+        fi
+        exit 0
+      '';
+    in
+    {
+      services.feeds = {
+        Unit = {
+          Description = "Update feeds (if not during working hours)";
+          StartLimitIntervalSec = 1;
+          StartLimitBurst = 1;
+          StartLimitAction = "none";
+        };
+
+        Service = {
+          Type = "oneshot";
+          ExecCondition = [ "${pkgs.playtime}/bin/playtime -q" if-newsboat-not-running ]
+            ++ lib.optional osConfig.networking.networkmanager.enable if-network;
+
+          ExecStart = [ "${pkgs.limitcpu}/bin/cpulimit -qf -l 25 -- ${pkgs.newsboat}/bin/newsboat -x reload" ];
+          ExecStartPost = ''-${pkgs.writeShellScript "newsboat-cleanup" "${pkgs.limitcpu}/bin/cpulimit -qf -l 25 -- ${pkgs.newsboat}/bin/newsboat --cleanup >/dev/null"}'';
+
+          Restart = "on-failure";
+          RestartSec = 15;
+
+          Nice = 19;
+          CPUSchedulingPolicy = "idle";
+          IOSchedulingClass = "idle";
+          IOSchedulingPriority = 7;
+        };
       };
 
-      Service = {
-        Type = "oneshot";
-        ExecCondition = [
-          "${pkgs.playtime}/bin/playtime -q"
-          "${pkgs.writeShellScript ''newsboat-wait'' ''! ${pkgs.procps}/bin/pwait -u %u -x newsboat''}"
-        ];
-        ExecStart = [ "${pkgs.limitcpu}/bin/cpulimit -qf -l 25 -- ${pkgs.newsboat}/bin/newsboat -x reload" ];
-        ExecStartPost = [ "-${pkgs.limitcpu}/bin/cpulimit -qf -l 25 -- ${pkgs.newsboat}/bin/newsboat --cleanup" ];
+      timers.feeds = {
+        Unit = {
+          Description = "Update feeds every six hours";
+          PartOf = [ "default.target" ];
+        };
+        Install.WantedBy = [ "default.target" ];
 
-        Restart = "on-failure";
-        RestartSec = 15;
+        Timer = {
+          OnCalendar = "0/6:00:00";
+          OnStartupSec = "30m";
+          Persistent = true;
+          RandomizedDelaySec = "5m";
+        };
+      };
 
-        Nice = 19;
-        CPUSchedulingPolicy = "idle";
-        IOSchedulingClass = "idle";
-        IOSchedulingPriority = 7;
+      timers.feeds-check-broken = {
+        Unit = {
+          Description = "Check if there are any broken feed URLs every week";
+          PartOf = [ "default.target" ];
+        };
+        Install.WantedBy = [ "default.target" ];
+
+        Timer = {
+          OnCalendar = "weekly";
+          Persistent = true;
+          RandomizedDelaySec = "5m";
+        };
+      };
+
+      services.feeds-check-broken = {
+        Unit.Description = "Check if there are any broken feed URLs";
+        Service = {
+          ExecCondition = [ if-newsboat-not-running if-network ];
+          ExecStart = pkgs.writeShellScript "newsboat-check-broken" ''
+            PATH=${lib.makeBinPath [ config.programs.jq.package pkgs.lychee pkgs.newsboat pkgs.yq-go ]}
+            newsboat -e | yq -p xml -o json | jq -er '.opml.body.outline[]."+@xmlUrl"' | lychee --no-progress - >/dev/null
+          '';
+        };
       };
     };
 
-    timers.feeds = {
-      Unit = {
-        Description = "Update feeds every two hours";
-        PartOf = [ "default.target" ];
-      };
-      Install.WantedBy = [ "default.target" ];
+  programs.qutebrowser = lib.optionalAttrs
+    config.programs.dmenu.enable
+    {
+      aliases."feeds" =
+        let
+          quteFeeds = writeShellScript "qutebrowser-feeds" ''
+            PATH=${makeBinPath [ pkgs.coreutils pkgs.moreutils pkgs.sfeed pkgs.xclip ]}:$PATH
 
-      Timer = {
-        OnCalendar = "0/2:00:00";
-        OnUnitActiveSec = "2h";
-        OnStartupSec = 0;
-        Persistent = true;
-        RandomizedDelaySec = "5m";
-      };
+            : "''${QUTE_FIFO:?}"
+            : "''${QUTE_HTML:?}"
+
+            feeds=$(<"$QUTE_HTML" sfeed_web "$1" | cut -f1)
+
+            if [[ -n "$feeds" ]]; then
+                feeds=$(dmenu -l 4 -g 2 -p "qutebrowser [feeds]:" <<<"$feeds")
+                xclip -selection clipboard -i <<< "$feeds"
+
+                printf 'message-info "%s"\n' \
+                    "feeds: copied feed to clipboard." \
+                    > "''${QUTE_FIFO}"
+            else
+                printf 'message-warning "%s"\n' \
+                    "feeds: no feeds were found." \
+                    > "''${QUTE_FIFO}"
+            fi
+          '';
+        in
+        "spawn -u ${quteFeeds} {url:domain}";
+
+      keyBindings.normal."zpf" = "feeds";
     };
-  };
-
-  programs.qutebrowser = {
-    aliases."feeds" =
-      let
-        quteFeeds = writeShellScript "qutebrowser-feeds" ''
-          PATH=${makeBinPath [ pkgs.dmenu pkgs.coreutils pkgs.moreutils pkgs.sfeed pkgs.xclip ]}:$PATH
-
-          : "''${QUTE_FIFO:?}"
-          : "''${QUTE_HTML:?}"
-
-          feeds=$(<"$QUTE_HTML" sfeed_web "$1" | cut -f1)
-
-          if [[ -n "$feeds" ]]; then
-              feeds=$(dmenu -l 4 -g 2 -p "qutebrowser [feeds]:" <<<"$feeds")
-              xclip -selection clipboard -i <<< "$feeds"
-
-              printf 'message-info "%s"\n' \
-                  "feeds: copied feed to clipboard." \
-                  > "''${QUTE_FIFO}"
-          else
-              printf 'message-warning "%s"\n' \
-                  "feeds: no feeds were found." \
-                  > "''${QUTE_FIFO}"
-          fi
-        '';
-      in
-      "spawn -u ${quteFeeds} {url:domain}";
-
-    keyBindings.normal."zpf" = "feeds";
-  };
 }
