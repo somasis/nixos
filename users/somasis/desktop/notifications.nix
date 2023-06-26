@@ -16,7 +16,7 @@
         alignment = "left";
         origin = "top-right";
         offset = "0x0";
-        width = "(128,752)";
+        width = "(${toString (2256 / 24)},${toString (2256 / 3)})";
         height = 32;
 
         notification_limit = 12;
@@ -94,19 +94,21 @@
   };
 
   systemd.user.services.xsecurelock.Service.ExecStartPre = [
-    "-${pkgs.coreutils}/bin/env PATH=${pkgs.dbus}/bin:$PATH ${config.services.dunst.package}/bin/dunstctl set-paused true"
+    "-${config.services.dunst.package}/bin/dunstctl set-paused true"
   ];
 
   systemd.user.services.xsecurelock.Service.ExecStopPost = [
-    "-${pkgs.coreutils}/bin/env PATH=${pkgs.dbus}/bin:$PATH ${config.services.dunst.package}/bin/dunstctl set-paused false"
+    "-${config.services.dunst.package}/bin/dunstctl set-paused false"
   ];
 
   programs.autorandr.hooks.postswitch."notify" = ''
-    ${config.services.dunst.package}/bin/dunstify \
+    notify-send \
         -a autorandr \
         -i preferences-desktop-display \
         -u low \
         'autorandr' \
         "Switched to profile '$AUTORANDR_CURRENT_PROFILE'."
   '';
+
+  home.packages = [ pkgs.libnotify ];
 }
