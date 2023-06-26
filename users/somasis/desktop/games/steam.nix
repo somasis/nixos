@@ -16,7 +16,10 @@ lib.mkIf steam.enable {
     Install.WantedBy = [ "graphical-session.target" ];
     Service = {
       Type = "simple";
+
+      Environment = [ "STEAM_FORCE_DESKTOPUI_SCALING=1.5" ];
       ExecStart = "${steam.package}/bin/steam -silent -no-browser";
+
       Restart = "on-failure";
 
       Nice = 19;
