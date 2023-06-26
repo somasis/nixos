@@ -35,7 +35,6 @@ in
 {
   imports = [
     ./blocking.nix
-    # ./farside.nix
     ./greasemonkey.nix
     ./open.nix
     ./reader.nix
