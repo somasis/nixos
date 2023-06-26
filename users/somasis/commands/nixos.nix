@@ -193,6 +193,8 @@ in
                     ~/src/nix/"$basename" \
                     ~/src/"$basename"; do
                     if git -C "$d" diff-index --quiet HEAD -- 2>/dev/null; then
+                        printf 'Updating "%s"...\n' "$basename" >&2
+
                         # --atomic is used so the local trees aren't ever left in a weird state.
                         before=$(git -C "$d" rev-parse HEAD) \
                             && verbose "+ git -C \"%s\" pull -q --progress -- --atomic\n" "$d" \
