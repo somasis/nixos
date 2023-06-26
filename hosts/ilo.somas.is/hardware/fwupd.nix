@@ -7,5 +7,17 @@
     extraRemotes = [ "lvfs-testing" ];
   };
 
-  cache.directories = [ "/var/lib/fwupd" ];
+  cache.directories = [ "/var/cache/fwupd" ];
+  persist.directories = [ "/var/lib/fwupd" ];
+
+  systemd = {
+    timers.fwupd-refresh = {
+      after = [ "network-online.target" ];
+      wantedBy = [ "default.target" ];
+    };
+
+    # Necessary beacuse otherwise it spits a terminal-only progress bar into
+    # the system journal.
+    services.fwupd-refresh.serviceConfig.StandardOutput = "null";
+  };
 }

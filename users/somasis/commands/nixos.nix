@@ -338,6 +338,10 @@ in
 
         systemctl -q is-active systemd-journald.service && edo sudo journalctl --flush
 
+        if fwupdmgr get-updates --json --no-authenticate | jq -e '.Devices | length > 0' >/dev/null; then
+            fwupdmgr update
+        fi
+
         [ "$e" -eq 0 ] || exit $e
 
         _nixos_new_system=/nix/var/nix/profiles/$(readlink /nix/var/nix/profiles/system)
