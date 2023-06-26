@@ -64,7 +64,21 @@ let
       '';
 
       generate = writeShellScript "generate-yt-dlp" ''
-        PATH=${makeBinPath [ config.programs.yt-dlp.package config.programs.jq.package pkgs.yq-go ]}:$PATH
+        PATH=${makeBinPath [ config.programs.yt-dlp.package config.programs.jq.package pkgs.libnotify pkgs.yq-go ]}:$PATH
+
+        err() {
+            printf "error: failed to update '%s'\n" "$1" >&2
+            notify-send -u critical \
+                -a newsboat \
+                -i internet-feed-reader \
+                -A "log=Read log" \
+                "newsboat" \
+                "Failed to update '$1'."
+
+            exit 1
+        }
+
+        trap 'trap - ERR; err' ERR
 
         last="$XDG_CACHE_HOME"/newsboat/yt-dlp
         mkdir -p "$last"
@@ -73,7 +87,7 @@ let
         [[ -s "$last" ]] && date=$(cat "$last") || date=$(date --utc +%Y%m%d)
 
         runtime=$(mktemp -d)
-        trap 'cd /; rm -rf "$runtime"' EXIT
+        trap 'trap - EXIT; cd /; rm -rf "$runtime"' EXIT
 
         cd "$runtime"
 
