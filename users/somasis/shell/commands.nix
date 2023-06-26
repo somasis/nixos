@@ -46,6 +46,18 @@
     (pkgs.writeShellScriptBin "pe" ''
       ${pkgs.xe}/bin/xe -LL -j0 "$@" | sort -snk1 | cut -d' ' -f2-
     '')
+
+    (pkgs.wrapCommand {
+      package = pkgs.comma;
+      wrappers = [{
+        prependFlags = lib.escapeShellArgs [
+          "--picker"
+          (pkgs.writeShellScript "comma-picker" ''
+            exec dmenu -p "," -S 2>/dev/null
+          '')
+        ];
+      }];
+    })
   ];
 
   programs.bash.initExtra = ''
