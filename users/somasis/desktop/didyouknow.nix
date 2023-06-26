@@ -6,19 +6,30 @@
 }:
 let
   fixtext = pkgs.writeShellScriptBin "fixtext" ''
-    sed -E \
-        -e 's/\s+\(pictured\)/ /' \
-        -e 's/\(pictured\)\s+/ /' \
-        -e 's/\(pictured\)//' \
-        -e 's/\([^)]+\W+pictured\)//' \
-        -e 's/\(pictured[^)]+\W+\)//' \
-        -e 's/\([^)]+\W+pictured[^)]+\W+\)//' \
+    tr -s '[[:blank:]]' \
+        | sed -E \
+            -e 's/\s+\(pictured\)/ /' \
+            -e 's/\(pictured\)\s+/ /' \
+            -e 's/\(pictured\)//' \
+            -e 's/\([^)]+\W+pictured\)//' \
+            -e 's/\(pictured[^)]+\W+\)//' \
+            -e 's/\([^)]+\W+pictured[^)]+\W+\)//' \
+        | sed -E \
+            -e "/ ' .* ' / {
+                s/ ' / '/
+                s/ ' /' /
+            }" \
+            -e '/ " .* " / {
+                s/ " / "/
+                s/ " /" /
+            }' \
+            -e 's/ ([!?,\.]) /\1 /g' \
+            -e 's/ ([!?,\.])$/\1/g' \
         | tr -s '[[:blank:]]' \
-        | sed -E -e 's/ ([!?,\.])$/\1/g'
   '';
 
   fetch-didyouknow = pkgs.writeShellScript "fetch-didyouknow" ''
-    PATH=${lib.makeBinPath [ fixtext pkgs.coreutils pkgs.curl pkgs.gnused pkgs.pandoc pkgs.table pkgs.teip ]}:"$PATH"
+    PATH=${lib.makeBinPath [ fixtext pkgs.coreutils pkgs.curl pkgs.dateutils pkgs.gnused pkgs.pandoc pkgs.pup pkgs.table pkgs.teip ]}:"$PATH"
 
     : "''${XDG_CACHE_HOME:=$HOME/var/cache}"
     dir="$XDG_CACHE_HOME/didyouknow"
@@ -59,9 +70,15 @@ let
               | map(
                 (.year | if . >= 0 then . else "\(. * -1) BC" end) as $year
                   | "\($year):\t\(.text)"
-              )
+              )[]
             ' <<< "$featured" \
             | teip -d $'\t' -f2 -s -- fixtext \
+            | {
+                stdin=$(cat)
+                lines=$(wc -l <<< "$stdin")
+                [ "$lines" -gt 16 ] && stdin="$(head -n 16 <<< "$stdin")"$'\n\t'"[and $lines more...]"
+                printf '%s\n' "$stdin"
+            } \
             | table -R1 -o $'\t'
     )
 
@@ -93,34 +110,28 @@ let
 
     aotd=$(
         jq -r '
-            (.tfa.extract | if (. | length) >= 200 then "\(.[0:220] | rtrimstr(" "))..." else . end) as $extract
-              | "\(.tfa.titles.normalized)\n\n\($extract)"
+            .tfa.extract as $extract
+            | .tfa.titles.normalized as $title
+            | "\($title)\n\n\($extract)"
             ' <<< "$featured" \
-            | fixtext
+            | fixtext \
+            | fmt
     )
 
     didyouknow=$(
-        sed -E \
-            -e '1,/^<!--Hooks-->/d' \
-            -e '/^<!--HooksEnd-->/,$ d' \
-            -e 's/\{\{-\?\}\}/?/' \
-            -e "s/\`/'/g" \
-            -e '/^\{\{.*\}\}$/d' \
-            -e 's/\{\{|\}\}//g' \
-            <<< "$didyouknow" \
-            | pandoc -f html -t plain --wrap=preserve \
-            | pandoc -f mediawiki -t plain --wrap=preserve \
-            | sed -E \
-                -e 's/^-   //' \
-                -e '/^\.\.\. / s/$/\n/' \
-            | fixtext
+        jq -re .parse.text <<< "$didyouknow" \
+            | pup --charset UTF-8 'body > div > ul > li' \
+            | pandoc -f html -t plain --wrap=none \
+            | fixtext \
+            | fmt -t \
+            | sed 's/^[^\.]/ &/'
     )
 
     [ -n "$onthisday" ] || exit 1
     [ -n "$aotd" ] || exit 1
     [ -n "$didyouknow" ] || exit 1
 
-    printf '%s in history...\n\n%s\n' "$(date +'%B %d')" "$onthisday" > "$dir"/onthisday.txt
+    printf '%s in history...\n\n%s' "$(dateconv -f '%B %dth' now)" "$onthisday" > "$dir"/onthisday.txt
     printf 'Article of the day: %s\n' "$(fold -s -w 79 <<<"$aotd")" > "$dir"/aotd.txt
     printf 'Did you know?\n\n%s\n' "$(fold -s -w 79 <<< "$didyouknow")" > "$dir"/didyouknow.txt
   '';
@@ -184,11 +195,21 @@ in
       };
     };
 
+    services.fetch-didyouknow = {
+      Unit.Description = "Fetch today's Wikipedia 'Did you know?' text";
+
+      Service = {
+        Type = "oneshot";
+        ExecStartPre = lib.optional osConfig.networking.networkmanager.enable "${pkgs.networkmanager}/bin/nm-online -q";
+        ExecStart = fetch-didyouknow;
+      };
+    };
+
     timers.set-didyouknow = {
       Unit.Description = "Set the currently displaying 'Did you know?' widget text, every hour";
-      Install.WantedBy = [ "default.target" ];
+      Install.WantedBy = [ "graphical-session.target" ];
       Install.RequiredBy = [ "stw@didyouknow.service" ];
-      Unit.PartOf = [ "default.target" "stw@didyouknow.service" ];
+      Unit.PartOf = [ "graphical-session.target" "stw@didyouknow.service" ];
       Timer = {
         OnCalendar = "hourly";
         OnStartupSec = 0;
@@ -197,7 +218,8 @@ in
     };
 
     services.set-didyouknow = {
-      Unit.Description = "Set the currently displaying 'Did you know?' widget text";
+      Unit.Description = "Cycle the currently displaying 'Did you know?' widget text";
+      Install.WantedBy = [ "stw@didyouknow.service" ];
 
       Service = {
         Type = "oneshot";
@@ -212,13 +234,14 @@ in
               }
           done
 
-          if [ $(( $(date +%H) % 2 )) -eq 0 ]; then
-              file="$dir"/didyouknow.txt
-          else
-              file="$dir"/onthisday.txt
-          fi
+          current_file=$(basename "$(readlink "$runtime"/stw.txt)" .txt) || current_file=
+          case "$current_file" in
+              ""|aotd)    next_file="$dir"/onthisday.txt  ;;
+              onthisday)  next_file="$dir"/didyouknow.txt ;;
+              didyouknow) next_file="$dir"/aotd.txt       ;;
+          esac
 
-          ln -sf "$file" "$runtime"/stw.txt
+          ln -sf "$next_file" "$runtime"/stw.txt
         '';
         ExecStartPost = "-${pkgs.systemd}/bin/systemctl --user reload stw@didyouknow.service";
       };
