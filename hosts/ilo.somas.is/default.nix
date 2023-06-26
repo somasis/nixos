@@ -144,6 +144,8 @@ nixpkgs.lib.nixosSystem {
         enableLsColors = false;
       };
 
+      environment.pathsToLink = lib.optional config.programs.bash.enableCompletion "/share/bash-completion";
+
       services.gvfs.enable = true;
       programs.dconf.enable = true;
 

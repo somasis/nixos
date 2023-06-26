@@ -17,7 +17,7 @@ in
       postBuild = ''
         install -d $out/share/bash-completion/completions
         install -m0755 \
-            ${pkgs.mpd-sima.src}/sima/data/bash/completion.sh \
+            ${pkgs.mpd-sima.src}/data/bash/completion.sh \
             $out/share/bash-completion/completions/mpd-sima
       '';
     })

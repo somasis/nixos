@@ -81,7 +81,7 @@
       # Don't use readline's internal pager for showing completion;
       # just print them to the terminal.
       page-completions = false;
-      print-completions-horizontally = true;
+      # print-completions-horizontally = true;
 
       # "when inserting a single match into the line ... [do] not
       # insert characters from the completion that match characters
