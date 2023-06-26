@@ -50,9 +50,7 @@
   programs.readline = {
     enable = true;
 
-    bindings = {
-      "\\x08" = "unix-word-rubout"; # ctrl-backspace
-    };
+    bindings."\\x08" = "unix-word-rubout"; # ctrl-backspace
 
     variables = {
       # Use a single <tab> for completion, always; even when
