@@ -18,14 +18,15 @@ case "${SCREENSHOT_GEOMETRY:=selection}" in
         slop=$(slop "$@" -f '%g %i') || exit 1
 
         read -r geometry window <<<"${slop}"
+
         window=$(
             # make sure it's actually a window ID
             if [ "${#window}" -eq 7 ]; then
-                xdotool getwindowclassname "${window}" 2>/dev/null
+                xdotool getwindowclassname "${window}" 2>/dev/null || xdotool getwindowname "${window}" 2>/dev/null
             else
-                xdotool getmouselocation getwindowclassname 2>/dev/null
+                xdotool getmouselocation getwindowclassname 2>/dev/null || xdotool getwindowname "${window}" 2>/dev/null
             fi
-        )
+        ) || :
 
         b="${b}${window:+ ${window}}"
         maim -g "${geometry}" "${b}".png
