@@ -1,10 +1,15 @@
-{ pkgs }:
+{ pkgs
+, lib ? pkgs.lib
+, ...
+}:
 let
-  inherit (pkgs) callPackage lib;
+  inherit (pkgs) callPackage;
 in
 rec
 {
   wrapCommand = callPackage ./wrapCommand;
+
+  writeJqScript = callPackage ./writeJqScript;
 
   screenshot = callPackage ./screenshot { };
   xinput-notify = callPackage ./xinput-notify { };
