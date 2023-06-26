@@ -4,6 +4,8 @@
 , pkgs
 , ...
 }:
+# TODO Utilize <https://git.sr.ht/~whynothugo/systemd-lock-handler> in some way,
+# it looks a lot more purpose-built to actually do what I'm trying to do here
 let
   inherit (config.lib.somasis) camelCaseToScreamingSnakeCase;
 
