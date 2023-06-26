@@ -1,7 +1,7 @@
 { pkgs, ... }: {
   imports = [
     ./audio.nix
-    ./autorandr.nix
+    ./display.nix
     ./bluetooth.nix
     ./brightness.nix
     ./ddcci.nix

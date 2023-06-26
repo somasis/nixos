@@ -1,7 +1,7 @@
 { config
 , pkgs
 , lib
-, nixosConfig
+, osConfig
 , ...
 }:
 let
@@ -61,6 +61,39 @@ in
   #   config.match-edid = true;
   # };
 
+  systemd.user.services.xiccd = lib.mkIf osConfig.services.colord.enable {
+    Unit = {
+      Description = pkgs.xiccd.meta.description;
+      PartOf = [ "graphical-session.target" ];
+      Before = [
+        "sctd.service"
+        "wallpaper.service"
+      ];
+
+      Requires = [ "dbus.service" ];
+      After = [ "dbus.service" ];
+    };
+    Install.WantedBy = [ "graphical-session.target" ];
+
+    Service = {
+      Type = "simple";
+      ExecStart = [ "${pkgs.xiccd}/bin/xiccd" ];
+    };
+  };
+
+  # <https://www.notebookcheck.net/Framework-Laptop-13-5-Review-If-Microsoft-Made-A-Repairable-Surface-Laptop-This-Would-Be-It.551850.0.html>
+  # Notebookcheck's calibration file for the monitor used by the Framework 11th gen, the BOE CQ NE135FBM-N41
+  xdg.dataFile = {
+    # "share/icc/BOE CQ NE135FBM-N41.icc".source = pkgs.fetchurl {
+    #   url = "https://www.notebookcheck.net/uploads/tx_nbc2/BOE_CQ_______NE135FBM_N41.icm";
+    #   hash = "sha256-Sul8UxNABeK8pmJcjUuIbr24OLoM6E/mHi/qf+wJETY=";
+    # };
+
+    # <https://community.frame.work/t/display-accuracy-and-calibration/22381>
+    # <https://www.mediafire.com/file/34tvr50khoe1ayj/NE135FBM-N41_%25232_2022-09-09_08-01_2.2_F-S_XYZLUT%252BMTX.icc/file>
+    "share/icc/NE135FBM-N41 #2 2022-09-09 08-01 2.2 F-S XYZLUT+MTX.icc".source = ./display-BOE-CQ-NE135FBM-N41.icc;
+  };
+
   programs.autorandr = {
     enable = true;
 
@@ -72,7 +105,7 @@ in
     profiles = {
       # internal:external: external monitor *only*
       # internal+external: internal monitor *with* external monitor
-      "${nixosConfig.networking.fqdnOrHostName}" = {
+      "${osConfig.networking.fqdnOrHostName}" = {
         fingerprint.eDP-1 = monitor.ilo.fingerprint;
         config = {
           eDP-1 = {

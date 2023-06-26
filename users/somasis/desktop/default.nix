@@ -23,12 +23,12 @@
     ./anki.nix
     ./audio.nix
     ./automount.nix
-    ./autorandr.nix
     ./clipboard.nix
     ./compositing.nix
     ./dates.nix
     ./diary.nix
     ./didyouknow.nix
+    ./display.nix
     ./dmenu.nix
     ./file-manager.nix
     ./ledger.nix
