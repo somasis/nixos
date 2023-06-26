@@ -42,11 +42,7 @@ in
   ];
 
   persist = {
-    directories = [
-      "etc/qutebrowser"
-      # "etc/qutebrowser/userscripts"
-      # "etc/qutebrowser/userstyles"
-    ];
+    directories = [ "etc/qutebrowser" ];
 
     # files = [
     #   # BUG(?): Can't make autoconfig.yml an impermanent file; I think qutebrowser
@@ -74,33 +70,6 @@ in
     ];
   };
 
-  # activation."qutebrowser-dict" = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
-  #   set -e
-
-  #   dictcli() { ${config.programs.qutebrowser.package}/share/qutebrowser/scripts/dictcli.py "$@"; }
-
-  #   set -- ${lib.escapeShellArgs config.programs.qutebrowser.settings.spellcheck.languages}
-
-  #   dictcli list \
-  #       | sed 's/   */\t/g' \
-  #       | while IFS=$(printf '\t') read -r lang _ remote local; do
-  #           for l; do
-  #               [ "$lang" = "$l" ] || continue
-  #               case "$local" in
-  #                   -)
-  #                       $DRY_RUN_CMD dictcli install "$l"
-  #                       ;;
-  #                   "$remote")
-  #                       continue
-  #                       ;;
-  #                   *)
-  #                       $DRY_RUN_CMD dictcli update "$l"
-  #                       ;;
-  #               esac
-  #           done
-  #       done
-  # '';
-
   home.sessionVariables."BROWSER" = "qutebrowser";
 
   programs.qutebrowser = {
@@ -110,6 +79,8 @@ in
 
     loadAutoconfig = true;
     settings = let xres = config.xresources.properties; in rec {
+      logging.level.console = "error";
+
       # Clear default aliases
       aliases = { };
 
@@ -327,17 +298,10 @@ in
       fonts.tabs.selected = "bold default_size monospace";
 
       # Colors (themed like Arc-Dark).
-      # colors.tabs.bar.bg = "#ededee";
-      # colors.tabs.odd.bg = "#f5f6f7";
-      # colors.tabs.even.bg = "#f5f6f7";
-      colors.tabs.bar.bg = "#353946";
-      colors.tabs.odd.bg = "#353946";
-      colors.tabs.even.bg = "#353946";
+      colors.tabs.bar.bg = xres."*sidebarColor";
+      colors.tabs.odd.bg = xres."*sidebarColor";
+      colors.tabs.even.bg = xres."*sidebarColor";
 
-      # colors.tabs.even.fg = xres."*background";
-      # colors.tabs.odd.fg = xres."*background";
-      # colors.tabs.selected.even.fg = xres."*foreground";
-      # colors.tabs.selected.odd.fg = xres."*foreground";
       colors.tabs.even.fg = xres."*foreground";
       colors.tabs.odd.fg = xres."*foreground";
       colors.tabs.selected.even.fg = xres."*foreground";
@@ -385,6 +349,10 @@ in
       };
 
       url.open_base_url = true;
+
+      # NOTE Remove when qutebrowser uses qt6
+      # <https://github.com/qutebrowser/qutebrowser/issues/7572>
+      qt.args = [ "enable-experimental-web-platform-features" ];
     };
 
     extraConfig = ''
@@ -528,10 +496,19 @@ in
     };
   };
 
-  somasis.tunnels.tunnels = [
-    { name = "kodi-remote"; location = 45780; remote = "somasis@spinoza.7596ff.com"; remoteLocation = 8080; }
-    { name = "kodi-websockets"; location = 9090; remote = "somasis@spinoza.7596ff.com"; remoteLocation = 9090; }
-  ];
+  somasis.tunnels.tunnels = {
+    kodi-remote = {
+      location = 45780;
+      remote = "somasis@spinoza.7596ff.com";
+      remoteLocation = 8080;
+    };
+
+    kodi-websockets = {
+      location = 9090;
+      remote = "somasis@spinoza.7596ff.com";
+      remoteLocation = 9090;
+    };
+  };
 
   home.packages = [ pkgs.qutebrowser-sync ];
 }
