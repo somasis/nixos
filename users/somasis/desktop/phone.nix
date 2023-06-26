@@ -33,11 +33,7 @@ in
     };
   };
 
-
-  persist.directories = [{
-    method = "symlink";
-    directory = "etc/kdeconnect";
-  }];
+  persist.directories = [{ method = "symlink"; directory = "etc/kdeconnect"; }];
 
   programs.qutebrowser = {
     aliases.kdeconnect = "spawn -u ${kdeconnectShare}";
