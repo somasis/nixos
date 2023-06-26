@@ -61,7 +61,7 @@
       system = "x86_64-linux";
       maxJobs = 4;
 
-      protocol = "ssh-ng";
+      protocol = "ssh";
       sshUser = "nix-ssh";
       sshKey = "${config.users.users.root.home}/.ssh/id_ed25519";
 
@@ -77,19 +77,17 @@
       options = "--delete-older-than 7d";
     };
 
-    registry.nixpkgs.flake = nixpkgs;
-    registry.self.flake = self;
+    registry = {
+      nixpkgs.flake = nixpkgs;
+      self.flake = self;
+    };
+
     nixPath = [ "nixpkgs=flake:nixpkgs" ];
   };
 
   programs.ssh.extraConfig = ''
     Host spinoza.7596ff.com
-      ControlMaster auto
-      ControlPath /tmp/%C.control.ssh
-      ControlPersist 15m
-
       ServerAliveInterval 15
-
       Compression yes
   '';
 
