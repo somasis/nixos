@@ -3,8 +3,7 @@
 
   programs.bash.initExtra = ''
     _before_command() {
-        # stty -echo >&2
-        local _before_command_command="''${BASH_COMMAND%% *}"
+        local _before_command_command="$BASH_COMMAND"
         case "$_before_command_command" in
             'sudo '*|'edo '*)
                 _before_command_command="''${_before_command_command#* }"
@@ -17,7 +16,6 @@
         esac
 
         printf '\e]0;%s\a' "''${SSH_CONNECTION:+$USER@$HOSTNAME: }''${_before_command_command}"
-        # stty echo >&2
     }
 
     _before_prompt() {
