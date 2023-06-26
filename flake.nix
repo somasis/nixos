@@ -23,9 +23,6 @@
     home-manager.url = "github:nix-community/home-manager";
     home-manager.inputs.nixpkgs.follows = "nixpkgs";
 
-    nixd.url = "github:nix-community/nixd";
-    nixd.inputs.nixpkgs.follows = "nixpkgsStable";
-
     # Use a pre-built nix-index database
     nix-index-database.url = "github:Mic92/nix-index-database";
     nix-index-database.inputs.nixpkgs.follows = "nixpkgs";
@@ -120,13 +117,9 @@
         overlays = [
           self.overlays.default
 
-          inputs.nixd.overlays.default
-
           (final: prev: {
-            stable = inputs.nixpkgsStable.legacyPackages."${system}";
+            stable = inputs.nixpkgsStable.legacyPackages.${system};
           })
-
-          self.overlays.default
         ];
       };
 
