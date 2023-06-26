@@ -5,18 +5,37 @@ let
 in
 {
   # Boone, NC, USA
-  time.timeZone = "America/New_York";
   location = {
     latitude = 36.21641;
     longitude = -81.67464;
   };
 
-  # Automatically update location and timezone when traveling.
-  # services.localtimed.enable = true;
+  # Automatically update location and timezone when traveling,
+  services.localtimed.enable = true;
+  # with a fallback timezone.
+  # time.timeZone can't be set when using automatic-timezoned; but that's bullshit.
+  # See <https://github.com/NixOS/nixpkgs/issues/68489>
+  # and <https://github.com/NixOS/nixpkgs/blob/master/pkgs/os-specific/linux/systemd/0006-hostnamed-localed-timedated-disable-methods-that-cha.patch#L79-L82>
+  #
+  # time.timeZone = "America/New_York";
+  systemd.services.set-default-timezone = {
+    description = "Set the default timezone at boot";
+    wantedBy = [ "time-set.target" ];
+    requires = [ "systemd-timesyncd.service" ];
+    before = [ "localtimed.service" ];
+    serviceConfig = {
+      Type = "oneshot";
+      ExecStart = "${pkgs.systemd}/bin/timedatectl set-timezone America/New_York";
+    };
+  };
+  networking.networkmanager.dispatcherScripts = [{
+    source = pkgs.writeShellScript "nm-localtimed" ''
+      if [ "$2" = "up" ]; then systemctl start localtimed.service; fi
+    '';
+  }];
 
   services.geoclue2 = {
     enable = true;
-    # enableDemoAgent = true;
     submitData = true;
 
     # Used by users/somasis/desktop/stw/wttr.nix.
