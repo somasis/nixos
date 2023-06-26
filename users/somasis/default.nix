@@ -27,21 +27,14 @@
 
   persist = {
     allowOther = true;
-    directories = [
-      { method = "symlink"; directory = "bin"; }
-    ];
+    directories = [{ method = "symlink"; directory = "bin"; }];
   };
 
-  cache = {
-    allowOther = true;
-    directories = [{ method = "symlink"; directory = "var/cache/nix"; }];
-  };
+  cache.allowOther = true;
 
   log = {
     allowOther = true;
-    directories = [
-      { method = "symlink"; directory = "logs"; }
-    ];
+    directories = [{ method = "symlink"; directory = "logs"; }];
   };
 
   home.keyboard.options = [ "compose:ralt" ];
