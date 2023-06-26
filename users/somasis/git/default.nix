@@ -21,15 +21,23 @@
     aliases = {
       addall = "add -Av";
       addp = "add -p";
+      unadd = "reset HEAD --";
+
       amend = "commit --amend";
       amendall = "!git addall; EDITOR=cat git amend";
+
       com = "commit";
       commits = "log --reverse --oneline @{upstream}...HEAD";
+
       patches = "format-patch -M -C -C --stdout origin..HEAD";
-      rbc = "rebase --continue";
+
       re = "rebase";
+      rbc = "rebase --continue";
       ri = "rebase -i";
-      unadd = "reset HEAD --";
+
+      cherry = "cherry-pick";
+      chc = "cherry-pick --continue";
+      ch = "cherry-pick";
     };
 
     extraConfig = {
@@ -108,9 +116,12 @@
     re = "git re";
     ri = "git ri";
 
+    cherry = "git cherry-pick";
+    chc = "git chc";
+    ch = "git ch";
+
     branch = "git branch -v";
     switch = "git switch";
-    cherry = "git cherry-pick";
     branchoff = "git branchoff";
   };
 
