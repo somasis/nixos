@@ -16,7 +16,7 @@
 
     shadow = false;
     shadowOffsets = [ (-16) (-16) ];
-    shadowOpacity = .35;
+    shadowOpacity = 1;
 
     shadowExclude = [
       "bounding_shaped"
@@ -51,9 +51,26 @@
       };
 
       # Kvantum
-      blur-background-exclude = [ "(_NET_WM_WINDOW_TYPE@:a *= 'MENU' || _NET_WM_WINDOW_TYPE@:a *= 'COMBO')" ];
+      blur-background-exclude = [
+        "(_NET_WM_WINDOW_TYPE@:a *= 'MENU' || _NET_WM_WINDOW_TYPE@:a *= 'COMBO')"
+      ];
+
+      # allow for inverting individual windows
+      # <https://www.reddit.com/r/i3wm/comments/kbw3a5/shortcut_for_inverting_a_windows_colors/>
+      invert-color-include = [ "KYLIE_INVERT@:8c = 1" ];
     };
   };
+
+  services.sxhkd.keybindings."super + shift + i" = builtins.toString (pkgs.writeShellScript "toggle-invert" ''
+    xprop -id "$(xdotool getwindowfocus)" -format KYLIE_INVERT 8c \
+        -set KYLIE_INVERT "$(
+            xprop -id "$(xdotool getwindowfocus)" 8c KYLIE_INVERT \
+                | sed \
+                    -e 's/.*= 1.*/0/' \
+                    -e 's/.*= 0.*/1/' \
+                    -e 's/.*not found.*/1/'
+        )"
+  '');
 
   programs.autorandr.hooks.postswitch.picom = ''
     ${pkgs.systemd}/bin/systemctl --user try-restart picom.service
