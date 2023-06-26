@@ -86,6 +86,8 @@ let
 
         F = set.fuzzyMatching;
         x = set.prefixMatching;
+
+        cw = set.caretWidth;
       }) + cfg.extraArgs
       ;
     }];
@@ -107,6 +109,7 @@ in
       enableAlpha = mkOverride false;
       enableBarPadding = mkOverride false;
       enableBorder = mkOverride false;
+      enableCaretWidth = mkOverride false;
       enableCaseInsensitive = mkOverride false;
       enableCenter = mkOverride false;
       enableColorEmoji = mkOverride true;
@@ -231,6 +234,10 @@ in
       '';
       prefixMatching = mkSetting "prefixMatching" cfg.overrides.enablePrefixMatching bool false ''
         Default to using prefix matching.
+      '';
+
+      caretWidth = mkSetting "enableCaretWidth" cfg.overrides.enableCaretWidth numbers.nonnegative 2 ''
+        Width of the input box's caret.
       '';
     };
 

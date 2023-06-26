@@ -12,6 +12,7 @@
 , enableAlpha ? false
 , enableBarPadding ? false
 , enableBorder ? false
+, enableCaretWidth ? false
 , enableCaseInsensitive ? false
 , enableCenter ? false
 , enableColorEmoji ? true
@@ -68,13 +69,13 @@ let
 in
 stdenv.mkDerivation rec {
   pname = "dmenu";
-  version = "unstable-2023-05-16";
+  version = "unstable-2023-06-15";
 
   src = fetchFromGitHub {
     owner = "bakkeby";
     repo = "dmenu-flexipatch";
-    rev = "9e721014cd90dd6782a088f4d8f96706711774ac";
-    hash = "sha256-1GOCVdlx40B9u5q28SWWdEMvygUBynrM93Wmpj3/mWQ=";
+    rev = "690436ef27ba260a407b0997eae0eb3bc6af6f71";
+    hash = "sha256-j7Px+rtvN63xeiAXXkw8T9g3zGbbDTU2m4ijandX9UA=";
   };
 
   enableParallelBuilding = true;
@@ -113,6 +114,7 @@ stdenv.mkDerivation rec {
         ${optionalCpp enableAlpha "ALPHA_PATCH"}
         ${optionalCpp enableBarPadding "BARPADDING_PATCH"}
         ${optionalCpp enableBorder "BORDER_PATCH"}
+        ${optionalCpp enableCaretWidth "CARET_WIDTH_PATCH"}
         ${optionalCpp enableCaseInsensitive "CASEINSENSITIVE_PATCH"}
         ${optionalCpp enableCenter "CENTER_PATCH"}
         ${optionalCpp enableColorEmoji "COLOR_EMOJI_PATCH"}

@@ -6,31 +6,25 @@
 }:
 let
   dmenu = config.programs.dmenu.package;
+
   bspwm = config.xsession.windowManager.bspwm.package;
   pass = config.programs.password-store.package;
 
-  dmenu-emoji = pkgs.dmenu-emoji.override { inherit dmenu; };
   dmenu-run = pkgs.dmenu-run.override { inherit dmenu; };
-  dmenu-session = pkgs.dmenu-session.override {
-    inherit dmenu;
-    inherit bspwm;
-  };
-  dmenu-pass = pkgs.dmenu-pass;
-  # dmenu-pass = pkgs.dmenu-pass.override {
-  #   inherit dmenu;
-  #   inherit pass;
-  # };
-  qute-pass = pkgs.qute-pass;
-  # qute-pass = pkgs.qute-pass.override {
-  #   inherit dmenu-pass;
-  #   inherit pass;
-  # };
+  dmenu-emoji = pkgs.dmenu-emoji.override { inherit dmenu; };
+  dmenu-session = pkgs.dmenu-session.override { inherit dmenu bspwm; };
+
+  dmenu-pass = pkgs.dmenu-pass.override { inherit dmenu pass; };
+  qute-pass = pkgs.qute-pass.override { inherit dmenu-pass pass; };
+
+  xres = config.xresources.properties;
 in
 {
   programs.dmenu = {
     enable = true;
 
     overrides = {
+      enableCaretWidth = true;
       enableColorEmoji = true;
       enableCtrlVToPaste = true;
       enableGrid = true;
@@ -43,23 +37,30 @@ in
       enableNoSort = true;
       enablePango = true;
       enablePlainPrompt = true;
-      enableVertFull = true;
+      enablePassword = true;
+      # enableVertFull = true;
       enableWMType = true;
+
+      enableNumbers = true;
+
+      enableManaged = true;
+      enableXyw = true;
     };
 
     settings = {
       lineHeight = 48;
+      caretWidth = 3;
 
       font = "monospace 10";
 
-      background = config.xresources.properties."*darkBackground";
-      foreground = config.xresources.properties."*darkForeground";
-      backgroundSelected = config.xresources.properties."*colorAccent";
-      foregroundSelected = config.xresources.properties."*darkForeground";
-      backgroundHighlight = config.xresources.properties."*darkBackground";
-      foregroundHighlight = config.xresources.properties."*color1";
-      backgroundHighlightSelected = config.xresources.properties."*colorAccent";
-      foregroundHighlightSelected = config.xresources.properties."*color1";
+      background = xres."*darkBackground";
+      foreground = xres."*darkForeground";
+      backgroundSelected = xres."*colorAccent";
+      foregroundSelected = xres."*darkForeground";
+      backgroundHighlight = xres."*darkBackground";
+      foregroundHighlight = xres."*color1";
+      backgroundHighlightSelected = xres."*colorAccent";
+      foregroundHighlightSelected = xres."*color1";
     };
   };
 
@@ -68,31 +69,40 @@ in
     ++ lib.optional config.xsession.windowManager.bspwm.enable dmenu-session
     ++ lib.optional (osConfig.fonts.fontconfig.defaultFonts.emoji != [ ]) dmenu-emoji
     ++ lib.optional config.programs.password-store.enable dmenu-pass
-    ++ lib.optional config.programs.qutebrowser.enable qute-pass
+    ++ lib.optional (config.programs.qutebrowser.enable && config.programs.password-store.enable) qute-pass
   ;
 
   cache.directories = [{ method = "symlink"; directory = "var/cache/dmenu"; }];
 
-  services.sxhkd.keybindings =
-    {
-      "super + grave" = "${dmenu-run}/bin/dmenu-run";
-      "super + Return" = "${dmenu-run}/bin/dmenu-run";
-      "alt + F2" = "${dmenu-run}/bin/dmenu-run";
-    }
-    // lib.optionalAttrs config.xsession.windowManager.bspwm.enable {
-      "super + Escape" =
-        "DMENU_SESSION_ENABLE_LOCKING=${lib.boolToString config.services.screen-locker.enable} ${dmenu-session}/bin/dmenu-session"
-      ;
-    }
-    // lib.optionalAttrs (osConfig.fonts.fontconfig.defaultFonts.emoji != [ ]) {
-      "super + e" = "${dmenu-emoji}/bin/dmenu-emoji -c";
-    }
-    // lib.optionalAttrs config.programs.password-store.enable {
-      # "super + shift + p" was previously used, but thats used
-      # for the display settings key on the Framework keyboard
-      "super + k" = "${dmenu-pass}/bin/dmenu-pass -cn";
-      "super + shift + k" = "${dmenu-pass}/bin/dmenu-pass -cn -m otp";
-    };
+  services.sxhkd.keybindings = {
+    "super + grave" = "dmenu-run";
+    "super + Return" = "dmenu-run";
+    "alt + F2" = "dmenu-run";
+  } // lib.optionalAttrs config.xsession.windowManager.bspwm.enable {
+    "super + Escape" = ''
+      DMENU_SESSION_ENABLE_LOCKING=${lib.boolToString config.services.screen-locker.enable} \
+          dmenu-session
+    '';
+  } // lib.optionalAttrs (osConfig.fonts.fontconfig.defaultFonts.emoji != [ ]) {
+    "super + e" = "dmenu-emoji -c";
+  } // lib.optionalAttrs config.programs.password-store.enable {
+    # "super + shift + p" was previously used, but thats used
+    # for the display settings key on the Framework keyboard
+    "super + k" = "dmenu-pass -cn";
+    "super + shift + k" = "dmenu-pass -cn -m otp";
+  };
 
-  services.dunst.settings.global.dmenu = "dmenu -p 'notification'";
+  # Use -n (instant) so that it doesn't require two clicks for one action.
+  services.dunst.settings.global.dmenu = "dmenu -n -p 'notification'";
+
+  programs.qutebrowser = lib.optionalAttrs config.programs.password-store.enable {
+    aliases."pass" = "spawn -u ${qute-pass}/bin/qute-pass";
+
+    keyBindings.normal."zll" = "pass -H";
+    keyBindings.normal."zlL" = "pass -H -d Enter";
+    keyBindings.normal."zlz" = "pass -H -E";
+    keyBindings.normal."zlu" = "pass -m username";
+    keyBindings.normal."zlp" = "pass -m password";
+    keyBindings.normal."zlo" = "pass -m otp";
+  };
 }
