@@ -2,84 +2,83 @@
 , lib
 , pkgs
 , ...
-}: {
+}:
+let
+  xres = config.xresources.properties;
+
+  inherit (config.lib.somasis.colors) format hex darken;
+
+  wordSeparators = lib.concatStrings [
+    # Kitty defaults
+    # "@"
+    # "-"
+    # "."
+    # "/"
+    # "_"
+    # "~"
+    # "?"
+    # "&"
+    # "="
+    # "%"
+    # "+"
+    # "#"
+
+    # Alacritty defaults
+    ","
+    "│"
+    "`"
+    "|"
+    ":"
+    ''\''
+    "\\\""
+    "'"
+    " "
+    "("
+    ")"
+    "["
+    "]"
+    "{"
+    "}"
+    "<"
+    ">"
+
+    # More rarely occuring
+    "‹"
+    "›"
+
+    # Unicode box characters/tree characters
+    "─"
+    "→"
+
+    "\t"
+
+    "¬" # Used by Kakoune for the newline indicator
+    ";"
+
+    "‘"
+    "’"
+    "‚"
+    "‛"
+    "“"
+    "”"
+    "„"
+    "‟"
+
+    "="
+  ];
+in
+{
   services.sxhkd.keybindings = {
-    "super + b" = "alacritty";
-    # "super + shift + b" = builtins.toString (pkgs.writeShellScript "sxhkd-terminal-at-window-cwd" ''
-    #   window_pid=$(${pkgs.xdotool}/bin/xdotool getactivewindow getwindowpid)
-    #   window_pid_parent=$(${pkgs.procps}/bin/pgrep -P "$window_pid" | tail -n1)
-    #   window_cwd=$(${pkgs.coreutils}/bin/readlink -f /proc/"$window_pid_parent"/cwd)
-    #   cd "$window_cwd"
-    #   exec alacritty
-    # '');
-    "super + shift + b" = ''
-      alacritty --working-directory "$(${pkgs.xcwd}/bin/xcwd)"
-    '';
+    # "super + b" = "alacritty";
+    "super + b" = "kitty -1";
+
+    # "super + shift + b" = ''
+    #   alacritty --working-directory "$(${pkgs.xcwd}/bin/xcwd)"
+    # '';
   };
 
   programs.alacritty = {
     enable = true;
-
-    package =
-      let
-        xdgFixed = pkgs.writeShellScriptBin "xdg-open" ''
-          PATH=${lib.makeBinPath [ pkgs.gnused pkgs.nettools pkgs.systemd pkgs.xdg-utils pkgs.xe ] }":$PATH"
-
-          case "$1" in
-              --)  : ;;
-              --*) exec ${pkgs.xdg-utils}/bin/xdg-open "$@" ;;
-              *)   uri="$1" ;;
-          esac
-
-          case "$uri" in
-              # Locally-resolved file URIs.
-              file:///*) : ;;
-
-              # Remote-resolved file URIs.
-              # We need to parse out the hostname from file:// URIs, since xdg-open doesn't do it.
-              # (but it ought to!)
-              file://*/*)
-                  host=''${uri#file://}
-                  host=''${host%%/*}
-                  case "$host" in
-                      "$(hostname)")
-                          uri=''${uri#file://"$host"/}
-                          ;;
-                      *)
-                          paths=(
-                              $(
-                                  systemctl --user list-unit-files --type=mount --no-legend \
-                                      | sed 's/ .*//; s/\.mount$//' \
-                                      | xe -N1 -j0 -L systemd-escape -p -u
-                              )
-                          )
-
-                          for path in "''${paths[@]}"; do
-                              case "$path" in
-                                  */"$host".*)
-                                      new_uri=~/mnt/sftp/"''${path##*/}"
-                                      [ -e "$new_uri" ] && uri="$new_uri" && continue
-                                      ;;
-                              esac
-                          done
-                          ;;
-                  esac
-                  ;;
-          esac
-
-          exec ${pkgs.xdg-utils}/bin/xdg-open "$uri"
-        '';
-      in
-      pkgs.symlinkJoin {
-        name = "alacritty-final";
-
-        buildInputs = [ pkgs.makeWrapper ];
-        paths = [ pkgs.alacritty ];
-
-        postBuild = ''
-          wrapProgram $out/bin/alacritty --prefix PATH : "${xdgFixed}/bin"
-        '';
-      };
 
     settings =
       let
@@ -146,112 +145,144 @@
 
         selection = {
           save_to_clipboard = true;
-          semantic_escape_chars = lib.concatStrings [
-            # Defaults
-            ","
-            "│"
-            "`"
-            "|"
-            ":"
-            ''\''
-            "\\\""
-            "'"
-            " "
-            "("
-            ")"
-            "["
-            "]"
-            "{"
-            "}"
-            "<"
-            ">"
-            "\t"
-
-            "¬" # Used by Kakoune for the newline indicator
-            ";"
-
-            "‘"
-            "’"
-            "‚"
-            "‛"
-            "“"
-            "”"
-            "„"
-            "‟"
-          ];
+          semantic_escape_chars = wordSeparators;
         };
       };
   };
 
-  home.packages = [ (pkgs.writeShellScriptBin "xterm" ''exec alacritty "$@"'') ];
+  home.packages = [
+    # (pkgs.writeShellScriptBin "xterm" ''exec alacritty "$@"'')
+    (pkgs.writeShellScriptBin "xterm" ''exec kitty "$@"'')
+  ];
 
-  # programs.kitty = {
-  #   enable = false;
+  programs.kitty = {
+    enable = true;
 
-  #   settings = rec {
-  #     cursor = "none";
-  #     cursor_shape = "beam";
-  #     cursor_beam_thickness = "1.25";
-  #     cursor_blink_interval = ".75";
-  #     cursor_stop_blinking_after = 0;
+    font = {
+      name = "monospace";
+      size = 10.0;
+    };
 
-  #     foreground = "${config.xresources.properties."*foreground"}";
-  #     background = "${config.xresources.properties."*background"}";
-  #     selection_foreground = "none";
-  #     selection_background = "none";
+    settings = rec {
+      cursor = "none";
+      cursor_shape = "beam";
+      cursor_beam_thickness = "1.5";
+      cursor_blink_interval = ".75";
+      cursor_stop_blinking_after = 0;
 
-  #     color0 = "${config.xresources.properties."*color0"}";
-  #     color1 = "${config.xresources.properties."*color1"}";
-  #     color2 = "${config.xresources.properties."*color2"}";
-  #     color3 = "${config.xresources.properties."*color3"}";
-  #     color4 = "${config.xresources.properties."*color4"}";
-  #     color5 = "${config.xresources.properties."*color5"}";
-  #     color6 = "${config.xresources.properties."*color6"}";
-  #     color7 = "${config.xresources.properties."*color7"}";
-  #     color8 = "${config.xresources.properties."*color8"}";
-  #     color9 = "${config.xresources.properties."*color9"}";
-  #     color10 = "${config.xresources.properties."*color10"}";
-  #     color11 = "${config.xresources.properties."*color11"}";
-  #     color12 = "${config.xresources.properties."*color12"}";
-  #     color13 = "${config.xresources.properties."*color13"}";
-  #     color14 = "${config.xresources.properties."*color14"}";
-  #     color15 = "${config.xresources.properties."*color15"}";
-  #     url_color = color12;
+      foreground = config.xresources.properties."*foreground";
+      background = config.xresources.properties."*background";
+      selection_foreground = "none";
+      selection_background = "none";
 
-  #     wheel_scroll_multiplier = "2.0";
+      active_border_color = config.xsession.windowManager.bspwm.settings.focused_border_color;
+      bell_border_color = config.xsession.windowManager.bspwm.settings.active_border_color;
+      inactive_border_color = config.xsession.windowManager.bspwm.settings.normal_border_color;
 
-  #     mouse_hide_wait = 0;
-  #     scrollback_lines = 10000;
-  #     scrollback_fill_enlarged_window = true;
+      color0 = config.xresources.properties."*color0";
+      color1 = config.xresources.properties."*color1";
+      color2 = config.xresources.properties."*color2";
+      color3 = config.xresources.properties."*color3";
+      color4 = config.xresources.properties."*color4";
+      color5 = config.xresources.properties."*color5";
+      color6 = config.xresources.properties."*color6";
+      color7 = config.xresources.properties."*color7";
+      color8 = config.xresources.properties."*color8";
+      color9 = config.xresources.properties."*color9";
+      color10 = config.xresources.properties."*color10";
+      color11 = config.xresources.properties."*color11";
+      color12 = config.xresources.properties."*color12";
+      color13 = config.xresources.properties."*color13";
+      color14 = config.xresources.properties."*color14";
+      color15 = config.xresources.properties."*color15";
 
-  #     copy_on_select = true;
-  #     draw_minimal_borders = false;
-  #     placement_strategy = "top-left";
+      url_color = color4;
+      url_style = "dotted";
+      show_hyperlink_targets = true;
 
-  #     # enabled_layouts = "none";
-  #     tab_bar_style = "hidden";
+      wheel_scroll_multiplier = "2.0";
 
-  #     allow_remote_control = true;
+      mouse_hide_wait = 0;
+      scrollback_lines = 10000;
+      scrollback_fill_enlarged_window = true;
 
-  #     clear_all_shortcuts = "yes";
-  #   };
+      copy_on_select = true;
+      draw_minimal_borders = false;
+      placement_strategy = "top-left";
 
-  #   keybindings = {
-  #     "ctrl+shift+n" = "launch --cwd=current";
+      # select_by_word_characters = wordSeparators;
 
-  #     "ctrl+shift+c" = "copy_to_clipboard";
-  #     "ctrl+shift+v" = "paste_from_clipboard";
+      enabled_layouts = "fat";
 
-  #     "shift+home" = "scroll_home";
-  #     "shift+page_up" = "scroll_page_up";
-  #     "shift+page_down" = "scroll_page_down";
-  #     "shift+end" = "scroll_end";
+      tab_bar_style = "hidden";
 
-  #     "ctrl+shift+equal" = "change_font_size all +0.5";
-  #     "ctrl+shift+minus" = "change_font_size all -0.5";
-  #     "ctrl+equal" = "change_font_size all 0";
-  #   };
-  # };
+      allow_remote_control = true;
+
+      clear_all_shortcuts = true;
+
+      focus_follows_mouse = config.xsession.windowManager.bspwm.settings.focus_follows_pointer;
+    };
+
+    # like Alacritty
+    extraConfig = ''
+      modify_font cell_height 105%
+    '';
+
+    keybindings = {
+      "ctrl+shift+n" = "launch --cwd=current";
+
+      "ctrl+shift+c" = "copy_to_clipboard";
+      "ctrl+shift+v" = "paste_from_clipboard";
+
+      "shift+home" = "scroll_home";
+      "shift+page_up" = "scroll_page_up";
+      "shift+page_down" = "scroll_page_down";
+      "shift+end" = "scroll_end";
+
+      "ctrl+shift+equal" = "change_font_size all +0.5";
+      "ctrl+shift+minus" = "change_font_size all -0.5";
+      "ctrl+equal" = "change_font_size all 0";
+    };
+  };
+
+  xdg.configFile."kitty/diff.conf".text = ''
+    pygments_style          bw
+
+    foreground              ${xres."*foreground"}
+    background              ${xres."*background"}
+
+    title_fg                ${xres."*foreground"}
+    title_bg                ${xres."*background"}
+
+    margin_fg               ${xres."*foreground"}
+    margin_bg               ${xres."*color0"}
+
+    removed_bg              ${xres."*color1"}
+    highlight_removed_bg    ${hex (darken .325 xres."*color9")}
+    removed_margin_bg       ${xres."*color9"}
+
+    added_bg                ${xres."*color2"}
+    highlight_added_bg      ${hex (darken .2 xres."*color2")}
+    added_margin_bg         ${xres."*color10"}
+
+    filler_bg               ${xres."*color0"}
+
+    hunk_margin_bg          ${xres."*color14"}
+    hunk_bg                 ${xres."*color6"}
+
+    search_fg               ${xres."*color15"}
+    search_bg               ${xres."*colorAccent"}
+
+    select_fg               ${xres."*color15"}
+    select_bg               ${xres."*colorAccent"}
+  '';
+
+  programs.bash.initExtra = ''
+    [ -n "$KITTY_WINDOW_ID" ] \
+        && alias \
+            ssh="kitty +kitten ssh" \
+            icat="kitty +kitten icat"
+  '';
 
   # xresources.properties = {
   #   # xterm(1) settings

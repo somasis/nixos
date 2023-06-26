@@ -316,7 +316,7 @@ in
 
             case "$action" in
                 'View log')
-                    exec alacritty -T "ffmpeg" --hold fq "$job"
+                    exec kitty -T "ffmpeg" --hold fq "$job"
                     ;;
             esac
         } &
@@ -377,7 +377,7 @@ in
                 unique-id = "copy-file-contents";
               }
               {
-                command = "${pkgs.execline}/bin/execline-cd ${path} alacritty";
+                command = "kitty -d ${path}";
                 description = "Open a terminal in the selected or current directory";
                 directories = false;
                 icon = "terminal";
