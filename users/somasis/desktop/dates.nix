@@ -59,7 +59,7 @@ let
     done
   '';
 
-  datesCalendar = pkgs.writeShellScriptBin "dates-calendar" ''
+  dates-calendar = pkgs.writeShellScriptBin "dates-calendar" ''
     PATH=${lib.makeBinPath [ pkgs.coreutils ]}:"$PATH"
     : "''${XDG_RUNTIME_DIR:=/run/user/$(id -u)}"
     output="$XDG_RUNTIME_DIR/dates-calendar/output.txt"
@@ -67,7 +67,7 @@ let
   '';
 in
 {
-  home.packages = [ pkgs.dates datesCalendar ];
+  home.packages = [ dates-calendar pkgs.dates ];
 
   persist.directories = [ "etc/dates" ];
   xdg.configFile."dates/_".source = config.lib.file.mkOutOfStoreSymlink "/etc/localtime";
@@ -101,7 +101,7 @@ in
       Unit.PropagatesStopTo = [ "stw@dates.service" ];
       Service = {
         Type = "simple";
-        ExecStart = "${makeDatesCalendar}";
+        ExecStart = makeDatesCalendar;
       };
     };
   };
