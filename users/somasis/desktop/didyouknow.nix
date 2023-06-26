@@ -144,7 +144,7 @@ in
 {
   home.packages = [ didyouknow ];
 
-  somasis.chrome.stw.widgets.didyouknow = {
+  services.stw.widgets.didyouknow = {
     text = {
       font = "monospace:style=heavy:size=10";
       color = config.xresources.properties."*darkForeground";

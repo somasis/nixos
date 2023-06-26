@@ -130,28 +130,24 @@ in
     };
   };
 
-  somasis.chrome.widgets.stw = [
-    {
-      name = "wttr";
+  services.stw.widgets.wttr = {
+    text = {
+      font = "monospace:style=heavy:size=10";
+      color = config.xresources.properties."*darkForeground";
+    };
 
-      text = {
-        font = "monospace:style=heavy:size=10";
-        color = config.xresources.properties."*darkForeground";
+    window = {
+      opacity = 0;
+      position = {
+        x = 24;
+        y = 72;
       };
 
-      window = {
-        opacity = 0;
-        position = {
-          x = 24;
-          y = 72;
-        };
+      padding = 12;
+    };
 
-        padding = 12;
-      };
+    update = 60;
 
-      update = 60;
-
-      command = "${pkgs.coreutils}/bin/cat %C/wttr/forecast.txt";
-    }
-  ];
+    command = "${pkgs.coreutils}/bin/cat %C/wttr/forecast.txt";
+  };
 }

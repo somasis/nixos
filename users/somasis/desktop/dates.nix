@@ -72,7 +72,7 @@ in
   persist.directories = [ "etc/dates" ];
   xdg.configFile."dates/_".source = config.lib.file.mkOutOfStoreSymlink "/etc/localtime";
 
-  somasis.chrome.stw.widgets.dates = {
+  services.stw.widgets.dates = {
     enable = false;
 
     command = "dates-calendar";

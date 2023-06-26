@@ -5,7 +5,7 @@
 }:
 with lib;
 let
-  cfg = config.somasis.chrome.stw;
+  cfg = config.services.stw;
   pkg = cfg.package;
   stw = "${pkg}/bin/stw";
 
@@ -36,7 +36,7 @@ let
     '';
 in
 {
-  options.somasis.chrome.stw = {
+  options.services.stw = {
     enable = mkEnableOption "text widgets on the root window";
 
     package = mkOption {
@@ -66,7 +66,7 @@ in
             };
 
             command = mkOption {
-              type = types.str;
+              type = with types; oneOf [ nonEmptyStr path ];
               description = "Command to run, whose output will be the widget text.";
               default = null;
               example = "fortune";

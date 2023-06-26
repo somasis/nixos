@@ -128,7 +128,7 @@ in
     inherit directory;
   }];
 
-  somasis.chrome.stw.widgets.sonapona = {
+  services.stw.widgets.sonapona = {
     text = {
       font = "monospace:style=heavy:size=10";
       color = config.xresources.properties."*darkForeground";
