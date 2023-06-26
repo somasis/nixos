@@ -63,6 +63,8 @@ assert (wrappers != [ ]);
 
         assert (builtins.typeOf beforeCommand == "list");
 
+        assert (builtins.typeOf extraArgs == "string");
+
         let
           args = [ ]
           ++ lib.optionals (commandName != "") [ "--argv0" commandName ]
