@@ -110,7 +110,7 @@ let
 
     eval "$(envtag "$1")"
     url=$(
-        jq -n '
+        jq -nr '
             ("\(env.artist_credit // env.artist) \(env.title)") as $query
                 | "https://www.youtube.com/results?search_query=\($query | @uri)"
         '
@@ -349,14 +349,12 @@ in
         # funky at program start that causes it to need an additional write after
         # being closed for the first time; and after that, it does more r/w...
         (pkgs.writeShellScriptBin "cantata" ''
-            export
-            PATH="${lib.makeBinPath runtimeInputs}:$PATH"
+          export PATH=${lib.makeBinPath runtimeInputs}":$PATH"
 
           : "''${XDG_CONFIG_HOME:=$HOME/.config}"
           : "''${XDG_RUNTIME_DIR:=/run/user/$(id -un)}"
 
-          set -eu
-          set -o pipefail
+          set -euo pipefail
 
           mkdir -m 700 -p "$XDG_CONFIG_HOME/cantata" "$XDG_RUNTIME_DIR/cantata"
           touch "$XDG_RUNTIME_DIR/cantata/cantata.conf"
@@ -371,10 +369,9 @@ in
 
           # -n: don't allow fetching things over the network
           e=0
-          (${pkgs.jumpapp}/bin/jumpapp -f -n -i cantata ${cantata}/bin/cantata -n "$@");
-          e = $?
-            rm - f "$XDG_CONFIG_HOME/cantata/cantata.conf"
-            exit "$e"
+          (${pkgs.jumpapp}/bin/jumpapp -f -n -i cantata ${cantata}/bin/cantata -n "$@") || e=$?
+          rm -f "$XDG_CONFIG_HOME/cantata/cantata.conf"
+          exit "$e"
         '')
 
         cantata
@@ -382,5 +379,3 @@ in
     })
   ];
 }
-
-
