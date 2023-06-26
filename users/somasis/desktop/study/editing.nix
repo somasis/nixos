@@ -18,6 +18,8 @@
     # Scan editing tools
     pkgs.deskew
     pkgs.scantailor-advanced
+
+    pkgs.pdfgrep
   ];
 
   xdg.configFile."scantailor-advanced/scantailor-advanced.ini".text = lib.generators.toINI { } {
@@ -28,4 +30,11 @@
       units = "in";
     };
   };
+
+  home.shellAliases = {
+    pdfgrep = "pdfgrep --cache";
+    ocr = "ocrmypdf --deskew --clean";
+  };
+
+  cache.directories = [ "var/cache/pdfgrep" ];
 }

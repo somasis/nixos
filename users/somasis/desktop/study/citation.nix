@@ -41,94 +41,6 @@ let
       })
     { };
 
-  zotero-cli = pkgs.callPackage
-    ({ lib, fetchFromGitHub, python3Packages, pyzotero, rauth }:
-      python3Packages.buildPythonApplication rec {
-        pname = "zotero-cli";
-        version = "unstable-2022-02-11";
-        format = "setuptools";
-
-        src = fetchFromGitHub {
-          repo = pname;
-          owner = "mara-kr";
-          rev = "8195d2e06e2b9385b6fb72f6faa29838a8f720a2";
-          hash = "sha256-1VMdau/ocz/kQJzdYWoOyT8qSQenh809aiqEGb9Er44=";
-        };
-
-        propagatedBuildInputs = with python3Packages; [
-          click
-          pypandoc
-          pyzotero
-          rauth
-          setuptools-git
-        ];
-
-        patchPhase = ''
-          sed -i '/pathlib/d' setup.py
-        '';
-
-        meta = with lib; {
-          description = "Command-line interface for the Zotero API";
-          homepage = "https://github.com/mara-kr/zotero-cli";
-          maintainers = with maintainers; [ somasis ];
-          license = licenses.mit;
-        };
-      })
-    {
-      pyzotero = pkgs.python3Packages.buildPythonApplication rec {
-        pname = "pyzotero";
-        version = "1.5.5";
-
-        format = "setuptools";
-
-        src = pkgs.python3Packages.fetchPypi {
-          inherit pname version;
-          hash = "sha256-4sxGPKLg13gc39COjTpq8cXo921Tfy7EXad1cujtKf0=";
-        };
-
-        propagatedBuildInputs = with pkgs.python3Packages; [
-          bibtexparser
-          dateutil
-          feedparser
-          httpretty
-          pytz
-          requests
-          setuptools_scm
-        ];
-
-        doCheck = false;
-
-        meta = with lib; {
-          description = "Python wrapper for the Zotero API";
-          homepage = "https://github.com/urschrei/pyzotero";
-          maintainers = with maintainers; [ somasis ];
-          license = licenses.mit;
-        };
-      };
-
-      rauth = pkgs.python3Packages.buildPythonApplication rec {
-        pname = "rauth";
-        version = "0.7.3";
-
-        format = "setuptools";
-
-        src = pkgs.python3Packages.fetchPypi {
-          inherit pname version;
-          hash = "sha256-UkzbwcKFYOrPyanUDFlSXrjQD98H+62GEH6iRBFHewo=";
-        };
-
-        doCheck = false;
-        propagatedBuildInputs = with pkgs.python3Packages; [ requests ];
-
-        meta = with lib; {
-          description = "A Python library for OAuth 1.0/a, 2.0, and Ofly";
-          homepage = "https://github.com/maxcountryman/rauth";
-          maintainers = with maintainers; [ somasis ];
-          license = licenses.mit;
-        };
-      };
-    };
-
   # Use Appalachian State University's proxy
   proxy = "https://login.proxy006.nclive.org/login";
 in
@@ -524,14 +436,13 @@ in
     Unit = {
       Description = pkgs.zotero.meta.description;
       PartOf = [ "graphical-session.target" ];
-      After = [ "picom.service" "panel.service" ];
+      After = [ "picom.service" "tray.target" ];
     };
     Install.WantedBy = [ "graphical-session.target" ];
 
     Service = {
       Type = "simple";
       ExecStart = "${config.programs.zotero.package}/bin/zotero";
-      # KillSignal = "SIGQUIT";
 
       SyslogIdentifier = "zotero";
     };
@@ -547,6 +458,21 @@ in
   ;
 
   services.sxhkd.keybindings."super + z" = "${config.programs.zotero.package}/bin/zotero";
+
+  programs.qutebrowser = {
+    aliases.zotero = "spawn -u ${qute-zotero}/bin/qute-zotero";
+    aliases.Zotero = "hint links userscript ${qute-zotero}/bin/qute-zotero";
+    keyBindings.normal = let open = x: "open -rt ${x}"; in {
+      "zpz" = "zotero";
+      "zpZ" = "Zotero";
+      "rz" = open "${proxy}?qurl={url}";
+    };
+
+    searchEngines = {
+      "!library" = "${proxy}?qurl=http%3A%2F%2Fsearch.ebscohost.com%2Flogin.aspx%3Fdirect%3Dtrue%26site%3Deds-live%26scope%3Dsite%26group%3Dmain%26profile%3Deds%26authtime%3Dcookie%2Cip%2Cuid%26bQuery%3D{quoted}";
+      "!scholar" = "${proxy}?qurl=https%3A%2F%2Fscholar.google.com%2Fscholar%3Fhl%3Den%26q%3D{quoted}%26btnG%3DSearch";
+    };
+  };
 
   home.shellAliases."libgen" = lib.optionalString osConfig.services.tor.client.enable "${pkgs.torsocks}/bin/torsocks " + "${libgen}";
 
@@ -577,18 +503,4 @@ in
   #   '');
   # };
 
-  programs.qutebrowser = {
-    aliases.zotero = "spawn -u ${qute-zotero}/bin/qute-zotero";
-    aliases.Zotero = "hint links userscript ${qute-zotero}/bin/qute-zotero";
-    keyBindings.normal = let open = x: "open -rt ${x}"; in {
-      "zpz" = "zotero";
-      "zpZ" = "Zotero";
-      "rz" = open "${proxy}?qurl={url}";
-    };
-
-    searchEngines = {
-      "!library" = "${proxy}?qurl=http%3A%2F%2Fsearch.ebscohost.com%2Flogin.aspx%3Fdirect%3Dtrue%26site%3Deds-live%26scope%3Dsite%26group%3Dmain%26profile%3Deds%26authtime%3Dcookie%2Cip%2Cuid%26bQuery%3D{quoted}";
-      "!scholar" = "${proxy}?qurl=https%3A%2F%2Fscholar.google.com%2Fscholar%3Fhl%3Den%26q%3D{quoted}%26btnG%3DSearch";
-    };
-  };
 }

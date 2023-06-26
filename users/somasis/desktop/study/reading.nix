@@ -1,4 +1,5 @@
 { config
+, lib
 , pkgs
 , ...
 }: {
@@ -43,28 +44,57 @@
       recolor-lightcolor = config.xresources.properties."*background";
     };
 
-    mappings = {
-      "<F1>" = "toggle_statusbar";
+    mappings =
+      let
+        # this is what we call in the industry a
+        # "Really fucking dumb workaround for a lack of well designed configuration
+        # mechanism in an open source application I don't know how to modify the source of"
+        xdotoolKeyType = pkgs.writeShellScript "xdotool" ''
+          set -x
+          PATH=${lib.makeBinPath [ pkgs.xdotool ]}:"$PATH"
 
-      "<Space>" = "navigate next";
-      "<Esc>" = "navigate next";
+          window=$(xdotool getactivewindow)
 
-      "<A-Left>" = "navigate previous";
-      "<A-Right>" = "navigate next";
+          while [ $# -gt 0 ]; do
+              case "$1" in
+                  type:*)
+                      xdotool type --window "$window" --delay 10 --clearmodifiers "''${1#type:}"
+                      ;;
+                  key:*)
+                      xdotool key --window "$window" --delay 10 --clearmodifiers "''${1#key:}"
+                      ;;
+              esac
+              shift
+          done
+        '';
 
-      "Tab" = "toggle_index";
-      "`" = "toggle_index";
-      "[index] Left" = "navigate_index collapse";
-      "[index] Right" = "navigate_index expand";
+        xdotool = args: ''exec ${lib.escapeShellArg "${xdotoolKeyType} ${lib.escapeShellArgs args}"}'';
+      in
+      {
+        "<F1>" = "toggle_statusbar";
 
-      "r" = "rotate rotate-cw";
-      "S-r" = "rotate rotate-ccw";
-      "i" = "recolor";
+        "<Space>" = "navigate next";
+        # "<Esc>" = "navigate next";
 
-      "=" = "adjust_window best-fit";
-      "_" = "adjust_window width";
-      "d" = "toggle_page_mode";
-    };
+        "<A-Left>" = "navigate previous";
+        "<A-Right>" = "navigate next";
+
+        "Tab" = "toggle_index";
+        "`" = "toggle_index";
+        "[index] Left" = "navigate_index collapse";
+        "[index] Right" = "navigate_index expand";
+
+        "r" = "rotate rotate-cw";
+        "R" = "rotate rotate-ccw";
+        "i" = "recolor";
+
+        "=" = "adjust_window best-fit";
+        "_" = "adjust_window width";
+
+        "d" = xdotool [ "type::set first-page-column 1:2" "key:Return" "key:ctrl+d" ];
+        "D" = xdotool [ "type::set first-page-column 1:1" "key:Return" "key:ctrl+d" ];
+        "<C-d>" = "toggle_page_mode";
+      };
   };
 
   persist.directories = [{
