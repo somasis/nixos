@@ -7,19 +7,18 @@
 
     fonts = [
       pkgs.noto-fonts
-      pkgs.inter
 
       pkgs.iosevka-bin
-      # (pkgs.iosevka-bin.override { variant = "sgr-iosevka-term"; })
       (pkgs.iosevka-bin.override { variant = "aile"; })
       (pkgs.iosevka-bin.override { variant = "etoile"; })
       (pkgs.iosevka-bin.override { variant = "slab"; })
       (pkgs.iosevka-bin.override { variant = "curly"; })
       (pkgs.iosevka-bin.override { variant = "curly-slab"; })
+      (pkgs.nerdfonts.override { fonts = [ "NerdFontsSymbolsOnly" ]; })
 
       pkgs.sarasa-gothic # CJK in a style similar to Iosevka
 
-      # pkgs.lmodern
+      pkgs.lmodern
 
       pkgs.nasin-nanpa
 
@@ -44,21 +43,17 @@
 
       defaultFonts = {
         sansSerif = lib.mkForce [
-          "Inter"
-          # "Noto Sans"
-          # "Sarasa Mono CL"
+          "Noto Sans"
           "nasin-nanpa"
           "emoji"
         ];
         serif = lib.mkForce [
           "Noto Serif"
-          # "Iosevka Etoile"
-          # "Sarasa Fixed Slab CL"
           "nasin-nanpa"
           "emoji"
         ];
         monospace = lib.mkForce [
-          "Iosevka Term"
+          "Iosevka"
           "Sarasa Term CL"
           "nasin-nanpa"
           "emoji"
@@ -71,7 +66,5 @@
   console = {
     packages = [ pkgs.spleen pkgs.uw-ttyp0 pkgs.uni-vga ];
     font = "${pkgs.spleen}/share/consolefonts/spleen-12x24.psfu";
-    # font = "${pkgs.uni-vga}/share/consolefonts/u_vga16.psf.gz";
-    # font = "${pkgs.uw-ttyp0}/share/consolefonts/t0-22-uni.psf";
   };
 }
