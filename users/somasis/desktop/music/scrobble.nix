@@ -1,10 +1,11 @@
 { config
 , pkgs
 , lib
+, osConfig
 , ...
 }:
 let
-  xdgRuntimeDir = "/run/user/${toString nixosConfig.users.users.${config.home.username}.uid}";
+  xdgRuntimeDir = "/run/user/${toString osConfig.users.users.${config.home.username}.uid}";
 
   mpdscribble = pkgs.symlinkJoin {
     name = "mpdscribble";
@@ -69,7 +70,7 @@ in
       Install.WantedBy = [ "mpd.service" ];
 
       Service.Environment = [
-        "ENTRY=${nixosConfig.networking.fqdnOrHostName}/listenbrainz-mpd"
+        "ENTRY=${osConfig.networking.fqdnOrHostName}/listenbrainz-mpd"
         "PATH=${lib.getBin config.programs.password-store.package}/bin"
       ];
 
@@ -78,7 +79,7 @@ in
         umask 0077
         exec pass "$ENTRY" > "$XDG_RUNTIME_DIR/listenbrainz-mpd.secret"
       '';
-      Service.ExecStopPre = [ "${pkgs.coreutils}/bin/rm -f %t/listenbrainz-mpd.secret" ];
+      Service.ExecStopPost = [ "${pkgs.coreutils}/bin/rm -f %t/listenbrainz-mpd.secret" ];
     };
 
     mpdscribble = {

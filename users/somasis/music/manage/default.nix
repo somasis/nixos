@@ -1,7 +1,7 @@
 { pkgs
 , lib
 , config
-, nixosConfig
+, osConfig
 , ...
 }:
 let
@@ -63,17 +63,17 @@ let
       trap 'fail $?' ERR
 
       output=$(
-          pass ${nixosConfig.networking.fqdnOrHostName}/beets/acoustid \
+          pass ${osConfig.networking.fqdnOrHostName}/beets/acoustid \
               | jq -Rc '{ acoustid: { apikey: . } }'
       )
       output+=$(
-          pass ${nixosConfig.networking.fqdnOrHostName}/beets/musicbrainz \
+          pass ${osConfig.networking.fqdnOrHostName}/beets/musicbrainz \
               | jq -Rc \
                   --arg user Somasis \
                   '{ musicbrainz: { user: $user, pass: . } }'
       )
       output+=$(
-          pass ${nixosConfig.networking.fqdnOrHostName}/beets/google \
+          pass ${osConfig.networking.fqdnOrHostName}/beets/google \
               | jq -Rc '{ lyrics: { google_API_key: . } }'
       )
 
@@ -241,7 +241,7 @@ let
     };
   };
 
-  notServer = nixosConfig.networking.fqdnOrHostName != "spinoza.7596ff.com";
+  notServer = osConfig.networking.fqdnOrHostName != "spinoza.7596ff.com";
 in
 {
   imports = [
@@ -270,7 +270,7 @@ in
     #   postBuild = ''
     #     wrapProgram $out/bin/gazelle-origin \
     #         --set-default "ORIGIN_TRACKER" "RED" \
-    #         --run ': "''${RED_API_KEY:=$(${config.programs.password-store.package}/bin/pass ${nixosConfig.networking.fqdnOrHostName}/gazelle-origin/redacted.ch)}"' \
+    #         --run ': "''${RED_API_KEY:=$(${config.programs.password-store.package}/bin/pass ${osConfig.networking.fqdnOrHostName}/gazelle-origin/redacted.ch)}"' \
     #         --run 'export RED_API_KEY'
     #   '';
     # })

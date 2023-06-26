@@ -1,6 +1,6 @@
 { config
 , lib
-, nixosConfig
+, osConfig
 , pkgs
 , ...
 }:
@@ -185,7 +185,7 @@ with lib;
                 ExecStopPost = [ "${pkgs.coreutils}/bin/rm -f %t/${socket}" ];
 
                 Restart = "on-failure";
-              } // (lib.optionalAttrs nixosConfig.networking.networkmanager.enable { ExecStartPre = [ "${pkgs.networkmanager}/bin/nm-online -q" ]; });
+              } // (lib.optionalAttrs osConfig.networking.networkmanager.enable { ExecStartPre = [ "${pkgs.networkmanager}/bin/nm-online -q" ]; });
           };
         }
       )

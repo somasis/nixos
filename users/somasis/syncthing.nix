@@ -1,6 +1,6 @@
-{ config, nixosConfig, lib, ... }:
+{ config, osConfig, lib, ... }:
 let
-  inherit (nixosConfig.services) tor;
+  inherit (osConfig.services) tor;
   inherit (lib.cli) toGNUCommandLineShell;
 in
 {

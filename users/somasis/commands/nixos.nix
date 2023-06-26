@@ -1,13 +1,13 @@
 { lib
 , pkgs
 , config
-, nixosConfig
+, osConfig
 , ...
 }:
 let
   repl = pkgs.writeShellScript "nixos-repl" ''
-    ${nixosConfig.nix.package}/bin/nix repl \
-        --argstr hostName "${nixosConfig.networking.hostName}" \
+    ${config.nix.package}/bin/nix repl \
+        --argstr hostName "${osConfig.networking.hostName}" \
         --argstr userName "${config.home.username}" \
         "$@" --file /etc/nixos/repl.nix
   '';
@@ -27,7 +27,7 @@ in
 
       runtimeInputs = [
         config.programs.jq.package
-        nixosConfig.nix.package
+        config.nix.package
         pkgs.coreutils
         pkgs.gawk
         pkgs.gnugrep
@@ -119,7 +119,7 @@ in
 
       runtimeInputs = [
         config.programs.jq.package
-        nixosConfig.nix.package
+        config.nix.package
         pkgs.coreutils
       ];
 

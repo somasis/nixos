@@ -1,4 +1,4 @@
-{ pkgs, nixosConfig, ... }: {
+{ pkgs, osConfig, ... }: {
   services.sctd = {
     enable = true;
     baseTemperature = 3900;
@@ -13,7 +13,7 @@
   ];
 
   programs.autorandr.hooks.postswitch."sctd" = ''
-    f="${nixosConfig.networking.fqdnOrHostName}"
+    f="${osConfig.networking.fqdnOrHostName}"
 
     case "$AUTORANDR_CURRENT_PROFILE" in
         "$f"[:+]"tv")

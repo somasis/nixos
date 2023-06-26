@@ -1,5 +1,5 @@
 { config
-, nixosConfig
+, osConfig
 , pkgs
 , ...
 }: {

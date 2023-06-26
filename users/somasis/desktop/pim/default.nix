@@ -1,4 +1,4 @@
-{ nixosConfig, config, lib, pkgs, ... }:
+{ osConfig, config, lib, pkgs, ... }:
 let
   data = "${config.xdg.dataHome}/vdirsyncer";
   mkCollection = collections: "[" + (lib.concatStringsSep "," (map (x: ''"${x}"'') collections)) + "]";

@@ -1,6 +1,6 @@
 { lib
 , config
-, nixosConfig ? { }
+, osConfig ? { }
 , ...
 }:
 let
@@ -10,7 +10,7 @@ let
     types
     ;
 
-  default = type: nixosConfig.impermanence."${type}" or "/${type}${config.home.homeDirectory}";
+  default = type: osConfig.impermanence."${type}" or "/${type}${config.home.homeDirectory}";
   mkPath = default: description: mkOption {
     inherit default description;
     type = types.path;

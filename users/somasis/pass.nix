@@ -3,7 +3,7 @@
 
 { config
 , pkgs
-, nixosConfig
+, osConfig
 , lib
 , ...
 }:

@@ -1,6 +1,6 @@
-{ config, nixosConfig, pkgs, lib, ... }:
+{ config, osConfig, pkgs, lib, ... }:
 let
-  inherit (nixosConfig.services) tor;
+  inherit (osConfig.services) tor;
 
   translate = pkgs.writeShellScript "translate" ''
     set -euo pipefail

@@ -1,7 +1,7 @@
 { config
 , pkgs
 , lib
-, nixosConfig
+, osConfig
 , ...
 }:
 let
@@ -30,7 +30,7 @@ let
         set -eu
         set -o pipefail
 
-        entry="${nixosConfig.networking.fqdnOrHostName}/signal-desktop"
+        entry="${osConfig.networking.fqdnOrHostName}/signal-desktop"
 
         mkdir -m 700 -p "''${XDG_CONFIG_HOME:=$HOME/.config}/${signalWindowName}"
         rm -f "$XDG_CONFIG_HOME/${signalWindowName}"/config.json

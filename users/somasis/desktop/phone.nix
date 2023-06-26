@@ -1,6 +1,6 @@
 { pkgs
 , config
-, nixosConfig
+, osConfig
 , lib
 , ...
 }:
@@ -29,7 +29,7 @@ in
     # "kdeconnect/.keep".source = builtins.toFile "keep" "";
 
     "kdeconnect/config".text = lib.generators.toINI { } {
-      General.name = "${config.home.username}@${nixosConfig.networking.fqdnOrHostName}";
+      General.name = "${config.home.username}@${osConfig.networking.fqdnOrHostName}";
     };
   };
 

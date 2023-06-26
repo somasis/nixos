@@ -1,5 +1,6 @@
 { pkgs
 , lib
+, osConfig
 , ...
 }: {
   home.shellAliases = rec {
@@ -36,7 +37,7 @@
 
     number = "nl -b a -d '' -f n -w 1";
 
-    doas = lib.optionalString nixosConfig.security.sudo.enable "sudo";
+    doas = lib.optionalString osConfig.security.sudo.enable "sudo";
   };
 
   home.packages = [

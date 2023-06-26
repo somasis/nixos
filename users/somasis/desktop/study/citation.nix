@@ -1,13 +1,13 @@
 { pkgs
 , config
 , lib
-, nixosConfig
+, osConfig
 , inputs
 , ...
 }:
 let
   inherit (inputs) csl zoteroTranslators;
-  inherit (nixosConfig.services) tor;
+  inherit (osConfig.services) tor;
 
   libgen = "${pkgs.libgen-cli}/bin/libgen-cli";
 
@@ -548,6 +548,8 @@ in
 
   services.sxhkd.keybindings."super + z" = "${config.programs.zotero.package}/bin/zotero";
 
+  home.shellAliases."libgen" = lib.optionalString osConfig.services.tor.client.enable "${pkgs.torsocks}/bin/torsocks " + "${libgen}";
+
   # TODO this should work, but it sure don't
   # services.xsuspender.rules.zotero = {
   #   matchWmClassGroupContains = "Zotero";
@@ -589,6 +591,4 @@ in
       "!scholar" = "${proxy}?qurl=https%3A%2F%2Fscholar.google.com%2Fscholar%3Fhl%3Den%26q%3D{quoted}%26btnG%3DSearch";
     };
   };
-
-  home.shellAliases."libgen" = lib.optionalString nixosConfig.services.tor.client.enable "${pkgs.torsocks}/bin/torsocks " + "${libgen}";
 }

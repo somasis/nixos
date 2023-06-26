@@ -1,5 +1,5 @@
 { pkgs
-, nixosConfig
+, osConfig
 , ...
 }: {
   home.packages = [ pkgs.batsignal ];
@@ -18,8 +18,8 @@
           -e \
           -I "battery" \
           -D "${pkgs.systemd}/bin/systemctl suspend" \
-          -w "${builtins.toString nixosConfig.services.upower.percentageLow}" \
-          -c "${builtins.toString nixosConfig.services.upower.percentageCritical}"
+          -w "${builtins.toString osConfig.services.upower.percentageLow}" \
+          -c "${builtins.toString osConfig.services.upower.percentageCritical}"
       '';
 
       Restart = "on-failure";

@@ -1,7 +1,7 @@
 { pkgs
 , lib
 , config
-, nixosConfig
+, osConfig
 , ...
 }:
 let
@@ -116,7 +116,7 @@ in
   #       generate the javasettings XML file during build time...
   # xdg.configFile =
   #   let
-  #     system = nixosConfig.nixpkgs.localSystem.uname;
+  #     system = osConfig.nixpkgs.localSystem.uname;
   #   in
   #   {
   #     "libreoffice/4/user/config/javasettings_${system.system}_${lib.toUpper system.processor}.xml".text = toXML {

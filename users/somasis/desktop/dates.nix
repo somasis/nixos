@@ -1,4 +1,4 @@
-{ nixosConfig
+{ osConfig
 , config
 , lib
 , pkgs
@@ -70,7 +70,7 @@ in
   home.packages = [ pkgs.dates datesCalendar ];
 
   persist.directories = [ "etc/dates" ];
-  xdg.configFile."dates/_".source = "${pkgs.tzdata}/share/zoneinfo/${nixosConfig.time.timeZone}";
+  xdg.configFile."dates/_".source = config.lib.file.mkOutOfStoreSymlink "/etc/localtime";
 
   somasis.chrome.stw.widgets.dates = {
     enable = false;

@@ -1,5 +1,5 @@
 { config
-, nixosConfig
+, osConfig
 , lib
 , pkgs
 , ...
@@ -66,7 +66,7 @@ in
   home.packages =
     [ dmenu-run ]
     ++ lib.optional config.xsession.windowManager.bspwm.enable dmenu-session
-    ++ lib.optional (nixosConfig.fonts.fontconfig.defaultFonts.emoji != [ ]) dmenu-emoji
+    ++ lib.optional (osConfig.fonts.fontconfig.defaultFonts.emoji != [ ]) dmenu-emoji
     ++ lib.optional config.programs.password-store.enable dmenu-pass
     ++ lib.optional config.programs.qutebrowser.enable qute-pass
   ;
@@ -84,7 +84,7 @@ in
         "DMENU_SESSION_ENABLE_LOCKING=${lib.boolToString config.services.screen-locker.enable} ${dmenu-session}/bin/dmenu-session"
       ;
     }
-    // lib.optionalAttrs (nixosConfig.fonts.fontconfig.defaultFonts.emoji != [ ]) {
+    // lib.optionalAttrs (osConfig.fonts.fontconfig.defaultFonts.emoji != [ ]) {
       "super + e" = "${dmenu-emoji}/bin/dmenu-emoji -c";
     }
     // lib.optionalAttrs config.programs.password-store.enable {

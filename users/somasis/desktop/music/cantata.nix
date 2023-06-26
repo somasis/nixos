@@ -1,5 +1,5 @@
 { config
-, nixosConfig
+, osConfig
 , lib
 , pkgs
 , ...
@@ -364,7 +364,7 @@ in
 
           cat ${cantataConf} - > "$XDG_RUNTIME_DIR"/cantata/cantata.conf <<EOF
           [Scrobbling]
-          sessionKey=$(pass ${nixosConfig.networking.fqdnOrHostName}/cantata/last.fm)
+          sessionKey=$(pass ${osConfig.networking.fqdnOrHostName}/cantata/last.fm)
           EOF
 
           ln -sf "$XDG_RUNTIME_DIR/cantata/cantata.conf" "$XDG_CONFIG_HOME/cantata/cantata.conf"

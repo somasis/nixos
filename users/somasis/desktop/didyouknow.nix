@@ -1,7 +1,7 @@
 { lib
 , pkgs
 , config
-, nixosConfig
+, osConfig
 , ...
 }:
 let
@@ -221,16 +221,6 @@ in
           ln -sf "$file" "$runtime"/stw.txt
         '';
         ExecStartPost = "-${pkgs.systemd}/bin/systemctl --user reload stw@didyouknow.service";
-      };
-    };
-
-    services.fetch-didyouknow = {
-      Unit.Description = "Fetch today's Wikipedia 'Did you know?' text";
-
-      Service = {
-        Type = "oneshot";
-        ExecStartPre = lib.optional nixosConfig.networking.networkmanager.enable "${pkgs.networkmanager}/bin/nm-online -q";
-        ExecStart = "${fetch-didyouknow}";
       };
     };
   };

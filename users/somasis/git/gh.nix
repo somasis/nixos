@@ -1,5 +1,5 @@
 { config
-, nixosConfig
+, osConfig
 , pkgs
 , ...
 }: {
@@ -18,7 +18,7 @@
         beforeCommand = [
           ''
             set +x
-            : "''${GH_TOKEN:=$(${config.programs.password-store.package}/bin/pass "${nixosConfig.networking.fqdnOrHostName}/gh/$GH_HOST/''${USER:-$(id -un)}")}"
+            : "''${GH_TOKEN:=$(${config.programs.password-store.package}/bin/pass "${osConfig.networking.fqdnOrHostName}/gh/$GH_HOST/''${USER:-$(id -un)}")}"
             export GH_TOKEN
           ''
         ];

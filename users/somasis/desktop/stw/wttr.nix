@@ -110,7 +110,7 @@ in
         ExecStopPost = [ "-${pkgs.systemd}/bin/systemctl reload --user stw@wttr.service" ];
         StandardOutput = "null";
       }
-      // (lib.optionalAttrs nixosConfig.networking.networkmanager.enable { ExecStartPre = [ "${pkgs.networkmanager}/bin/nm-online -q" ]; })
+      // (lib.optionalAttrs osConfig.networking.networkmanager.enable { ExecStartPre = [ "${pkgs.networkmanager}/bin/nm-online -q" ]; })
       ;
     };
 

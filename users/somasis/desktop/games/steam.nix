@@ -1,9 +1,9 @@
 { config
 , lib
-, nixosConfig
+, osConfig
 , ...
 }:
-let inherit (nixosConfig.programs) steam; in
+let inherit (osConfig.programs) steam; in
 lib.mkIf steam.enable {
   persist.directories = [ "share/Steam" ];
 

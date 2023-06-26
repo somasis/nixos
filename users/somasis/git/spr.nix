@@ -1,5 +1,5 @@
 { config
-, nixosConfig
+, osConfig
 , pkgs
 , ...
 }:
@@ -27,7 +27,7 @@ let
 
       cat > "$config" <<EOF
       [spr]
-      githubAuthToken = $(pass "${nixosConfig.networking.fqdnOrHostName}/spr/$hostname/$username")
+      githubAuthToken = $(pass "${osConfig.networking.fqdnOrHostName}/spr/$hostname/$username")
       EOF
 
       for p in "$runtime"/*/*.conf; do
@@ -39,7 +39,7 @@ in
 {
   programs.git = {
     includes = [{
-      path = "/run/user/${toString nixosConfig.users.users.somasis.uid}/pass-spr/gitconfig";
+      path = "/run/user/${toString osConfig.users.users.somasis.uid}/pass-spr/gitconfig";
     }];
 
     extraConfig.spr = {

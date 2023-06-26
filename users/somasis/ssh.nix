@@ -1,6 +1,6 @@
 { config
 , pkgs
-, nixosConfig
+, osConfig
 , lib
 , ...
 }: {
@@ -15,7 +15,7 @@
     controlPersist = "5m";
 
     # HACK: I shouldn't have to put my UID here, right?
-    controlPath = "/run/user/${toString nixosConfig.users.users.${config.home.username}.uid}/%C.control.ssh";
+    controlPath = "/run/user/${toString osConfig.users.users.${config.home.username}.uid}/%C.control.ssh";
     userKnownHostsFile = "${config.xdg.cacheHome}/ssh/known_hosts";
 
     # Send an in-band keep-alive every 30 seconds.
@@ -24,8 +24,8 @@
     matchBlocks = let algoList = lib.concatStringsSep ","; in {
       "*" = {
         identityFile = [
-          "${config.xdg.configHome}/ssh/${config.home.username}@${nixosConfig.networking.fqdnOrHostName}:id_ed25519"
-          "${config.xdg.configHome}/ssh/${config.home.username}@${nixosConfig.networking.fqdnOrHostName}:id_rsa"
+          "${config.xdg.configHome}/ssh/${config.home.username}@${osConfig.networking.fqdnOrHostName}:id_ed25519"
+          "${config.xdg.configHome}/ssh/${config.home.username}@${osConfig.networking.fqdnOrHostName}:id_rsa"
           "${config.xdg.configHome}/ssh/id_ed25519"
           "${config.xdg.configHome}/ssh/id_rsa"
         ];

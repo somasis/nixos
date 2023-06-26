@@ -1,5 +1,5 @@
-{ nixosConfig, config, pkgs, ... }:
-assert nixosConfig.hardware.brillo.enable;
+{ osConfig, config, pkgs, ... }:
+assert osConfig.hardware.brillo.enable;
 {
   cache.directories = [{ method = "symlink"; directory = "var/cache/brillo"; }];
   home.packages = [ pkgs.brillo ];

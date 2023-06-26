@@ -1,7 +1,7 @@
 { config
 , pkgs
 , lib
-, nixosConfig
+, osConfig
 , ...
 }:
 let
@@ -39,7 +39,7 @@ in
               inherit address;
 
               realName = "Kylie McClain";
-              passwordCommand = "${pass} show ${nixosConfig.networking.fqdnOrHostName}/nixos/${address}";
+              passwordCommand = "${pass} show ${osConfig.networking.fqdnOrHostName}/nixos/${address}";
 
               offlineimap.enable = true;
 
@@ -102,7 +102,7 @@ in
             CPUSchedulingPolicy = "idle";
             IOSchedulingClass = "idle";
             IOSchedulingPriority = 7;
-          } // (optionalAttrs nixosConfig.networking.networkmanager.enable { ExecStartPre = [ "${pkgs.networkmanager}/bin/nm-online -q" ]; });
+          } // (optionalAttrs osConfig.networking.networkmanager.enable { ExecStartPre = [ "${pkgs.networkmanager}/bin/nm-online -q" ]; });
         };
 
         timers."offlineimap-${mkPathSafeName n}" = {

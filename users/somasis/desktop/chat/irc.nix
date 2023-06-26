@@ -1,6 +1,6 @@
 { config
 , pkgs
-, nixosConfig
+, osConfig
 , inputs
 , lib
 , ...
@@ -63,8 +63,8 @@ let
       case "$mode" in
           catgirl)
               exec catgirl \
-                  -u "${nixosConfig.networking.fqdnOrHostName}" \
-                  -c "$XDG_CONFIG_HOME/catgirl/client-${nixosConfig.networking.fqdnOrHostName}.crt" \
+                  -u "${osConfig.networking.fqdnOrHostName}" \
+                  -c "$XDG_CONFIG_HOME/catgirl/client-${osConfig.networking.fqdnOrHostName}.crt" \
                   -N "$0 -n" \
                   "$@"
               ;;
@@ -529,7 +529,7 @@ in
   };
 
   persist.files = [
-    "etc/catgirl/client-${nixosConfig.networking.fqdnOrHostName}.crt"
+    "etc/catgirl/client-${osConfig.networking.fqdnOrHostName}.crt"
     # "share/catgirl/bitlbee.pounce.somas.is.buf"
     "share/catgirl/libera.pounce.somas.is.buf"
     "share/catgirl/oftc.pounce.somas.is.buf"

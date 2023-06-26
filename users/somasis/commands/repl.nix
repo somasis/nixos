@@ -1,5 +1,5 @@
 { lib
-, nixosConfig
+, osConfig
 , pkgs
 , ...
 }:
@@ -132,7 +132,7 @@ in
       name = "btcli";
 
       runtimeInputs = [
-        (lib.getBin nixosConfig.hardware.bluetooth.package)
+        (lib.getBin osConfig.hardware.bluetooth.package)
         pkgs.gnused
         pkgs.coreutils
         pkgs.moreutils

@@ -1,6 +1,6 @@
 { config
 , pkgs
-, nixosConfig
+, osConfig
 , ...
 }: {
   home.packages = [
