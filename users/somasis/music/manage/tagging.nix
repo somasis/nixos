@@ -24,7 +24,7 @@
       "importadded"
 
       # Fetch genres from Last.fm
-      "lastgenre"
+      # "lastgenre"
 
       # Fetch/display lyrics
       "lyrics"
@@ -98,7 +98,7 @@
 
     musicbrainz = {
       # NOTE: conflicts with lastgenre
-      # genres = true;
+      genres = true;
       extra_tags = [
         "catalognum"
         "country"
@@ -154,13 +154,13 @@
 
     importadded.preserve_mtimes = true;
 
-    lastgenre = {
-      auto = true;
+    # lastgenre = {
+    #   auto = true;
 
-      count = 5;
-      prefer_specific = true;
-      title_case = false;
-    };
+    #   count = 5;
+    #   prefer_specific = true;
+    #   title_case = false;
+    # };
 
     lyrics.sources = [ "musixmatch" "genius" ];
 
