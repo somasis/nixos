@@ -25,7 +25,7 @@ in
 
   cache.directories = [ "share/mpd_sima" ];
 
-  xdg.configfile."mpd_sima/mpd_sima.cfg".source = lib.generators.toini
+  xdg.configFile."mpd_sima/mpd_sima.cfg".text = lib.generators.toINI
     {
       listsAsDuplicateKeys = false;
       mkKeyValue = k: v:
@@ -37,15 +37,22 @@ in
     }
     {
       sima = {
-        internal = [ "Crop" "Lastfm" "Random" ];
+        internal = [
+          # "Crop"
+          "Lastfm"
+          "Random"
+        ];
         queue_length = 6;
       };
-      crop.consume = 10;
+
+      # crop.consume = 10;
+
       lastfm = {
         queue_mode = "track";
         single_album = false;
         track_to_add = 3;
       };
+
       random.track_to_add = 3;
     }
   ;
@@ -59,7 +66,7 @@ in
 
     Service = {
       Type = "simple";
-      ExecStart = [ "${pkgs.mpd-sima}/bin/mpd-sima" ];
+      ExecStart = "${pkgs.mpd-sima}/bin/mpd-sima";
     };
   };
 }
