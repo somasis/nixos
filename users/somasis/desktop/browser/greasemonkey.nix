@@ -137,6 +137,23 @@ lib.mkIf (options.programs.qutebrowser ? greasemonkey) {
 
     (pkgs.fetchurl { hash = "sha256-jDHXF0tV5yVACfwdMrRl65Ihl7SG/Xs+0WrNywseB0g="; url = "https://userscripts.adtidy.org/release/disable-amp/1.0/disable-amp.user.js"; })
 
+    # <https://github.com/AdguardTeam/AdGuardExtra#adguard-extra>
+    (pkgs.fetchurl { hash = "sha256-UymMfIN+7RhGNTHc+DgQkUDT/sXOtGvs61mT44x/7dg="; url = "https://userscripts.adtidy.org/release/adguard-extra/1.0/adguard-extra.user.js"; })
+
+    (pkgs.fetchurl { hash = "sha256-F63/UXvFhBmcgHcoh4scOLqVgKdj+CjssIGnn3CshpU="; url = "https://greasyfork.org/scripts/4255-linkify-plus-plus/code/Linkify%20Plus%20Plus.user.js"; })
+
+    ((pkgs.fetchFromGitHub { owner = "daijro"; repo = "always-on-focus"; rev = "106714a3e4f3a2b895dafd10e806939acfe87198"; hash = "sha256-N6dWry8YaZfBxEpqZPH8xIH7jhNcqevYVOxVtEVNodc="; }) + "/alwaysonfocus.user.js")
+
+    (pkgs.runCommand "ISO-8601-dates.user.js"
+      {
+        src = (pkgs.fetchFromGitHub {
+          owner = "chocolateboy";
+          repo = "userscripts";
+          rev = "bf1be5ea11f28b353457e809764d02617070dc82";
+          hash = "sha256-DSCPThX/mOqhPYqfFx0xn5mJ4/CZEJGj0nd7He3Dcfc=";
+        }) + "/src/iso_8601_dates.user.js";
+      } ''sed '/^\/\/ @exclude/ i // @match *' "$src" > "$out"''
+    )
 
     # musicbrainz.com
     # loujine-musicbrainz
@@ -174,17 +191,18 @@ lib.mkIf (options.programs.qutebrowser ? greasemonkey) {
     (pkgs.fetchurl { hash = "sha256-Bb1QsU6R9xU718hRskGbuwNO7rrhuV7S1gvKtC9SlL0="; url = "https://greasyfork.org/scripts/37166-add-site-search-links-to-google-search-result/code/Add%20Site%20Search%20Links%20To%20Google%20Search%20Result.user.js"; })
     (pkgs.fetchurl { hash = "sha256-5C7No5dYcYfWMY+DwciMeBmkdE/wnplu5fxk4q7OFZc="; url = "https://greasyfork.org/scripts/382039-speed-up-google-captcha/code/Speed%20up%20Google%20Captcha.user.js"; })
     ((pkgs.fetchFromGitHub { owner = "jmlntw"; repo = "google-search-sidebar"; rev = "0e8e94c017681447cd9a21531d4cab7427f44022"; hash = "sha256-6bRzZTXYnAIsWJZQqfgmxdzeQOVk6H5swbCduCkqqIw="; }) + "/dist/google-search-sidebar.user.js")
+    (pkgs.fetchurl { hash = "sha256-r4UF6jr3jhVP7JxJNPBzEpK1fkx5t97YWPwf37XLHHE="; url = "https://greasyfork.org/scripts/383166-google-images-search-by-paste/code/Google%20Images%20-%20search%20by%20paste.user.js"; })
+    (pkgs.fetchurl { hash = "sha256-O+CuezLYKcK2Qh4jq4XxrtEEIPKOaruHnUGQNwkkCF8="; url = "https://greasyfork.org/scripts/381497-reddit-search-on-google/code/Reddit%20search%20on%20Google.user.js"; })
 
     (pkgs.fetchurl { hash = "sha256-/5Dub8dgql6z1p4PzK20Y9Yzb55Scjc6X97QaXIATTY="; url = "https://greasyfork.org/scripts/398189-google-image-direct-view/code/Google%20Image%20Direct%20View.user.js"; })
 
     # twitter.com
-    (pkgs.fetchurl { hash = "sha256-JFBaqr7MDRwKbiGYm0b5YhcRhfkDWzg2Idf8N+U3pLs="; url = "https://raw.githubusercontent.com/yuhaofe/Video-Quality-Fixer-for-Twitter/v0.2.0/vqfft.user.js"; })
-    # (pkgs.fetchurl { hash = "sha256-zQd4egcF4xOVEOJi8RKHSTzFfzrR3bBhHcT6tzIkmtc="; url = "https://greasyfork.org/scripts/387773-control-panel-for-twitter/code/Control%20Panel%20for%20Twitter.user.js"; })
-
+    # ((pkgs.fetchFromGitHub { owner = "yuhaofe"; repo = "Video-Quality-Fixer-for-Twitter"; rev = "704f5e4387835b95cb730838ae1df97bebe928dc"; hash = "sha256-oePFTou+Ho29458k129bPcPHmHyzsr0gfrH1H3Yjnpw="; }) + "/vqfft.user.js")
+    # (pkgs.fetchurl { hash = "sha256-lyh/E3QfdLVDppPxVlPGKUBMR58ekojQ46v+J8A+DK4="; url = "https://gist.githubusercontent.com/angeld23/b01dd2ef14cd53fc3735fa88f68b7aef/raw/ee9c8df88b32e48249f3852011f2915bfa123f11/remove_twitter_blue_promo.user.js"; })
     (pkgs.fetchurl { hash = "sha256-3WED6Kodom4j27CDr7CBtdPFXBdRUf41iQk/O/Lkaz4="; url = "https://greasyfork.org/scripts/404632-twitter-direct/code/Twitter%20Direct.user.js"; })
-    (pkgs.fetchurl { hash = "sha256-/bkWrnzxoG9fHnj1t7Nbr0nFLoyovQAEXkgd/ZuBu1M="; url = "https://greasyfork.org/scripts/405103-twitter-linkify-trends/code/Twitter%20Linkify%20Trends.user.js"; })
-    (pkgs.fetchurl { hash = "sha256-tNWUn4LQZxn3ehfSzJ6KFs7H41+I7V8o9773Ua5uQJE="; url = "https://greasyfork.org/scripts/413963-twitter-zoom-cursor/code/Twitter%20Zoom%20Cursor.user.js"; })
-    (pkgs.fetchurl { hash = "sha256-vVd6iKMCV1V5MazeKn8ksfsp7zVt55KOULgkIXt3lms="; url = "https://greasyfork.org/scripts/464506-twitter-advertiser-blocker/code/Twitter%20Advertiser%20Blocker.user.js"; })
+    # (pkgs.fetchurl { hash = "sha256-/bkWrnzxoG9fHnj1t7Nbr0nFLoyovQAEXkgd/ZuBu1M="; url = "https://greasyfork.org/scripts/405103-twitter-linkify-trends/code/Twitter%20Linkify%20Trends.user.js"; })
+    # (pkgs.fetchurl { hash = "sha256-tNWUn4LQZxn3ehfSzJ6KFs7H41+I7V8o9773Ua5uQJE="; url = "https://greasyfork.org/scripts/413963-twitter-zoom-cursor/code/Twitter%20Zoom%20Cursor.user.js"; })
+    # (pkgs.fetchurl { hash = "sha256-vVd6iKMCV1V5MazeKn8ksfsp7zVt55KOULgkIXt3lms="; url = "https://greasyfork.org/scripts/464506-twitter-advertiser-blocker/code/Twitter%20Advertiser%20Blocker.user.js"; })
 
     # tumblr.com
     (pkgs.fetchurl { hash = "sha256-ArfFzIPFoLIoFVpxKVu5JWOhgmVE58L47ljbcI4yksM="; url = "https://greasyfork.org/scripts/31593-tumblr-images-to-hd-redirector/code/Tumblr%20Images%20to%20HD%20Redirector.user.js"; })
@@ -196,8 +214,14 @@ lib.mkIf (options.programs.qutebrowser ? greasemonkey) {
     # reddit.com
     (pkgs.fetchurl { hash = "sha256-R53piHtc6P0EKmR51PUgHimdfN9UgnIY65El9XKxJiI="; url = "https://greasyfork.org/scripts/39312-reddit-highlighter/code/Reddit%20Highlighter.user.js"; })
 
+    # substack.com
+    (pkgs.fetchurl { hash = "sha256-fOTbMhKEw7To5/CDPmnwj5oVGzrFOCPri+edxZodb9g="; url = "https://greasyfork.org/scripts/465222-substack-popup-dismisser/code/substack_popup_dismisser.user.js"; })
+
     # youtube.com
+    (pkgs.fetchurl { hash = "sha256-6FK4x/rZA1BxWOmYLjVU4rEFqXHgpwAy0rYedQzza2g="; url = "https://greasyfork.org/scripts/370755-youtube-peek-preview/code/Youtube%20Peek%20Preview.user.js"; })
     (pkgs.fetchurl { hash = "sha256-pKxroIOn19WvcvBKA5/+ZkkA2YxXkdTjN3l2SLLcC0A="; url = "https://gist.githubusercontent.com/codiac-killer/87e027a2c4d5d5510b4af2d25bca5b01/raw/764a0821aa248ec4126b16cdba7516c7190d287d/youtube-autoskip.user.js"; })
+    (pkgs.fetchurl { hash = "sha256-LnorSydM+dA/5poDUdOEZ1uPoAOMQwpbLmadng3qCqI="; url = "https://greasyfork.org/scripts/23329-disable-youtube-60-fps-force-30-fps/code/Disable%20YouTube%2060%20FPS%20(Force%2030%20FPS).user.js"; })
+
     (
       let
         version = "1.3.2";
