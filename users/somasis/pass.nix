@@ -9,7 +9,6 @@
 }:
 let
   inherit (config.lib.somasis) programPath;
-  inherit (pkgs) qute-pass;
 in
 {
   persist.directories = [
@@ -289,55 +288,152 @@ in
 
   programs.qutebrowser =
     let
-      passGenerateCmd = pkgs.writeShellScript "pass-generate-cmd" ''
+      dmenu = config.programs.dmenu.package;
+      pass = config.programs.password-store.package;
+      dmenu-pass = pkgs.dmenu-pass.override { inherit dmenu pass; };
+      qute-pass = pkgs.qute-pass.override { inherit dmenu-pass pass; };
+
+      # Using the current host, construct the initial entry that should be used for the password
+      # we're generating, and then put it in the command line
+      pass-generate-command = pkgs.writeShellScript "pass-generate-command" ''
+        set -x
+
         : "''${QUTE_FIFO:?}"
 
-        password_store_host=$(
-            printf '%s\n' "$2" \
-                | sed -E \
-                    -e "s|^https?://||" \
-                    -e "s|^www\.||" \
-                    -e "s|/.*||" \
-                    -e "s|^|www/|" \
-                    -e "s|$||"
-        )
-
-        printf 'set-cmd-text :spawn -u %s %s/\n' "$1" "$password_store_host" >>"''${QUTE_FIFO}"
+        entry=$(${qute-pass}/bin/qute-pass -m domain-to-entry "$1")
+        printf 'set-cmd-text :pass-generate www/%s/\n' "$entry" >>"$QUTE_FIFO"
       '';
-      passGenerate = pkgs.writeShellScript "pass-generate" ''
+
+      # Actually generate the password
+      pass-generate = pkgs.writeShellScript "pass-generate" ''
+        set -x
+
         : "''${QUTE_FIFO:?}"
 
-        if ${config.programs.password-store.package}/bin/pass generate -c "$1"; then
+        shift
+        for arg; do
+            entry="$arg"
+        done
+
+        if ${config.programs.password-store.package}/bin/pass generate -c "$@" >/dev/null; then
             ${pkgs.libnotify}/bin/notify-send \
                 -a pass \
                 -i password \
                 -u low \
                 "pass" \
-                "Generated password at '$1'. Copied to clipboard and will be cleared in ''${PASSWORD_STORE_CLIP_TIME} seconds."
+                "Generated password at '$entry'. Copied to clipboard and will be cleared in ''${PASSWORD_STORE_CLIP_TIME} seconds."
         else
             ${pkgs.libnotify}/bin/notify-send \
                 -a pass \
                 -i password \
                 pass \
-                "\`pass generate -c '$1'\` failed for some reason..."
+                "\`pass generate -c $*\` failed for some reason..."
             exit 1
         fi
       '';
     in
     {
-      aliases."pass" = "spawn -u ${programPath qute-pass}";
-      aliases."pass-generate" = "spawn -u ${passGenerateCmd} ${passGenerate}";
+      aliases."pass-generate-command" = "spawn -u ${pass-generate-command}";
+      aliases."pass-generate" = "spawn -u ${pass-generate}";
 
-      # -n: Don't automatically enter into insert mode, so as to match the input.insert_mode.* settings.
-      keyBindings.normal = {
-        "zll" = "pass";
-        "zlL" = "pass -d Enter";
-        "zlz" = "pass -E";
-        # "zlz" = "spawn -u pass-hint-username";
-        "zlu" = "pass -u";
-        "zlp" = "pass -p";
-        "zlo" = "pass -o";
-        "zlg" = "pass-generate {url:host}";
-      };
+      keyBindings.normal."zlg" = "pass-generate-command {url:host}";
+      keyBindings.normal."zlG" = "pass-generate-command -n {url:host}";
+
+      # selectors for username/password/otp input boxes. I know right
+      extraConfig =
+        let
+          flatMap = f: l: lib.flatten (map f l);
+          quote = q: s: "${q}${lib.escape [ q ] s}${q}";
+
+          # ensure that specific forms come before non-specific
+          inForms = l:
+            [ ]
+            ++ (flatMap (x: ''form[id*=login i] ${x}'') l)
+            ++ (flatMap (x: ''form ${x}'') l)
+          ;
+
+          # ensure autocompletes come first
+          asNames = l:
+            [ ]
+            ++ (flatMap (x: [ ''[autocomplete=${x} i]'' ''[autocomplete~=${x} i]'' ''[autocomplete*=${x} i]'' ]) l)
+            ++ (flatMap (x: [ ''[name=${x} i]'' ''[id=${x} i]'' ''[placeholder=${x} i]'' ''[aria-label=${x} i]'' ]) l)
+            ++ (flatMap (x: [ ''[name~=${x} i]'' ''[id~=${x} i]'' ''[placeholder~=${x} i]'' ''[aria-label~=${x} i]'' ]) l)
+            ++ (flatMap (x: [ ''[name*=${x} i]'' ''[id*=${x} i]'' ''[placeholder*=${x} i]'' ''[aria-label*=${x} i]'' ]) l)
+          ;
+
+          # ensure that we prioritize required/autofocused forms before all else
+          preferSpecial = l:
+            [ ]
+            ++ (map (x: "${x}[required][autofocus]") l)
+            ++ (map (x: "${x}[required]") l)
+            ++ (map (x: "${x}[autofocus]") l)
+            ++ l
+          ;
+
+          # generate a list with a whole lot of selectors in highest to lowest priority
+          # start with the element that we need to check multiple of, then process it
+          # a few times
+          #
+          # process:
+          #     1. Start with "username", wrapped in quotes to create '"username"', and pass it to `asNames`
+          #     2. asNames generates
+          #       [
+          #         ''[autocomplete="username" i]'', ''[autocomplete~="username" i]'', ''[autocomplete*="username" i]'',i
+          #         ''[name="username" i]'', ''[id="username" i]'', ''[placeholder="username" i]'', ''[aria-label="username" i]'',
+          #         ''[name~="username" i]'', ''[id~="username" i]'', ''[placeholder~="username" i]'', ''[aria-label~="username" i]'',
+          #         ''[name*="username" i]'', ''[id*="username" i]'', ''[placeholder*="username" i]'', ''[aria-label*="username" i]''
+          #       ]
+          #       and passes it to the next function.
+          #     3. Prefix each item with 'input[type="text"]
+          #     4. Receive list `x`, and generate once big list that is each item in
+          #        `x` with '[required][autofocus]' appended,
+          #        then `x` with '[required]' appended,
+          #        then `x` with '[autofocus]' appended,
+          #        then `x` again, in that order.
+          #     5. Append the form selectors to each time, same process but with
+          #        'form[id*=login i] ' and 'form ' so that we prefer login forms before
+          #        any other forms.
+          #     ∴  giant huge priority-sorted list of selectors
+          usernameSelectors = lib.pipe (map (quote "\"") [ "username" "user" "" ]) [
+            asNames
+            (map (x: ''input[type="text"]${x}''))
+            preferSpecial
+            inForms
+          ];
+
+          emailSelectors = lib.pipe (map (quote "\"") [ "email" "" ]) [
+            asNames
+            (flatMap (x: [ ''input[type="email"]${x}'' ''input[type="text"]${x}'' ]))
+            preferSpecial
+            inForms
+          ];
+
+          passwordSelectors = lib.pipe (map (quote "\"") [ "password" "" ]) [
+            asNames
+            (map (x: ''input[type="password"]${x}''))
+            preferSpecial
+            inForms
+          ];
+
+          otpSelectors = lib.pipe (map (quote "\"") [ "otp" "2fa" "" ]) [
+            asNames
+            (map (x: ''input[type="number"]${x}''))
+            preferSpecial
+            inForms
+          ];
+
+          selectors = {
+            username = emailSelectors ++ usernameSelectors;
+            password = passwordSelectors;
+            otp = otpSelectors;
+          };
+        in
+        lib.concatStringsSep
+          "\n"
+          (lib.mapAttrsToList
+            (n: v: "c.hints.selectors[${quote "'" n}] = ${builtins.toJSON v}")
+            selectors
+          )
+      ;
     };
 }
