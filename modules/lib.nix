@@ -87,6 +87,31 @@ with lib;
     programName = p: p.meta.mainProgram or p.pname or p.name;
     programPath = p: "${getBin p}/bin/${programName p}";
 
+    removeComments = input:
+      let
+        withCommentsRemoved =
+          pkgs.runCommandLocal "removeComments"
+            {
+              input =
+                if lib.isString input then
+                  pkgs.writeText "with-comments" input
+                else # if lib.isStorePath input then
+                  input
+              ;
+            } ''
+            sed -E \
+                -e '/^[[:space:]]*#/d' \
+                -e 's/[[:space:]]+# .*//' \
+                "$input" \
+                > "$out"
+          ''
+        ;
+      in
+      if lib.isString input then
+        builtins.readFile withCommentsRemoved
+      else
+        withCommentsRemoved
+    ;
 
     generators = {
       toXML = attrs:
