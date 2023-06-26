@@ -11,8 +11,8 @@ with lib;
       enable = mkEnableOption "Enable tunnels";
 
       tunnels = mkOption {
-        type = types.listOf (types.submodule (
-          { config, ... }: {
+        type = types.attrsOf (types.submodule (
+          { name, config, ... }: {
             options = {
               location = mkOption {
                 type = types.int;
@@ -31,7 +31,7 @@ with lib;
               name = mkOption {
                 type = types.str;
                 description = "Pretty name for use by other stuff";
-                default = config.location;
+                default = name;
                 defaultText = literalExpression ''config.somasis.tunnels.tunnels.<name>.location'';
                 example = "ircd";
               };
@@ -54,22 +54,19 @@ with lib;
           }
         ));
 
-        description = "List of tunnels to create";
-        example = [
-          {
-            name = "ircd";
-
+        description = "Set of tunnels to create";
+        example = {
+          ircd = {
             location = 9400;
 
             remote = "snowdenej@nsa.gov";
             remoteLocation = 9400;
 
             linger = "600s";
-          }
-        ];
+          };
+        };
 
-        default = [ ];
-        defaultText = literalExpression "[]";
+        default = { };
       };
     };
   };
@@ -199,7 +196,7 @@ with lib;
           Install.WantedBy = [ "default.target" ];
         };
       }
-      config.somasis.tunnels.tunnels
+      (lib.mapAttrsToList (n: v: v) config.somasis.tunnels.tunnels)
     ;
   };
 }

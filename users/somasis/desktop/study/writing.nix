@@ -184,9 +184,8 @@ in
       };
   };
 
-  somasis.tunnels.tunnels = [{
-    name = "languagetool";
+  somasis.tunnels.tunnels.languagetool = {
     location = 3864;
     remote = "somasis@spinoza.7596ff.com";
-  }];
+  };
 }

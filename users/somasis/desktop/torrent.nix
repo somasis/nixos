@@ -315,13 +315,12 @@ let
 
 in
 {
-  somasis.tunnels.tunnels = [{
-    name = "transmission";
+  somasis.tunnels.tunnels.transmission = {
     location = 9091;
     remoteLocation = 17994;
 
     remote = "somasis@genesis.whatbox.ca";
-  }];
+  };
 
   home.packages = [
     transmission
