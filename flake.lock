@@ -491,11 +491,11 @@
     "uAssets": {
       "flake": false,
       "locked": {
-        "lastModified": 1687802980,
-        "narHash": "sha256-PuQ1vQteasgocbG6YylyeU6//SCONORPdopCA/h2SFg=",
+        "lastModified": 1687812597,
+        "narHash": "sha256-g9291UySN+OGrgA3kqYp+7pxDI4/TtgGVTCzKTVT/6g=",
         "owner": "uBlockOrigin",
         "repo": "uAssets",
-        "rev": "59ac6f422117a942db17daade0d800bd6d442db0",
+        "rev": "dfeaa44bdf73fc8e49f2583eea42612dd118c8bc",
         "type": "github"
       },
       "original": {
