@@ -102,6 +102,7 @@ nixpkgs.lib.nixosSystem {
       programs.command-not-found.enable = false;
       environment = {
         defaultPackages = [ ];
+        etc."nanorc".enable = false;
 
         systemPackages = [
           # Necessary for `nixos-rebuild`'s git stuff
