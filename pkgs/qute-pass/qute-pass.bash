@@ -102,7 +102,7 @@ fi
 if [[ "$#" -eq 1 ]]; then
     query="$1"
 elif [[ "$#" -eq 0 ]]; then
-    query=$(domain-to-entry "$1")
+    query=$(domain-to-entry "${QUTE_URL}")
 else
     usage
 fi
