@@ -57,7 +57,6 @@ nixpkgs.lib.nixosSystem {
         ./filesystems.nix
         ./fonts.nix
         ./games.nix
-        # ./harden.nix
         ./locale.nix
         ./nix.nix
         ./power.nix
