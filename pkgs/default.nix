@@ -32,4 +32,6 @@ rec
 
   ffsclient = callPackage ./ffsclient { };
   qutebrowser-sync = callPackage ./qutebrowser-sync { };
+
+  notify-send-all = callPackage ./notify-send-all { };
 } // import ./trivial-builders { inherit lib pkgs; }

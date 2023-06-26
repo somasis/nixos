@@ -109,6 +109,8 @@ nixpkgs.lib.nixosSystem {
           pkgs.extrace
           pkgs.git
           pkgs.gparted
+
+          pkgs.notify-send-all
         ];
 
         variables = {
