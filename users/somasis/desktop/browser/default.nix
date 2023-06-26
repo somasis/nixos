@@ -136,14 +136,6 @@ in
       # I seem to have better performance with process-per-site rather than process-per-site-instance...
       qt.chromium.process_model = "process-per-site";
 
-      # hints.selectors["username"] = "input[type='text']:first-of-type"
-      # hints.selectors['password'] = 'input[type="password"]'
-      # hints.selectors["username"] = [
-      #     'input[type="text"]:first-of-type',
-      #     'input[type="email"]:first-of-type',
-      # ]
-      # hints.selectors["password"] = ['input[type="password"]']
-
       completion = {
         # Shrink the completion menu to the amount of items.
         shrink = true;
