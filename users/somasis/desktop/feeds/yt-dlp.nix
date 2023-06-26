@@ -95,26 +95,154 @@ in
 {
   # cache.directories = [ "var/cache/newsboat/yt-dlp" ];
   programs.newsboat.urls = [
-    # YouTube
     (yt-dlp {
       url = "https://www.youtube.com/CathodeRayDude";
-      tags = [ "youtube" "tech" ];
+      tags = [ "youtube" "technology" ];
     })
+    (yt-dlp {
+      url = "https://www.youtube.com/c/@CathodeRayDudeGaiden";
+      tags = [ "youtube" "technology" ];
+    })
+
     (yt-dlp {
       url = "https://www.youtube.com/RoadGuyRob";
       tags = [ "youtube" "urbanism" ];
     })
+
     (yt-dlp {
       url = "https://www.youtube.com/brutalmoose";
       tags = [ "youtube" ];
     })
     (yt-dlp {
+      url = "https://www.youtube.com/@moose2";
+      tags = [ "youtube" ];
+    })
+
+    (yt-dlp {
       url = "https://www.youtube.com/TechnologyConnections";
       tags = [ "youtube" "technology" ];
     })
     (yt-dlp {
+      url = "https://www.youtube.com/@TechnologyConnextras";
+      tags = [ "youtube" "technology" ];
+    })
+
+    (yt-dlp {
       url = "https://www.youtube.com/GeoWizard";
       tags = [ "youtube" "geography" ];
+    })
+
+    (yt-dlp {
+      url = "https://www.youtube.com/c/BoyBoyProductions";
+      tags = [ "youtube" ];
+    })
+    (yt-dlp {
+      url = "https://www.youtube.com/c/Ididathing";
+      tags = [ "youtube" ];
+    })
+
+    (yt-dlp {
+      url = "https://www.youtube.com/@FoldingIdeas";
+      tags = [ "youtube" ];
+    })
+
+    (yt-dlp {
+      url = "https://www.youtube.com/@OddityArchive";
+      tags = [ "youtube" "media" ];
+    })
+    (yt-dlp {
+      url = "https://www.youtube.com/@OALostEpisodes";
+      tags = [ "youtube" "media" ];
+    })
+    (yt-dlp {
+      url = "https://www.youtube.com/@ArchiveAnnex";
+      tags = [ "youtube" "media" ];
+    })
+
+    (yt-dlp {
+      url = "https://www.youtube.com/@RGMechEx";
+      tags = [ "youtube" "gaming" "tech" ];
+    })
+
+    (yt-dlp {
+      url = "https://www.youtube.com/@peterdibble";
+      tags = [ "youtube" "urbanism" ];
+    })
+    (yt-dlp {
+      url = "https://www.youtube.com/@RoadGuyRob";
+      tags = [ "youtube" "urbanism" ];
+    })
+    (yt-dlp {
+      url = "https://www.youtube.com/@YetAnotherUrbanist";
+      tags = [ "youtube" "urbanism" ];
+    })
+
+    (yt-dlp {
+      url = "https://www.youtube.com/@Sharopolis";
+      tags = [ "youtube" "gaming" "tech" ];
+    })
+    (yt-dlp {
+      url = "https://www.youtube.com/@Shaun_vids";
+      tags = [ "youtube" "politics" ];
+    })
+    (yt-dlp {
+      url = "https://www.youtube.com/@campingwithsteve";
+      tags = [ "youtube" "nature" ];
+    })
+    (yt-dlp {
+      url = "https://www.youtube.com/@SteveWallisStep2";
+      tags = [ "youtube" "nature" ];
+    })
+    (yt-dlp {
+      url = "https://www.youtube.com/@tom7";
+      tags = [ "youtube" "computer" "technology" ];
+    })
+    (yt-dlp {
+      url = "https://www.youtube.com/@Techmoan";
+      tags = [ "youtube" "technology" ];
+    })
+
+    (yt-dlp {
+      url = "https://www.youtube.com/@hbomberguy";
+      tags = [ "youtube" "politics" ];
+    })
+    (yt-dlp {
+      url = "https://www.youtube.com/@JulianOShea";
+      tags = [ "youtube" "australia" ];
+    })
+    (yt-dlp {
+      url = "https://www.youtube.com/@loadingreadyrun";
+      tags = [ "youtube" "gaming" ];
+    })
+    (yt-dlp {
+      url = "https://www.youtube.com/@MichaelMJD";
+      tags = [ "youtube" "technology" "computing" ];
+    })
+
+    (yt-dlp {
+      url = "https://www.youtube.com/@DankPods";
+      tags = [ "youtube" "australia" "technology" ];
+    })
+    (yt-dlp {
+      url = "https://www.youtube.com/@GarbageTime420";
+      tags = [ "youtube" "australia" "cars" ];
+    })
+    (yt-dlp {
+      url = "https://www.youtube.com/@the.drum.thing.";
+      tags = [ "youtube" "australia" "music" ];
+    })
+    (yt-dlp {
+      url = "https://www.youtube.com/@DashCamOwnersAustralia";
+      tags = [ "youtube" "australia" ];
+    })
+
+    (yt-dlp {
+      url = "https://www.youtube.com/@urbanzoneleague";
+      tags = [ "youtube" "urbanterror" "gaming" ];
+    })
+    (yt-dlp {
+      url = "https://www.youtube.com/@UrbanTerrorOfficial";
+      tags = [ "youtube" "urbanterror" "gaming" ];
     })
   ];
 }
