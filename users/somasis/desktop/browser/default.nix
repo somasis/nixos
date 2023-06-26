@@ -133,9 +133,6 @@ in
         start_pages = default_page;
       };
 
-      # I seem to have better performance with process-per-site rather than process-per-site-instance...
-      qt.chromium.process_model = "process-per-site";
-
       completion = {
         # Shrink the completion menu to the amount of items.
         shrink = true;
