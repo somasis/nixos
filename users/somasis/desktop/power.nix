@@ -2,28 +2,14 @@
 , osConfig
 , ...
 }: {
-  home.packages = [ pkgs.batsignal ];
+  services.batsignal = {
+    enable = true;
 
-  systemd.user.services.batsignal = {
-    Unit = {
-      Description = pkgs.batsignal.meta.description;
-      PartOf = [ "graphical-session.target" ];
-    };
-    Install.WantedBy = [ "graphical-session.target" ];
-
-    Service = {
-      Type = "simple";
-      ExecStart = ''
-        ${pkgs.batsignal}/bin/batsignal \
-          -e \
-          -I "battery" \
-          -D "${pkgs.systemd}/bin/systemctl suspend" \
-          -w "${builtins.toString osConfig.services.upower.percentageLow}" \
-          -c "${builtins.toString osConfig.services.upower.percentageCritical}"
-      '';
-
-      Restart = "on-failure";
-      RestartSec = 1;
-    };
+    extraArgs = [ "-e" ]
+      ++ [ "-I" "battery" ]
+      ++ [ "-D" "${pkgs.systemd}/bin/systemctl suspend" ]
+      ++ [ "-w" (builtins.toString osConfig.services.upower.percentageLow) ]
+      ++ [ "-c" (builtins.toString osConfig.services.upower.percentageCritical) ]
+    ;
   };
 }
