@@ -94,8 +94,10 @@ in
       "!nixopts" = "https://search.nixos.org/options?channel=unstable&sort=alpha_asc&query={}";
       "!nixpkgs" = "https://search.nixos.org/packages?channel=unstable&sort=alpha_asc&query={}";
       "!nixwiki" = "https://nixos.wiki/index.php?go=Go&search={}";
+      "!hmissues" = "https://github.com/nix-community/home-manager/issues?q={}";
 
       "!mdn" = "https://developer.mozilla.org/en-US/search?q={}";
+      "!c" = replaceStrings [ "{}" ] [ "site:en.cppreference.com/w/c+{}" ] searchEngines.DEFAULT;
 
       "!greasyfork" = "https://greasyfork.org/en/scripts?q={}";
       "!openuserjs" = "https://openuserjs.org/?q={}";
@@ -121,6 +123,11 @@ in
       "!archman" = "https://man.archlinux.org/search?q={}";
       "!archpkgs" = "https://archlinux.org/packages/?sort=&q={}";
       "!archwiki" = "https://wiki.archlinux.org/index.php?title=Special%3ASearch&search={}";
+
+      "!debman" = "https://manpages.debian.org/jump?q={}";
+      "!debpkgs" = "https://packages.debian.org/search?keywords={}";
+
+      "!repology" = "https://repology.org/projects/?search={}";
 
       "!ia" = "https://archive.org/search?query={}";
       "!a" = "https://web.archive.org/web/*/{unquoted}";
