@@ -179,14 +179,5 @@
     debug = true;
   };
 
-  somasis = {
-    tunnels = {
-      enable = true;
-      tunnels = [{
-        name = "nix-serve-http";
-        location = 5000;
-        remote = "somasis@spinoza.7596ff.com";
-      }];
-    };
-  };
+  somasis.tunnels.enable = true;
 }

@@ -17,6 +17,29 @@ let
   '';
 in
 {
+  somasis.tunnels.tunnels.nix-serve-http = {
+    location = 5000;
+    remote = "somasis@spinoza.7596ff.com";
+  };
+
+  cache.directories = [
+    "var/lib/nix" # Using `method = "symlink"` will cause issues while switching generations.
+
+    { method = "symlink"; directory = "var/cache/nix"; }
+  ];
+
+  programs.bash = {
+    initExtra = ''
+      nix-output() {
+          nix build --no-link --print-out-paths "$@"
+      }
+
+      nix-cd() {
+          edo cd "$(nix-output "$1" | head -n1)"
+      }
+    '';
+  };
+
   home.packages = [
     # nixosRepl
 
@@ -82,8 +105,10 @@ in
         export query
 
         # shellcheck disable=SC2016
-        nix flake metadata --no-write-lock-file \
-            --inputs-from /etc/nixos --json \
+        nix flake metadata \
+            --no-write-lock-file \
+            --inputs-from /etc/nixos \
+            --json \
             /etc/nixos \
             | jq -r '
                 (.locks.nodes.root.inputs | paths[]) as $a
@@ -94,8 +119,11 @@ in
             | xe -j "$JOBS" -LF -s '
                 eval "set -- \"$1\" $query"; \
                 printf "%s\t" "$1"; \
-                nix search --no-write-lock-file \
-                    --inputs-from /etc/nixos --json \
+                nix search \
+                    --no-write-lock-file \
+                    --inputs-from /etc/nixos \
+                    --quiet \
+                    --json \
                     "$@";
                 printf "\n"
             ' \
@@ -141,7 +169,10 @@ in
 
         [ -n "$debug" ] && set -x
 
-        nix flake metadata --json --no-write-lock-file /etc/nixos \
+        nix flake metadata \
+            --no-write-lock-file \
+            --json \
+            /etc/nixos \
             | jq -r '
                 .locks.nodes.root[][] as $input
                     | .locks.nodes."\($input)"
@@ -174,8 +205,8 @@ in
                 done
             done
 
-        verbose "+ nix flake update /etc/nixos\n"
-        exec nix flake update /etc/nixos
+        verbose "+ nix flake update --commit-lock-file /etc/nixos\n"
+        exec nix flake update --commit-lock-file /etc/nixos
       '';
     })
 
@@ -294,6 +325,7 @@ in
       runtimeInputs = [
         pkgs.coreutils
         pkgs.systemd
+        pkgs.ncurses
         pkgs.nixos-rebuild
         pkgs.playtime
         pkgs.table
@@ -302,6 +334,33 @@ in
 
       text = ''
         playtime || exit $?
+
+        : "''${XDG_STATE_HOME:=$HOME/.local/state}"
+        : "''${NIX_USER_PROFILE_DIR:=}"
+
+        first_existing_path() {
+            local path
+
+            for path; do
+                if [ -e "$path" ]; then
+                    path=$(dirname "$path")/$(readlink "$path")
+                    [ -e "$path" ] \
+                        && printf '%s\n' "$path" \
+                        && return 0
+                fi
+            done
+            return 1
+        }
+
+        get_system_generation() {
+            first_existing_path /nix/var/nix/profiles/system
+        }
+
+        get_home_generation() {
+            first_existing_path \
+                "$XDG_STATE_HOME"/nix/profiles/home-manager \
+                "$NIX_USER_PROFILE_DIR"/home-manager
+        }
 
         debug=
         verbose=
@@ -324,8 +383,10 @@ in
         [ -n "$debug" ] && set -x
 
         # Keep the old and new revisions so we can compare them later.
-        _nixos_old_system=/nix/var/nix/profiles/$(readlink /nix/var/nix/profiles/system)
-        _nixos_old_home="$NIX_USER_PROFILE_DIR"/"$(readlink "$NIX_USER_PROFILE_DIR"/home-manager)"
+        _nixos_old_system=$(get_system_generation)
+        _nixos_old_home=$(get_home_generation) || :
+
+        [ -n "$_nixos_old_system" ] || exit 1
 
         [ "$#" -gt 0 ] || set -- switch
 
@@ -344,8 +405,9 @@ in
 
         [ "$e" -eq 0 ] || exit $e
 
-        _nixos_new_system=/nix/var/nix/profiles/$(readlink /nix/var/nix/profiles/system)
-        _nixos_new_home="$NIX_USER_PROFILE_DIR"/"$(readlink "$NIX_USER_PROFILE_DIR"/home-manager)"
+        _nixos_new_system=$(get_system_generation)
+        _nixos_new_home=$(get_home_generation) || :
+        [ -n "$_nixos_new_system" ] || exit 1
 
         case "$1" in
             switch|test)
@@ -373,9 +435,14 @@ in
         diff_home=
         {
             [ "$_nixos_new_system" = "$_nixos_old_system" ] || diff_system=$(NIXOS_DIFF_TABLE=false edo nixos-diff "$_nixos_old_system" "$_nixos_new_system")
-            [ "$_nixos_new_home" = "$_nixos_old_home" ] || diff_home=$(NIXOS_DIFF_TABLE=false edo nixos-diff "$_nixos_old_home" "$_nixos_new_home")
+            if [ -n "$_nixos_old_home" ] && [ -n "$_nixos_new_home" ]; then
+                if [ "$_nixos_new_home" != "$_nixos_old_home" ]; then
+                    diff_home=$(NIXOS_DIFF_TABLE=false edo nixos-diff "$_nixos_old_home" "$_nixos_new_home")
+                fi
+            fi
 
-            [ -n "$diff_home" ] && [ -n "$diff_system" ] \
+            [ -n "$diff_home" ] \
+                && [ -n "$diff_system" ] \
                 && diff_system=$(
                     grep -Fxv \
                         -f <(
@@ -391,7 +458,7 @@ in
             {
                 [ -n "$diff_system" ] && printf '%s\n' "$diff_system" ""
                 [ -n "$diff_home" ] && printf '%s\n' "$diff_home"
-            } | table -T2
+            } | table -T -1
         } | sponge >&2
       '';
     })
@@ -444,7 +511,7 @@ in
                 | nocolor \
                 | {
                     if [[ "$NIXOS_DIFF_TABLE" == 'true' ]]; then
-                        table -T2
+                        table -T -1
                     else
                         cat
                     fi
