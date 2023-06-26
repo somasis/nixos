@@ -181,7 +181,14 @@
 
     style = {
       name = "kvantum";
-      package = pkgs.libsForQt5.kvantum;
+      package = pkgs.symlinkJoin {
+        name = "kvantum";
+
+        paths = [
+          pkgs.libsForQt5.qtstyleplugin-kvantum
+          pkgs.qt6Packages.qtstyleplugin-kvantum
+        ];
+      };
     };
   };
 
