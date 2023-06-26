@@ -125,19 +125,18 @@ in
 lib.mkIf (options.programs.qutebrowser ? greasemonkey) {
   cache.directories = [ "share/qutebrowser/greasemonkey/requires" ];
 
-  programs.qutebrowser.greasemonkey = [
+  programs.qutebrowser.greasemonkey = map (x: if ! lib.isDerivation x then pkgs.writeText "${builtins.baseNameOf x}.user.js" (builtins.readFile x) else x) [
     # Global
-    (pkgs.fetchurl { hash = "sha256-PhyOl2bxQhJ9bNQboPYQf9J+87AxIUpEcz1wu5KzE/k="; url = "https://raw.githubusercontent.com/navchandar/Auto-Load-Big-Image/8fff139d89617697a2f83f92d62b8ca9df95e6f9/Userscript.user.js"; })
-    (pkgs.fetchurl { hash = "sha256-jdjQw6tTOP5UZ26oYKRF6yNwN2WffzTRE18RMdBtB0U="; url = "https://raw.githubusercontent.com/eight04/select-text-inside-a-link-like-opera/v6.0.0/select-text-inside-a-link-like-opera.user.js"; })
+    ((pkgs.fetchFromGitHub { owner = "navchandar"; repo = "Auto-Load-Big-Image"; rev = "ee388af4bb244bf34a6b24319f2c7bd72a8f3ccd"; hash = "sha256-DL7cIc+1iipl8CxamOsQQL7UpiAMhm62f8ok+r15wJw="; }) + "/Userscript.user.js")
+    ((pkgs.fetchFromGitHub { owner = "eight04"; repo = "select-text-inside-a-link-like-opera"; rev = "3692b6a626e83cd073485dcee9929f80a52c10c9"; hash = "sha256-u5LpbuprShZKHNhw7RnNITfo1gM9pYDzSLHNI+CUYMk="; }) + "/select-text-inside-a-link-like-opera.user.js")
     (pkgs.fetchurl { hash = "sha256-R+1ZM05ZJgNUskjnmo0mtYMH3gPEldTNfBaMc5t5t3Y="; url = "https://gist.githubusercontent.com/oxguy3/ebd9fe692518c7f7a1e9/raw/234f5667d97e6a14fe47ef39ae45b6e5d5ebaf46/RoughScroll.js"; })
 
     (pkgs.fetchurl { hash = "sha256-+HDTlu5/WmuXI7vqNDi9XuQ5RvzHXaAf8fK7x3XxEp0="; url = "https://adsbypasser.github.io/releases/adsbypasser.full.es7.user.js"; })
     (pkgs.fetchurl { hash = "sha256-4nDL4vPOki+qpQmCKqLEVUc1Bh0uO3eJ8OpB8CuhJgs="; url = "https://greasyfork.org/scripts/32-show-password-onmouseover/code/Show%20Password%20onMouseOver.user.js"; })
     (pkgs.fetchurl { hash = "sha256-FshnFfKDwdCAam4Ikq0GlYcoJ0/a7B5vs8QMytLTqig="; url = "https://openuserjs.org/install/SelaoO/Ctrl+Enter_is_submit_everywhere.user.js"; })
+
     (pkgs.fetchurl { hash = "sha256-jDHXF0tV5yVACfwdMrRl65Ihl7SG/Xs+0WrNywseB0g="; url = "https://userscripts.adtidy.org/release/disable-amp/1.0/disable-amp.user.js"; })
 
-    # <https://userstyles.world/style/8283/unround-everything-everywhere>
-    # (mkUserstyle (pkgs.fetchurl { hash = "sha256-mn1yXTdPvESPrabYrwXtp0Y5FiZKaNQ7+Lv19tZvY7U="; url = "https://userstyles.world/api/style/8283.user.css"; name = "unround-everything-everywhere.user.css"; }))
 
     # musicbrainz.com
     # loujine-musicbrainz
@@ -156,14 +155,15 @@ lib.mkIf (options.programs.qutebrowser ? greasemonkey) {
     (pkgs.fetchurl { hash = "sha256-eh7QPO2vxP0rcaEL1Z+mso6yGX36jsQpwYU02UCXNTw="; url = "https://gitlab.com/_mclovin/purchase-links-for-music-requests/-/raw/1aa5621357a8b527ae75a5deef03367030b929e4/request-external-links.user.js"; })
     (pkgs.writeText "redacted-collapse-collages.js" ./userscripts/redacted-collapse-collages.js)
 
-    (pkgs.fetchurl { hash = "sha256-zJPLwo1nkpouG4Disb+egRKRAAC6d3lVaQP8JJl9uYE="; url = "https://raw.githubusercontent.com/SavageCore/yadg-pth-userscript/v1.9.0/pth_yadg.meta.js"; })
+    ((pkgs.fetchFromGitHub { owner = "SavageCore"; repo = "yadg-pth-userscript"; rev = "342d3bc58ee90be94b9829f5a6229b5c7f5d513b"; hash = "sha256-0cxt3fl1yRsU0NCmXAF51E6jVXImBX++8KcaFlRgPKQ="; }) + "/pth_yadg.meta.js")
 
     # github.com
-    (pkgs.fetchurl { hash = "sha256-jH2WsbtSIxlyMyVLD0r7i+yKczwpAV/7CEh+vrc6yuY="; url = "https://raw.githubusercontent.com/devxoul/github-monospace-editor/0.1.3/script/github-monospace-editor.user.js"; })
+    ((pkgs.fetchFromGitHub { owner = "devxoul"; repo = "github-monospace-editor"; rev = "90574105330c6ef66006d1e3c1d22779521da687"; hash = "sha256-0Ref63oUT+59B+i1RnCiq7TrhJZWJ6ka2oEFsYiebmA="; }) + "/script/github-monospace-editor.user.js")
 
     # news.ycombinator.com
     (pkgs.fetchurl { hash = "sha256-B8Po//yloy6fZfwlUsmNjWkwUV2IkTHBzc7TXu+E44c="; url = "https://greasyfork.org/scripts/39311-hacker-news-highlighter/code/Hacker%20News%20Highlighter.user.js"; })
     (pkgs.fetchurl { hash = "sha256-S2c6egARy9hxejN6Ct/zshUT/sWr9w6+LMfrRnVsDw0="; url = "https://greasyfork.org/scripts/23432-hacker-news-date-tooltips/code/Hacker%20News%20Date%20Tooltips.user.js"; })
+    ((pkgs.fetchFromGitHub { owner = "hjk789"; repo = "Userscripts"; rev = "00c6934afc078167f180d84f63e0c5db443c8377"; hash = "sha256-1oUSbBrXN4M3WIGZztE/HwpZdf/O2aK1ROGzRARQvFg="; }) + "/Collapse-HackerNews-Parent-Comments/Collapse-HackerNews-Parent-Comments.user.js")
 
     # imdb.com
     (pkgs.fetchurl { hash = "sha256-+ZKq++Vd97Kn/Z37Se5gyVFqYsXepyQrWPzD/TG+Luk="; url = "https://greasyfork.org/scripts/23433-imdb-full-summary/code/IMDb%20Full%20Summary.user.js"; })
@@ -173,10 +173,9 @@ lib.mkIf (options.programs.qutebrowser ? greasemonkey) {
     (pkgs.fetchurl { hash = "sha256-azHAQKmNxAcnyc7l08oW9X6DuMqAblFGPwD8T9DsrSs="; url = "https://greasyfork.org/scripts/32635-disable-google-search-result-url-redirector/code/Disable%20Google%20Search%20Result%20URL%20Redirector.user.js"; })
     (pkgs.fetchurl { hash = "sha256-Bb1QsU6R9xU718hRskGbuwNO7rrhuV7S1gvKtC9SlL0="; url = "https://greasyfork.org/scripts/37166-add-site-search-links-to-google-search-result/code/Add%20Site%20Search%20Links%20To%20Google%20Search%20Result.user.js"; })
     (pkgs.fetchurl { hash = "sha256-5C7No5dYcYfWMY+DwciMeBmkdE/wnplu5fxk4q7OFZc="; url = "https://greasyfork.org/scripts/382039-speed-up-google-captcha/code/Speed%20up%20Google%20Captcha.user.js"; })
-    (pkgs.fetchurl { hash = "sha256-O7xInRO9H+AhG8Y6Ky5IDVJK++jzMHggSeq5X7/Je1A="; url = "https://raw.githubusercontent.com/jmlntw/google-search-sidebar/v0.4.1/dist/google-search-sidebar.user.js"; })
+    ((pkgs.fetchFromGitHub { owner = "jmlntw"; repo = "google-search-sidebar"; rev = "0e8e94c017681447cd9a21531d4cab7427f44022"; hash = "sha256-6bRzZTXYnAIsWJZQqfgmxdzeQOVk6H5swbCduCkqqIw="; }) + "/dist/google-search-sidebar.user.js")
 
-    # images.google.com
-    (pkgs.fetchurl { hash = "sha256-lNGCdMjf5RsR/70T81VaW2S5w71PSK4pHwsaBTL6Gqg="; url = "https://greasyfork.org/scripts/29420-google-dwimages/code/Google%20DWIMages.user.js"; })
+    (pkgs.fetchurl { hash = "sha256-/5Dub8dgql6z1p4PzK20Y9Yzb55Scjc6X97QaXIATTY="; url = "https://greasyfork.org/scripts/398189-google-image-direct-view/code/Google%20Image%20Direct%20View.user.js"; })
 
     # twitter.com
     (pkgs.fetchurl { hash = "sha256-JFBaqr7MDRwKbiGYm0b5YhcRhfkDWzg2Idf8N+U3pLs="; url = "https://raw.githubusercontent.com/yuhaofe/Video-Quality-Fixer-for-Twitter/v0.2.0/vqfft.user.js"; })
@@ -242,7 +241,7 @@ lib.mkIf (options.programs.qutebrowser ? greasemonkey) {
           EOF
         ''
     )
-    (pkgs.fetchurl { hash = "sha256-5JC3vrPj+kJq68AFtEWwriyCc7sD8nIpqc6dLbjPGso="; url = "https://raw.githubusercontent.com/Anarios/return-youtube-dislike/main/Extensions/UserScript/Return%20Youtube%20Dislike.user.js"; })
+    ((pkgs.fetchFromGitHub { owner = "Anarios"; repo = "return-youtube-dislike"; rev = "5c73825aadb81b6bf16cd5dff2b81a88562b6634"; hash = "sha256-+De9Ka9MYsR9az5Zb6w4gAJSKqU9GwqqO286hi9bGYY="; }) + "/Extensions/UserScript/Return Youtube Dislike.user.js")
 
     # wikipedia.org / wikipesija.org
     (pkgs.writeText "mediawiki-anchors.js" ./userscripts/mediawiki-anchors.js)
@@ -253,18 +252,22 @@ lib.mkIf (options.programs.qutebrowser ? greasemonkey) {
     # mastodon.social
     (pkgs.runCommand "mastodon-larger-preview.user.js"
       {
-        src = pkgs.fetchurl {
-          url = "https://raw.githubusercontent.com/Frederick888/mastodon-larger-preview/e9005241dfd904373041fdb46d7bf932ac7492f0/main.user.js";
-          hash = "sha256-fI3FnflWfZu5dinktgOgvKMQr/MDhjoWcpu1dzLx7vQ=";
-        };
+        src = (pkgs.fetchFromGitHub {
+          owner = "Frederick888";
+          repo = "mastodon-larger-preview";
+          rev = "e9005241dfd904373041fdb46d7bf932ac7492f0";
+          hash = "sha256-1miMTG8H/lf0BqiKdt9fA9qDiuhHqUiswM5mDqu594s=";
+        }) + "/main.user.js";
       } ''sed '/^\/\/ @match/ i // @match https://mastodon.social/*' "$src" > "$out"''
     )
     (pkgs.runCommand "mastodon-pixiv-preview.user.js"
       {
-        src = pkgs.fetchurl {
-          url = "https://raw.githubusercontent.com/Frederick888/mastodon-pixiv-preview/b2994b11d041c77945bb59d0ebfe7ceb2920c985/main.user.js";
-          hash = "sha256-t/lm/ydlkW/4Gl86rXdwrBWsMYvRMWHl9gJ0qCCs1Sw=";
-        };
+        src = (pkgs.fetchFromGitHub {
+          owner = "Frederick888";
+          repo = "mastodon-pixiv-preview";
+          rev = "b2994b11d041c77945bb59d0ebfe7ceb2920c985";
+          hash = "sha256-pglKBOl6WPF0JDWVyk/r6J8MB9RGt9x14cRFd3A0b1E=";
+        }) + "/main.user.js";
       } ''sed '/^\/\/ @match/ i // @match https://mastodon.social/*' "$src" > "$out"''
     )
   ];
