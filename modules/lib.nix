@@ -24,7 +24,7 @@ with lib;
 
     mkPathSafeName = replaceStrings [ "@" ":" "\\" "[" "]" ] [ "-" "-" "-" "" "" ];
 
-    commaList = concatStringsSep ",";
+    commaList = concatMapStringsSep "," (lib.escape [ "," ]);
 
     # testCase -> TEST_CASE
     camelCaseToScreamingSnakeCase = x:
