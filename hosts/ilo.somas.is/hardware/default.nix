@@ -42,20 +42,27 @@
   #   }))
   # ];
 
-  # services.usbguard = {
-  #   enable = true;
-  #   package = pkgs.usbguard;
-  #   IPCAllowedGroups = [ "wheel" ];
-  # };
+  services.usbguard = {
+    enable = true;
+    package = pkgs.usbguard;
+    IPCAllowedGroups = [ "wheel" ];
+  };
 
-  # cache.directories = [
-  #   {
-  #     directory = "/var/lib/usbguard";
-  #     mode = "0775";
-  #     user = "root";
-  #     group = "wheel";
-  #   }
-  # ];
+  environment.systemPackages = [ pkgs.usbguard-notifier ];
+  systemd = {
+    packages = [ pkgs.usbguard-notifier ];
+    user.services.usbguard-notifier = {
+      # partOf = [ "graphical-session.target" ];
+      wantedBy = [ "graphical-session.target" ];
+    };
+  };
+
+  cache.directories = [{
+    directory = "/var/lib/usbguard";
+    mode = "0775";
+    user = "root";
+    group = "wheel";
+  }];
 
   # VDPAU, VAAPI, etc. is handled by <nixos-hardware/common/gpu/intel>,
   # which is imported by <nixos-hardware/framework>.

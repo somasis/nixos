@@ -76,9 +76,23 @@ in
           # }
         ;
 
-        ExecStartPre = [ "${pkgs.xorg.setxkbmap}/bin/setxkbmap -option srvrkeys:none" ];
+        # Implement GNOME's lockscreen USBGuard integration stuff
+        ExecStartPre =
+          [ "${pkgs.xorg.setxkbmap}/bin/setxkbmap -option srvrkeys:none" ]
+          ++ lib.optionals osConfig.services.usbguard.enable [
+            "${pkgs.usbguard}/bin/usbguard set-parameter InsertedDevicePolicy block"
+            "${pkgs.systemd}/bin/systemctl --user stop usbguard-notifier.service"
+          ];
+
         ExecStart = [ "${xsecurelock}/bin/xsecurelock" ];
-        ExecStopPost = [ "${pkgs.systemd}/bin/systemctl --user start setxkbmap.service" ];
+
+        ExecStopPost =
+          [ "${pkgs.systemd}/bin/systemctl --user start setxkbmap.service" ]
+          ++ lib.optionals osConfig.services.usbguard.enable [
+            "${pkgs.systemd}/bin/systemctl --user start usbguard-notifier.service"
+            "${pkgs.usbguard}/bin/usbguard set-parameter InsertedDevicePolicy ${osConfig.services.usbguard.insertedDevicePolicy}"
+          ];
+
         Restart = "on-failure";
         RestartSec = 0;
       };
