@@ -15,6 +15,7 @@
 
   # TODO Submit a proper fix for using mandoc as the man provider to home-manager upstream
   programs.man.package = pkgs.mandoc;
+
   home.sessionVariables = {
     MANPATH = ":${config.home.profileDirectory}/share/man";
     MANWIDTH = 80;
