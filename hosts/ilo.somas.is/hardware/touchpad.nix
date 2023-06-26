@@ -1,12 +1,8 @@
 {
-  services.xserver.libinput = {
-    enable = true;
+  services.xserver.libinput.touchpad = {
+    naturalScrolling = true;
 
-    touchpad = {
-      naturalScrolling = true;
-
-      # BUG(?): The Framework's touchpad defaults to button presses, according to libinput?
-      clickMethod = "clickfinger";
-    };
+    # BUG(?): The Framework's touchpad defaults to button presses, according to libinput?
+    clickMethod = "clickfinger";
   };
 }
