@@ -1,36 +1,55 @@
-{ pkgs, config, ... }: {
-  home = {
-    packages = [ pkgs.khard ];
-    # cache.directories = [ "share/khal" ];
+{ config
+, osConfig
+, lib
+, pkgs
+, ...
+}:
+let
+  remoteFastmail = type: userName: {
+    inherit type;
+    url = "https://${type}.messagingengine.com";
+    inherit userName;
+    passwordCommand = [
+      (toString (pkgs.writeShellScript "password-command" ''
+        ${config.programs.password-store.package}/bin/pass \
+            ${lib.escapeShellArg osConfig.networking.fqdnOrHostName}/vdirsyncer/${lib.escapeShellArg userName}
+      ''))
+    ];
+  };
+in
+rec {
+  accounts.contact = {
+    basePath = "contacts";
+
+    accounts = {
+      contacts = { name, ... }: {
+        local = {
+          type = "filesystem";
+          fileExt = ".vcf";
+        };
+
+        remote = remoteFastmail "carddav" "kylie@somas.is";
+
+        vdirsyncer = {
+          enable = true;
+
+          collections = [ "Default" ];
+
+          conflictResolution = "remote wins";
+
+          metadata = [ "displayname" ];
+        };
+      };
+    };
   };
 
-  #   xdg.configFile."khal/config".text = ''
-  #     [calendars]
+  # use accounts.* without config so that we get it before the path is made absolute
+  persist.directories = lib.mkMerge [
+    (map
+      (account: { method = "symlink"; directory = "${accounts.contact.basePath}/${account}"; })
+      (builtins.attrNames accounts.contact.accounts)
+    )
+  ];
 
-  #         [[calendars_local]]
-  #             type = discover
-  #             path = ${config.xdg.dataHome}/vdirsyncer/calendars/*
-
-  #         [[calendars_readonly_local]]
-  #             type = discover
-  #             path = ${config.xdg.dataHome}/vdirsyncer/calendars_readonly/*
-  #             readonly = True
-
-  #         [[Birthdays]]
-  #             type = birthdays
-  #             path = ${config.xdg.dataHome}/vdirsyncer/contacts/Default/
-
-  #     [default]
-  #         default_calendar = "Calendar"
-  #         highlight_event_days = True
-
-  #     [locale]
-  #         timeformat = "%I:%M %p"
-  #         dateformat = "%Y-%m-%d"
-  #         longdateformat = "%Y-%m-%d"
-  #         datetimeformat = "%Y-%m-%d %I:%M %p"
-  #         longdatetimeformat = "%Y-%m-%d %I:%M %p"
-
-  #         weeknumbers = "left"
-  #   '';
+  home.packages = [ pkgs.khard ];
 }
