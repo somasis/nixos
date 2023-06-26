@@ -54,19 +54,15 @@
     ./plugins
   ];
 
-  home = {
-    packages = [
-      # makel
+  home.packages = [
+    # makel
 
-      # Used by spell.kak; see spell.nix for dictionaries
-      pkgs.aspell
+    # Used by spell.kak; see spell.nix for dictionaries
+    pkgs.aspell
 
-      # Used by editorconfig.kak
-      pkgs.editorconfig-core-c
-    ];
-
-    sessionVariables."EDITOR" = "kak";
-  };
+    # Used by editorconfig.kak
+    pkgs.editorconfig-core-c
+  ];
 
   # TODO: can remove on next Kakoune release, maybe
   #       <https://github.com/mawww/kakoune/pull/4699>
