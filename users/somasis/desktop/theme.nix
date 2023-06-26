@@ -15,9 +15,9 @@
 
     # Qt theming
     pkgs.libsForQt5.qtstyleplugin-kvantum
+    pkgs.qt6Packages.qtstyleplugin-kvantum
+    pkgs.libsForQt5.qtstyleplugins
     pkgs.arc-kde-theme
-
-    pkgs.line-awesome
 
     # TODO Disable for now until they're in nixpkgs
     # # toki pona
@@ -93,6 +93,7 @@
       "*background" = darkBackground;
       "*cursorColor" = darkCursorColor;
       "*borderColor" = darkBorderColor;
+      "*sidebarColor" = "#353946";
 
       "*color0" = color0;
       "*color1" = color1;
@@ -116,7 +117,7 @@
       "panel.background" = darkBackground;
       # "panel.font" = "-misc-spleen-medium-*-normal-*-24-*-*-*-*-*-*-*";
       # "panel.boldFont" = "-misc-spleen-medium-*-normal-*-24-*-*-*-*-*-*-*";
-      "panel.font" = "monospace:size=10";
+      "panel.font1" = "monospace:size=10";
       "panel.font2" = "monospace:size=10:style=bold";
       "panel.font3" = "monospace:size=10:style=light";
       "panel.font4" = "monospace:size=10:style=heavy";
@@ -143,20 +144,18 @@
 
     gtk2.configLocation = "${config.xdg.configHome}/gtk-2.0/gtkrc";
 
-    gtk3 = {
-      extraConfig = {
-        gtk-cursor-blink = true;
-        gtk-cursor-blink-time = 750;
-        gtk-cursor-blink-timeout = 0;
-        gtk-cursor-aspect-ratio = "0.05";
-      };
+    gtk3.extraConfig = {
+      gtk-cursor-blink = true;
+      gtk-cursor-blink-time = 750;
+      gtk-cursor-blink-timeout = 0;
+      gtk-cursor-aspect-ratio = "0.10";
     };
 
     gtk4.extraConfig = {
       gtk-cursor-blink = false;
       gtk-cursor-blink-time = 750;
       gtk-cursor-blink-timeout = 0;
-      gtk-cursor-aspect-ratio = "0.05";
+      gtk-cursor-aspect-ratio = "0.10";
     };
   };
 
@@ -172,11 +171,14 @@
 
     QT_STYLE_OVERRIDE = config.qt.style.name; # TODO: why is this necessary
 
+    # Improve Java GUI font rendering (really necessary for using
+    # LangaugeTool on LibreOffice)
     _JAVA_OPTIONS = "-Dawt.useSystemAAFontSettings=on";
   };
 
   qt = {
     enable = true;
+
     style = {
       name = "kvantum";
       package = pkgs.libsForQt5.kvantum;
