@@ -135,8 +135,9 @@ in
     };
 
     window = {
-      color = config.xresources.properties."*color4";
-      opacity = 0.15;
+      color = config.xresources.properties."*darkBackground";
+      opacity = 0.25;
+
       position = {
         x = -24;
         y = -24;
