@@ -6,6 +6,22 @@
 with lib;
 {
   config.lib.somasis = rec {
+    floatToInt = float:
+      let
+        inherit (builtins) typeOf toString head tail splitVersion;
+        inherit (lib) isFloat toIntBase10;
+        inherit (lib.strings) escapeNixString;
+
+        fractional = toIntBase10 (toString (tail (splitVersion (toString float))));
+        whole = toIntBase10 (toString (head (splitVersion (toString float))));
+      in
+      assert (isFloat float);
+      if fractional == 0 then
+        whole
+      else
+        throw "floatToInt: Could not convert ${escapeNixString float} to integer."
+    ;
+
     mkPathSafeName = replaceStrings [ "@" ":" "\\" "[" "]" ] [ "-" "-" "-" "" "" ];
 
     commaList = concatStringsSep ",";
