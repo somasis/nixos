@@ -15,8 +15,7 @@ let
 
     umask 0077
 
-    PATH=${lib.makeBinPath [ pkgs.rdrview pkgs.coreutils pkgs.gnused ]}:$PATH
-    : "''${TMPDIR:=/tmp}"
+    PATH=${lib.makeBinPath [ pkgs.rdrview pkgs.coreutils pkgs.gnused ]}:"$PATH"
 
     exec >> "$QUTE_FIFO"
 
@@ -24,7 +23,7 @@ let
         file://*) QUTE_URL=''${QUTE_URL#file://} ;;
     esac
 
-    tmp=$(mktemp "$TMPDIR"/rdrview.XXXXXXXXX.html)
+    tmp=$(mktemp -t --suffix .html rdrview.XXXXXXXXX)
     base=$(printf '%s\n' "$QUTE_URL" | sed -E '/^[^:]+:\/\/.*\// s|^(.*)/[^/]+$|\1|')
 
     if ! rdrview -u "$base" -c "$QUTE_HTML"; then
