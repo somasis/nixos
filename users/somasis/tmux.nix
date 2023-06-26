@@ -23,7 +23,7 @@
 
       # Set terminal (client) titles appropriately.
       set-option -g set-titles on
-      set-option -g set-titles-string "tmux: #T"
+      set-option -g set-titles-string "tmux#{?T,: #T,}"
 
       # Status bar
       set-option -g status on
@@ -33,7 +33,7 @@
 
       set-option -g status-left ""
       set-option -g status-left-length 0
-      set-option -g status-right "%I:%M %p"
+      set-option -g status-right "#{?DISPLAY,,%I:%M %p}"
 
       set-option -g status-style "bg=default,fg=magenta"
       set-option -g status-left-style "fg=magenta"
