@@ -38,18 +38,20 @@
   # ananicy spams the log constantly
   systemd.services.ananicy-cpp.serviceConfig.StandardOutput = "null";
 
-  systemd.shutdown."wine-kill" = pkgs.writeShellScript "wine-kill" ''
-    ${pkgs.procps}/bin/pkill '^winedevice\.exe$' || :
-    if [[ -n "$(${pkgs.procps}/bin/pgrep '^winedevice\.exe$')" ]]; then
-        ${pkgs.procps}/bin/pkill -e -9 '^winedevice\.exe$' || :
-    fi
-    exit 0
-  '';
+  systemd.shutdown."wine-kill" =
+    pkgs.writeShellScript "wine-kill" ''
+      ${pkgs.procps}/bin/pkill '^winedevice\.exe$' || :
+      if [[ -n "$(${pkgs.procps}/bin/pgrep '^winedevice\.exe$')" ]]; then
+          ${pkgs.procps}/bin/pkill -e -9 '^winedevice\.exe$' || :
+      fi
+      exit 0
+    '';
 
-  environment.etc."systemd/system-sleep/wake-xsecurelock".source = pkgs.writeShellScript "wake-xsecurelock" ''
-    if [[ "$1" = "post" ]]; then
-        ${pkgs.procps}/bin/pkill -x -USR2 xsecurelock || :
-    fi
-    exit 0
-  '';
+  environment.etc."systemd/system-sleep/99-wake-xsecurelock".source =
+    pkgs.writeShellScript "wake-xsecurelock" ''
+      if [[ "$1" = "post" ]]; then
+          ${pkgs.procps}/bin/pkill -x -USR2 xsecurelock || :
+      fi
+      exit 0
+    '';
 }
