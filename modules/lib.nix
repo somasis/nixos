@@ -151,13 +151,15 @@ with lib;
         secret = url: entry:
           let
             secret = pkgs.writeShellScript "fetch-secret-url" ''
-              url="$1"    # https://github.com/somasis.private.atom?token=%s
-              entry="$2"  # www/github.com/somasis.private.atom
+              PATH=${lib.makeBinPath [ config.programs.password-store.package pkgs.curl ]}:"$PATH"
+
+              url="$1"   # ex. https://github.com/somasis.private.atom?token=%s
+              entry="$2" # ex. www/github.com/somasis.private.atom
 
               url="\""$(sed 's/"/\\"/g' <<< "$url")"\""
 
-              autocurl -Lf -G -K - <<EOF
-              url = $(printf "$url" "$(${config.programs.password-store.package}/bin/pass "$entry")")
+              curl -Lf -G -K - <<EOF
+              url = $(printf "$url" "$(pass "$entry")")
               EOF
             '';
           in

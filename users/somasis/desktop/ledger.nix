@@ -301,7 +301,7 @@ let
           | while read -r currency; do
               currency_to_usd=
               while [[ -z "''${currency_to_usd}" ]]; do
-                  currency_to_usd=$(autocurl -sf "https://usd.rate.sx/1''${currency}")
+                  currency_to_usd=$(curl -Lf "https://usd.rate.sx/1''${currency}")
                   sleep 1
               done
 

@@ -25,8 +25,28 @@ let
 
     mkdir -p "$dir"
 
-    didyouknow=$(autocurl -fL "https://en.wikipedia.org/wiki/Template:Did_you_know?action=raw")
-    featured=$(autocurl -fL "https://api.wikimedia.org/feed/v1/wikipedia/en/featured/$(date +%Y/%m/%d)")
+    curl() {
+        command curl -Lf --no-progress-meter --compressed "$@"
+    }
+
+    didyouknow=$(
+        curl \
+            --get \
+            -d 'action=parse' \
+            -d 'format=json' \
+            --data-urlencode 'page=Template:Did you know' \
+            -d 'redirects=1' \
+            -d 'prop=text' \
+            -d 'section=2' \
+            -d 'disableeditsection=1' \
+            -d 'disabletoc=1' \
+            -d 'formatversion=2' \
+            'https://en.wikipedia.org/w/api.php'
+    )
+
+    featured=$(
+        curl "https://api.wikimedia.org/feed/v1/wikipedia/en/featured/$(date +%Y/%m/%d)"
+    )
 
     if [[ -z "$didyouknow" ]] || [[ -z "$featured" ]]; then
         exit 1

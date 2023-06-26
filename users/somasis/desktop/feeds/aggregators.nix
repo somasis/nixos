@@ -83,7 +83,7 @@ let
   '';
 
   generateReddit = writeShellScript "generate-reddit" ''
-    PATH=${makeBinPath [ config.programs.jq.package pkgs.yq-go pkgs.coreutils pkgs.moreutils ] }:$PATH
+    PATH=${makeBinPath [ config.programs.jq.package pkgs.curl pkgs.yq-go pkgs.coreutils pkgs.moreutils ] }:$PATH
 
     [[ -t 0 ]] || cat > /dev/null
 
@@ -102,7 +102,7 @@ let
 
     cd "$runtime"
 
-    autocurl -Lf -o subreddit.json "https://www.reddit.com/r/$subreddit/.json"
+    curl -Lf -o subreddit.json "https://www.reddit.com/r/$subreddit/.json"
     [[ -s subreddit.json ]] || exit 1
 
     ${filterSubredditJson} "''${jq_args[@]}" subreddit.json > filtered.json
