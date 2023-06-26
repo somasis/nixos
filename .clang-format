@@ -1,0 +1,15 @@
+# kak: filetype=yaml
+BasedOnStyle: LLVM
+IndentWidth: 8
+ColumnLimit: 100
+UseTab: ForIndentation
+
+# InsertTrailingCommas: Wrapped
+# BinPackArguments: true
+BinPackParameters: true
+AllowAllArgumentsOnNextLine: true
+AlignAfterOpenBracket: Align
+AllowShortCaseLabelsOnASingleLine: true
+AllowShortIfStatementsOnASingleLine: WithoutElse
+AllowShortLoopsOnASingleLine: true
+BreakBeforeBraces: Attach

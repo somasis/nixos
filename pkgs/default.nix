@@ -19,6 +19,7 @@ rec
 
   dates = callPackage ./dates { };
   json2nix = callPackage ./json2nix { };
+  mimetest = callPackage ./mimetest { };
   nocolor = callPackage ./nocolor { };
   playtime = callPackage ./playtime { };
   table = callPackage ./table { };

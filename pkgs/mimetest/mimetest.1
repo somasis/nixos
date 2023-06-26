@@ -1,0 +1,95 @@
+.Dd June 21, 2023
+.Dt MIMETEST 1
+.Os
+.
+.Sh NAME
+.Nm mimetest
+.Nd filter a list of files by their MIME types
+.
+.Sh SYNOPSIS
+.Nm
+.Op Fl !0v
+.Ar mime/type ...
+.
+.Nm
+.Op Fl !0v
+.Fl a
+.Ar mime/type ...
+--
+.Ar file ...
+.
+.Sh DESCRIPTION
+.Nm
+takes a list of MIME types and files, and prints any files that match a type in
+the list of desired MIME types.
+.
+.Pp
+In most cases, the MIME type being specified will take one of these forms:
+.Bl -bullet
+.It
+.Sm off
+.Em parent
+/
+.Em child
+.Sm on
+.
+.It
+.Sm off
+.Em parent
+/*
+.Sm on
+.
+.It
+.Sm off
+*
+/
+.Em child
+.Sm on
+.El
+.
+.Pp
+The MIME types provided will be interpreted according to
+.Xr glob 7 .
+Which is to say, they're just patterns which
+.Nm
+will match against the MIME type of each file.
+.
+.Pp
+The options are as follows:
+.Bl -tag -width Ds
+.It Fl \&!
+Invert the match.
+.
+.It Fl 0
+Input filenames are separated by NUL bytes
+.Pq rather than newlines, the default .
+.
+.It Fl v
+Verbose: for each file , print the MIME type of the file.
+MIME type being tested for and the MIME type of the matching file.
+.
+.El
+.
+.Sh EXAMPLES
+Get all text files in the current directory (any of these work):
+.Bd -literal -offset indent
+$ find -type f | mimetest "text/*"
+$ find -type f -print0 | mimetest -0 "text/*"
+$ find -type f -exec mimetest -av "text/*" -- {} +
+.Ed
+.
+.Pp
+Get all audio files in your music library:
+.Bd -literal -offset indent
+$ find ~/audio/library -type f | mimetest "audio/*"
+.Ed
+.
+.Sh SEE ALSO
+.Xr file 1 ,
+.Xr find 1 ,
+.Xr stest 1 ,
+.Xr test 1 ,
+.Xr libmagic 3 .
+.
+.Sh AUTHORS
+.An Kylie McClain Aq Mt kylie@somas.is
