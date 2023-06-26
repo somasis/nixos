@@ -169,7 +169,7 @@
     QT_AUTO_SCREEN_SCALE_FACTOR = 0;
     QT_AUTO_SCREEN_SCALE_FACTORS = 1.5;
 
-    QT_STYLE_OVERRIDE = config.qt.style.name; # TODO: why is this necessary
+    # QT_STYLE_OVERRIDE = config.qt.style.name; # TODO: why is this necessary
 
     # Improve Java GUI font rendering (really necessary for using
     # LangaugeTool on LibreOffice)
