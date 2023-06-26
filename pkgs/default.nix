@@ -19,7 +19,6 @@ rec
   nocolor = callPackage ./nocolor { };
   playtime = callPackage ./playtime { };
   table = callPackage ./table { };
-  wcal = callPackage ./wcal { };
 
   dmenu = callPackage ./dmenu { };
   dmenu-emoji = callPackage ./dmenu-emoji { };
@@ -30,8 +29,9 @@ rec
   pass-meta = callPackage ./pass-meta { };
   qute-pass = callPackage ./qute-pass { };
 
-  ffsclient = callPackage ./ffsclient { };
   qutebrowser-sync = callPackage ./qutebrowser-sync { };
 
+  ffsclient = callPackage ./ffsclient { };
+  wcal = callPackage ./wcal { };
   notify-send-all = callPackage ./notify-send-all { };
 } // import ./trivial-builders { inherit lib pkgs; }
