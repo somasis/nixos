@@ -4,20 +4,25 @@
 , ...
 }:
 let
+  inherit (lib)
+    pipe
+    replaceStrings
+    ;
+
   inherit (config.lib.somasis)
-    formatColor
+    colors
     removeComments
     ;
 
-  colorAccent = lib.pipe config.xresources.properties."*colorAccent" [
-    (formatColor "rgb")
+  colorAccent = pipe config.xresources.properties."*colorAccent" [
+    colors.rgb
     (replaceStrings [ "rgb" ", " ] [ "Rgb" "," ])
   ];
 in
 {
   # <https://github.com/figsoda/mmtc/blob/main/Configuration.md#Condition>
   xdg.configFile = {
-    "mmtc/mmtc.ron".source = removeComments ''
+    "mmtc/mmtc.ron".text = removeComments ''
       Config(
         jump_lines: 10,
 
