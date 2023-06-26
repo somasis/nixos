@@ -57,6 +57,7 @@ in
       host = config.services.mpd.network.listenAddress;
     };
   };
+
   services.mpris-proxy.enable = true;
 
   home.packages = [ pkgs.mpc-cli ];
