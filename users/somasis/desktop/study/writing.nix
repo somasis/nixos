@@ -88,16 +88,22 @@ in
     # Free replacements for pkgs.corefonts
     # Arial, Times New Roman
     pkgs.noto-fonts-extra
-    # # Cambria
+
+    # Cambria
     pkgs.caladea
-    # # Calibri
+
+    # Calibri
     pkgs.carlito
+
     # Comic Sans MS
     pkgs.comic-relief
-    # # Georgia
+
+    # Georgia
     pkgs.gelasio
+
     # Arial Narrow
     pkgs.liberation-sans-narrow
+
     # Arial, Helvetica, Times New Roman, Courier New
     pkgs.liberation_ttf
   ];
