@@ -52,7 +52,7 @@ in
     { method = "symlink"; directory = "var/cache/mpdscribble"; }
   ];
 
-  home.packges = [ mpdscribble ];
+  home.packages = [ mpdscribble ];
 
   services.listenbrainz-mpd = {
     enable = true;
