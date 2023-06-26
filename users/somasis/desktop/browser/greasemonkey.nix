@@ -1,4 +1,5 @@
 { pkgs
+, options
 , config
 , lib
 , inputs
@@ -121,7 +122,7 @@ let
   #     GM_addStyle(${builtins.toJSON (builtins.readFile style)});
   #   '';
 in
-{
+lib.mkIf (options.programs.qutebrowser ? greasemonkey) {
   cache.directories = [ "share/qutebrowser/greasemonkey/requires" ];
 
   programs.qutebrowser.greasemonkey = [
