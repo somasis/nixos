@@ -207,5 +207,102 @@ with lib;
         '';
       };
     };
+
+    colors = rec {
+      format = format: color:
+        assert (lib.isString format);
+        assert (lib.isString color);
+
+        lib.fileContents (pkgs.runCommandLocal "color"
+          { inherit color format; }
+          # strip out the spaces because some things don't support spaces in rgb/hsl/etc.
+          # type formats, and the things that do support spaces tend to allow no spaces.
+          ''${pkgs.pastel}/bin/pastel format "$format" "$color" > "$out" | tr -d " "''
+        );
+
+      hex = format "hex";
+      rgb = format "rgb";
+
+      amountOp = operation: amount: color:
+        assert (lib.isString operation);
+        assert (lib.isFloat amount);
+        assert (lib.isString color);
+
+        lib.fileContents (pkgs.runCommandLocal "color"
+          { inherit operation amount color; }
+          ''${pkgs.pastel}/bin/pastel "$operation" "$amount" "$color" > "$out"''
+        );
+
+      saturate = amountOp "saturate";
+      desaturate = amountOp "desaturate";
+      lighten = amountOp "lighten";
+      darken = amountOp "darken";
+    };
+
+    types.color = format:
+      let
+        inherit (builtins) elem;
+
+        pastelTypes = [
+          "rgb"
+          "rgb-float"
+          "hex"
+          "hsl"
+          "hsl-hue"
+          "hsl-saturation"
+          "hsl-lightness"
+          "lch"
+          "lch-lightness"
+          "lch-chroma"
+          "lch-hue"
+          "lab"
+          "lab-a"
+          "lab-b"
+          "luminance"
+          "brightness"
+          "ansi-8bit"
+          "ansi-24bit"
+          "ansi-8bit-escapecode"
+          "ansi-24bit-escapecode"
+          "cmyk"
+          "name"
+        ];
+      in
+      assert (elem format pastelTypes);
+      mkOptionType {
+        name = "color";
+        merge = lib.options.mergeDefaultOption;
+
+        description = ''
+          a color, as understood by `pastel` (see `pastel format --help` for more information)
+        '';
+        descriptionClass = "noun";
+
+        check = value: (lib.fileContents
+          (pkgs.runCommandLocal "check-value"
+            { inherit value; }
+            ''
+              set -x
+              e=0
+              ${pkgs.pastel}/bin/pastel color "$value" >/dev/null || e=$?
+              echo "$e" > "$out"
+              exit 0
+            ''
+          ) == "0"
+        );
+      }
+    ;
+
+    mkColorOption =
+      { format
+      , default ? null
+      , description ? null
+      }:
+      mkOption {
+        type = types.color format;
+        apply = colors.format format;
+
+        inherit default description;
+      };
   };
 }
