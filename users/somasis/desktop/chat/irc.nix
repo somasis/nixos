@@ -115,7 +115,7 @@ let
                       "$0" send-keys M-0 End C-u
                       "$0" send-keys -l "/window $chat"
                       "$0" send-keys Enter C-y
-                      jumpapp -t catgirl -c catgirl alacritty --class catgirl -T catgirl -e "$0"
+                      jumpapp -t catgirl -c catgirl kitty --class catgirl -T catgirl -e "$0"
                       ;;
               esac
 
@@ -618,12 +618,13 @@ in
     };
   };
 
-  somasis.tunnels.tunnels = [{
-    name = "scooper";
+  somasis.tunnels.tunnels.scooper = {
     location = 9400;
-
     remote = "somasis@lacan.somas.is";
-  }];
+  };
 
-  services.sxhkd.keybindings."super + c" = "${pkgs.jumpapp}/bin/jumapp -t catgirl -c catgirl alacritty --class catgirl -T catgirl -e catgirls";
+  programs.qutebrowser.searchEngines."!irc" =
+    "http://localhost:${toString config.somasis.tunnels.tunnels.scooper.location}/search?query={}";
+
+  services.sxhkd.keybindings."super + c" = "${pkgs.jumpapp}/bin/jumpapp -t catgirl -c catgirl kitty -T catgirl --class catgirl -e catgirls";
 }

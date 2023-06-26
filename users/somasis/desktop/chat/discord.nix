@@ -5,11 +5,6 @@
 , ...
 }:
 let
-  inherit (lib)
-    concatStringsSep
-    mapAttrs'
-    ;
-
   inherit (config.lib.somasis)
     camelCaseToScreamingSnakeCase
     programName
@@ -36,7 +31,7 @@ in
     pkgs.xe
   ];
 
-  persist.directories = [ "etc/ArmCord" ];
+  persist.directories = [ "etc/${discordWindowClassName}" ];
 
   xdg.configFile = {
     "ArmCord/storage/settings.json".text = lib.generators.toJSON { } {
@@ -58,6 +53,8 @@ in
       trayIcon = "dsc-tray";
 
       performanceMode = "battery";
+
+      useLegacyCapturer = true;
     };
 
     "ArmCord/storage/lang.json".text = lib.generators.toJSON { } {
@@ -98,7 +95,11 @@ in
       };
     };
   };
-  systemd.user.services.mpd-discord-rpc.Unit.BindsTo = lib.optional config.services.mpd.enable "mpd.service";
+
+  systemd.user.services.mpd-discord-rpc.Unit.BindsTo =
+    [ "discord.service" ]
+    ++ lib.optional config.services.mpd.enable "mpd.service"
+  ;
 
   services.dunst.settings = {
     zz-discord = {
@@ -139,13 +140,13 @@ in
   };
 
   services.sxhkd.keybindings."super + d" = builtins.toString (pkgs.writeShellScript "discord" ''
-    if ! ${pkgs.jumpapp}/bin/jumpapp -c ${lib.escapeShellArg discordWindowClassName} -f ${lib.escapeShellArg (programName discord)} 2>/dev/null; then
+    if ! ${pkgs.jumpapp}/bin/jumpapp -c ${lib.escapeShellArg discordWindowClassName} -f ${lib.escapeShellArg (programName discord)} >/dev/null; then
         if ${pkgs.systemd}/bin/systemctl --user is-active -q discord.service; then
-            exec ${programPath discord} >/dev/null 2>&1
+            exec ${programName discord} >/dev/null 2>&1
         else
             ${pkgs.systemd}/bin/systemctl --user start discord.service \
                 && sleep 2 \
-                && exec ${programPath discord} >/dev/null 2>&1
+                && exec ${programName discord} >/dev/null 2>&1
         fi
     fi
   '');
