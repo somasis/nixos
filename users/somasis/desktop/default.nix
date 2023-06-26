@@ -152,18 +152,19 @@
     (pkgs.callPackage ../../../pkgs/youplot { })
   ];
 
-  # home.file.".face".source = "${inputs.avatarSomasis}";
+  # home.file.".face".source = inputs.avatarSomasis;
 
   xsession = {
     enable = true;
     importedVariables = lib.mkBefore [ "PATH" ];
+
+    # Necessary so that `startx` runs home-manager's managed xsession
+    scriptPath = ".xinitrc";
+
+    profilePath = "etc/xorg/xprofile";
   };
 
-  # Necessary so that `startx` runs home-manager's managed xsession
-  xsession.scriptPath = ".xinitrc";
-
   xresources.path = "${config.xdg.configHome}/xorg/xresources";
-  xsession.profilePath = "etc/xorg/xprofile";
 
   services.xsuspender = {
     # Basically disable xsuspender by default; only enable for certain programs.
