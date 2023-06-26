@@ -38,7 +38,6 @@ nixpkgs.lib.nixosSystem {
     nixosModules.impermanence
 
     nixos-hardware.nixosModules.framework
-    lanzaboote.nixosModules.lanzaboote
 
     nix-index-database.nixosModules.nix-index
 

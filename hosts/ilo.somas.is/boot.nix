@@ -11,19 +11,12 @@
 
   console.earlySetup = true;
 
-  persist.directories = [ "/etc/secureboot" ];
-
   boot = {
     loader.efi.canTouchEfiVariables = true;
-    # loader.systemd-boot.enable = lib.mkForce false;
+    loader.systemd-boot.enable = true;
     loader.systemd-boot.editor = false;
     loader.systemd-boot.configurationLimit = 25;
     loader.timeout = 0;
-
-    lanzaboote = {
-      enable = true;
-      pkiBundle = "/etc/secureboot";
-    };
 
     # Silent boot.
     consoleLogLevel = 3;
@@ -77,12 +70,11 @@
     };
   };
 
-  # log.files = [ "var/log/X.0.log" ];
-
   services = {
     xserver = {
       enable = true;
       tty = 1;
+
       displayManager.startx.enable = true;
     };
 
@@ -93,34 +85,46 @@
 
       vt = 1;
 
-      settings = rec {
-        initial_session = {
-          user = builtins.head (builtins.attrNames (
-            lib.filterAttrs (_: v: v.isNormalUser) config.users.users
-          ));
+      settings =
+        # Log startx to systemd journal.
+        let
+          startx =
+            pkgs.writeShellScript "startx" ''
+              exec \
+                  ${config.systemd.package}/bin/systemd-cat \
+                      --identifier=startx \
+                      --stderr-priority=err \
+                      ${pkgs.xorg.xinit}/bin/startx "$@" -- \
+                          -keeptty \
+                          -logfile >(
+                              ${pkgs.gnused}/bin/sed -E 's/^\[ +[0-9]+\.[0-9]+\] //' \
+                                  | ${config.systemd.package}/bin/systemd-cat -t Xorg --level-prefix=false
+                          ) \
+                          -logverbose 7 \
+                          -verbose 0
+            '';
+        in
+        rec
+        {
+          initial_session = {
+            user = builtins.head (builtins.attrNames (
+              lib.filterAttrs (_: v: v.isNormalUser) config.users.users
+            ));
 
-          # Log Xorg/startx/etc. to systemd journal.
-          command = pkgs.writeShellScript "startx" ''
-            exec \
-                ${config.systemd.package}/bin/systemd-cat \
-                    --identifier=startx \
-                    --stderr-priority=err \
-                    --level-prefix=true \
-                    ${pkgs.xorg.xinit}/bin/startx "$@" -- \
-                        -keeptty \
-                        -logfile >(
-                            ${pkgs.gnused}/bin/sed -E 's/^\[ +[0-9]+\.[0-9]+\] //' \
-                                | ${config.systemd.package}/bin/systemd-cat -t Xorg --level-prefix=false
-                        ) \
-                        -logverbose 7 \
-                        -verbose 0
+            command = startx;
+          };
+
+          default_session.command = ''
+            ${pkgs.greetd.tuigreet}/bin/tuigreet -c ${initial_session.command}
           '';
         };
-
-        default_session.command = "${pkgs.greetd.tuigreet}/bin/tuigreet -c ${initial_session.command}";
-      };
     };
 
     getty.greetingLine = "o kama pona tawa ${config.networking.fqdnOrHostName}.";
+  };
+
+  # Don't create any virtual terminals except the one used by Xorg.
+  services.logind.extraConfig = lib.generators.toKeyValue { } {
+    NAutoVTs = 1;
   };
 }
