@@ -45,9 +45,9 @@
     ./screen-brightness.nix
     ./screen-locker.nix
     ./screen-temperature.nix
-    ./syncthing.nix
     ./sxhkd.nix
     ./syncplay.nix
+    ./syncthing.nix
     ./terminal.nix
     ./theme.nix
     ./torrent.nix
