@@ -13,7 +13,10 @@
     sessionVariables = {
       IGNOREEOF = 1;
       TIMEFORMAT = ''
-        \nwall\t%3lR\nuser\t%3lU\nkern\t%3lS\ncpu%%\t%P
+        wall	%3lR
+        user	%3lU
+        kern	%3lS
+        cpu	%%P%
       '';
     };
 
