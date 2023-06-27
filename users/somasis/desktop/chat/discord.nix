@@ -14,6 +14,8 @@ let
   discord = pkgs.armcord;
   discordWindowClassName = "ArmCord";
   discordDescription = discord.meta.description;
+  discordName = programName discord;
+  discordPath = "${discord}/bin/${discordName}";
 in
 {
   home.packages = [
@@ -139,17 +141,18 @@ in
     };
   };
 
-  services.sxhkd.keybindings."super + d" = builtins.toString (pkgs.writeShellScript "discord" ''
-    if ! ${pkgs.jumpapp}/bin/jumpapp -c ${lib.escapeShellArg discordWindowClassName} -f ${lib.escapeShellArg (programName discord)} >/dev/null; then
-        if ${pkgs.systemd}/bin/systemctl --user is-active -q discord.service; then
-            exec ${programName discord} >/dev/null 2>&1
-        else
-            ${pkgs.systemd}/bin/systemctl --user start discord.service \
-                && sleep 2 \
-                && exec ${programName discord} >/dev/null 2>&1
-        fi
-    fi
-  '');
+  services.sxhkd.keybindings."super + d" = pkgs.writeShellScript "discord" ''
+    ${pkgs.jumpapp}/bin/jumpapp \
+        -c ${lib.escapeShellArg discordWindowClassName} \
+        -i ${lib.escapeShellArg (programName discord)} \
+        -f ${pkgs.writeShellScript "start-or-switch" ''
+            if ! ${pkgs.systemd}/bin/systemctl --user is-active -q discord.service >/dev/null 2>&1; then
+                ${pkgs.systemd}/bin/systemctl --user start discord.service && sleep 2
+            fi
+            exec ${lib.escapeShellArg (programName discord)} >/dev/null 2>&1
+        ''} \
+        >/dev/null
+  '';
 
   # services.xsuspender.rules.discord = {
   #   matchWmClassGroupContains = "discord";

@@ -18,23 +18,22 @@ let
     programPath
     ;
 
-  signal = pkgs.signal-desktop-beta;
-  signalWindowName = "Signal Beta";
+  signalPackage = pkgs.signal-desktop-beta;
+  signalWindowClassName = "Signal Beta";
+  signalDescription = signalPackage.meta.description;
 
-  signalDescription = signal.meta.description;
-
-  signal' = pkgs.symlinkJoin {
+  signal = pkgs.symlinkJoin {
     name = "signal-desktop-with-pass";
     paths = [
-      (pkgs.writeShellScriptBin (programName signal) ''
+      (pkgs.writeShellScriptBin (programName signalPackage) ''
         set -eu
         set -o pipefail
 
         entry="${osConfig.networking.fqdnOrHostName}/signal-desktop"
 
-        mkdir -m 700 -p "''${XDG_CONFIG_HOME:=$HOME/.config}/${signalWindowName}"
-        rm -f "$XDG_CONFIG_HOME/${signalWindowName}"/config.json
-        mkfifo "$XDG_CONFIG_HOME/${signalWindowName}"/config.json
+        mkdir -m 700 -p "''${XDG_CONFIG_HOME:=$HOME/.config}/${signalWindowClassName}"
+        rm -f "$XDG_CONFIG_HOME/${signalWindowClassName}"/config.json
+        mkfifo "$XDG_CONFIG_HOME/${signalWindowClassName}"/config.json
 
         ${config.programs.password-store.package}/bin/pass "$entry" \
             | ${config.programs.jq.package}/bin/jq -R '{
@@ -42,29 +41,30 @@ let
                 mediaPermissions: true,
                 mediaCameraPermissions: true
             }' \
-            > "$XDG_CONFIG_HOME/${signalWindowName}"/config.json &
+            > "$XDG_CONFIG_HOME/${signalWindowClassName}"/config.json &
 
-        ${pkgs.rwc}/bin/rwc -p "$XDG_CONFIG_HOME/${signalWindowName}"/config.json \
-            | ${pkgs.xe}/bin/xe -s 'rm -f "$XDG_CONFIG_HOME/${signalWindowName}"/config.json' &
+        ${pkgs.rwc}/bin/rwc -p "$XDG_CONFIG_HOME/${signalWindowClassName}"/config.json \
+            | ${pkgs.xe}/bin/xe -s 'rm -f "$XDG_CONFIG_HOME/${signalWindowClassName}"/config.json' &
 
         e=0
-        (exec -a ${programName signal} ${programPath signal} "$@") || e=$?
+        (exec -a ${programName signalPackage} ${programPath signalPackage} "$@") || e=$?
         kill $(jobs -p)
         exit "$e"
       '')
 
-      signal
+      signalPackage
     ];
   };
 
-  signalPath = "${signal'}/bin/${programName signal}";
+  signalName = programName signalPackage;
+  signalPath = "${signal}/bin/${signalName}";
 in
 {
   home.packages = [ signal ];
 
-  persist.directories = [ "etc/${signalWindowName}" ];
+  persist.directories = [ "etc/${signalWindowClassName}" ];
 
-  xdg.configFile."${signalWindowName}/ephemeral.json".text = lib.generators.toJSON { }
+  xdg.configFile."${signalWindowClassName}/ephemeral.json".text = lib.generators.toJSON { }
     (mapAttrs' (n: v: nameValuePair (camelCaseToKebabCase n) v) {
       systemTraySetting = "MinimizeToSystemTray";
       shownTrayNotice = true;
@@ -86,17 +86,18 @@ in
     foreground = "#ffffff";
   };
 
-  services.sxhkd.keybindings."super + s" = builtins.toString (pkgs.writeShellScript "signal" ''
-    if ! ${pkgs.jumpapp}/bin/jumpapp -c ${lib.escapeShellArg signalWindowName} -f ${lib.escapeShellArg (programName signal)} 2>/dev/null; then
-        if ${pkgs.systemd}/bin/systemctl --user is-active -q signal.service; then
-            exec ${signalPath} >/dev/null 2>&1
-        else
-            ${pkgs.systemd}/bin/systemctl --user start signal.service \
-                && sleep 2 \
-                && exec ${signalPath} >/dev/null 2>&1
-        fi
-    fi
-  '');
+  services.sxhkd.keybindings."super + s" = pkgs.writeShellScript "signal" ''
+    ${pkgs.jumpapp}/bin/jumpapp \
+        -c ${lib.escapeShellArg signalWindowClassName} \
+        -i ${lib.escapeShellArg signalName} \
+        -f ${pkgs.writeShellScript "start-or-switch" ''
+            if ! ${pkgs.systemd}/bin/systemctl --user is-active -q signal.service >/dev/null 2>&1; then
+                ${pkgs.systemd}/bin/systemctl --user start signal.service && sleep 2
+            fi
+            exec ${lib.escapeShellArg signalName} >/dev/null 2>&1
+        ''} \
+        >/dev/null
+  '';
 
   systemd.user.services.signal = {
     Unit = {
