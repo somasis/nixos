@@ -523,11 +523,11 @@
     "zoteroTranslators": {
       "flake": false,
       "locked": {
-        "lastModified": 1687794760,
-        "narHash": "sha256-4rtr7KU8P5SJep+/wxiSIQPJGHj9nsk/L7r47sfpAlI=",
+        "lastModified": 1687820057,
+        "narHash": "sha256-oCpnOyT78Pt1QiPeG/1XTy+5bMBATGq36wJ1mdaPDVA=",
         "owner": "zotero",
         "repo": "translators",
-        "rev": "f5b02c1df439c20e0da2287a61adcdfce6f72bdb",
+        "rev": "00413e20f5ef49a03c7956ab6d5707fc9ccb6733",
         "type": "github"
       },
       "original": {
