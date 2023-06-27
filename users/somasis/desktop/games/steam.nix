@@ -20,23 +20,17 @@ lib.mkIf steam.enable {
       Environment = [ "STEAM_FORCE_DESKTOPUI_SCALING=1.5" ];
       ExecStart = "${steam.package}/bin/steam -silent -no-browser";
 
+      # We need to kill the PID listed in ~/.steampid, or else Steam
+      # will exit unsuccesfully every time.
+      PIDFile = "%h/.steampid";
+
       Restart = "on-failure";
 
+      # Keep Steam easy-going in the background.
       Nice = 19;
       CPUSchedulingPolicy = "idle";
       IOSchedulingClass = "idle";
       IOSchedulingPriority = 7;
     };
   };
-
-  # Keep Steam easy-going in the background.
-  services.xsuspender.rules.steam = {
-    matchWmClassContains = "Steam";
-    downclockOnBattery = 1;
-    suspendDelay = 15;
-    resumeEvery = 60;
-    resumeFor = 5;
-  };
-
-  xsession.windowManager.bspwm.rules."Steam".border = false;
 }
