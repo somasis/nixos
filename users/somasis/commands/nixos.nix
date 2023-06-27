@@ -569,7 +569,7 @@ in
                 -name 'system-*-link' \
                 -type l \
                 | xe -N2 nvd --color always diff \
-                | pretty 'system'
+                | pretty ${lib.escapeShellArg osConfig.networking.fqdnOrHostName}
 
             find /nix/var/nix/profiles/per-user \
                 -mindepth 1 \
@@ -584,7 +584,7 @@ in
                         | tail -n2
                     ' -- {} \; \
                 | xe -N2 nvd --color always diff \
-                | pretty 'home-manager'
+                | pretty ${lib.escapeShellArg config.home.username}
         fi
       '';
     })
