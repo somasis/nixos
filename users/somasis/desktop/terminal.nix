@@ -203,7 +203,8 @@ in
       wheel_scroll_multiplier = "2.0";
 
       mouse_hide_wait = 0;
-      scrollback_lines = 10000;
+
+      scrollback_lines = 5000;
       scrollback_fill_enlarged_window = true;
 
       copy_on_select = true;
