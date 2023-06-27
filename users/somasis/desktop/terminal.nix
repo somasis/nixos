@@ -196,7 +196,7 @@ in
       color14 = config.xresources.properties."*color14";
       color15 = config.xresources.properties."*color15";
 
-      url_color = color4;
+      url_color = config.xresources.properties."*colorAccent";
       url_style = "dotted";
       show_hyperlink_targets = true;
 
