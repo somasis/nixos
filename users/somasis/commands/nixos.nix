@@ -173,7 +173,7 @@ in
             done
         fi
 
-        verbose() {
+        info() {
             # shellcheck disable=SC2059,SC2015
             [[ "$level" -ge 1 ]] && printf "$@" >&2 || :
         }
@@ -208,7 +208,7 @@ in
 
                         # --atomic is used so the local trees aren't ever left in a weird state.
                         before=$(git -C "$d" rev-parse HEAD) \
-                            && verbose "+ git -C \"%s\" pull -q --progress -- --atomic\n" "$d" \
+                            && verbose "$ git -C \"%s\" pull -q --progress -- --atomic\n" "$d" \
                             && git -C "$d" pull -q --progress -- --atomic \
                             && after=$(git -C "$d" rev-parse HEAD) \
                             && PAGER="cat" git -c color.ui=always -C "$d" \
@@ -218,7 +218,7 @@ in
                 done
             done
 
-        verbose "+ nix flake update --commit-lock-file ''${level_args[*]} /etc/nixos\n"
+        info "$ nix flake update --commit-lock-file ''${level_args[*]} /etc/nixos\n"
         exec nix flake update --commit-lock-file "''${level_args[@]}" /etc/nixos
       '';
     })
@@ -298,38 +298,41 @@ in
             done
         fi
 
-        nix flake metadata --json --no-write-lock-file /etc/nixos \
-            | jq -r '
-                .locks.nodes.root[][] as $input
-                    | .locks.nodes."\($input)"
-                    | (
-                        .original.repo
-                            // (
-                                (.original.url // .original.path)
-                                    | scan("^.*/(.*)")[]
-                            )?
-                    ) as $name
-                    | (.original.ref // "") as $ref
-                    | "\($input)\t\($name)\t\($ref)"' \
-            | while IFS=$'\t' read -r input source;do
-                basename=$(basename "$source" .git)
-                for d in \
-                    ~/src/nix/"$input" \
-                    ~/src/"$input" \
-                    ~/src/nix/"$basename" \
-                    ~/src/"$basename"; do
-                    if [[ -e "$d"/.git ]] && git -C "$d" diff-files --quiet; then
-                        args+=( --override-input "$input" "git+file://$d" )
-                        break
-                    elif [[ -e "$d" ]]; then
-                        args+=( --override-input "$input" "path:$d" )
-                        break
-                    fi
+        mapfile -d $'\0' -t -O "''${#args[@]}" args < <(
+            nix flake metadata --json --no-write-lock-file /etc/nixos \
+                | jq -r '
+                    .locks.nodes.root[][] as $input
+                        | .locks.nodes."\($input)"
+                        | (
+                            .original.repo
+                                // (
+                                    (.original.url // .original.path)
+                                        | scan("^.*/(.*)")[]
+                                )?
+                        ) as $name
+                        | (.original.ref // "") as $ref
+                        | "\($input)\t\($name)\t\($ref)"' \
+                | while IFS=$'\t' read -r input source;do
+                    basename=$(basename "$source" .git)
+                    for d in \
+                        ~/src/nix/"$input" \
+                        ~/src/"$input" \
+                        ~/src/nix/"$basename" \
+                        ~/src/"$basename"; do
+                        if [[ -e "$d"/.git ]] && git -C "$d" diff-files --quiet; then
+                            printf '%s\0' --override-input "$input" "git+file://$d"
+                            break
+                        elif [[ -e "$d" ]]; then
+                            printf '%s\0' --override-input "$input" "path:$d"
+                            break
+                        fi
+                    done
                 done
-            done
+        )
 
         exec nixos "''${args[@]}" "''${@:-switch}"
       '';
+
     })
 
     (pkgs.writeShellApplication {
@@ -400,7 +403,7 @@ in
 
         edo() {
             # shellcheck disable=SC2015
-            [[ "$level" -ge 2 ]] && printf '+ %s\n' "$*" >&2 || :
+            [[ "$level" -ge 2 ]] && printf '$ %s\n' "$*" >&2 || :
             "$@"
         }
 

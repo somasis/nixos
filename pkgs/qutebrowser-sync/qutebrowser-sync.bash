@@ -26,7 +26,7 @@ log() {
 edo() {
     local e
 
-    [[ "${QUTEBROWSER_SYNC_VERBOSITY}" -ge 4 ]] && PS4="+ " && set -x >/dev/null
+    [[ "${QUTEBROWSER_SYNC_VERBOSITY}" -ge 4 ]] && PS4="$ " && set -x >/dev/null
     # [[ "${QUTEBROWSER_SYNC_VERBOSITY}" -ge 4 ]] && echo "+ $*" >&2
     "$@"
     {
