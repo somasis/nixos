@@ -149,8 +149,6 @@
           };
         })
       { })
-
-    (pkgs.callPackage ../../../pkgs/youplot { })
   ];
 
   # home.file.".face".source = inputs.avatarSomasis;
