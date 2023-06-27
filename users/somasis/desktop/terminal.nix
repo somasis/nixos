@@ -285,6 +285,14 @@ in
             icat="kitty +kitten icat"
   '';
 
+  programs.kakoune.config.hooks = [{
+    name = "ModuleLoaded";
+    option = "kitty";
+    commands = ''
+      set-option global kitty_window_type "os-window"
+    '';
+  }];
+
   # xresources.properties = {
   #   # xterm(1) settings
   #   "xterm*termName" = "xterm-256color";
