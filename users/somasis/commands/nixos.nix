@@ -74,7 +74,7 @@ in
         }
 
         format() {
-            if [ -t 1 ]; then
+            if [[ -t 1 ]]; then
                 while read -r f a v d; do
                     printf "%s\t%s\t%s\t%s\n" "$f" "$a" "$v" "$d"
                 done \
@@ -152,22 +152,33 @@ in
       ];
 
       text = ''
-        verbose=
-        debug=
-
+        level=0
         for a; do
-          shift
-          [ "$a" = "--debug" ] && debug=true && verbose=true&& continue
-          [ "$a" = "--verbose" ] && verbose=true && continue
-          set -- "$@" "$a"
+            shift
+            [[ "$a" = "--quiet" ]] && level=$(( level - 1 )) && continue
+            [[ "$a" = "--verbose" ]] && level=$(( level + 1 )) && continue
+            set -- "$@" "$a"
         done
+
+        level_args=()
+        if [[ "$level" -ge 0 ]]; then
+            while [[ "$level" -ge 0 ]]; do
+                level_args+=( --verbose )
+                level=$(( level - 1 ))
+            done
+        else
+            while [[ "$level" -le 0 ]]; do
+                level_args+=( --quiet )
+                level=$(( level + 1 ))
+            done
+        fi
 
         verbose() {
             # shellcheck disable=SC2059,SC2015
-            [ -n "$verbose" ] && printf "$@" >&2 || :
+            [[ "$level" -ge 1 ]] && printf "$@" >&2 || :
         }
 
-        [ -n "$debug" ] && set -x
+        [[ "$level" -ge 2 ]] && set -x
 
         nix flake metadata \
             --no-write-lock-file \
@@ -184,16 +195,16 @@ in
                             )?
                     ) as $name
                     | (.original.ref // "") as $ref
-                    | "\($input)\t\($name)\t\($ref)"' \
-            | while IFS=$(printf '\t') read -r input source;do
-                basename=$(basename "$source" .git)
+                    | "\($input)\t\($name)"' \
+            | while IFS=$'\t' read -r input name;do
+                basename=$(basename "$name" .git)
                 for d in \
                     ~/src/nix/"$input" \
                     ~/src/"$input" \
                     ~/src/nix/"$basename" \
                     ~/src/"$basename"; do
                     if git -C "$d" diff-index --quiet HEAD -- 2>/dev/null; then
-                        printf 'Updating "%s"...\n' "$basename" >&2
+                        printf "Updating 'inputs.%s'...\n" "$input" >&2
 
                         # --atomic is used so the local trees aren't ever left in a weird state.
                         before=$(git -C "$d" rev-parse HEAD) \
@@ -207,8 +218,8 @@ in
                 done
             done
 
-        verbose "+ nix flake update --commit-lock-file /etc/nixos\n"
-        exec nix flake update --commit-lock-file /etc/nixos
+        verbose "+ nix flake update --commit-lock-file ''${level_args[*]} /etc/nixos\n"
+        exec nix flake update --commit-lock-file "''${level_args[@]}" /etc/nixos
       '';
     })
 
@@ -265,60 +276,59 @@ in
       ];
 
       text = ''
-        args=$(
-            nix flake metadata --json --no-write-lock-file /etc/nixos \
-                | jq -r '
-                    .locks.nodes.root[][] as $input
-                        | .locks.nodes."\($input)"
-                        | (
-                            .original.repo
-                                // (
-                                    (.original.url // .original.path)
-                                        | scan("^.*/(.*)")[]
-                                )?
-                        ) as $name
-                        | (.original.ref // "") as $ref
-                        | "\($input)\t\($name)\t\($ref)"' \
-                | while IFS=$(printf '\t') read -r input source;do
-                    basename=$(basename "$source" .git)
-                    for d in \
-                        ~/src/nix/"$input" \
-                        ~/src/"$input" \
-                        ~/src/nix/"$basename" \
-                        ~/src/"$basename"; do
-                        if [ -e "$d"/.git ] && git -C "$d" diff-files --quiet; then
-                            s6-quote -u -- "--override-input '$input' 'git+file://$d'"
-                            break
-                        elif [ -e "$d" ]; then
-                            s6-quote -u -- "--override-input '$input' 'path:$d'"
-                            break
-                        fi
-                    done
-                done | tr '\n' ' '
-        )
-
         level=-2
         for a; do
-          shift
-          [[ "$a" = "--quiet" ]] && level=$(( level - 1 )) && continue
-          [[ "$a" = "--verbose" ]] && level=$(( level + 1 )) && continue
-          set -- "$@" "$a"
+            shift
+            [[ "$a" = "--quiet" ]] && level=$(( level - 1 )) && continue
+            [[ "$a" = "--verbose" ]] && level=$(( level + 1 )) && continue
+            set -- "$@" "$a"
         done
+
+        args=()
 
         if [[ "$level" -ge 0 ]]; then
             while [[ "$level" -ge 0 ]]; do
-                args="$args --verbose"
+                args+=( --verbose )
                 level=$(( level - 1 ))
             done
         else
             while [[ "$level" -le 0 ]]; do
-                args="$args --quiet"
+                args+=( --quiet )
                 level=$(( level + 1 ))
             done
         fi
 
-        # --quiet --quiet removes the "updated input" spam
-        eval "exec nixos $args \"\''${@:-switch}\""
+        nix flake metadata --json --no-write-lock-file /etc/nixos \
+            | jq -r '
+                .locks.nodes.root[][] as $input
+                    | .locks.nodes."\($input)"
+                    | (
+                        .original.repo
+                            // (
+                                (.original.url // .original.path)
+                                    | scan("^.*/(.*)")[]
+                            )?
+                    ) as $name
+                    | (.original.ref // "") as $ref
+                    | "\($input)\t\($name)\t\($ref)"' \
+            | while IFS=$'\t' read -r input source;do
+                basename=$(basename "$source" .git)
+                for d in \
+                    ~/src/nix/"$input" \
+                    ~/src/"$input" \
+                    ~/src/nix/"$basename" \
+                    ~/src/"$basename"; do
+                    if [[ -e "$d"/.git ]] && git -C "$d" diff-files --quiet; then
+                        args+=( --override-input "$input" "git+file://$d" )
+                        break
+                    elif [[ -e "$d" ]]; then
+                        args+=( --override-input "$input" "path:$d" )
+                        break
+                    fi
+                done
+            done
+
+        exec nixos "''${args[@]}" "''${@:-switch}"
       '';
     })
 
@@ -344,9 +354,9 @@ in
             local path
 
             for path; do
-                if [ -e "$path" ]; then
+                if [[ -e "$path" ]]; then
                     path=$(dirname "$path")/$(readlink "$path")
-                    [ -e "$path" ] \
+                    [[ -e "$path" ]] \
                         && printf '%s\n' "$path" \
                         && return 0
                 fi
@@ -364,40 +374,52 @@ in
                 "$NIX_USER_PROFILE_DIR"/home-manager
         }
 
-        debug=
-        verbose=
-
+        level=0
         for a; do
-          shift
-          [ "$a" = "--debug" ] && debug=true && verbose=true && continue
-          [ "$a" = "--verbose" ] && verbose=true && continue
-          set -- "$@" "$a"
+            shift
+            [[ "$a" = "--quiet" ]] && level=$(( level - 1 )) && continue
+            [[ "$a" = "--verbose" ]] && level=$(( level + 1 )) && continue
+            [[ "$a" = "--debug" ]] && level=$(( level + 2 )) && continue
+            set -- "$@" "$a"
         done
+
+        level_args=()
+        if [[ "$level" -ge 0 ]]; then
+            while [[ "$level" -ge 0 ]]; do
+                level_args+=( --verbose )
+                level=$(( level - 1 ))
+            done
+        else
+            while [[ "$level" -le 0 ]]; do
+                level_args+=( --quiet )
+                level=$(( level + 1 ))
+            done
+        fi
 
         export COLUMNS="''${COLUMNS:-$(tput cols || echo 80)}"
 
         edo() {
             # shellcheck disable=SC2015
-            [ -n "$verbose" ] && printf '+ %s\n' "$*" >&2 || :
+            [[ "$level" -ge 2 ]] && printf '+ %s\n' "$*" >&2 || :
             "$@"
         }
 
-        [ -n "$debug" ] && set -x
+        [[ "$level" -ge 2 ]] && set -x
 
         # Keep the old and new revisions so we can compare them later.
         _nixos_old_system=$(get_system_generation)
         _nixos_old_home=$(get_home_generation) || :
 
-        [ -n "$_nixos_old_system" ] || exit 1
+        [[ -n "$_nixos_old_system" ]] || exit 1
 
-        [ "$#" -gt 0 ] || set -- switch
+        [[ "$#" -gt 0 ]] || set -- switch
 
         # Disable logging before the switch, just in case we touch the
         # log filesystem in a way it doesn't like...
         systemctl -q is-active systemd-journald.service && edo sudo journalctl --sync --relinquish-var
 
         e=0
-        edo nixos-rebuild --use-remote-sudo --no-update-lock-file "''${@:-switch}" || e=$?
+        edo nixos-rebuild --use-remote-sudo --no-update-lock-file "''${level_args[@]}" "''${@:-switch}" || e=$?
 
         systemctl -q is-active systemd-journald.service && edo sudo journalctl --flush
 
@@ -405,11 +427,11 @@ in
             fwupdmgr update
         fi
 
-        [ "$e" -eq 0 ] || exit $e
+        [[ "$e" -eq 0 ]] || exit $e
 
         _nixos_new_system=$(get_system_generation)
         _nixos_new_home=$(get_home_generation) || :
-        [ -n "$_nixos_new_system" ] || exit 1
+        [[ -n "$_nixos_new_system" ]] || exit 1
 
         case "$1" in
             switch|test)
@@ -418,7 +440,7 @@ in
                     || edo systemctl --user list-dependencies default.target
 
                 # Start graphical-session.target again, if Xorg is running.
-                if [ -n "$DISPLAY" ]; then
+                if [[ -n "$DISPLAY" ]]; then
                     edo systemctl --user start graphical-session.target \
                         || edo systemctl --user list-dependencies graphical-session.target
                 fi
@@ -436,15 +458,15 @@ in
         diff_system=
         diff_home=
         {
-            [ "$_nixos_new_system" = "$_nixos_old_system" ] || diff_system=$(NIXOS_DIFF_TABLE=false edo nixos-diff "$_nixos_old_system" "$_nixos_new_system")
-            if [ -n "$_nixos_old_home" ] && [ -n "$_nixos_new_home" ]; then
-                if [ "$_nixos_new_home" != "$_nixos_old_home" ]; then
+            [[ "$_nixos_new_system" = "$_nixos_old_system" ]] || diff_system=$(NIXOS_DIFF_TABLE=false edo nixos-diff "$_nixos_old_system" "$_nixos_new_system")
+            if [[ -n "$_nixos_old_home" ]] && [[ -n "$_nixos_new_home" ]]; then
+                if [[ "$_nixos_new_home" != "$_nixos_old_home" ]]; then
                     diff_home=$(NIXOS_DIFF_TABLE=false edo nixos-diff "$_nixos_old_home" "$_nixos_new_home")
                 fi
             fi
 
-            [ -n "$diff_home" ] \
-                && [ -n "$diff_system" ] \
+            [[ -n "$diff_home" ]] \
+                && [[ -n "$diff_system" ]] \
                 && diff_system=$(
                     grep -Fxv \
                         -f <(
@@ -458,8 +480,8 @@ in
                 && printf '\n'
 
             {
-                [ -n "$diff_system" ] && printf '%s\n' "$diff_system" ""
-                [ -n "$diff_home" ] && printf '%s\n' "$diff_home"
+                [[ -n "$diff_system" ]] && printf '%s\n' "$diff_system" ""
+                [[ -n "$diff_home" ]] && printf '%s\n' "$diff_home"
             } | table -T -1
         } | sponge >&2
       '';
@@ -520,7 +542,7 @@ in
                 }
         }
 
-        [ "$#" -gt 0 ] || usage
+        [[ "$#" -gt 0 ]] || usage
 
         old="$1"
         new="$2"
@@ -535,9 +557,9 @@ in
         new_generation=$(basename "$new" -link)
         new_generation=''${new_generation##"$old_stem"-}
 
-        if [ "$#" -eq 2 ]; then
+        if [[ "$#" -eq 2 ]]; then
             nvd --color always diff "$old" "$new" | pretty "$old_stem"
-        elif [ "$#" -eq 0 ]; then
+        elif [[ "$#" -eq 0 ]]; then
             find /nix/var/nix/profiles \
                 -mindepth 1 \
                 -maxdepth 1 \
