@@ -246,6 +246,11 @@ in
     };
   };
 
+  # kitty's shell integration will complain if "ignorespace" is in $HISTCONTROL.
+  programs.bash.historyControl = lib.mkIf config.programs.kitty.enable (
+    lib.remove "ignorespace" (lib.remove "ignoreboth" config.programs.bash.historyControl)
+  );
+
   xdg.configFile."kitty/diff.conf".text = ''
     pygments_style          bw
 
