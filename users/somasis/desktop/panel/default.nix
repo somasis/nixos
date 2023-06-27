@@ -351,8 +351,8 @@ in
       Unit = {
         Description = "lemonbar(1) based panel";
         PartOf = [ "graphical-session.target" "graphical-session-post.target" "tray.target" ];
+        After = [ "picom.service" ];
         StartLimitInterval = 0;
-        After = [ "picom.session" ];
       };
       Install.WantedBy = [ "graphical-session.target" "graphical-session-post.target" "tray.target" ];
 
