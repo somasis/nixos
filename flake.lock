@@ -1,5 +1,93 @@
 {
   "nodes": {
+    "adblockAntiAdblockFilters": {
+      "flake": false,
+      "locked": {
+        "narHash": "sha256-z1tCYCgYtlbpc5dozUplz9q7Cg2lPKmAiN2Dgg9UmdU=",
+        "type": "file",
+        "url": "https://easylist-downloads.adblockplus.org/antiadblockfilters.txt"
+      },
+      "original": {
+        "type": "file",
+        "url": "https://easylist-downloads.adblockplus.org/antiadblockfilters.txt"
+      }
+    },
+    "adblockEasyList": {
+      "flake": false,
+      "locked": {
+        "narHash": "sha256-3NPfCAruUCtM7Z/mmHAkNlKh9hVJBeGQN3QbtFB1Ai0=",
+        "type": "file",
+        "url": "https://easylist.to/easylist/easylist.txt"
+      },
+      "original": {
+        "type": "file",
+        "url": "https://easylist.to/easylist/easylist.txt"
+      }
+    },
+    "adblockEasyListCookies": {
+      "flake": false,
+      "locked": {
+        "narHash": "sha256-McVQIAysFtgG4xHaVQSPlUheLjwyPiUTwK91y1H++lo=",
+        "type": "file",
+        "url": "https://secure.fanboy.co.nz/fanboy-cookiemonster.txt"
+      },
+      "original": {
+        "type": "file",
+        "url": "https://secure.fanboy.co.nz/fanboy-cookiemonster.txt"
+      }
+    },
+    "adblockEasyListRussian": {
+      "flake": false,
+      "locked": {
+        "narHash": "sha256-TMS+Wb3JCSsVw8qKdmPdZfigWVvEviClyIWSePJVG08=",
+        "type": "file",
+        "url": "https://easylist-downloads.adblockplus.org/advblock.txt"
+      },
+      "original": {
+        "type": "file",
+        "url": "https://easylist-downloads.adblockplus.org/advblock.txt"
+      }
+    },
+    "adblockEasyListSpanish": {
+      "flake": false,
+      "locked": {
+        "narHash": "sha256-FyCLpIrqwiewb1p7oWHPDYUOcQP6VI5ygcoriZPzZp8=",
+        "type": "file",
+        "url": "https://easylist-downloads.adblockplus.org/easylistspanish.txt"
+      },
+      "original": {
+        "type": "file",
+        "url": "https://easylist-downloads.adblockplus.org/easylistspanish.txt"
+      }
+    },
+    "adblockFanboySocial": {
+      "flake": false,
+      "locked": {
+        "narHash": "sha256-OH+m4ERKepEBLe/bdwqcV9gRxFMGn2gz2bWQPYmwGbw=",
+        "type": "file",
+        "url": "https://easylist.to/easylist/fanboy-social.txt"
+      },
+      "original": {
+        "type": "file",
+        "url": "https://easylist.to/easylist/fanboy-social.txt"
+      }
+    },
+    "adblockHosts": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1687905015,
+        "narHash": "sha256-vMryjN9p3cgqltZSOaj7m+jNC2vAWoDAflgW64TgYXA=",
+        "owner": "StevenBlack",
+        "repo": "hosts",
+        "rev": "adbbd807d683ab3956dbf0b78b79ba22f1ea2a73",
+        "type": "github"
+      },
+      "original": {
+        "owner": "StevenBlack",
+        "repo": "hosts",
+        "type": "github"
+      }
+    },
     "catgirl": {
       "flake": false,
       "locked": {
@@ -237,6 +325,13 @@
     },
     "root": {
       "inputs": {
+        "adblockAntiAdblockFilters": "adblockAntiAdblockFilters",
+        "adblockEasyList": "adblockEasyList",
+        "adblockEasyListCookies": "adblockEasyListCookies",
+        "adblockEasyListRussian": "adblockEasyListRussian",
+        "adblockEasyListSpanish": "adblockEasyListSpanish",
+        "adblockFanboySocial": "adblockFanboySocial",
+        "adblockHosts": "adblockHosts",
         "catgirl": "catgirl",
         "csl": "csl",
         "disko": "disko",
@@ -252,6 +347,8 @@
         "nixpkgs": "nixpkgs",
         "nixpkgsStable": "nixpkgsStable",
         "sbase": "sbase",
+        "uAssetsPrivacy": "uAssetsPrivacy",
+        "uAssetsResourceAbuse": "uAssetsResourceAbuse",
         "ubase": "ubase",
         "zoteroTranslators": "zoteroTranslators"
       }
@@ -270,6 +367,30 @@
       "original": {
         "type": "git",
         "url": "git://git.suckless.org/sbase"
+      }
+    },
+    "uAssetsPrivacy": {
+      "flake": false,
+      "locked": {
+        "narHash": "sha256-ab/ArdEO1Jgl5SyhsWPFid2nJeSvJnLIuvOdpPcDgzM=",
+        "type": "file",
+        "url": "https://raw.githubusercontent.com/uBlockOrigin/uAssetsCDN/main/filters/privacy.min.txt"
+      },
+      "original": {
+        "type": "file",
+        "url": "https://raw.githubusercontent.com/uBlockOrigin/uAssetsCDN/main/filters/privacy.min.txt"
+      }
+    },
+    "uAssetsResourceAbuse": {
+      "flake": false,
+      "locked": {
+        "narHash": "sha256-bnG9tLza3X4nvVnUlsVurAMe8u0X4gkGfu9g8c55Uy8=",
+        "type": "file",
+        "url": "https://raw.githubusercontent.com/uBlockOrigin/uAssetsCDN/main/filters/resource-abuse.txt"
+      },
+      "original": {
+        "type": "file",
+        "url": "https://raw.githubusercontent.com/uBlockOrigin/uAssetsCDN/main/filters/resource-abuse.txt"
       }
     },
     "ubase": {
