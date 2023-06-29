@@ -19,11 +19,11 @@
     "adblockEasyList": {
       "flake": false,
       "locked": {
-        "lastModified": 1687969081,
-        "narHash": "sha256-pjOzD3vu90vftYac4qFujFJUEPDeksCiQrjixMvUTx4=",
+        "lastModified": 1688016060,
+        "narHash": "sha256-Y/EVg3lqUAc0msytpipwp9e/YCpGN+b1ca/tbSz7Vi0=",
         "owner": "easylist",
         "repo": "easylist",
-        "rev": "306cebf7157d50d466cc0edf8e1452686bda53d5",
+        "rev": "4ac0b3c84537a2d9fbaeddcea95f85f5d7ad190a",
         "type": "github"
       },
       "original": {
@@ -344,11 +344,11 @@
     "uAssets": {
       "flake": false,
       "locked": {
-        "lastModified": 1687972666,
-        "narHash": "sha256-TsBRrjs5vN+8cxj+scWa3Wo4gq6K6oUo+UB4p2SQ7HU=",
+        "lastModified": 1688015145,
+        "narHash": "sha256-PTT6AO+LIntMaWfTbhB/l15GS9NJ7T+tvJixbW+MmlU=",
         "owner": "uBlockOrigin",
         "repo": "uAssets",
-        "rev": "c6704c1cc899ae2d864b0c777722f9404da35113",
+        "rev": "3b27489123126d0a106a6876a80765c98f77f1f8",
         "type": "github"
       },
       "original": {
