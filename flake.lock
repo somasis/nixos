@@ -3,7 +3,7 @@
     "adblockAntiAdblockFilters": {
       "flake": false,
       "locked": {
-        "narHash": "sha256-z1tCYCgYtlbpc5dozUplz9q7Cg2lPKmAiN2Dgg9UmdU=",
+        "narHash": "sha256-ufXZZehZi1Jq1zVWJzvUfy0JailsotMtcF7TLHzmdCQ=",
         "type": "file",
         "url": "https://easylist-downloads.adblockplus.org/antiadblockfilters.txt"
       },
@@ -15,7 +15,7 @@
     "adblockEasyList": {
       "flake": false,
       "locked": {
-        "narHash": "sha256-3NPfCAruUCtM7Z/mmHAkNlKh9hVJBeGQN3QbtFB1Ai0=",
+        "narHash": "sha256-6QKg70LcX0i8TThqFhAdi849KCkuQudkDebmuJV4h4w=",
         "type": "file",
         "url": "https://easylist.to/easylist/easylist.txt"
       },
@@ -27,7 +27,7 @@
     "adblockEasyListCookies": {
       "flake": false,
       "locked": {
-        "narHash": "sha256-McVQIAysFtgG4xHaVQSPlUheLjwyPiUTwK91y1H++lo=",
+        "narHash": "sha256-aI9nBdImW2LlWAa3Fr8m25b6ksuKePL2iTNeK6g7cq8=",
         "type": "file",
         "url": "https://secure.fanboy.co.nz/fanboy-cookiemonster.txt"
       },
@@ -39,7 +39,7 @@
     "adblockEasyListRussian": {
       "flake": false,
       "locked": {
-        "narHash": "sha256-TMS+Wb3JCSsVw8qKdmPdZfigWVvEviClyIWSePJVG08=",
+        "narHash": "sha256-IVogSR0FhsIeLtxTg9mbUXVz+1QY5W2teb5XtAe4Ezc=",
         "type": "file",
         "url": "https://easylist-downloads.adblockplus.org/advblock.txt"
       },
@@ -51,7 +51,7 @@
     "adblockEasyListSpanish": {
       "flake": false,
       "locked": {
-        "narHash": "sha256-FyCLpIrqwiewb1p7oWHPDYUOcQP6VI5ygcoriZPzZp8=",
+        "narHash": "sha256-qL0QwJuDwa/0X1sdfSQOvMr3NlLckT0mfMX3MxVR01g=",
         "type": "file",
         "url": "https://easylist-downloads.adblockplus.org/easylistspanish.txt"
       },
@@ -63,7 +63,7 @@
     "adblockFanboySocial": {
       "flake": false,
       "locked": {
-        "narHash": "sha256-OH+m4ERKepEBLe/bdwqcV9gRxFMGn2gz2bWQPYmwGbw=",
+        "narHash": "sha256-pPCYAxEDOu58v74hSM2mJjFMroRjn5AhYt6gV5VG42M=",
         "type": "file",
         "url": "https://easylist.to/easylist/fanboy-social.txt"
       },
@@ -372,7 +372,7 @@
     "uAssetsPrivacy": {
       "flake": false,
       "locked": {
-        "narHash": "sha256-ab/ArdEO1Jgl5SyhsWPFid2nJeSvJnLIuvOdpPcDgzM=",
+        "narHash": "sha256-k3sFKHGQCsgf16aCUUheh+DdpO+EaADyqqlkSYYLGdk=",
         "type": "file",
         "url": "https://raw.githubusercontent.com/uBlockOrigin/uAssetsCDN/main/filters/privacy.min.txt"
       },
