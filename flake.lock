@@ -1,69 +1,5 @@
 {
   "nodes": {
-    "adblockAntiAdblockFilters": {
-      "flake": false,
-      "locked": {
-        "lastModified": 1687541572,
-        "narHash": "sha256-7HsqChmKnT9xL8hJT95k6pcwCEgEEcCfSTvHoVGxVb8=",
-        "owner": "easylist",
-        "repo": "antiadblockfilters",
-        "rev": "e743f52d0eaa55f05b87e1f57a9e75725812ea02",
-        "type": "github"
-      },
-      "original": {
-        "owner": "easylist",
-        "repo": "antiadblockfilters",
-        "type": "github"
-      }
-    },
-    "adblockEasyList": {
-      "flake": false,
-      "locked": {
-        "lastModified": 1688016060,
-        "narHash": "sha256-Y/EVg3lqUAc0msytpipwp9e/YCpGN+b1ca/tbSz7Vi0=",
-        "owner": "easylist",
-        "repo": "easylist",
-        "rev": "4ac0b3c84537a2d9fbaeddcea95f85f5d7ad190a",
-        "type": "github"
-      },
-      "original": {
-        "owner": "easylist",
-        "repo": "easylist",
-        "type": "github"
-      }
-    },
-    "adblockEasyListSpanish": {
-      "flake": false,
-      "locked": {
-        "lastModified": 1687950813,
-        "narHash": "sha256-zQo7y5B88hs7bvqaFfAAWkC47m9MGKX3YnEZqW1Mb44=",
-        "owner": "easylist",
-        "repo": "easylistspanish",
-        "rev": "3a1c784514bb09b0cf782a5a2174364498695ef6",
-        "type": "github"
-      },
-      "original": {
-        "owner": "easylist",
-        "repo": "easylistspanish",
-        "type": "github"
-      }
-    },
-    "adblockHosts": {
-      "flake": false,
-      "locked": {
-        "lastModified": 1687905015,
-        "narHash": "sha256-vMryjN9p3cgqltZSOaj7m+jNC2vAWoDAflgW64TgYXA=",
-        "owner": "StevenBlack",
-        "repo": "hosts",
-        "rev": "adbbd807d683ab3956dbf0b78b79ba22f1ea2a73",
-        "type": "github"
-      },
-      "original": {
-        "owner": "StevenBlack",
-        "repo": "hosts",
-        "type": "github"
-      }
-    },
     "catgirl": {
       "flake": false,
       "locked": {
@@ -301,10 +237,6 @@
     },
     "root": {
       "inputs": {
-        "adblockAntiAdblockFilters": "adblockAntiAdblockFilters",
-        "adblockEasyList": "adblockEasyList",
-        "adblockEasyListSpanish": "adblockEasyListSpanish",
-        "adblockHosts": "adblockHosts",
         "catgirl": "catgirl",
         "csl": "csl",
         "disko": "disko",
@@ -320,7 +252,6 @@
         "nixpkgs": "nixpkgs",
         "nixpkgsStable": "nixpkgsStable",
         "sbase": "sbase",
-        "uAssets": "uAssets",
         "ubase": "ubase",
         "zoteroTranslators": "zoteroTranslators"
       }
@@ -339,22 +270,6 @@
       "original": {
         "type": "git",
         "url": "git://git.suckless.org/sbase"
-      }
-    },
-    "uAssets": {
-      "flake": false,
-      "locked": {
-        "lastModified": 1688015145,
-        "narHash": "sha256-PTT6AO+LIntMaWfTbhB/l15GS9NJ7T+tvJixbW+MmlU=",
-        "owner": "uBlockOrigin",
-        "repo": "uAssets",
-        "rev": "3b27489123126d0a106a6876a80765c98f77f1f8",
-        "type": "github"
-      },
-      "original": {
-        "owner": "uBlockOrigin",
-        "repo": "uAssets",
-        "type": "github"
       }
     },
     "ubase": {
