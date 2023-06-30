@@ -59,6 +59,29 @@
       }];
     })
 
+    (pkgs.writeShellScriptBin ",m" ''
+      usage() {
+          cat >&2 <<EOF
+      usage: ,m [section] name
+      EOF
+          exit 69
+      }
+
+      pick() {
+          dmenu -p ",m" -S -n "$@"
+      }
+
+      if [[ "$#" -eq 2 ]]; then
+          output=$(nix-locate --minimal --top-level --regex '/share/man/man'"$1"'/'"$2"."$1" | pick)
+      elif [[ "$#" -eq 1 ]]; then
+          output=$(nix-locate --minimal --top-level --regex '/share/man/man.*'/"$1" | pick)
+      else
+          usage
+      fi
+
+      MANPATH="$output''${MANPATH:+:$MANPATH}" man "$@"
+    '')
+
     (pkgs.writeShellScriptBin "edo" ''
       # <https://stackoverflow.com/questions/2683279/how-to-detect-if-a-script-is-being-sourced/14706745#14706745
       _edo_is_sourced=0
