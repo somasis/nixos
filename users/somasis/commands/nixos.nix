@@ -32,7 +32,7 @@ in
   programs.bash = {
     initExtra = ''
       nix-cd() {
-          edo cd "$(nix-output "$1" | head -n1)"
+          edo pushd "$(nix-output "$1" | head -n1)"
       }
     '';
   };
