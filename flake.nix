@@ -13,6 +13,9 @@
     #   url = "https://www.gravatar.com/avatar/a187e38560bb56f5231cd19e45ad80f6?s=512&d=https%3A%2F%2Favatars.githubusercontent.com%2Fsomasis%3Fsize%3D512";
     # };
 
+    flake-compat.url = "github:inclyc/flake-compat";
+    flake-compat.flake = false;
+
     nixpkgs.url = "github:nixos/nixpkgs?ref=nixos-unstable";
     nixpkgsStable.url = "github:nixos/nixpkgs?ref=nixos-23.05";
 
