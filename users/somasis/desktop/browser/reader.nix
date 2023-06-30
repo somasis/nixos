@@ -6,47 +6,6 @@ let
     hash = "sha256-me/B8b7fkjtWWEMbIBi0LvT8FCPgsEyt0dKMxA0nxQo=";
   };
 
-  render = pkgs.writeShellScript "render" ''
-    set -euo pipefail
-    set -x
-
-    : "''${QUTE_FIFO:?}"
-    : "''${QUTE_URL:?}"
-    : "''${QUTE_HTML:?}"
-    : "''${QUTE_TEXT:?}"
-
-    umask 0077
-
-    PATH=${lib.makeBinPath [ pkgs.asciidoctor-with-extensions pkgs.pandoc ]}:"$PATH"
-
-    case "$QUTE_URL" in
-        file://*)      url=''${QUTE_URL#file://} ;;
-        view-source:*) url=''${QUTE_URL#view-source:} ;;
-        *)             url="$QUTE_URL" ;;
-    esac
-
-    file_type=''${url##*/}
-    file_type=''${file_type##*.}
-
-    case "$url" in
-        *.txt) file="$QUTE_TEXT" ;;
-        *) file="$QUTE_HTML" ;;
-    esac
-
-    rendered=$(mktemp --suffix .html)
-
-    case "$file_type" in
-        *.md|*.markdown) pandoc -f markdown -t html -o "$rendered" ;;
-        *.asciidoc) asciidoctor -o "$rendered" - ;;
-        *)
-            printf '%s "%s"\n' message-error "render: unknown file type '%s'" > "$QUTE_FIFO"
-            exit 1
-            ;;
-    esac
-
-    printf 'open -r %s\n' "$rendered" > "$QUTE_FIFO"
-  '';
-
   rdrview = pkgs.writeShellScript "rdrview" ''
     set -x
 
@@ -104,6 +63,47 @@ let
     EOF
 
     printf 'open -r %s\n' "$tmp"
+  '';
+
+  render = pkgs.writeShellScript "render" ''
+    set -euo pipefail
+    set -x
+
+    : "''${QUTE_FIFO:?}"
+    : "''${QUTE_URL:?}"
+    : "''${QUTE_HTML:?}"
+    : "''${QUTE_TEXT:?}"
+
+    umask 0077
+
+    PATH=${lib.makeBinPath [ pkgs.asciidoctor-with-extensions pkgs.pandoc ]}:"$PATH"
+
+    case "$QUTE_URL" in
+        file://*)      url=''${QUTE_URL#file://} ;;
+        view-source:*) url=''${QUTE_URL#view-source:} ;;
+        *)             url="$QUTE_URL" ;;
+    esac
+
+    file_type=''${url##*/}
+    file_type=''${file_type##*.}
+
+    case "$url" in
+        *.txt) file="$QUTE_TEXT" ;;
+        *) file="$QUTE_HTML" ;;
+    esac
+
+    rendered=$(mktemp --suffix .html)
+
+    case "$file_type" in
+        *.md|*.markdown) pandoc -f markdown -t html -o "$rendered" ;;
+        *.asciidoc) asciidoctor -o "$rendered" - ;;
+        *)
+            printf "message-error \"render: unknown file type '%s'\"\n" > "$QUTE_FIFO"
+            exit 1
+            ;;
+    esac
+
+    printf 'open -r %s\n' "$rendered" > "$QUTE_FIFO"
   '';
 in
 {
