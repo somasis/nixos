@@ -40,8 +40,8 @@ in
   home.packages = [
     # nixosRepl
 
-    pkgs.vulnix
     pkgs.nvd
+    pkgs.vulnix
 
     (pkgs.writeShellScriptBin "nix-output" ''
       exec nix build --no-link --print-out-paths "$@"
