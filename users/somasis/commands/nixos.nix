@@ -155,7 +155,7 @@ in
       ];
 
       text = ''
-        level=0
+        level=1
         for a; do
             shift
             [[ "$a" = "--quiet" ]] && level=$(( level - 1 )) && continue
@@ -164,13 +164,15 @@ in
         done
 
         level_args=()
+        final_level="$level"
         if [[ "$level" -ge 0 ]]; then
             while [[ "$level" -ge 0 ]]; do
                 level_args+=( --verbose )
+                verbose_level=$(( verbose_level + 1 ))
                 level=$(( level - 1 ))
             done
         else
-            while [[ "$level" -le 0 ]]; do
+            while [[ "$level" -lt 0 ]]; do
                 level_args+=( --quiet )
                 level=$(( level + 1 ))
             done
@@ -178,10 +180,14 @@ in
 
         info() {
             # shellcheck disable=SC2059,SC2015
-            [[ "$level" -ge 1 ]] && printf "$@" >&2 || :
+            [[ "$final_level" -ge 0 ]] && printf "$@" >&2 || :
         }
 
-        [[ "$level" -ge 2 ]] && set -x
+        ido() {
+            # shellcheck disable=SC2059,SC2015
+            [[ "$final_level" -ge 0 ]] && printf '$ %s\n' "$*" >&2 || :
+            "$@"
+        }
 
         nix flake metadata \
             --no-write-lock-file \
@@ -207,12 +213,11 @@ in
                     ~/src/nix/"$basename" \
                     ~/src/"$basename"; do
                     if git -C "$d" diff-index --quiet HEAD -- 2>/dev/null; then
-                        printf "Updating 'inputs.%s'...\n" "$input" >&2
+                        info printf "Updating 'inputs.%s'...\n" "$input" >&2
 
                         # --atomic is used so the local trees aren't ever left in a weird state.
                         before=$(git -C "$d" rev-parse HEAD) \
-                            && verbose "$ git -C \"%s\" pull -q --progress -- --atomic\n" "$d" \
-                            && git -C "$d" pull -q --progress -- --atomic \
+                            && ido git -C "$d" pull -q --progress -- --atomic \
                             && after=$(git -C "$d" rev-parse HEAD) \
                             && PAGER="cat" git -c color.ui=always -C "$d" \
                                 log --no-merges --reverse --oneline "$before..$after"
@@ -295,7 +300,7 @@ in
                 level=$(( level - 1 ))
             done
         else
-            while [[ "$level" -le 0 ]]; do
+            while [[ "$level" -lt 0 ]]; do
                 args+=( --quiet )
                 level=$(( level + 1 ))
             done
@@ -396,7 +401,7 @@ in
                 level=$(( level - 1 ))
             done
         else
-            while [[ "$level" -le 0 ]]; do
+            while [[ "$level" -lt 0 ]]; do
                 level_args+=( --quiet )
                 level=$(( level + 1 ))
             done
