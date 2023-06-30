@@ -143,5 +143,8 @@
         impermanence = import ./modules/impermanence.nix;
         home-manager.impermanence = import ./modules/impermanence-hm.nix;
       };
+
+      formatter =
+        lib.genAttrs lib.systems.flakeExposed (system: nixpkgs.legacyPackages.${system}.nixpkgs-fmt);
     };
 }
