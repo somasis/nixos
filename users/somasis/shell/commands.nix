@@ -58,10 +58,43 @@
         ];
       }];
     })
+
+    (pkgs.writeShellScriptBin "edo" ''
+      # <https://stackoverflow.com/questions/2683279/how-to-detect-if-a-script-is-being-sourced/14706745#14706745
+      _edo_is_sourced=0
+      if [ -n "$ZSH_VERSION" ]; then
+          case "$ZSH_EVAL_CONTEXT" in *':file') _edo_is_sourced=1 ;; esac
+      elif [ -n "$KSH_VERSION" ]; then
+          test \
+              "$(cd -- "$(dirname -- "$0")" && pwd -P)/$(basename -- "$0")" \
+              != "$(cd -- "$(dirname -- "''${.sh.file}")" && pwd -P)/$(basename -- "''${.sh.file}")" ] \
+              && _edo_is_sourced=1
+      elif [ -n "$BASH_VERSION" ]; then
+          ( return 0 2>/dev/null ) && _edo_is_sourced=1
+      else
+          # All other shells: examine $0 for known shell binary filenames.
+          # Detects `sh` and `dash`; add additional shell filenames as needed.
+          case "''${0##*/}" in sh|-sh|dash|-dash) _edo_is_sourced=1;; esac
+      fi
+
+      edo() {
+          _edo_string="$"
+          for _edo_arg; do
+              _edo_string+=" ''${_edo_arg//\'/\'\\\'\'}"
+          done
+
+          printf '%s\n' "$_edo_string" >&2 || :
+          "$@"
+      }
+
+      if [ "$_edo_is_sourced" -eq 0 ]; then
+          edo "$@"
+      fi
+    '')
   ];
 
   programs.bash.initExtra = ''
-    edo() { printf '+ %s\n' "$*" >&2; "$@"; }
+    . edo
 
     # ... | peek [COMMAND...] | ...
     peek() {
