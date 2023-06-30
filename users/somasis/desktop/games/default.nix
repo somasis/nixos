@@ -11,13 +11,12 @@
   ];
 
   home.packages = [
-    # pkgs.koboredux-free
     pkgs.lbreakout2
     pkgs.libsForQt5.kpat
     pkgs.opentyrian
     pkgs.pingus
     pkgs.sgtpuzzles
-    # pkgs.zaz # TODO broken because of SDL.h
+    pkgs.zaz
 
     pkgs.pcsx2
 
