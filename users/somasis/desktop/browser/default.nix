@@ -34,8 +34,8 @@ let
 in
 {
   imports = [
+    ./greasemonkey
     ./blocking.nix
-    ./greasemonkey.nix
     ./open.nix
     ./reader.nix
     ./search.nix
