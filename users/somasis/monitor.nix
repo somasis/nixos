@@ -37,7 +37,7 @@
 
       # Display options > Global options: threads
       hide_kernel_threads = 0;
-      hide_userland_threads = 1;
+      hide_userland_threads = 0;
       show_thread_names = 1;
       highlight_threads = 1; # "Display threads in a different color"
 
@@ -52,6 +52,7 @@
       fields = with fields; [
         USER
         PID
+        ELAPSED
         STATE
         NICE
         PRIORITY
@@ -76,8 +77,8 @@
     // rightMeters [
       (text "Hostname")
       (text "System")
-      (text "SystemdState")
       (text "Uptime")
+      (text "Systemd")
       (text "DiskIO")
       (text "ZFSCARC")
       (text "NetworkIO")
@@ -89,5 +90,5 @@
   programs.bash.shellAliases.htop = "2>/dev/null htop";
 
   services.sxhkd.keybindings."super + alt + Delete" =
-    "terminal ${config.programs.htop.package}/bin/htop";
+    "kitty --title htop --class htop htop";
 }
