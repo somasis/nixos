@@ -3,7 +3,7 @@
     "adblockAntiAdblockFilters": {
       "flake": false,
       "locked": {
-        "narHash": "sha256-GUQwzxh79kcrUn9/Kl6zWYPm/dLZllig+O24QS/cZBE=",
+        "narHash": "sha256-3aK53j2QjTgPyK7x7IbTWjbeR964tJDERfVY97dNcP0=",
         "type": "file",
         "url": "https://easylist-downloads.adblockplus.org/antiadblockfilters.txt"
       },
@@ -27,7 +27,7 @@
     "adblockEasyListCookies": {
       "flake": false,
       "locked": {
-        "narHash": "sha256-fSeeUoI29yncas/v5U2bEJJvR/UcQD3vIjWB8pi27qw=",
+        "narHash": "sha256-QFlgPPVyEFM/fzttY3x4XqSr7tTS7vdbfiMnrUUJTb8=",
         "type": "file",
         "url": "https://secure.fanboy.co.nz/fanboy-cookiemonster.txt"
       },
@@ -39,7 +39,7 @@
     "adblockEasyListRussian": {
       "flake": false,
       "locked": {
-        "narHash": "sha256-Pz8HjZvnWFeMPAKsHI6OO9DMZpRZvbRl/M1hAY/bvnk=",
+        "narHash": "sha256-iXN5Unc4N64UHSX+qm5LAgbyd+v5SID0w4HUVy4+z8s=",
         "type": "file",
         "url": "https://easylist-downloads.adblockplus.org/advblock.txt"
       },
@@ -51,7 +51,7 @@
     "adblockEasyListSpanish": {
       "flake": false,
       "locked": {
-        "narHash": "sha256-4Tjy6XPdmKhliHuh5RwmZoFLkdUQHod0/Px4dDZPWIw=",
+        "narHash": "sha256-UN1VlBv/YCNGy8MImCFqMVOr6cD9+DkqdUnNd7DjxbA=",
         "type": "file",
         "url": "https://easylist-downloads.adblockplus.org/easylistspanish.txt"
       },
@@ -63,7 +63,7 @@
     "adblockFanboySocial": {
       "flake": false,
       "locked": {
-        "narHash": "sha256-GiICabeBuc2lhA3v18MpRyK7JlUfgOitZ6KootF2Y1U=",
+        "narHash": "sha256-sSb5chk0GkYmHGwP8yah81c6DHZA320ayLwKfY3UfaM=",
         "type": "file",
         "url": "https://easylist.to/easylist/fanboy-social.txt"
       },
@@ -309,11 +309,11 @@
     },
     "nixpkgsStable": {
       "locked": {
-        "lastModified": 1687829761,
-        "narHash": "sha256-QRe1Y8SS3M4GeC58F/6ajz6V0ZLUVWX3ZAMgov2N3/g=",
+        "lastModified": 1688109178,
+        "narHash": "sha256-BSdeYp331G4b1yc7GIRgAnfUyaktW2nl7k0C577Tttk=",
         "owner": "nixos",
         "repo": "nixpkgs",
-        "rev": "9790f3242da2152d5aa1976e3e4b8b414f4dd206",
+        "rev": "b72aa95f7f096382bff3aea5f8fde645bca07422",
         "type": "github"
       },
       "original": {
