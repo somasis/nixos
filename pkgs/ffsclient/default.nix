@@ -16,6 +16,9 @@ buildGoModule rec {
 
   vendorHash = "sha256-rR9uQ23llvxVD3+GkfyZJh268G8ugNkrHRC/9kmmpdU=";
 
+  # requires network
+  doCheck = false;
+
   meta = with lib; rec {
     inherit (src.meta) homepage;
 
