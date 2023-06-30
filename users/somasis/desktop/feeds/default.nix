@@ -233,6 +233,9 @@ in
         title = "NixOS Discourse: announcements";
         tags = [ "NixOS" ];
       }
+      { url = "https://discuss.kakoune.com/c/plugins/5.rss"; title = "Kakoune: plugins"; tags = [ "kakoune" "computer" ]; }
+      { url = "https://discuss.kakoune.com/c/recipes-and-guides/8.rss"; title = "Kakoune: recipes and guides"; tags = [ "kakoune" "computer" ]; }
+      { url = "https://discuss.kakoune.com/c/terminal-tools/15.rss"; title = "Kakoune: terminal tools"; tags = [ "kakoune" "computer" ]; }
 
       # Music
       {
@@ -307,6 +310,11 @@ in
         tags = [ "news" "media" "film" ];
       }
 
+      {
+        url = "https://newleftreview.org/feed";
+        tags = [ "journal" ];
+      }
+
       # Notifications
       {
         url = feeds.urls.secret "https://github.com/somasis.private.atom?token=%s" "www/github.com/somasis.private.atom";
@@ -353,6 +361,10 @@ in
       {
         url = "https://drewdevault.com/blog/index.xml";
         tags = [ "blog" "development" "computer" ];
+      }
+      {
+        url = "https://maia.crimew.gay/feed.xml";
+        tags = [ "blog" "security" ];
       }
 
       # Tumblr
@@ -418,6 +430,17 @@ in
         title = "Mental Hellth";
         tags = [ "blog" "health" "philosophy" "psychoanalysis" ];
       }
+
+      {
+        url = "https://sootyempiric.blogspot.com/feeds/posts/default";
+        title = "The Sooty Empiric";
+        tags = [ "blog" "philosophy" ];
+      }
+      {
+        url = "http://blog.vernonwcisney.com/1/feed";
+        tags = [ "blog" "philosophy" ];
+      }
+      { url = feeds.urls.filter "https://medium.com/feed/@vcisney" feeds.filters.discardContent; tags = [ "blog" "philosophy" "medium" ]; }
     ];
   };
 

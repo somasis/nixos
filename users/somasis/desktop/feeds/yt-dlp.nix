@@ -197,7 +197,7 @@ in
     })
     (yt-dlp {
       url = "https://www.youtube.com/@Shaun_vids";
-      tags = [ "youtube" "politics" ];
+      tags = [ "youtube" ];
     })
     (yt-dlp {
       url = "https://www.youtube.com/@campingwithsteve";
@@ -218,7 +218,7 @@ in
 
     (yt-dlp {
       url = "https://www.youtube.com/@hbomberguy";
-      tags = [ "youtube" "politics" ];
+      tags = [ "youtube" ];
     })
     (yt-dlp {
       url = "https://www.youtube.com/@JulianOShea";
