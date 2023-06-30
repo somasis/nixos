@@ -28,6 +28,7 @@
   '';
 
   home.packages = [
+    pkgs.frangipanni
     pkgs.fx
     pkgs.html-tidy
     pkgs.ijq
