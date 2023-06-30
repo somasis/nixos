@@ -26,6 +26,7 @@ in
     "var/lib/nix" # Using `method = "symlink"` will cause issues while switching generations.
 
     { method = "symlink"; directory = "var/cache/nix"; }
+    "var/cache/vulnix"
   ];
 
   programs.bash = {
@@ -39,6 +40,7 @@ in
   home.packages = [
     # nixosRepl
 
+    pkgs.vulnix
     pkgs.nvd
 
     (pkgs.writeShellScriptBin "nix-output" ''
@@ -149,6 +151,7 @@ in
         config.programs.jq.package
         config.nix.package
         pkgs.coreutils
+        pkgs.vulnix
       ];
 
       text = ''
@@ -218,8 +221,8 @@ in
                 done
             done
 
-        info "$ nix flake update --commit-lock-file ''${level_args[*]} /etc/nixos\n"
-        exec nix flake update --commit-lock-file "''${level_args[@]}" /etc/nixos
+        ido nix flake update --commit-lock-file "''${level_args[@]}" /etc/nixos
+        [ -e /etc/nixos/.vulnix.toml ] && ido vulnix -w /etc/nixos/.vulnix.toml -S
       '';
     })
 
