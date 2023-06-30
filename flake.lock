@@ -27,7 +27,7 @@
     "adblockEasyListCookies": {
       "flake": false,
       "locked": {
-        "narHash": "sha256-fSeeUoI29yncas/v5U2bEJJvR/UcQD3vIjWB8pi27qw=",
+        "narHash": "sha256-QFlgPPVyEFM/fzttY3x4XqSr7tTS7vdbfiMnrUUJTb8=",
         "type": "file",
         "url": "https://secure.fanboy.co.nz/fanboy-cookiemonster.txt"
       },
