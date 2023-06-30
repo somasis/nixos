@@ -175,10 +175,6 @@ in
       selection_foreground = "none";
       selection_background = "none";
 
-      active_border_color = config.xsession.windowManager.bspwm.settings.focused_border_color;
-      bell_border_color = config.xsession.windowManager.bspwm.settings.active_border_color;
-      inactive_border_color = config.xsession.windowManager.bspwm.settings.normal_border_color;
-
       color0 = config.xresources.properties."*color0";
       color1 = config.xresources.properties."*color1";
       color2 = config.xresources.properties."*color2";
@@ -202,26 +198,23 @@ in
 
       wheel_scroll_multiplier = "2.0";
 
-      mouse_hide_wait = 0;
-
       scrollback_lines = 5000;
       scrollback_fill_enlarged_window = true;
 
-      copy_on_select = true;
-      draw_minimal_borders = false;
+      copy_on_select = "clipboard";
       placement_strategy = "top-left";
 
-      # select_by_word_characters = wordSeparators;
-
-      enabled_layouts = "fat";
-
-      tab_bar_style = "hidden";
+      # Mouse hiding is handled by services.unclutter.
+      mouse_hide_wait = 0;
 
       allow_remote_control = true;
 
       clear_all_shortcuts = true;
 
-      focus_follows_mouse = config.xsession.windowManager.bspwm.settings.focus_follows_pointer;
+      # Disable anything related to windows, tabs, etc.
+      enabled_layouts = "fat";
+      tab_bar_style = "hidden";
+      remember_window_size = false;
     };
 
     # like Alacritty
@@ -245,11 +238,6 @@ in
       "ctrl+equal" = "change_font_size all 0";
     };
   };
-
-  # kitty's shell integration will complain if "ignorespace" is in $HISTCONTROL.
-  programs.bash.historyControl = lib.mkIf config.programs.kitty.enable (
-    lib.remove "ignorespace" (lib.remove "ignoreboth" config.programs.bash.historyControl)
-  );
 
   xdg.configFile."kitty/diff.conf".text = ''
     pygments_style          bw
@@ -294,9 +282,25 @@ in
     name = "ModuleLoaded";
     option = "kitty";
     commands = ''
+      # Use real windows instead of Kitty's split "windows".
       set-option global kitty_window_type "os-window"
     '';
   }];
+
+  programs.kakoune.package =
+    if (builtins.compareVersions pkgs.kakoune-unwrapped.version "2022.10.31") <= 0 then
+      pkgs.kakoune-unwrapped.overrideAttrs
+        (final: prev: {
+          patches = [
+            (pkgs.fetchpatch {
+              url = "https://github.com/mawww/kakoune/commit/7c54de233486d29c3c33e4f63774b170a5945564.patch";
+              hash = "sha256-R8zdaLj/icQkTGpkeB+9NfcaKPNssd1zHJIFuX/g/8Y=";
+            })
+          ];
+        })
+    else
+      throw "users/somasis/desktop/terminal.nix: kakoune patch can be removed now"
+  ;
 
   # xresources.properties = {
   #   # xterm(1) settings
