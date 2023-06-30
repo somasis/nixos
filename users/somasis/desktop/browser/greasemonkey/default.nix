@@ -131,7 +131,9 @@ lib.mkIf (options.programs.qutebrowser ? greasemonkey) {
     ((pkgs.fetchFromGitHub { owner = "eight04"; repo = "select-text-inside-a-link-like-opera"; rev = "3692b6a626e83cd073485dcee9929f80a52c10c9"; hash = "sha256-u5LpbuprShZKHNhw7RnNITfo1gM9pYDzSLHNI+CUYMk="; }) + "/select-text-inside-a-link-like-opera.user.js")
     (pkgs.fetchurl { hash = "sha256-R+1ZM05ZJgNUskjnmo0mtYMH3gPEldTNfBaMc5t5t3Y="; url = "https://gist.githubusercontent.com/oxguy3/ebd9fe692518c7f7a1e9/raw/234f5667d97e6a14fe47ef39ae45b6e5d5ebaf46/RoughScroll.js"; })
 
+    # <https://adsbypasser.github.io/>
     (pkgs.fetchurl { hash = "sha256-+HDTlu5/WmuXI7vqNDi9XuQ5RvzHXaAf8fK7x3XxEp0="; url = "https://adsbypasser.github.io/releases/adsbypasser.full.es7.user.js"; })
+
     (pkgs.fetchurl { hash = "sha256-4nDL4vPOki+qpQmCKqLEVUc1Bh0uO3eJ8OpB8CuhJgs="; url = "https://greasyfork.org/scripts/32-show-password-onmouseover/code/Show%20Password%20onMouseOver.user.js"; })
     (pkgs.fetchurl { hash = "sha256-FshnFfKDwdCAam4Ikq0GlYcoJ0/a7B5vs8QMytLTqig="; url = "https://openuserjs.org/install/SelaoO/Ctrl+Enter_is_submit_everywhere.user.js"; })
 
@@ -170,7 +172,7 @@ lib.mkIf (options.programs.qutebrowser ? greasemonkey) {
     (pkgs.fetchurl { hash = "sha256-ToKUcsKwyEYUccC1zQQurJ8iTB8mfAGSiJbvk0f6sF8="; url = "https://greasyfork.org/scripts/2140-redacted-ch-extended-main-menu/code/RedactedCH%20::%20Extended%20Main%20Menu.user.js"; })
     (pkgs.fetchurl { hash = "sha256-CeDotDjzjD4PcJ603NK1WCFw412wChZW5fcOjCg+4cI="; url = "https://greasyfork.org/scripts/395736-is-it-down/code/Is%20it%20Down.user.js"; })
     (pkgs.fetchurl { hash = "sha256-eh7QPO2vxP0rcaEL1Z+mso6yGX36jsQpwYU02UCXNTw="; url = "https://gitlab.com/_mclovin/purchase-links-for-music-requests/-/raw/1aa5621357a8b527ae75a5deef03367030b929e4/request-external-links.user.js"; })
-    (pkgs.writeText "redacted-collapse-collages.js" ./userscripts/redacted-collapse-collages.js)
+    (pkgs.writeText "redacted-collapse-collages.js" ./redacted-collapse-collages.js)
 
     ((pkgs.fetchFromGitHub { owner = "SavageCore"; repo = "yadg-pth-userscript"; rev = "342d3bc58ee90be94b9829f5a6229b5c7f5d513b"; hash = "sha256-0cxt3fl1yRsU0NCmXAF51E6jVXImBX++8KcaFlRgPKQ="; }) + "/pth_yadg.meta.js")
 
@@ -206,6 +208,9 @@ lib.mkIf (options.programs.qutebrowser ? greasemonkey) {
 
     # tumblr.com
     (pkgs.fetchurl { hash = "sha256-ArfFzIPFoLIoFVpxKVu5JWOhgmVE58L47ljbcI4yksM="; url = "https://greasyfork.org/scripts/31593-tumblr-images-to-hd-redirector/code/Tumblr%20Images%20to%20HD%20Redirector.user.js"; })
+
+    # lemmy.ml, etc.
+    (pkgs.fetchurl { hash = "sha256-u17da3NewVrfAj0E6UeKt+XWkdpvUOsE7iYj0VuiSIM="; url = "https://greasyfork.org/scripts/469093-compact-lemmy-to-old-reddit-re-format-lemmy-v0-18/code/Compact%20Lemmy%20to%20oldReddit%20Re-format%20(Lemmy%20v018).user.js"; })
 
     # lobste.rs
     (pkgs.fetchurl { hash = "sha256-CJyDG74QVsw5n4U1lztzymorZ96/P20ifQF+/PtJKMs="; url = "https://greasyfork.org/scripts/40906-lobsters-highlighter/code/Lobsters%20Highlighter.user.js"; })
@@ -268,7 +273,7 @@ lib.mkIf (options.programs.qutebrowser ? greasemonkey) {
     ((pkgs.fetchFromGitHub { owner = "Anarios"; repo = "return-youtube-dislike"; rev = "5c73825aadb81b6bf16cd5dff2b81a88562b6634"; hash = "sha256-+De9Ka9MYsR9az5Zb6w4gAJSKqU9GwqqO286hi9bGYY="; }) + "/Extensions/UserScript/Return Youtube Dislike.user.js")
 
     # wikipedia.org / wikipesija.org
-    (pkgs.writeText "mediawiki-anchors.js" ./userscripts/mediawiki-anchors.js)
+    (pkgs.writeText "mediawiki-anchors.js" ./mediawiki-anchors.js)
 
     # zoom.us
     (pkgs.fetchurl { hash = "sha256-BWIOITDCDnbX2MCIcTK/JtqBaz4SU6nRu5f8WUbN8GE="; url = "https://openuserjs.org/install/clemente/Zoom_redirector.user.js"; })
@@ -294,5 +299,11 @@ lib.mkIf (options.programs.qutebrowser ? greasemonkey) {
         }) + "/main.user.js";
       } ''sed '/^\/\/ @match/ i // @match https://mastodon.social/*' "$src" > "$out"''
     )
+
+    (pkgs.runCommand "jhide.user.js" { } ''
+      ${pkgs.jhide}/bin/jhide -o $out ${lib.escapeShellArgs (map (lib.replaceStrings [ "file://" ] [ "" ]) config.programs.qutebrowser.settings.content.blocking.adblock.lists)}
+    '')
   ];
+
+  home.packages = [ pkgs.jhide ];
 }
