@@ -1,22 +1,28 @@
-{ pkgs, config, ... }:
+{ lib
+, pkgs
+, config
+, ...
+}:
 let
-  # format = pkgs.writeShellScript "format" ''
-  #   d=''${1%/*}
-
-  #   t=$(mktemp "$d"/.tmp.XXXXXXXXXX)
-
-  #   cat "$1" > "$t"
-
-  #   if ${pkgs.nixFlakes}/bin/nix fmt "$t" 2>/dev/null; then
-  #       cat "$t"
-  #   else
-  #       ${pkgs.nixpkgs-fmt}/bin/nixpkgs-fmt "$t" || cat "$1"
-  #   fi
-
-  #   rm -f "$t"
-  # '';
   format = pkgs.writeShellScript "format" ''
-    ${config.nix.package}/bin/nix fmt -- "$@" 2>/dev/null || ${pkgs.nixpkgs-fmt}/bin/nixpkgs-fmt -- "$@"
+    set -x
+    t_orig=$(mktemp)
+    t_out=$(mktemp)
+
+    tee "$t_orig" > "$t_out"
+
+    e=0
+    if \
+        ${config.nix.package}/bin/nix fmt "$t_out" >/dev/null 2>&1 \
+        || ${pkgs.nixpkgs-fmt}/bin/nixpkgs-fmt "$t_out" >/dev/null 2>&1
+        then
+        cat "$t_out"
+    else
+        cat "$t_orig"
+        e=1
+    fi
+    rm -f "$t_orig" "$t_out"
+    exit "$e"
   '';
 
   lint = pkgs.writeShellScript "lint" ''

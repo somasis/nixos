@@ -84,6 +84,8 @@
 
   programs.kakoune = {
     enable = true;
+    defaultEditor = true;
+
     config = {
       # Highlighters
       numberLines = {

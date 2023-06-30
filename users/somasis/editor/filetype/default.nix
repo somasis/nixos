@@ -21,7 +21,7 @@
 
           shebang=$(head -n 1 "$kak_buffile")
           case "$shebang" in
-              '#!'*'/env nix-shell')
+              '#!'*'/env nix-shell'|'#!'*'/env cached-nix-shell')
                   interpreter=''${shebang##*/env }
                   interpreter=''${interpreter%% *}
                   ;;
@@ -35,11 +35,11 @@
           interpreter=''${interpreter%%[0-9]*}
 
           case "$interpreter" in
-              nix-shell)
+              nix-shell|cached-nix-shell)
                   # sheesh
                   filetype=$(
                       sed -E \
-                          -e '/^#! *nix-shell.* -i .*/!d' \
+                          -e '/^#! *(cached-)?nix-shell.* -i .*/!d' \
                           -e 's/.* -i //' \
                           -e 's/ .*//' \
                           "$kak_buffile"

@@ -1,3 +1,4 @@
+# C and C++.
 { pkgs, ... }:
 let
   format = "${pkgs.clang-tools}/bin/clang-format -style=file";
@@ -6,18 +7,17 @@ let
   '';
 in
 {
-  programs.kakoune.config.hooks = [
-    # C and C++.
-    {
-      name = "WinSetOption";
-      option = "filetype=(c|cc|cpp|h)";
-      commands = ''
-        clang-enable-autocomplete
-        clang-enable-diagnostics
+  home.packages = [ pkgs.clang-tools ];
 
-        set-option window formatcmd "${format}"
-        set-option window lintcmd "${lint}"
-      '';
-    }
-  ];
+  programs.kakoune.config.hooks = [{
+    name = "WinSetOption";
+    option = "filetype=(c|cc|cpp|h)";
+    commands = ''
+      clang-enable-autocomplete
+      clang-enable-diagnostics
+
+      set-option window formatcmd "${format}"
+      set-option window lintcmd "${lint}"
+    '';
+  }];
 }
