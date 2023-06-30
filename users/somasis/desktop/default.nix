@@ -103,52 +103,6 @@
     pkgs.xdragon
     pkgs.xorg.xinput
     pkgs.xzoom
-
-    (pkgs.libsForQt5.callPackage
-      ({ stdenv
-       , fetchFromGitHub
-       , cmake
-       , pkg-config
-       , qtbase
-       , qttools
-       , wrapQtAppsHook
-       , fmt
-       , libpsl
-       , cxxopts
-       , httplib
-       , gettext
-       , openssl
-       , kwidgetsaddons
-       , kwindowsystem
-       }:
-        stdenv.mkDerivation rec {
-          pname = "tremotesf2";
-          version = "2.1.0";
-
-          src = fetchFromGitHub {
-            owner = "equeim";
-            repo = pname;
-            rev = version;
-            hash = "sha256-xnBrBtj1AjhVKVsxsGZ85y2cX6B/3ZCJXRegRwb0xC0=";
-            fetchSubmodules = true;
-          };
-
-          nativeBuildInputs = [ pkg-config cmake qttools wrapQtAppsHook ];
-          buildInputs = [ qtbase fmt kwidgetsaddons libpsl cxxopts ]
-            ++ lib.optionals stdenv.hostPlatform.isUnix [ gettext kwindowsystem ];
-          checkInputs = [ qtbase openssl httplib ];
-
-          cmakeFlags = [ "-DPKG_CONFIG_EXECUTASBLE=${pkg-config}/bin/pkg-config" ];
-
-          meta = with lib; {
-            description = "Remote GUI for transmission-daemon";
-            homepage = "https://github.com/equeim/tremotesf2";
-            license = with licenses; [ cc0 gpl3Plus mit lgpl21Plus gpl2Plus ]; # cc-by-nd-40 lgpl20Only
-            maintainers = [ maintainers.somasis ];
-            platforms = platforms.unix ++ platforms.windows;
-          };
-        })
-      { })
   ];
 
   # home.file.".face".source = inputs.avatarSomasis;
