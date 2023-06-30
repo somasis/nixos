@@ -28,6 +28,7 @@ in
       ExecStart = "${pkgs.systemd}/bin/timedatectl set-timezone America/New_York";
     };
   };
+
   networking.networkmanager.dispatcherScripts = [{
     source = pkgs.writeShellScript "nm-localtimed" ''
       if [ "$2" = "up" ]; then systemctl start localtimed.service; fi
