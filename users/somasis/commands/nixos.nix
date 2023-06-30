@@ -30,10 +30,6 @@ in
 
   programs.bash = {
     initExtra = ''
-      nix-output() {
-          nix build --no-link --print-out-paths "$@"
-      }
-
       nix-cd() {
           edo cd "$(nix-output "$1" | head -n1)"
       }
@@ -44,6 +40,10 @@ in
     # nixosRepl
 
     pkgs.nvd
+
+    (pkgs.writeShellScriptBin "nix-output" ''
+      exec nix build --no-link --print-out-paths "$@"
+    '')
 
     (pkgs.writeShellApplication {
       name = "nixos-search";
