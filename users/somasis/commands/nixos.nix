@@ -124,9 +124,9 @@ in
                 nix search \
                     --no-write-lock-file \
                     --inputs-from /etc/nixos \
-                    --quiet \
                     --json \
-                    "$@";
+                    "$@" \
+                    2>/dev/null;
                 printf "\n"
             ' \
             | sort \
