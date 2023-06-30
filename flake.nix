@@ -86,16 +86,27 @@
     # hyprland.inputs.nixpkgs.follows = "nixpkgs";
 
     adblockEasyList.flake = false;
-    adblockEasyList.url = "github:easylist/easylist";
+    adblockEasyList.url = "https://easylist.to/easylist/easylist.txt";
+
+    adblockEasyListCookies.flake = false;
+    adblockEasyListCookies.url = "https://secure.fanboy.co.nz/fanboy-cookiemonster.txt";
 
     adblockEasyListSpanish.flake = false;
-    adblockEasyListSpanish.url = "github:easylist/easylistspanish";
+    adblockEasyListSpanish.url = "https://easylist-downloads.adblockplus.org/easylistspanish.txt";
+    adblockEasyListRussian.flake = false;
+    adblockEasyListRussian.url = "https://easylist-downloads.adblockplus.org/advblock.txt";
 
     adblockAntiAdblockFilters.flake = false;
-    adblockAntiAdblockFilters.url = "github:easylist/antiadblockfilters";
+    adblockAntiAdblockFilters.url = "https://easylist-downloads.adblockplus.org/antiadblockfilters.txt";
 
-    uAssets.flake = false;
-    uAssets.url = "github:uBlockOrigin/uAssets";
+    adblockFanboySocial.flake = false;
+    adblockFanboySocial.url = "https://easylist.to/easylist/fanboy-social.txt";
+
+    uAssetsPrivacy.flake = false;
+    uAssetsPrivacy.url = "https://raw.githubusercontent.com/uBlockOrigin/uAssetsCDN/main/filters/privacy.min.txt";
+
+    uAssetsResourceAbuse.flake = false;
+    uAssetsResourceAbuse.url = "https://raw.githubusercontent.com/uBlockOrigin/uAssetsCDN/main/filters/resource-abuse.txt";
 
     adblockHosts.flake = false;
     adblockHosts.url = "github:StevenBlack/hosts";
