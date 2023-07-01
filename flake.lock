@@ -3,7 +3,7 @@
     "adblockAntiAdblockFilters": {
       "flake": false,
       "locked": {
-        "narHash": "sha256-DGuc9nvywXZwyvCu5e3UNDpi7YmmExbEgcglmiht3AE=",
+        "narHash": "sha256-4FWtfzdEiBF0cW/JhJ+jKjf1gVrfp/DUysRiLkbHKgE=",
         "type": "file",
         "url": "https://easylist-downloads.adblockplus.org/antiadblockfilters.txt"
       },
@@ -15,7 +15,7 @@
     "adblockEasyList": {
       "flake": false,
       "locked": {
-        "narHash": "sha256-EgxFVjcndKTNqORWI82m7tCeqB+qStznOHUaADwejNc=",
+        "narHash": "sha256-/U4jQDDZNGRHDdma98D69OA29+MYgccb/Chloax/n2E=",
         "type": "file",
         "url": "https://easylist.to/easylist/easylist.txt"
       },
@@ -27,7 +27,7 @@
     "adblockEasyListCookies": {
       "flake": false,
       "locked": {
-        "narHash": "sha256-KSx/+CPbxbof2EQsV+KKVN2mGoh+VCfAynM78o7aetc=",
+        "narHash": "sha256-Emin6bwspsHNFggHdzsjdzrkCt79bZLBLuOSZz83CtY=",
         "type": "file",
         "url": "https://secure.fanboy.co.nz/fanboy-cookiemonster.txt"
       },
@@ -39,7 +39,7 @@
     "adblockEasyListRussian": {
       "flake": false,
       "locked": {
-        "narHash": "sha256-SaT8yvbXqFdRqKrWr2i0pqpLpUjLrqI9rndT8GK5xP8=",
+        "narHash": "sha256-pKdnEJJb3STDkfCnfng3LeEJK6zw+0qMyOpVpIp9r+A=",
         "type": "file",
         "url": "https://easylist-downloads.adblockplus.org/advblock.txt"
       },
@@ -51,7 +51,7 @@
     "adblockEasyListSpanish": {
       "flake": false,
       "locked": {
-        "narHash": "sha256-Ez9oBTGF5k7FNvwYFozsRJLSKfTqGfYuX1AoRgSRAQQ=",
+        "narHash": "sha256-+EmU22tvSPMaQNozVxgVx1f1KUBbxgSUBANmqOokpQI=",
         "type": "file",
         "url": "https://easylist-downloads.adblockplus.org/easylistspanish.txt"
       },
@@ -63,7 +63,7 @@
     "adblockFanboySocial": {
       "flake": false,
       "locked": {
-        "narHash": "sha256-7IyUszjEAB2TgUR6K/+ft45VtcstsaiRTHXFKIKAIoI=",
+        "narHash": "sha256-6fXSFlPSS9fd2zt/gfu7Pqw49AM7764FnZw/9dOwQoo=",
         "type": "file",
         "url": "https://easylist.to/easylist/fanboy-social.txt"
       },
