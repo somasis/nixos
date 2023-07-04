@@ -1,4 +1,7 @@
-{ lib, ... }: {
+{ config
+, lib
+, ...
+}: {
   programs.bash = {
     historyFile = lib.mkDefault "/dev/null";
     historyFileSize = lib.mkDefault 0;
