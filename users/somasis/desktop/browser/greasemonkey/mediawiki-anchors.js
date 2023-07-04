@@ -1,20 +1,28 @@
 // ==UserScript==
-// @name         MediaWiki Anchors
+// @name         MediaWiki Anchor links
 // @version      0.1-somasis
 // @namespace    https://github.com/OoDeLally/wikipedia-anchors
-// @description  Add an anchored link to titles on Wikipedia articles
-// @author       Pascal Heitz
+// @description  Add an anchored link to titles on Wikipedia/Wikipesija articles
+// @author       Pascal Heitz (original author)
+// @author       Kylie McClain <kylie@somas.is> (modifications)
 // @license      MIT
-// @include      http*://*.wikipedia.org/*
-// @include      http*://wikipedia.org/*
-// @include      http*://wikipesija.org/*
-// @include      http*://*.wiktionary.org/*
-// @include      http*://wiktionary.org/*
+// @match        http://wikipedia.org/*
+// @match        https://wikipedia.org/*
+// @match        http://*.wikipedia.org/*
+// @match        https://*.wikipedia.org/*
+// @match        http://wikipesija.org/*
+// @match        https://wikipesija.org/*
+// @match        http://*.wikipesija.org/*
+// @match        https://*.wikipesija.org/*
+// @match        http://wiktionary.org/*
+// @match        https://wiktionary.org/*
+// @match        http://*.wiktionary.org/*
+// @match        https://*.wiktionary.org/*
 // @grant        GM_addStyle
 // ==/UserScript==
 //
-// NOTE(somasis): Modified slightly from <https://github.com/OoDeLally/wikipedia-anchors>
-//                `@include` now has Wikipesija and Wiktionary support.
+// NOTE(somasis): Modified slightly from <https://github.com/OoDeLally/wikipedia-anchors>.
+//                `@match` rules now have Wikipesija and Wiktionary support.
 //                Anchor links are now prepended to the headers, and with link icons
 //                rather than "[ link ]" text.
 

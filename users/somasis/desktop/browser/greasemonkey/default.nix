@@ -49,6 +49,9 @@ lib.mkIf (options.programs.qutebrowser ? greasemonkey) {
     ((pkgs.fetchFromGitHub { owner = "eight04"; repo = "select-text-inside-a-link-like-opera"; rev = "3692b6a626e83cd073485dcee9929f80a52c10c9"; hash = "sha256-u5LpbuprShZKHNhw7RnNITfo1gM9pYDzSLHNI+CUYMk="; }) + "/select-text-inside-a-link-like-opera.user.js")
     (pkgs.fetchurl { hash = "sha256-R+1ZM05ZJgNUskjnmo0mtYMH3gPEldTNfBaMc5t5t3Y="; url = "https://gist.githubusercontent.com/oxguy3/ebd9fe692518c7f7a1e9/raw/234f5667d97e6a14fe47ef39ae45b6e5d5ebaf46/RoughScroll.js"; })
 
+    ./rewrite-smolweb.user.js
+    ./recaptcha-unpaid-labor.user.js
+
     # <https://adsbypasser.github.io/>
     (pkgs.fetchurl { hash = "sha256-+HDTlu5/WmuXI7vqNDi9XuQ5RvzHXaAf8fK7x3XxEp0="; url = "https://adsbypasser.github.io/releases/adsbypasser.full.es7.user.js"; })
 
@@ -90,7 +93,7 @@ lib.mkIf (options.programs.qutebrowser ? greasemonkey) {
     (pkgs.fetchurl { hash = "sha256-ToKUcsKwyEYUccC1zQQurJ8iTB8mfAGSiJbvk0f6sF8="; url = "https://greasyfork.org/scripts/2140-redacted-ch-extended-main-menu/code/RedactedCH%20::%20Extended%20Main%20Menu.user.js"; })
     (pkgs.fetchurl { hash = "sha256-CeDotDjzjD4PcJ603NK1WCFw412wChZW5fcOjCg+4cI="; url = "https://greasyfork.org/scripts/395736-is-it-down/code/Is%20it%20Down.user.js"; })
     (pkgs.fetchurl { hash = "sha256-eh7QPO2vxP0rcaEL1Z+mso6yGX36jsQpwYU02UCXNTw="; url = "https://gitlab.com/_mclovin/purchase-links-for-music-requests/-/raw/1aa5621357a8b527ae75a5deef03367030b929e4/request-external-links.user.js"; })
-    (pkgs.writeText "redacted-collapse-collages.js" ./redacted-collapse-collages.js)
+    ./redacted-collapse-collages.js
 
     ((pkgs.fetchFromGitHub { owner = "SavageCore"; repo = "yadg-pth-userscript"; rev = "342d3bc58ee90be94b9829f5a6229b5c7f5d513b"; hash = "sha256-0cxt3fl1yRsU0NCmXAF51E6jVXImBX++8KcaFlRgPKQ="; }) + "/pth_yadg.meta.js")
 
@@ -191,7 +194,7 @@ lib.mkIf (options.programs.qutebrowser ? greasemonkey) {
     ((pkgs.fetchFromGitHub { owner = "Anarios"; repo = "return-youtube-dislike"; rev = "5c73825aadb81b6bf16cd5dff2b81a88562b6634"; hash = "sha256-+De9Ka9MYsR9az5Zb6w4gAJSKqU9GwqqO286hi9bGYY="; }) + "/Extensions/UserScript/Return Youtube Dislike.user.js")
 
     # wikipedia.org / wikipesija.org
-    (pkgs.writeText "mediawiki-anchors.js" ./mediawiki-anchors.js)
+    ./mediawiki-anchors.js
 
     # zoom.us
     (pkgs.fetchurl { hash = "sha256-BWIOITDCDnbX2MCIcTK/JtqBaz4SU6nRu5f8WUbN8GE="; url = "https://openuserjs.org/install/clemente/Zoom_redirector.user.js"; })
