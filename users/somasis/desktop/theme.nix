@@ -121,6 +121,7 @@
       "panel.font2" = "monospace:size=10:style=bold";
       "panel.font3" = "monospace:size=10:style=light";
       "panel.font4" = "monospace:size=10:style=heavy";
+      "panel.font5" = "emoji:size=10";
     };
 
   home.pointerCursor = {
