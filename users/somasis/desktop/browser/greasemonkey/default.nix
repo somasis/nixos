@@ -299,11 +299,5 @@ lib.mkIf (options.programs.qutebrowser ? greasemonkey) {
         }) + "/main.user.js";
       } ''sed '/^\/\/ @match/ i // @match https://mastodon.social/*' "$src" > "$out"''
     )
-
-    (pkgs.runCommand "jhide.user.js" { } ''
-      ${pkgs.jhide}/bin/jhide -o $out ${lib.escapeShellArgs (map (lib.replaceStrings [ "file://" ] [ "" ]) config.programs.qutebrowser.settings.content.blocking.adblock.lists)}
-    '')
   ];
-
-  home.packages = [ pkgs.jhide ];
 }
