@@ -1,6 +1,31 @@
-{ pkgs, config, ... }:
+{ config
+, lib
+, pkgs
+, ...
+}:
 let
   inherit (config.lib.somasis) feeds;
+
+  philpapers =
+    { keyword
+    , title ? "PhilPapers: ${keyword}"
+    , proOnly ? false
+    , publishedOnly ? true
+    , sort ? "pubYear"
+    , tags ? [ "philosophy" keyword ]
+    , extraTags ? [ ]
+    }:
+    let
+      inherit (lib) escapeURL;
+
+      bool = b: if b then "on" else "off";
+      tags' = tags ++ lib.optionals (extraTags != null) tags;
+    in
+    {
+      url = "https://philpapers.org/asearch.pl?format=rss&filterMode=keywords&searchStr=${escapeURL keyword}&proOnly=${escapeURL (bool proOnly)}&publishedOnly=${escapeURL (bool publishedOnly)}&sort=${escapeURL sort}";
+      inherit title;
+      tags = tags';
+    };
 in
 {
   imports = [
@@ -20,6 +45,8 @@ in
     # ZotFile > General Settings > "Location of Files"
     "extensions.zotfile.dest_dir" = "${config.home.homeDirectory}/study/doc";
   };
+
+  lib.somasis.feeds.feeds = { inherit philpapers; };
 
   programs.newsboat.urls = [
     {
@@ -52,6 +79,9 @@ in
       title = "Radical Philosophy";
       tags = [ "philosophy" "journal" ];
     }
+
+    (philpapers { keyword = "polyamory"; })
+    (philpapers { keyword = "gender"; })
     # TODO: Does Duke University Press have a feed for Transgender Studies Quarterly?
   ];
 }
