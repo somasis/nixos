@@ -1,5 +1,6 @@
 { config
 , pkgs
+, lib
 , ...
 }: {
   imports = [
@@ -23,21 +24,24 @@
       addp = "add -p";
       unadd = "reset HEAD --";
 
-      amend = "commit --amend";
-      amendall = "!git addall; EDITOR=cat git amend";
-
       com = "commit";
-      commits = "log --reverse --oneline @{upstream}...HEAD";
+      amend = "commit --amend";
+      amendall = "!git addall; >/dev/null EDITOR=cat git amend";
 
-      patches = "format-patch -M -C -C --stdout origin..HEAD";
+      commits = "log --reverse --oneline @{upstream}...HEAD";
+      patches = "format-patch --stdout origin..HEAD";
 
       re = "rebase";
-      rbc = "rebase --continue";
       ri = "rebase -i";
+      rbe = "rebase --edit-todo";
+      rbc = "rebase --continue";
+      rbs = "rebase --skip";
+      rba = "rebase --abort";
 
-      cherry = "cherry-pick";
-      chc = "cherry-pick --continue";
       ch = "cherry-pick";
+      chc = "cherry-pick --continue";
+      chs = "cherry-pick --skip";
+      cha = "cherry-pick --abort";
     };
 
     extraConfig = {
@@ -49,8 +53,6 @@
       init.defaultBranch = "main";
       interactive.singlekey = true;
 
-      commit.verbose = true;
-
       pull.rebase = true;
       push = {
         default = "simple";
@@ -61,11 +63,19 @@
 
       branch = {
         autoSetupRebase = "always";
-        autoSetupMerge = "simple";
+        autoSetupMerge = "true";
       };
 
+      # Detect renames more aggressively.
+      diff.renames = "copies";
+
+      commit.verbose = true;
       stash.showPatch = true;
-      status.showStash = true;
+      status = {
+        showStash = true; # --show-stash
+        branch = true; # -b, --branch
+        short = true; # -s, --short
+      };
 
       # Parallelize more things.
       checkout.workers = "-1";
@@ -86,9 +96,6 @@
   home.shellAliases = {
     am = "git am";
     add = "git add -v";
-    addall = "git addall";
-    addp = "git addp";
-    unadd = "git unadd";
 
     checkout = "git checkout";
     restore = "git restore";
@@ -96,60 +103,69 @@
 
     com = "git commit";
     amend = "git commit -v --amend";
-    amendall = "addall;EDITOR=cat amend >/dev/null";
 
     clone = "git clone -vv";
     push = "git push -vv";
     pull = "git pull -vv";
 
-    status = "git status --show-stash -sb";
-    log = "git log --patch-with-stat --summary -M -C -C";
-    commits = "git commits";
-
+    log = "git log --patch-with-stat --summary";
     merge = "git merge";
 
     stash = "git stash";
-    pop = "git stash pop";
 
     rebase = "git rebase";
-    rbc = "git rbc";
-    re = "git re";
-    ri = "git ri";
 
-    cherry = "git cherry-pick";
-    chc = "git chc";
-    ch = "git ch";
-
-    branch = "git branch -v";
     switch = "git switch";
+    branch = "git branch -v";
     branchoff = "git branchoff";
   };
 
-  programs.bash.initExtra = ''
-    _git_prompt() {
-        [ -n "''${_git_prompt:=$(git rev-parse --abbrev-ref=loose HEAD 2>/dev/null)}" ] \
-            && printf '%s ' "''${_git_prompt}"
-        _git_prompt=
-    }
+  programs.bash.initExtra =
+    let
+      gitAliasesToShell = pkgs.runCommandLocal "git-aliases" { } ''
+        PATH=${lib.makeBinPath [ pkgs.s6-portable-utils ]}:"$PATH"
 
-    gitlukin() {
-        set -- $(
-            git log \
-                --color=always \
-                --no-merges \
-                --oneline \
-                --reverse "$@" \
-            | sk \
-                --ansi \
-                --no-sort \
-                -d ' ' \
-                --preview='git log --color=always -1 --patch-with-stat {1}' \
-                --preview-window=down:75% \
-            | cut -d' ' -f1
-        )
-        log --no-merges "$@"
-    }
-  '';
+        ${lib.toShellVar "aliases" config.programs.git.aliases}
+        for alias in "''${!aliases[@]}"; do
+            command="''${aliases[$alias]}"
+
+            case "$command" in
+                '!'*) command=''${command#"!"} ;;
+                *) command="git $command" ;;
+            esac
+            command=$(s6-quote -d "'" "$command")
+
+            printf 'alias %s=%s\n' "$alias" "$command"
+        done > "$out"
+      '';
+    in
+    ''
+      . ${gitAliasesToShell}
+
+      _git_prompt() {
+          [ -n "''${_git_prompt:=$(git rev-parse --abbrev-ref=loose HEAD 2>/dev/null)}" ] \
+              && printf '%s ' "''${_git_prompt}"
+          _git_prompt=
+      }
+
+      gitlukin() {
+          set -- $(
+              git log \
+                  --color=always \
+                  --no-merges \
+                  --oneline \
+                  --reverse "$@" \
+              | sk \
+                  --ansi \
+                  --no-sort \
+                  -d ' ' \
+                  --preview='git log --color=always -1 --patch-with-stat {1}' \
+                  --preview-window=down:75% \
+              | cut -d' ' -f1
+          )
+          log --no-merges "$@"
+      }
+    '';
 
   programs.kakoune.config.hooks = [
     # Show git diff on save
