@@ -41,6 +41,8 @@ in
               realName = "Kylie McClain";
               passwordCommand = "${pass} show ${osConfig.networking.fqdnOrHostName}/nixos/${address}";
 
+              folders.inbox = "INBOX";
+
               offlineimap.enable = true;
 
               imapnotify = {
@@ -72,12 +74,18 @@ in
       (account "mcclainkj@appstate.edu" {
         passwordCommand = "${pass} show www/appstate.edu/mcclainkj";
         aliases = [ "mcclainhj@appstate.edu" ];
+
         flavor = "gmail.com";
+        folders.sent = "Sent Mail";
+
         offlineimap.extraConfig = offlineimapNametransGmail;
       })
 
       (account "somasissounds@gmail.com" {
+
         flavor = "gmail.com";
+        folders.sent = "Sent Mail";
+
         offlineimap.extraConfig = offlineimapNametransGmail;
       })
     ]
