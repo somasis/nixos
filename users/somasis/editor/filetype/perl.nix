@@ -1,7 +1,12 @@
-{ pkgs, ... }:
+{ pkgs
+, lib
+, ...
+}:
 let
   format = "${pkgs.perlPackages.PerlTidy}/bin/perltidy -pro=.../.perltidyrc -st -se";
-  lint = pkgs.writeShellScript "lint" ''
+  lint = pkgs.writeShellScript "lint-perl" ''
+    PATH=${lib.makeBinPath [ pkgs.perlPackages.PerlCritic pkgs.coreutils pkgs.gnused ]}
+
     upward() {
         e=0
         while [ $# -gt 0 ]; do
@@ -16,7 +21,7 @@ let
         [ "$e" -gt 0 ] && return 1
     }
 
-    ${pkgs.perlPackages.PerlCritic}/bin/perlcritic \
+    perlcritic \
         --quiet \
         --profile "$(upward ".perlcriticrc")" \
         --verbose "%f:%l:%c: severity %s: %m [%p]\n" "$1" \
@@ -26,6 +31,8 @@ let
   '';
 in
 {
+  home.packages = [ pkgs.perlPackages.PerlCritic pkgs.perlPackages.PerlTidy ];
+
   programs.kakoune.config.hooks = [{
     name = "WinSetOption";
     option = "filetype=perl";

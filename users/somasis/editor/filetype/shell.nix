@@ -106,6 +106,16 @@ let
   };
 in
 {
+  home.packages = [
+    pkgs.checkbashisms
+    pkgs.shellcheck
+    pkgs.shfmt
+
+    shellcheckfmt
+    format
+    lint
+  ];
+
   programs.kakoune.config.hooks = [
     # Set the filetype of buffers bash uses for editing commands.
     {
@@ -144,13 +154,4 @@ in
       ]}
     ''
   ;
-
-  home.packages = [
-    pkgs.checkbashisms
-    pkgs.shellcheck
-    pkgs.shfmt
-    shellcheckfmt
-    format
-    lint
-  ];
 }

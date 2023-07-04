@@ -25,9 +25,7 @@
                   interpreter=''${shebang##*/env }
                   interpreter=''${interpreter%% *}
                   ;;
-              '#! '*) interpreter=''${shebang#* } ;;
-              '#!'*)  interpreter=''${shebang#"#!"} ;;
-              *) exit ;;
+              *) exit ;; # not a nix-shell script
           esac
 
           interpreter=''${interpreter%% *}
@@ -48,10 +46,6 @@
                   case "$filetype" in
                       bash) filetype=sh ;;
                   esac
-                  ;;
-              *)
-                  echo "unknown interpreter: $interpreter" >&2
-                  exit
                   ;;
           esac
 

@@ -1,11 +1,17 @@
-# roff(7).
-{ pkgs, ... }:
+# roff(7), mdoc(7).
+{ pkgs
+, lib
+, ...
+}:
 let
-  lint = pkgs.writeShellScript "lint" ''
-    ${pkgs.mandoc}/bin/mandoc -T lint -W warning "$1" | cut -d ' ' -f1-
+  lint = pkgs.writeShellScript "lint-troff" ''
+    PATH=${lib.makeBinPath [ pkgs.coreutils pkgs.mandoc ]}
+    mandoc -T lint -W warning "$1" | cut -d ' ' -f1-
   '';
 in
 {
+  home.packages = [ pkgs.mandoc ];
+
   programs.kakoune.config.hooks = [
     {
       name = "WinSetOption";
@@ -30,6 +36,5 @@ in
         }
       '';
     }
-
   ];
 }

@@ -1,9 +1,12 @@
-# C and C++.
-{ pkgs, ... }:
+{ pkgs
+, lib
+, ...
+}:
 let
   format = "${pkgs.clang-tools}/bin/clang-format -style=file";
-  lint = pkgs.writeShellScript "lint" ''
-    ${pkgs.clang-tools}/bin/clang-tidy --quiet "$@" 2>/dev/null
+  lint = pkgs.writeShellScript "lint-clang" ''
+    PATH=${lib.makeBinPath [ pkgs.clang-tools ]}
+    clang-tidy --quiet "$@" 2>/dev/null
   '';
 in
 {

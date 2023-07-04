@@ -1,8 +1,14 @@
-{ pkgs, config, ... }:
+{ pkgs
+, lib
+, config
+, ...
+}:
 let
-  lint = pkgs.writeShellScript "lint" ''
-    ${pkgs.proselint}/bin/proselint -j "$1" \
-        | ${config.programs.jq.package}/bin/jq -r \
+  lint = pkgs.writeShellScript "lint-prose" ''
+    PATH=${lib.makeBinPath [ config.programs.jq.package pkgs.proselint ]}
+
+    proselint -j "$1" \
+        | jq -r \
             --arg buffer "$1" '
                 .data.errors[]
                     | (
@@ -17,6 +23,8 @@ let
   '';
 in
 {
+  home.packages = [ pkgs.proselint ];
+
   programs.kakoune.config.hooks = [
     # Markup languages / prose-heavy text.
     # Used for formatting/linting plain text, emails, git(1) commits, and Markdown/AsciiDoc files
