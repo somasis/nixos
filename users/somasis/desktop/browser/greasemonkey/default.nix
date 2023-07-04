@@ -131,7 +131,7 @@ lib.mkIf (options.programs.qutebrowser ? greasemonkey) {
     (pkgs.fetchurl { hash = "sha256-ArfFzIPFoLIoFVpxKVu5JWOhgmVE58L47ljbcI4yksM="; url = "https://greasyfork.org/scripts/31593-tumblr-images-to-hd-redirector/code/Tumblr%20Images%20to%20HD%20Redirector.user.js"; })
 
     # lemmy.ml, etc.
-    (pkgs.fetchurl { hash = "sha256-u17da3NewVrfAj0E6UeKt+XWkdpvUOsE7iYj0VuiSIM="; url = "https://greasyfork.org/scripts/469093-compact-lemmy-to-old-reddit-re-format-lemmy-v0-18/code/Compact%20Lemmy%20to%20oldReddit%20Re-format%20(Lemmy%20v018).user.js"; })
+    ((pkgs.fetchFromGitHub { owner = "soundjester"; repo = "lemmy_monkey"; rev = "779d5e2843f5fd7bcc399eb5b122d24be7295e23"; hash = "sha256-7ndLbmTt2baDlVKoCXRIdXtcqjK2S7KUf6kOld/5PBA="; }) + /old.reddit.compact.user.js)
 
     # lobste.rs
     (pkgs.fetchurl { hash = "sha256-CJyDG74QVsw5n4U1lztzymorZ96/P20ifQF+/PtJKMs="; url = "https://greasyfork.org/scripts/40906-lobsters-highlighter/code/Lobsters%20Highlighter.user.js"; })
