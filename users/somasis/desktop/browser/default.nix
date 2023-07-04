@@ -425,6 +425,8 @@ in
         # Provide some Kakoune-style keyboard shortcuts.
         "gg" = "scroll-to-perc 0";
         "ge" = "scroll-to-perc 100";
+
+        "zsm" = "open https://mastodon.social/authorize_interaction?uri={url}";
       }
       // (lib.optionalAttrs (tor.enable && tor.client.enable) {
         "cnp" = "config-cycle -p content.proxy system socks://${tor.client.socksListenAddress.addr}:${toString tor.client.socksListenAddress.port}";
