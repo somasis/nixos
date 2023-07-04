@@ -213,7 +213,7 @@ let
         ];
 
         meta = with lib; {
-          description = "Integrate origin metadata (origin.txt) into beets' MusicBrainz queries";
+          description = "Integrate origin metadata (origin.txt) into beets MusicBrainz queries";
           homepage = "https://github.com/x1ppy/beets-originquery";
           maintainers = with maintainers; [ somasis ];
           license = licenses.unfree; # <https://github.com/x1ppy/beets-originquery/issues/3>
