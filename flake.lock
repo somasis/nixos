@@ -3,7 +3,7 @@
     "adblockAntiAdblockFilters": {
       "flake": false,
       "locked": {
-        "narHash": "sha256-Fbnme87xHSAgAciiqyRBYUDaJbFRfOZzLTrhvdoLcMU=",
+        "narHash": "sha256-KgzcLKhbsJMjqEphtAI2CoRPCKHerjbuHYMuHzKwm50=",
         "type": "file",
         "url": "https://easylist-downloads.adblockplus.org/antiadblockfilters.txt"
       },
@@ -15,7 +15,7 @@
     "adblockEasyList": {
       "flake": false,
       "locked": {
-        "narHash": "sha256-QyscQhKmtuX2XqtkrJiKMPdNO/SudqACpvvXO5dNVVs=",
+        "narHash": "sha256-81SrrToYuROSvDwpLV0L7R6JF+XBlYWQF9Lwsa2UVZI=",
         "type": "file",
         "url": "https://easylist.to/easylist/easylist.txt"
       },
@@ -27,7 +27,7 @@
     "adblockEasyListCookies": {
       "flake": false,
       "locked": {
-        "narHash": "sha256-CR/wFrC/6v1ceKpd9uPjbF7oPxsJIjRpTc7EPUiqIHE=",
+        "narHash": "sha256-fs7es3i64/fkEINPYxAPJpJJcS07dn5kLQNHeB+3NOc=",
         "type": "file",
         "url": "https://secure.fanboy.co.nz/fanboy-cookiemonster.txt"
       },
@@ -39,7 +39,7 @@
     "adblockEasyListRussian": {
       "flake": false,
       "locked": {
-        "narHash": "sha256-4nT0L2lURYd55wMlKYWRsTKp3Duu/cXgwQ7TWC3h5Dk=",
+        "narHash": "sha256-cP9epdzI9ilPBvot73EtLzOycb4sZWWqOxtHu1ddoeo=",
         "type": "file",
         "url": "https://easylist-downloads.adblockplus.org/advblock.txt"
       },
@@ -51,7 +51,7 @@
     "adblockEasyListSpanish": {
       "flake": false,
       "locked": {
-        "narHash": "sha256-3+FajMrcujNwoIFF/hk/8bMgN3SM3I2sfCdJPnkDMYY=",
+        "narHash": "sha256-mYal7pnLRnrz8rlradBbiTZNzR8W/u6ESd4vpBJ8Ahw=",
         "type": "file",
         "url": "https://easylist-downloads.adblockplus.org/easylistspanish.txt"
       },
@@ -63,7 +63,7 @@
     "adblockFanboySocial": {
       "flake": false,
       "locked": {
-        "narHash": "sha256-E7fcUF/bSV42m8krIQUt90V/8uuhCMJAabSaVgwwp5E=",
+        "narHash": "sha256-2ZMWaEP1xl1y16xBWOjM9zHmM3XaCY72s4PO0Y8yUgA=",
         "type": "file",
         "url": "https://easylist.to/easylist/fanboy-social.txt"
       },
@@ -85,25 +85,6 @@
       "original": {
         "owner": "StevenBlack",
         "repo": "hosts",
-        "type": "github"
-      }
-    },
-    "ak-nix": {
-      "inputs": {
-        "nixpkgs": "nixpkgs_2"
-      },
-      "locked": {
-        "lastModified": 1684089972,
-        "narHash": "sha256-DteBAc4BKGDaL1XqzmR5HrwQOFWp0P4ZKJu7Ay2qNjA=",
-        "owner": "aakropotkin",
-        "repo": "ak-nix",
-        "rev": "93882a278780894c40d94c6b8fae0b1871e66cbc",
-        "type": "github"
-      },
-      "original": {
-        "owner": "aakropotkin",
-        "ref": "main",
-        "repo": "ak-nix",
         "type": "github"
       }
     },
@@ -199,11 +180,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1688396410,
-        "narHash": "sha256-LVS+b806E8enHpZxqJBecz814qKd6Kc69j4nW4swfBI=",
+        "lastModified": 1688409282,
+        "narHash": "sha256-nnVCN5QiZ5+DEc70PRQLEcxqlxtsmeBU1BnpsRPUJlA=",
         "owner": "nix-community",
         "repo": "home-manager",
-        "rev": "8c66b46a86afa21763766ef97d7c8be5f3954e2b",
+        "rev": "c24deeca64538dcbc589ed8da9146e4ca9eb85b7",
         "type": "github"
       },
       "original": {
@@ -342,43 +323,6 @@
         "type": "github"
       }
     },
-    "nixpkgs_2": {
-      "locked": {
-        "lastModified": 1672633908,
-        "narHash": "sha256-sP0BMp4DprVCBjcTYPsTPwkJMsc45vM0FxHdDx6qE8U=",
-        "owner": "NixOS",
-        "repo": "nixpkgs",
-        "rev": "a4379d2b0deefedc8dba360897557707ea9ee9a7",
-        "type": "github"
-      },
-      "original": {
-        "id": "nixpkgs",
-        "type": "indirect"
-      }
-    },
-    "rime": {
-      "inputs": {
-        "ak-nix": "ak-nix",
-        "nixpkgs": [
-          "rime",
-          "ak-nix",
-          "nixpkgs"
-        ]
-      },
-      "locked": {
-        "lastModified": 1686165262,
-        "narHash": "sha256-y4ankzRbXaYnuJR3px45/0eo/dyFOpaudDktDJgf/rA=",
-        "owner": "aakropotkin",
-        "repo": "rime",
-        "rev": "7370eedb826332ded86555cafc739ec66c989259",
-        "type": "github"
-      },
-      "original": {
-        "owner": "aakropotkin",
-        "repo": "rime",
-        "type": "github"
-      }
-    },
     "root": {
       "inputs": {
         "adblockAntiAdblockFilters": "adblockAntiAdblockFilters",
@@ -402,7 +346,6 @@
         "nixos-hardware": "nixos-hardware",
         "nixpkgs": "nixpkgs",
         "nixpkgsStable": "nixpkgsStable",
-        "rime": "rime",
         "sbase": "sbase",
         "uAssetsPrivacy": "uAssetsPrivacy",
         "uAssetsResourceAbuse": "uAssetsResourceAbuse",
@@ -429,7 +372,7 @@
     "uAssetsPrivacy": {
       "flake": false,
       "locked": {
-        "narHash": "sha256-eGc/xuHf1ygQflucnjmEGS5k5ZGwmYzxQovsKxXPFzk=",
+        "narHash": "sha256-j0n4S3dl/xHqsDmjgmgmv1NRmvp6SDP1y/qTzAVlJ7M=",
         "type": "file",
         "url": "https://raw.githubusercontent.com/uBlockOrigin/uAssetsCDN/main/filters/privacy.min.txt"
       },
