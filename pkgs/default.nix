@@ -33,6 +33,7 @@ rec
   pass-meta = callPackage ./pass-meta { };
   qute-pass = callPackage ./qute-pass { };
 
+  borg-takeout = callPackage ./borg-takeout { };
   qutebrowser-sync = callPackage ./qutebrowser-sync { };
 
   ffsclient = callPackage ./ffsclient { };
