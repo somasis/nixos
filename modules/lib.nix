@@ -17,18 +17,46 @@ with lib;
     # Type: floatToInt :: float -> int
     floatToInt = float:
       let
-        inherit (builtins) typeOf toString head tail splitVersion;
-        inherit (lib) isFloat toIntBase10;
-        inherit (lib.strings) escapeNixString;
+        inherit (builtins)
+          split
+          toString
+          ;
+        inherit (lib)
+          flatten
+          isFloat
+          isList
+          pipe
+          remove
+          toInt
+          ;
 
-        fractional = toIntBase10 (toString (tail (splitVersion (toString float))));
-        whole = toIntBase10 (toString (head (splitVersion (toString float))));
+        splitFloat = pipe float [
+          toString
+          (split "(.+)[.](.+)")
+          (remove "")
+          flatten
+        ];
+
+        whole = pipe (elemAt splitFloat 0) [
+          toString
+          toInt
+        ];
+
+        fractional = pipe (elemAt splitFloat 1) [
+          toString
+          (split "0+$")
+          (remove "")
+          flatten
+          toString
+
+          # Handle fractional == 0. The `split` produced a bunch of
+          # empty strings if it's just 0.
+          (x: if x == "" then "0" else x)
+          toInt
+        ];
       in
       assert (isFloat float);
-      if fractional == 0 then
-        whole
-      else
-        throw "floatToInt: Could not convert ${escapeNixString float} to integer."
+      if fractional >= 5 then whole + 1 else whole
     ;
 
     # Make a string safe for usage as a systemd path.
