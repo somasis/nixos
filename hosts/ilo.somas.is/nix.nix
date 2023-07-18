@@ -108,9 +108,13 @@
       self.flake = self;
     };
 
-    nixPath = [ "nixpkgs=flake:nixpkgs" ];
+    nixPath = [
+      "nixpkgs=flake:nixpkgs"
+      "nixpkgs=/etc/nix/inputs/nixpkgs"
+    ];
   };
 
+  environment.etc."nix/inputs/nixpkgs".source = nixpkgs;
   environment.systemPackages = [ pkgs.nix-doc ];
 
   programs.ssh.extraConfig = ''
