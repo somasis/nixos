@@ -5,8 +5,6 @@
 }:
 let
   format = pkgs.writeShellScript "format-nix" ''
-    set -x
-
     : "''${kak_buffile:="$PWD"/file.nix}"
 
     : "''${format_in:?format_in not set}"

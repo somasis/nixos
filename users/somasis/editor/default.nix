@@ -51,7 +51,7 @@
 {
   imports = [
     ./filetype
-    ./plugins
+    ./clipboard.nix
     # ./lsp.nix
   ];
 
@@ -368,16 +368,13 @@
     '';
 
     plugins = [
-      pkgs.kakounePlugins.active-window-kak
-      pkgs.kakounePlugins.kakoune-state-save
-
       # File management commands
       (pkgs.kakouneUtils.buildKakounePluginFrom2Nix rec {
         pname = "tug";
         version = "unstable-2020-02-22";
         src = pkgs.fetchFromGitHub {
-          owner = "matthias-margush";
           repo = pname;
+          owner = "matthias-margush";
           rev = "23adaadb795af2d86dcb3daf7af3ebe12e932441";
           hash = "sha256-cW11DPsjBBtjOfU9gizH8dGSV3B1rQiD0qeO/Ab8jWI=";
         };
@@ -388,34 +385,17 @@
         pname = "kakoune-find";
         version = "unstable-2022-09-25";
         src = pkgs.fetchFromGitHub {
-          owner = "occivink";
           repo = pname;
+          owner = "occivink";
           rev = "09afcc8520d4c92928fe69da4c370b9979aa90d3";
           hash = "sha256-AyG0AbQOTFDQ/jrhtyb5ajWlvWO+h0JDe5SEtTyTkfQ=";
         };
       })
 
-      (pkgs.kakouneUtils.buildKakounePluginFrom2Nix {
-        pname = "smarttab-kak";
-        version = "unstable-2022-04-10";
-        src = pkgs.fetchFromGitHub {
-          owner = "andreyorst";
-          repo = "smarttab.kak";
-          rev = "86ac6599b13617ff938905ba4cdd8225d7eb6a2e";
-          hash = "sha256-STLZSwQPM+gTnkA+FQOF4I0ifPTjQWpEc/95JRzvIqU=";
-        };
-      })
-
-      (pkgs.kakouneUtils.buildKakounePluginFrom2Nix rec {
-        pname = "kakoune-goto-file";
-        version = "unstable-2018-11-01";
-        src = pkgs.fetchFromGitHub {
-          owner = "Delapouite";
-          repo = pname;
-          rev = "44b4ffad945acb635fc1a9c1c23957ff16461102";
-          hash = "sha256-k8I9SR5ygX6Ku+6vTXIPNAp1ZxD5B/ucwTKWigpWZjk=";
-        };
-      })
+      pkgs.kakounePlugins.active-window-kak
+      pkgs.kakounePlugins.kakoune-extra-filetypes
+      pkgs.kakounePlugins.kakoune-state-save
+      pkgs.kakounePlugins.smarttab-kak
     ];
   };
 
