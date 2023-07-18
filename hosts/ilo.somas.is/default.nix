@@ -15,7 +15,10 @@ nixpkgs.lib.nixosSystem {
   modules = with self; with inputs; [
     ({ self, ... }: {
       nixpkgs = {
-        config.allowUnfree = true;
+        config = {
+          allowUnfree = true;
+          # contentAddressedByDefault = true;
+        };
 
         localSystem = {
           inherit system;

@@ -24,7 +24,14 @@
     daemonIOSchedClass = "idle";
 
     settings = {
-      extra-experimental-features = [ "flakes" "nix-command" ];
+      extra-experimental-features = [
+        "flakes"
+        "nix-command"
+
+        "ca-derivations"
+
+        "auto-allocate-uids"
+      ];
 
       trusted-users = [ "@wheel" ];
 
@@ -56,14 +63,15 @@
         "https://numtide.cachix.org"
 
         "https://nix-community.cachix.org"
+
+        "https://cache.ngi0.nixos.org"
       ];
 
       trusted-public-keys = [
         "spinoza.7596ff.com-1:3evmjxB2owiKU1RcWMaVW7al/xdOG3QVqEEYwILPK1w="
-
         "numtide.cachix.org-1:2ps1kLBUWjxIneOy1Ik6cQjb41X0iXVXeHigGmycPPE="
-
         "nix-community.cachix.org-1:mB9FSh9qf2dCimDSUo8Zy7bkq5CX+/rkCWyvRCYg3Fs="
+        "cache.ngi0.nixos.org-1:KqH5CBLNSyX184S9BKZJo1LxrxJ9ltnY2uAs5c/f1MA="
       ];
 
       plugin-files = [ "${pkgs.nix-doc}/lib/libnix_doc_plugin.so" ];
