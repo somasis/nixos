@@ -148,6 +148,26 @@
       ];
 
       hooks = [
+        # Load any plugins I have in ~/src/*.kak
+        {
+          name = "KakBegin";
+          option = ".*";
+
+          commands = ''
+            evaluate-commands %sh{
+                find -H ~/src \
+                    ! -path '*/.*/*' \
+                    -type d \
+                    -name '*.kak' \
+                    -exec find {} \
+                        -name '*.kak' \
+                        -mindepth 1 \
+                        -printf 'source %p\n' \
+                        \;
+            }
+          '';
+        }
+
         # Ensure that the default scratch buffer is entirely empty. Clearing the text is annoying.
         {
           name = "BufCreate";

@@ -20,7 +20,14 @@ let
   # '';
 
   formatHTML = pkgs.writeShellScript "format-html" ''
-    ${pkgs.html-tidy}/bin/tidy -q --indent yes --indent-spaces "$kak_opt_tabstop" 2>/dev/null || true
+    ${pkgs.html-tidy}/bin/tidy \
+        --quiet yes \
+        --indent auto \
+        --indent-spaces "$kak_opt_tabstop" \
+        --tab-size "$kak_opt_tabstop" \
+        --tidy-mark no \
+        2>/dev/null \
+        || true
   '';
 
   # JavaScript
