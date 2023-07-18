@@ -4,9 +4,6 @@
 , overlays
 , ...
 }:
-let
-  system = "x86_64-linux";
-in
 nixpkgs.lib.nixosSystem {
   inherit (nixpkgs) lib;
 
@@ -21,7 +18,7 @@ nixpkgs.lib.nixosSystem {
         };
 
         localSystem = {
-          inherit system;
+          system = "x86_64-linux";
           isLinux = true;
           isx86_64 = true;
 
