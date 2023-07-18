@@ -6,6 +6,15 @@
 with lib;
 {
   config.lib.somasis = rec {
+    # Convert a float to an integer.
+    #
+    # Really, we just treat it as a double. We first make it a string
+    # (losing accuracy), split the string into its whole and fractional
+    # parts, convert those to integers, cut trailing zeros from the
+    # fractional part, and if the fractional part is >=5, we return the
+    # whole number + 1, and if not, we just return the whole.
+    #
+    # Type: floatToInt :: float -> int
     floatToInt = float:
       let
         inherit (builtins) typeOf toString head tail splitVersion;
@@ -22,11 +31,20 @@ with lib;
         throw "floatToInt: Could not convert ${escapeNixString float} to integer."
     ;
 
+    # Make a string safe for usage as a systemd path.
+    # Ripped from nixpkgs' systemd.nix module.
+    #
+    # Type: mkPathSafeName :: str -> str
     mkPathSafeName = replaceStrings [ "@" ":" "\\" "[" "]" ] [ "-" "-" "-" "" "" ];
 
+    # Create a comma,separated,string from a list.
+    #
+    # Type: commaList :: list -> str
     commaList = concatMapStringsSep "," (lib.escape [ "," ]);
 
-    # testCase -> TEST_CASE
+    # Convert a camelCaseString to a SCREAMING_SNAKE_CASE_STRING.
+    #
+    # Type: camelCaseToScreamingSnakeCase :: str -> str
     camelCaseToScreamingSnakeCase = x:
       if toLower x == x then
         x
@@ -37,7 +55,9 @@ with lib;
           x
     ;
 
-    # testCase -> test_case
+    # Convert a camelCaseString to a snake_case_string.
+    #
+    # Type: camelCaseToSnakeCase :: str -> str
     camelCaseToSnakeCase = x:
       if toLower x == x then
         x
@@ -48,7 +68,9 @@ with lib;
           x
     ;
 
-    # testCase -> test-case
+    # Convert a camelCaseString to a kebab-case-string.
+    #
+    # Type: camelCaseToKebabCase :: str -> str
     camelCaseToKebabCase = x:
       if toLower x == x then
         x
@@ -59,7 +81,9 @@ with lib;
           x
     ;
 
-    # testCase -> TEST-CASE
+    # Convert a camelCaseString to a KEBAB-CASE-STRING.
+    #
+    # Type: camelCaseToScreamingKebabCase :: str -> str
     camelCaseToScreamingKebabCase = x:
       if toLower x == x then
         x
@@ -70,7 +94,9 @@ with lib;
           x
     ;
 
-    # test_case -> testCase
+    # Convert a snake_case_string to a camelCaseString.
+    #
+    # Type: snakeCaseToCamelCase :: str -> str
     snakeCaseToCamelCase = x:
       let
         x' =
@@ -84,9 +110,13 @@ with lib;
     ;
 
     # Get the program name and path using the same logic as `nix run`.
+    #
+    # Type: programName :: derivation -> string
     programName = p: p.meta.mainProgram or p.pname or p.name;
-    programPath = p: "${getBin p}/bin/${programName p}";
 
+    # Remove "# comments" from a given string input.
+    #
+    # Type: removeComments :: (string | path) -> string
     removeComments = input:
       let
         withCommentsRemoved =
@@ -114,9 +144,12 @@ with lib;
     ;
 
     generators = {
-      toXML = attrs:
+      # Generate XML from an attrset.
+      #
+      # The XML makes a roundtrip as JSON, and is validated during generation.
+      #
+      # Type: toXML :: attrset -> string
         let
-          # xq requires that there be one XML root element; it must be specified as a command argument otherwise
           xml =
             if (builtins.length (builtins.attrNames attrs)) == 1 then
               pkgs.runCommand "xml"
@@ -136,7 +169,7 @@ with lib;
                   ${pkgs.xmlstarlet}/bin/xmlstarlet format -n canonical.xml > "$out"
                 ''
             else
-              abort "generators.toXML: only one XML root element is allowed"
+              abort "generators.toXML: only one root element is allowed"
           ;
         in
         lib.fileContents xml
