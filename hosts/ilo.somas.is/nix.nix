@@ -38,7 +38,7 @@
       max-jobs = 8;
       log-lines = 1000;
 
-      connect-timeout = 30;
+      connect-timeout = 5;
 
       auto-optimise-store = true;
       min-free = 1024000000; # 512 MB
