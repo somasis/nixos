@@ -352,7 +352,7 @@ in
       '';
     in
     {
-      "Thunar/uca.xml".text = config.lib.somasis.generators.toXML {
+      "Thunar/uca.xml".text = config.lib.somasis.generators.toXML { } {
         actions = {
           action =
             let
