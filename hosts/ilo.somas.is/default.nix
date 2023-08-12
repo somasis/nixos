@@ -135,7 +135,6 @@ nixpkgs.lib.nixosSystem {
         menus.enable = true;
         mime.enable = true; # TODO
         sounds.enable = false;
-        portal.enable = false;
       };
 
       programs.bash = {
