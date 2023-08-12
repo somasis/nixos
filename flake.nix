@@ -30,9 +30,6 @@
 
     impermanence.url = "github:nix-community/impermanence";
 
-    disko.url = "github:nix-community/disko";
-    disko.inputs.nixpkgs.follows = "nixpkgs";
-
     nix-filter.url = "github:numtide/nix-filter";
 
     catgirl.flake = false;
@@ -121,8 +118,14 @@
       system = builtins.currentSystem or "x86_64-linux";
     in
     {
-      overlays.default = final: prev: import ./pkgs { inherit (prev) pkgs; };
-      packages = lib.genAttrs lib.systems.flakeExposed (system: import ./pkgs { pkgs = nixpkgs.legacyPackages.${system}; });
+      overlays.default = import ./pkgs;
+      packages = lib.genAttrs lib.systems.flakeExposed
+        (
+          system:
+          import ./pkgs
+            nixpkgs.legacyPackages.${system}
+            nixpkgs.legacyPackages.${system}
+        );
 
       nixosConfigurations.ilo = import ./hosts/ilo.somas.is {
         inherit self inputs nixpkgs;
