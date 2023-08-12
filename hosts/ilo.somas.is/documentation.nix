@@ -12,7 +12,9 @@ in
     dev.enable = true;
     nixos = {
       enable = true; # Provides `nixos-help`.
-      includeAllModules = true;
+
+      # TODO breaks with impermanence
+      # includeAllModules = true;
     };
 
     man = {

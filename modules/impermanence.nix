@@ -40,10 +40,14 @@ in
     (mkAliasOptionModule [ "log" ] [ "environment" "persistence" config.persistence.log ])
   ];
 
-  # config = {
-  #   # Add entries for every user's home directory (and make them owner of it)
-  #   persist.directories = homes;
-  #   cache.directories = homes;
-  #   log.directories = homes;
-  # };
+  config.environment.persistence = {
+    persist.persistentStoragePath = config.persistence.persist;
+    cache.persistentStoragePath = config.persistence.cache;
+    log.persistentStoragePath = config.persistence.log;
+
+    # Add entries for every user's home directory (and make them owner of it)
+    # persist.directories = homes;
+    # cache.directories = homes;
+    # log.directories = homes;
+  };
 }
