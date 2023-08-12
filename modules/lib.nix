@@ -373,5 +373,17 @@ with lib;
       else
         x
     ;
+
+    # jhide can handle multiple lists, but the memory usage is much better
+    # if you have a script per list.
+    greasemonkey.jhide = list: pkgs.runCommandLocal "jhide.user.js" { } ''
+      ${lib.getExe pkgs.jhide} \
+          -o $out \
+          ${lib.escapeShellArgs (
+            map
+              (lib.replaceStrings [ "file://" ] [ "" ])
+              (if lib.isList list then list else [ list ])
+          )}
+    '';
   };
 }

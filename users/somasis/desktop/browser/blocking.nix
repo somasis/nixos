@@ -1,6 +1,6 @@
-{ pkgs
+{ config
+, pkgs
 , lib
-, config
 , inputs
 , ...
 }:
@@ -31,31 +31,29 @@ in
   programs.qutebrowser = {
     settings = {
       # Help with jhide's memory usage.
-      qt.chromium.process_model = "process-per-site";
+      # qt.chromium.process_model = "process-per-site";
 
       content.blocking = {
         enabled = true;
         method = "adblock";
-        adblock.lists = uriList [
+        adblock.lists = with inputs; uriList [
           adblockCustom
-          inputs.adblockEasyList
-          inputs.adblockEasyListCookies
-          inputs.adblockEasyListSpanish
-          inputs.adblockEasyListRussian
-          inputs.adblockAntiAdblockFilters
-          # inputs.adblockFanboySocial
-          inputs.uAssetsPrivacy
-          inputs.uAssetsResourceAbuse
+
+          adblockEasyList
+          adblockEasyListCookies
+          adblockEasyListSpanish
+          adblockEasyListRussian
+          adblockAntiAdblockFilters
+          adblockFanboySocial
+          uAssetsPrivacy
+          uAssetsResourceAbuse
         ];
       };
     };
 
-    greasemonkey = [
-      (pkgs.runCommand "jhide.user.js" { } ''
-        ${pkgs.jhide}/bin/jhide -o $out ${lib.escapeShellArgs (map (lib.replaceStrings [ "file://" ] [ "" ]) config.programs.qutebrowser.settings.content.blocking.adblock.lists)}
-      '')
-    ];
+    greasemonkey = map
+      config.lib.somasis.greasemonkey.jhide
+      config.programs.qutebrowser.settings.content.blocking.adblock.lists
+    ;
   };
-
-  home.packages = [ pkgs.jhide ];
 }
