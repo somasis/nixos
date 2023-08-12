@@ -72,6 +72,7 @@ nixpkgs.lib.nixosSystem {
 
       cache = {
         hideMounts = true;
+
         directories = [
           "/var/lib/systemd/timers"
           "/var/lib/systemd/timesync"
@@ -82,6 +83,7 @@ nixpkgs.lib.nixosSystem {
 
       log = {
         hideMounts = true;
+
         directories = [
           "/var/lib/systemd/catalog"
           "/var/lib/systemd/coredump"
