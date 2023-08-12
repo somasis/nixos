@@ -32,8 +32,6 @@ nixpkgs.lib.nixosSystem {
 
     nixosModules.lib
 
-    disko.nixosModules.disko
-
     impermanence.nixosModules.impermanence
     nixosModules.impermanence
 
