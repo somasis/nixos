@@ -206,14 +206,16 @@
                     ~/src/nix/"$basename" \
                     ~/src/"$basename"; do
                     if git -C "$d" diff-index --quiet HEAD -- 2>/dev/null; then
-                        info printf "Updating 'inputs.%s'...\n" "$input" >&2
-
                         # --atomic is used so the local trees aren't ever left in a weird state.
-                        before=$(git -C "$d" rev-parse HEAD) \
-                            && ido git -C "$d" pull -q --progress -- --atomic \
-                            && after=$(git -C "$d" rev-parse HEAD) \
-                            && PAGER="cat" git -c color.ui=always -C "$d" \
+                        before=$(git -C "$d" rev-parse HEAD)
+                        if ido git -C "$d" pull -q --progress -- --atomic; then
+                            after=$(git -C "$d" rev-parse HEAD)
+                            PAGER="cat" git -c color.ui=always -C "$d" \
                                 log --no-merges --reverse --oneline "$before..$after"
+                        else
+                            ido git merge --abort
+                            exit 1
+                        fi
                         break
                     fi
                 done
@@ -529,12 +531,23 @@
         }
 
         pretty() {
+            local stem="$1"; shift
+            local pretty_stem="$1"; shift
+            local old="$1"; shift
+            local new="$1"; shift
+
+            local old_generation
+            old_generation=$(basename "$old" -link)
+            old_generation=''${old_generation##"$stem"-}
+
+            local new_generation
+            new_generation=$(basename "$new" -link)
+            new_generation=''${new_generation##"$stem"-}
+
             local stdin
             stdin=$(</dev/stdin)
 
-            printf '%s (%s -> %s)\n' "$1" "$old_generation" "$new_generation"
-            printf '%s\n' "$stdin" \
-                | vis -ct \
+            vis -ct <<<"$stdin" \
                 | sed -E \
                     -e '/^((Added|Removed) packages|Version changes):$|^(<<<|>>>) /d' \
                     -e '/^\[\\\^/ {
@@ -546,17 +559,27 @@
                     -e '/^>>> /d' \
                 | unvis \
                 | NO_COLOR=true teip -d $'\t' -f2 -- nocolor \
-                | nocolor \
+                | {
+                    printf '%s\t%s -> %s\n' "$pretty_stem" "$old_generation" "$new_generation"
+                    cat
+                } \
                 | {
                     if [[ "$NIXOS_DIFF_TABLE" == 'true' ]]; then
                         table -T -1
                     else
                         cat
                     fi
-                }
+                } \
+                | sed $'1 { s/^/\e[1;4m/; s/[ \t]*/\e[0;4m&/; s/$/\e[0m/ }' \
+                | nocolor
         }
 
-        [[ "$#" -gt 0 ]] || usage
+        [[ "$#" -eq 2 ]] || usage
+
+        ${lib.toShellVar "system_stem" osConfig.networking.fqdnOrHostName}
+        ${lib.toShellVar "home_manager_stem" config.home.username}
+        : "''${system_stem:=$(hostname -f)}"
+        : "''${home_manager_stem:=$(id -un)}"
 
         old="$1"
         new="$2"
@@ -565,49 +588,14 @@
         old_stem=''${old_stem%-link}
         old_stem=''${old_stem%-[0-9]*}
 
-        old_generation=$(basename "$old" -link)
-        old_generation=''${old_generation##"$old_stem"-}
+        case "$old_stem" in
+            system)       pretty_stem="$system_stem" ;;
+            home-manager) pretty_stem="$home_manager_stem" ;;
+            *)            pretty_stem="$old_stem";
+        esac
 
-        new_generation=$(basename "$new" -link)
-        new_generation=''${new_generation##"$old_stem"-}
-
-        if [[ "$#" -eq 2 ]]; then
-            nvd --color always diff "$old" "$new" | pretty "$old_stem"
-        elif [[ "$#" -eq 0 ]]; then
-            find /nix/var/nix/profiles \
-                -mindepth 1 \
-                -maxdepth 1 \
-                -name 'system-*-link' \
-                -type l \
-                | xe -N2 nvd --color always diff \
-                | pretty ${lib.escapeShellArg osConfig.networking.fqdnOrHostName}
-
-            find /nix/var/nix/profiles/per-user \
-                -mindepth 1 \
-                -maxdepth 1 \
-                -type d \
-                -exec sh -c 'find "$@" \
-                    -mindepth 1 \
-                    -maxdepth 1 \
-                    -name "home-manager-*-link" \
-                    -type l \
-                        | sort \
-                        | tail -n2
-                    ' -- {} \; \
-                | xe -N2 nvd --color always diff \
-                | pretty ${lib.escapeShellArg config.home.username}
-        fi
+        nvd --color always diff "$1" "$2" | pretty "$old_stem" "$pretty_stem" "$1" "$2"
       '';
     })
-
-    # (pkgs.writeShellScriptBin "nixos-watch" ''
-    #   nixos "$@"
-    #   # nixos-local-sources \
-    #   #     | xe -N0 find /etc/nixos {} -type f ! -path '*/.*' \
-    #   #     | rwc -pe >/dev/null 2>&1
-    #   xe -N0 find /etc/nixos {} -type f ! -path '*/.*' \
-    #       | rwc -pe >/dev/null 2>&1
-    #   exec "$0" "$@"
-    # '')
   ];
 }
