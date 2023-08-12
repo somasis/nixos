@@ -18,7 +18,7 @@ lib.mkIf steam.enable {
       Type = "simple";
 
       Environment = [ "STEAM_FORCE_DESKTOPUI_SCALING=1.5" ];
-      ExecStart = "${steam.package}/bin/steam -silent -no-browser";
+      ExecStart = "${steam.package}/bin/steam -silent";
 
       # We need to kill the PID listed in ~/.steampid, or else Steam
       # will exit unsuccesfully every time.
