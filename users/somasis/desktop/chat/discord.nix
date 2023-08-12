@@ -5,16 +5,18 @@
 , ...
 }:
 let
+  inherit (lib)
+    getExe
+    ;
   inherit (config.lib.somasis)
     camelCaseToScreamingSnakeCase
-    programName
-    programPath
+    getExeName
     ;
 
   discord = pkgs.armcord;
   discordWindowClassName = "ArmCord";
   discordDescription = discord.meta.description;
-  discordName = programName discord;
+  discordName = getExeName discord;
   discordPath = "${discord}/bin/${discordName}";
 in
 {
@@ -78,7 +80,7 @@ in
     Service = {
       Type = "simple";
 
-      ExecStart = "${programPath discord} " + lib.cli.toGNUCommandLineShell { } {
+      ExecStart = "${getExe discord} " + lib.cli.toGNUCommandLineShell { } {
         start-minimized = true;
       };
 
@@ -144,12 +146,12 @@ in
   services.sxhkd.keybindings."super + d" = pkgs.writeShellScript "discord" ''
     ${pkgs.jumpapp}/bin/jumpapp \
         -c ${lib.escapeShellArg discordWindowClassName} \
-        -i ${lib.escapeShellArg (programName discord)} \
+        -i ${lib.escapeShellArg (getExeName discord)} \
         -f ${pkgs.writeShellScript "start-or-switch" ''
             if ! ${pkgs.systemd}/bin/systemctl --user is-active -q discord.service >/dev/null 2>&1; then
                 ${pkgs.systemd}/bin/systemctl --user start discord.service && sleep 2
             fi
-            exec ${lib.escapeShellArg (programName discord)} >/dev/null 2>&1
+            exec ${lib.escapeShellArg (getExeName discord)} >/dev/null 2>&1
         ''} \
         >/dev/null
   '';

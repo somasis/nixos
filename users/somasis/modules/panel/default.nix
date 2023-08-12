@@ -8,8 +8,7 @@ with lib;
 let
   inherit (config.lib.somasis)
     camelCaseToScreamingSnakeCase
-    programName
-    programPath
+    getExe
     ;
 
   inherit (config.xsession.windowManager) bspwm;

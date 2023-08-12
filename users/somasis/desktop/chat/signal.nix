@@ -7,6 +7,7 @@
 let
   inherit (lib)
     concatStringsSep
+    getExe
     mapAttrs'
     nameValuePair
     replaceStrings
@@ -14,8 +15,7 @@ let
 
   inherit (config.lib.somasis)
     camelCaseToKebabCase
-    programName
-    programPath
+    getExeName
     ;
 
   signalPackage = pkgs.signal-desktop-beta;
@@ -25,7 +25,7 @@ let
   signal = pkgs.symlinkJoin {
     name = "signal-desktop-with-pass";
     paths = [
-      (pkgs.writeShellScriptBin (programName signalPackage) ''
+      (pkgs.writeShellScriptBin (getExeName signalPackage) ''
         set -eu
         set -o pipefail
 
@@ -47,7 +47,7 @@ let
             | ${pkgs.xe}/bin/xe -s 'rm -f "$XDG_CONFIG_HOME/${signalWindowClassName}"/config.json' &
 
         e=0
-        (exec -a ${programName signalPackage} ${programPath signalPackage} "$@") || e=$?
+        (exec -a ${getExeName signalPackage} ${getExe signalPackage} "$@") || e=$?
         kill $(jobs -p)
         exit "$e"
       '')
@@ -56,7 +56,7 @@ let
     ];
   };
 
-  signalName = programName signalPackage;
+  signalName = getExeName signalPackage;
   signalPath = "${signal}/bin/${signalName}";
 in
 {

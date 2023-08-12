@@ -139,8 +139,8 @@ with lib;
 
     # Get the program name and path using the same logic as `nix run`.
     #
-    # Type: programName :: derivation -> string
-    programName = p: p.meta.mainProgram or p.pname or p.name;
+    # Type: getExeName :: derivation -> string
+    getExeName = x: builtins.baseNameOf (lib.getExe x);
 
     # Remove "# comments" from a given string input.
     #
@@ -254,8 +254,8 @@ with lib;
 
       filters = {
         discardContent = pkgs.writeShellScript "filter-discard-content" ''
-          ${getBin pkgs.yq-go}/bin/yq -p xml -o json --xml-strict-mode \
-              | ${getBin config.programs.jq.package}/bin/jq -e '
+          ${getExe pkgs.yq-go} -p xml -o json --xml-strict-mode \
+              | ${getExe config.programs.jq.package} -e '
                   if has("rss") then
                       del(.rss.channel.item[]["description", "encoded"])
                   elif has("feed") then
@@ -264,7 +264,7 @@ with lib;
                       .
                   end
               ' \
-              | ${getBin pkgs.yq-go}/bin/yq -p json -o xml --xml-strict-mode
+              | ${getExe pkgs.yq-go} -p json -o xml --xml-strict-mode
         '';
       };
     };
@@ -278,7 +278,7 @@ with lib;
           { inherit color format; }
           # strip out the spaces because some things don't support spaces in rgb/hsl/etc.
           # type formats, and the things that do support spaces tend to allow no spaces.
-          ''${pkgs.pastel}/bin/pastel format "$format" "$color" > "$out" | tr -d " "''
+          ''${lib.getExe pkgs.pastel} format "$format" "$color" > "$out" | tr -d " "''
         );
 
       hex = format "hex";
@@ -291,7 +291,7 @@ with lib;
 
         lib.fileContents (pkgs.runCommandLocal "color"
           { inherit operation amount color; }
-          ''${pkgs.pastel}/bin/pastel "$operation" "$amount" "$color" > "$out"''
+          ''${lib.getExe pkgs.pastel} "$operation" "$amount" "$color" > "$out"''
         );
 
       saturate = amountOp "saturate";
@@ -345,7 +345,7 @@ with lib;
             ''
               set -x
               e=0
-              ${pkgs.pastel}/bin/pastel color "$value" >/dev/null || e=$?
+              ${lib.getExe pkgs.pastel} color "$value" >/dev/null || e=$?
               echo "$e" > "$out"
               exit 0
             ''
