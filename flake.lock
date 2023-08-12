@@ -3,7 +3,7 @@
     "adblockAntiAdblockFilters": {
       "flake": false,
       "locked": {
-        "narHash": "sha256-FQKGvEr6qJhjeNstb7YOZSN0Gb9Jo7Ucy7sdXdy7t3A=",
+        "narHash": "sha256-JBTW/zRoRdzeQsHbPkN4ONk2mQOSmC+hE13J+FNCzCg=",
         "type": "file",
         "url": "https://easylist-downloads.adblockplus.org/antiadblockfilters.txt"
       },
@@ -27,7 +27,7 @@
     "adblockEasyListCookies": {
       "flake": false,
       "locked": {
-        "narHash": "sha256-8RPtn9pARlYA1abBt+G7wY0D7RCFJKP/+iKRbuxEOKE=",
+        "narHash": "sha256-scL/Q5OqOZG9O808YXpUP5qLQqFV6HJajzJaO+jpxNg=",
         "type": "file",
         "url": "https://secure.fanboy.co.nz/fanboy-cookiemonster.txt"
       },
@@ -39,7 +39,7 @@
     "adblockEasyListRussian": {
       "flake": false,
       "locked": {
-        "narHash": "sha256-QXDsH3BxxdHnBiTkxBJA3BGeFEVopKOxu5PYCZqfFuU=",
+        "narHash": "sha256-vdHve7R3z8zIBIlimrO413Ymgb5E/VlmMmXE7OMYJjo=",
         "type": "file",
         "url": "https://easylist-downloads.adblockplus.org/advblock.txt"
       },
@@ -51,7 +51,7 @@
     "adblockEasyListSpanish": {
       "flake": false,
       "locked": {
-        "narHash": "sha256-WdVAwKRwPJZ6/9NVJ34u7S4Jn8eLFsWgNRffMnQTub0=",
+        "narHash": "sha256-zhGTNmjPwnjUidZfbqgQf/34fSuH9KM45XnU9mhpOBw=",
         "type": "file",
         "url": "https://easylist-downloads.adblockplus.org/easylistspanish.txt"
       },
