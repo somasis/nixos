@@ -18,6 +18,9 @@
 
     # Necessary beacuse otherwise it spits a terminal-only progress bar into
     # the system journal.
-    services.fwupd-refresh.serviceConfig.StandardOutput = "null";
+    services.fwupd-refresh.serviceConfig = {
+      StandardOutput = "null";
+      SuccessExitStatus = [ 0 2 ];
+    };
   };
 }
