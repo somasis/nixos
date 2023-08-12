@@ -280,9 +280,11 @@ in
       );
 
       copy-file-contents = pkgs.writeShellScript "copy-file-contents" ''
-        ${pkgs.xclip}/bin/xclip \
+        export PATH=${lib.makeBinPath [ pkgs.file pkgs.xclip ]}
+
+        xclip \
             -selection clipboard \
-            -target "$(${pkgs.file}/bin/file -bL --mime-type "$1")" \
+            -target "$(file -bL --mime-type "$1")" \
             -in "$1"
       '';
 
