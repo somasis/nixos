@@ -443,7 +443,8 @@ in
         "gg" = "scroll-to-perc 0";
         "ge" = "scroll-to-perc 100";
 
-        "zsm" = "open https://mastodon.social/authorize_interaction?uri={url}";
+        "zsm" = "open -rt https://mastodon.social/authorize_interaction?uri={url}";
+        "zst" = "open -rt https://twitter.com/share?url={url}";
       };
     };
   };
