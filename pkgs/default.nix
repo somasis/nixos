@@ -1,18 +1,50 @@
-{ pkgs
-, lib ? pkgs.lib
-, ...
-}:
+final: prev:
 let
-  inherit (pkgs)
-    callPackage
+  inherit (prev)
+    lib
+
+    jq
     python3Packages
+
+    callPackage
+    runtimeShell
+    writeScript
+    writeTextFile
     ;
 in
 rec
 {
   wrapCommand = callPackage ./wrapCommand;
 
-  writeJqScript = callPackage ./writeJqScript;
+  writeJqScript = name: args: text:
+    let
+      args' = lib.cli.toGNUCommandLineShell { } (args // {
+        from-file = writeScript name ''
+          #!${jq}/bin/jq -f
+          ${text}
+        '';
+      });
+    in
+    writeTextFile {
+      inherit name;
+      executable = true;
+
+      checkPhase = ''
+        e=0
+        ${jq}/bin/jq -n ${args'} || e=$?
+
+        # 3: syntax error
+        [ "$e" -eq 3 ] && exit 1 || :
+
+        exit 0
+      '';
+
+      text = ''
+        #!${runtimeShell}
+        exec ${jq}/bin/jq ${args'} "$@"
+      '';
+    }
+  ;
 
   screenshot = callPackage ./screenshot { };
   xinput-notify = callPackage ./xinput-notify { };
@@ -40,4 +72,4 @@ rec
   mail-deduplicate = python3Packages.callPackage ./mail-deduplicate { };
   notify-send-all = callPackage ./notify-send-all { };
   wcal = callPackage ./wcal { };
-} // import ./trivial-builders { inherit lib pkgs; }
+}
