@@ -101,10 +101,13 @@ in
       encryption
       environment
       exclude
+      extraArgs
+      extraCreateArgs
       inhibitsSleep
+      preHook
       paths
-      prune
       persistentTimer
+      prune
       startAt
       ;
 
@@ -115,12 +118,16 @@ in
 
   environment.systemPackages =
     let
-      borgs = builtins.attrNames config.services.borgbackup.jobs;
+      borgJobs = builtins.attrNames config.services.borgbackup.jobs;
     in
-    [ pkgs.borg-takeout ]
-    ++ (lib.optional (builtins.length borgs == 1) (
+    [
+      (pkgs.borg-takeout.override {
+        borgConfig = config.services.borgbackup.jobs.spinoza;
+      })
+    ]
+    ++ (lib.optional (builtins.length borgJobs == 1) (
       pkgs.writeShellScriptBin "borg" ''
-        exec borg-job-${lib.escapeShellArg (builtins.elemAt borgs 0)} "$@"
+        exec borg-job-${lib.escapeShellArg (builtins.elemAt borgJobs 0)} "$@"
       ''
     ))
   ;
