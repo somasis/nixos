@@ -11,6 +11,9 @@
   services.picom = {
     enable = true;
 
+    # Remove "Xlib: ignoring invalid extension event 161" errors, fixed in next version (as of 10.2)
+    package = pkgs.picom-next;
+
     backend = "xrender";
     vSync = true;
 
@@ -66,9 +69,9 @@
         -set KYLIE_INVERT "$(
             xprop -id "$(xdotool getwindowfocus)" 8c KYLIE_INVERT \
                 | sed \
-                    -e 's/.*= 1.*/0/' \
-                    -e 's/.*= 0.*/1/' \
-                    -e 's/.*not found.*/1/'
+                    -e 's/. * = 1. * /0/' \
+                    -e 's/. * = 0. * /1/' \
+                    -e 's/. * not found.*/1/'
         )"
   '');
 
