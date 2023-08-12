@@ -16,7 +16,7 @@ with lib;
             options = {
               location = mkOption {
                 type = types.int;
-                description = "Local port to use for connecting to port on remote";
+                description = "Local port to use for tunnel";
                 default = null;
                 example = 9400;
               };
@@ -38,7 +38,7 @@ with lib;
 
               remoteLocation = mkOption {
                 type = types.int;
-                description = "Remote port that will be accessible at on the local port";
+                description = "Remote port to tunnel to (only does something when type == local)";
                 default = config.location;
                 defaultText = literalExpression ''config.somasis.tunnels.tunnels.<name>.location'';
                 example = 9400;
@@ -46,9 +46,16 @@ with lib;
 
               linger = mkOption {
                 type = types.str;
-                description = "How long the tunnel process should be kept around after its last connection";
+                description = "How long the tunnel process should be kept around after its last connection (only does something when type == local)";
                 default = "5m";
                 example = "90s";
+              };
+
+              type = mkOption {
+                type = types.enum [ "local" "dynamic" ];
+                description = "What type of tunnel to create; a local port forward (see option -L on ssh(1)), or a dynamic port forward (see option -D on ssh(1))";
+                default = "local";
+                example = "dynamic";
               };
             };
           }
@@ -92,7 +99,7 @@ with lib;
             Install.WantedBy = [ "tunnels.target" ];
           };
 
-          sockets."tunnel-proxy@${target}" = {
+          sockets."tunnel-proxy@${target}" = lib.optionalAttrs (tunnel.type == "local") {
             Unit = {
               Description = "Listen for requests to connect to ${target}";
               PartOf = [ "tunnels@${tunnel.remote}.target" ];
@@ -102,7 +109,7 @@ with lib;
             Socket.ListenStream = [ tunnel.location ];
           };
 
-          services."tunnel-proxy@${target}" = {
+          services."tunnel-proxy@${target}" = lib.optionalAttrs (tunnel.type == "local") {
             Unit = {
               Description = "Serve requests to connect to ${target}";
               PartOf = [ "tunnels@${tunnel.remote}.target" ];
@@ -123,9 +130,23 @@ with lib;
             Service = {
               ProtectSystem = true;
 
-              ExecStart = [
-                "${pkgs.systemd}/lib/systemd/systemd-socket-proxyd --exit-idle-time=${tunnel.linger} %t/${socket}"
-              ];
+              ExecStart = pkgs.writeShellScript "ssh-tunnel-listen-for-connection" ''
+                PATH=${lib.makeBinPath [ pkgs.coreutils pkgs.gawk pkgs.gnugrep pkgs.iproute2 ]}:"$PATH"
+
+                : "''${XDG_RUNTIME_DIR:=/run/user/$(id -u)}"
+
+                ${lib.toShellVar "target" target}
+                ${lib.toShellVar "type" tunnel.type}
+                ${lib.toShellVar "linger" tunnel.linger}
+                ${lib.toShellVar "socket" socket}
+
+                mkdir -p "$XDG_RUNTIME_DIR"/ssh-tunnel
+
+                listen="$XDG_RUNTIME_DIR/ssh-tunnel/$socket"
+
+                set -x
+                exec ${pkgs.systemd}/lib/systemd/systemd-socket-proxyd --exit-idle-time="$linger" "$listen"
+              '';
             };
           };
 
@@ -135,40 +156,62 @@ with lib;
               PartOf = [ "tunnels@${tunnel.remote}.target" ];
 
               After = [ "ssh-agent.service" ];
-
-              StopWhenUnneeded = true;
-            };
+            }
+            // lib.optionalAttrs (tunnel.type == "local") { StopWhenUnneeded = true; }
+            ;
 
             Service =
               let
-                ssh = lib.concatStringsSep " " [
-                  "${pkgs.openssh}/bin/ssh"
+                ssh-tunnel = pkgs.writeShellScript "ssh-tunnel" ''
+                  PATH=${lib.makeBinPath [ pkgs.coreutils (config.programs.ssh.package or pkgs.openssh) ]}:"$PATH"
 
-                  # Fork only once the forwards have been established successfully.
-                  "-f"
-                  "-o ExitOnForwardFailure=yes"
+                  : "''${XDG_RUNTIME_DIR:=/run/user/$(id -u)}"
 
-                  # Automation-related
-                  "-o BatchMode=yes"
+                  ${lib.toShellVar "target" target}
+                  ${lib.toShellVar "type" tunnel.type}
+                  ${lib.toShellVar "location" tunnel.location}
+                  ${lib.toShellVar "remote_location" tunnel.remoteLocation}
+                  ${lib.toShellVar "remote" tunnel.remote}
+                  ${lib.toShellVar "socket" socket}
 
-                  # Hardening-related
-                  "-o StrictHostKeyChecking=no" # Never connect when host has new keys
-                  "-o UpdateHostKeys=yes" # *Do* accept graceful key rotation
-                  "-o CheckHostIP=yes" # Defend against DNS spoofing
+                  mkdir -p "$XDG_RUNTIME_DIR"/ssh-tunnel
 
-                  # Disable various things that do not deal with the tunnel.
-                  "-N" # Don't run any commands
-                  "-T" # Don't allocate a terminal
-                  "-a" # Don't forward ssh-agent
-                  "-x" # Don't forward Xorg
-                  "-k" # Don't forward GSSAPI credentials
+                  ssh_args=(
+                      # Fork only once the forwards have been established successfully.
+                      -f
+                      -o ExitOnForwardFailure=yes
 
-                  # (if type == "dynamic" then
-                  #   "-D %t/${socket}:${target.location}"
-                  # else # if type == "local" then
-                  "-L %t/${socket}:localhost:${toString tunnel.remoteLocation}"
-                  # )
-                ];
+                      # Automation-related
+                      -o BatchMode=yes
+
+                      # Hardening-related
+                      -o StrictHostKeyChecking=no # Never connect when host has new keys
+                      -o UpdateHostKeys=yes # *Do* accept graceful key rotation
+                      -o CheckHostIP=yes # Defend against DNS spoofing
+
+                      # Disable various things that do not deal with the tunnel.
+                      -N # Don't run any commands
+                      -T # Don't allocate a terminal
+                      -a # Don't forward ssh-agent
+                      -x # Don't forward Xorg
+                      -k # Don't forward GSSAPI credentials
+                  )
+
+                  case "$type" in
+                      "dynamic")
+                          ssh_args+=( -D "localhost:$location" )
+                          ;;
+                      "local")
+                          listen="$XDG_RUNTIME_DIR"/ssh-tunnel/"$socket":localhost:"$remote_location"
+                          ssh_args+=( -L "$listen" )
+                          ;;
+                  esac
+
+                  ssh_args+=( "$remote" )
+
+                  set -x
+                  exec ssh "''${ssh_args[@]}"
+                '';
               in
               {
                 # Forking is used because it allows us to know exactly when the
@@ -178,12 +221,16 @@ with lib;
 
                 ProtectSystem = true;
 
-                ExecStart = [ "-${ssh} ${tunnel.remote}" ];
-                ExecStopPost = [ "${pkgs.coreutils}/bin/rm -f %t/${socket}" ];
+                ExecStart = ssh-tunnel;
+                ExecStopPost = lib.optional (tunnel.type == "local") "${pkgs.coreutils}/bin/rm -f %t/ssh-tunnel/${socket}";
 
                 Restart = "on-failure";
-              } // (lib.optionalAttrs osConfig.networking.networkmanager.enable { ExecStartPre = [ "${pkgs.networkmanager}/bin/nm-online -q" ]; });
-          };
+              }
+              // lib.optionalAttrs osConfig.networking.networkmanager.enable { ExecStartPre = [ "${pkgs.networkmanager}/bin/nm-online -q" ]; }
+            ;
+          }
+          // lib.optionalAttrs (tunnel.type == "dynamic") { Install.WantedBy = [ "tunnels@${tunnel.remote}.target" ]; }
+          ;
         }
       )
       {

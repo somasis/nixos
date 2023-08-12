@@ -1,4 +1,9 @@
-{ config, osConfig, pkgs, lib, ... }:
+{ config
+, osConfig
+, pkgs
+, lib
+, ...
+}:
 let
   inherit (osConfig.services) tor;
 
@@ -31,6 +36,17 @@ let
 
     printf 'yank -q inline "%s" ;; message-info "Yanked URL of highlighted text to clipboard: %s"\n' "''${url}" "''${url}"
   '';
+
+  proxies =
+    [ "system" ]
+    ++ (lib.optional (tor.enable && tor.client.enable)
+      "socks://${tor.client.socksListenAddress.addr}:${toString tor.client.socksListenAddress.port}"
+    )
+    ++ (lib.mapAttrsToList
+      (_: tunnel: "socks://127.0.0.1:${toString tunnel.location}")
+      (lib.filterAttrs (_: tunnel: tunnel.type == "dynamic") config.somasis.tunnels.tunnels)
+    )
+  ;
 in
 {
   imports = [
@@ -114,8 +130,7 @@ in
       };
 
       content = {
-        # Use system proxy settings.
-        proxy = "system";
+        proxy = builtins.toString (builtins.head proxies);
 
         # Allow JavaScript to read from or write to the clipboard.
         javascript = {
@@ -400,6 +415,8 @@ in
         "!" = "set-cmd-text :open !";
         "gss" = "set-cmd-text -s :open site:{url:domain}";
 
+        "cnp" = ''config-cycle -p content.proxy ${lib.concatStringsSep " " proxies}'';
+
         ";;" = "hint all";
 
         # Akin to catgirl(1).
@@ -427,11 +444,7 @@ in
         "ge" = "scroll-to-perc 100";
 
         "zsm" = "open https://mastodon.social/authorize_interaction?uri={url}";
-      }
-      // (lib.optionalAttrs (tor.enable && tor.client.enable) {
-        "cnp" = "config-cycle -p content.proxy system socks://${tor.client.socksListenAddress.addr}:${toString tor.client.socksListenAddress.port}";
-      })
-      ;
+      };
     };
   };
 
@@ -509,6 +522,12 @@ in
       location = 9090;
       remote = "somasis@spinoza.7596ff.com";
       remoteLocation = 9090;
+    };
+
+    proxy-spinoza = {
+      type = "dynamic";
+      location = 9099;
+      remote = "somasis@spinoza.7596ff.com";
     };
   };
 
