@@ -38,10 +38,11 @@ in
   persist.directories = [ "etc/${discordWindowClassName}" ];
 
   xdg.configFile = {
-    "ArmCord/storage/settings.json".text = lib.generators.toJSON { } {
+    "${discordWindowClassName}/storage/settings.json".text = lib.generators.toJSON { } {
       doneSetup = true;
 
       channel = "canary";
+      automaticPatches = true;
 
       armcordCSP = true;
       mods = "vencord";
@@ -54,14 +55,16 @@ in
       mobileMode = false;
 
       minimizeToTray = true;
+      tray = true;
       trayIcon = "dsc-tray";
+      dynamicIcon = true;
 
       performanceMode = "battery";
 
       useLegacyCapturer = true;
     };
 
-    "ArmCord/storage/lang.json".text = lib.generators.toJSON { } {
+    "${discordWindowClassName}/storage/lang.json".text = lib.generators.toJSON { } {
       lang = "en-US";
     };
   };
