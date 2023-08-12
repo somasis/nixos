@@ -3,20 +3,7 @@
 , config
 , osConfig
 , ...
-}:
-let
-  repl = pkgs.writeShellScript "nixos-repl" ''
-    ${config.nix.package}/bin/nix repl \
-        --argstr hostName "${osConfig.networking.hostName}" \
-        --argstr userName "${config.home.username}" \
-        "$@" --file /etc/nixos/repl.nix
-  '';
-
-  nixosRepl = pkgs.writeShellScriptBin "nixos-repl" ''
-    ${repl} --argstr flake "/etc/nixos"
-  '';
-in
-{
+}: {
   somasis.tunnels.tunnels.nix-serve-http = {
     location = 5000;
     remote = "somasis@spinoza.7596ff.com";
@@ -45,6 +32,13 @@ in
 
     (pkgs.writeShellScriptBin "nix-output" ''
       exec nix build --no-link --print-out-paths "$@"
+    '')
+
+    (pkgs.writeShellScriptBin "nixos-repl" ''
+      exec nix repl \
+          --argstr host ${lib.escapeShellArg osConfig.networking.hostName} \
+          --argstr user ${lib.escapeShellArg config.home.username} \
+          "$@" --file "/etc/nixos/repl.nix" --argstr flake "/etc/nixos"
     '')
 
     (pkgs.writeShellApplication {
