@@ -12,11 +12,16 @@
   console.earlySetup = true;
 
   boot = {
-    loader.efi.canTouchEfiVariables = true;
-    loader.systemd-boot.enable = true;
-    loader.systemd-boot.editor = false;
-    loader.systemd-boot.configurationLimit = 25;
-    loader.timeout = 0;
+    loader = {
+      efi.canTouchEfiVariables = true;
+      systemd-boot = {
+        enable = true;
+        editor = false;
+        configurationLimit = 25;
+      };
+
+      timeout = 0;
+    };
 
     # Silent boot.
     consoleLogLevel = 3;
