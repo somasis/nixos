@@ -4,16 +4,64 @@
 
 , coreutils
 , dateutils
-, libarchive
-, htmlq
 , gnugrep
+, gnused
+, htmlq
+, jq
+, libarchive
+
+, borgConfig ? { }
 }:
 let
+  extraArgs =
+    if borgConfig.extraArgs ? false then
+      borgConfig.extraArgs
+    else
+      ""
+  ;
+
+  preHook =
+    if borgConfig.preHook ? false then
+      borgConfig.preHook
+    else
+      ""
+  ;
+
   make = name: runtimeInputs:
     writeShellApplication {
       inherit name;
       inherit runtimeInputs;
-      text = builtins.readFile (./. + "/${name}.bash");
+
+      text =
+        ''
+          # shellcheck disable=SC2034,SC2090
+          ${preHook}
+
+          type=$(type -t borg)
+          case "$type" in
+              function)
+                  prev_borg=$(declare -f borg)
+
+                  eval "prev_$prev_borg"
+                  borg() {
+                      local ${lib.toShellVar "extraArgs" extraArgs}
+
+                      # shellcheck disable=SC2086
+                      prev_borg $extraArgs "$@"
+                  }
+                  ;;
+              *)
+                  borg() {
+                      local ${lib.toShellVar "extraArgs" extraArgs}
+
+                      # shellcheck disable=SC2086
+                      command borg $extraArgs "$@"
+                  }
+                  ;;
+          esac
+        ''
+        + builtins.readFile (./. + "/${name}.bash")
+      ;
     }
   ;
 in

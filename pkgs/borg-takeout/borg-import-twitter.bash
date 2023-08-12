@@ -31,10 +31,10 @@ d="${d}"T00:00:00
 
 printf '::twitter-%s-%s (%s)\n' "${a}" "${date}" "${d}"
 
+# shellcheck disable=SC2016
 bsdtar -cf - --format=ustar "${files[@]}" \
     | borg \
         import-tar \
-            "${extraArgs}" \
             --stats -p \
             --comment='imported with `borg import-tar`, via borg-import-twitter' \
             --timestamp="${d}" \
@@ -43,12 +43,10 @@ bsdtar -cf - --format=ustar "${files[@]}" \
 
 borg \
     rename \
-        "${extraArgs}" \
         "::twitter-${a}-${date}.failed" \
         "twitter-${a}-${date}"
 
 borg \
     prune \
-        "${extraArgs}" \
         --keep-monthly=12 --keep-yearly=4 \
         -a "twitter-${aid}-*"

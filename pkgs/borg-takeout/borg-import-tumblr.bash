@@ -33,10 +33,10 @@ rm -r "${t}"
 
 printf '::tumblr-%s-%s (%s)\n' "${a}" "${date}" "${d}"
 
+# shellcheck disable=SC2016
 bsdtar -cf - --format=ustar "${files[@]}" \
     | borg \
         import-tar \
-            "${extraArgs}" \
             --stats -p \
             --comment='imported with `borg import-tar`, via borg-import-tumblr' \
             --timestamp="${d}" \
@@ -45,12 +45,10 @@ bsdtar -cf - --format=ustar "${files[@]}" \
 
 borg \
     rename \
-        "${extraArgs}" \
         "::tumblr-${a}-${date}.failed" \
         "tumblr-${a}-${date}"
 
 borg \
     prune \
-        "${extraArgs}" \
         --keep-monthly=12 --keep-yearly=4 \
         -a "tumblr-${a}-*"
