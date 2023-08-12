@@ -27,4 +27,6 @@
     "shift + XF86AudioLowerVolume" = "ponymix-snap -t source decrease 5 >/dev/null";
     "shift + XF86AudioRaiseVolume" = "ponymix-snap -t source increase 5 >/dev/null";
   };
+
+  cache.directories = [{ method = "symlink"; directory = "etc/pulse"; }];
 }
