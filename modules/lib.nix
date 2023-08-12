@@ -145,27 +145,27 @@ with lib;
     # Remove "# comments" from a given string input.
     #
     # Type: removeComments :: (string | path) -> string
-    removeComments = input:
+    removeComments = string:
       let
         withCommentsRemoved =
           pkgs.runCommandLocal "removeComments"
             {
-              input =
-                if lib.isString input then
-                  pkgs.writeText "with-comments" input
-                else # if lib.isStorePath input then
-                  input
+              string =
+                if lib.isString string then
+                  pkgs.writeText "with-comments" string
+                else # if lib.isStorePath string then
+                  string
               ;
             } ''
             sed -E \
                 -e '/^[[:space:]]*#/d' \
                 -e 's/[[:space:]]+# .*//' \
-                "$input" \
+                "$string" \
                 > "$out"
           ''
         ;
       in
-      if lib.isString input then
+      if lib.isString string then
         builtins.readFile withCommentsRemoved
       else
         withCommentsRemoved
@@ -177,6 +177,7 @@ with lib;
       # The XML makes a roundtrip as JSON, and is validated during generation.
       #
       # Type: toXML :: attrset -> string
+      toXML = {}: attrs:
         let
           xml =
             if (builtins.length (builtins.attrNames attrs)) == 1 then
