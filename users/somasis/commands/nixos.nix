@@ -26,7 +26,7 @@ in
     "var/lib/nix" # Using `method = "symlink"` will cause issues while switching generations.
 
     { method = "symlink"; directory = "var/cache/nix"; }
-    "var/cache/vulnix"
+    # "var/cache/vulnix"
   ];
 
   programs.bash = {
@@ -41,7 +41,7 @@ in
     # nixosRepl
 
     pkgs.nvd
-    pkgs.vulnix
+    # pkgs.vulnix
 
     (pkgs.writeShellScriptBin "nix-output" ''
       exec nix build --no-link --print-out-paths "$@"
@@ -151,11 +151,11 @@ in
         config.programs.jq.package
         config.nix.package
         pkgs.coreutils
-        pkgs.vulnix
+        # pkgs.vulnix
       ];
 
       text = ''
-        level=1
+        level=0
         for a; do
             shift
             [[ "$a" = "--quiet" ]] && level=$(( level - 1 )) && continue
@@ -166,9 +166,8 @@ in
         level_args=()
         final_level="$level"
         if [[ "$level" -ge 0 ]]; then
-            while [[ "$level" -ge 0 ]]; do
+            while [[ "$level" -gt 0 ]]; do
                 level_args+=( --verbose )
-                verbose_level=$(( verbose_level + 1 ))
                 level=$(( level - 1 ))
             done
         else
@@ -227,8 +226,9 @@ in
             done
 
         ido nix flake update --commit-lock-file "''${level_args[@]}" /etc/nixos
-        [ -e /etc/nixos/.vulnix.toml ] && ido vulnix -w /etc/nixos/.vulnix.toml -S
       '';
+      # vulnix_whitelist=/etc/nixos/hosts/${lib.escapeShellArg osConfig.networking.fqdnOrHostName}/.vulnix.toml
+      # [ -e "$vulnix_whitelist" ] && ido vulnix -w "$vulnix_whitelist" -S || exit $?
     })
 
     (pkgs.writeShellApplication {
@@ -284,6 +284,11 @@ in
       ];
 
       text = ''
+        info() {
+            # shellcheck disable=SC2059,SC2015
+            [[ "$final_level" -ge 0 ]] && printf "$@" >&2 || :
+        }
+
         level=-2
         for a; do
             shift
@@ -294,8 +299,9 @@ in
 
         args=()
 
+        final_level="$level"
         if [[ "$level" -ge 0 ]]; then
-            while [[ "$level" -ge 0 ]]; do
+            while [[ "$level" -gt 0 ]]; do
                 args+=( --verbose )
                 level=$(( level - 1 ))
             done
@@ -338,6 +344,7 @@ in
                 done
         )
 
+        info '$ nixos %s%s\n' "''${args[*]:+[development inputs]}" "$*"
         exec nixos "''${args[@]}" "''${@:-switch}"
       '';
 
@@ -345,6 +352,7 @@ in
 
     (pkgs.writeShellApplication {
       name = "nixos";
+
       runtimeInputs = [
         pkgs.coreutils
         pkgs.systemd
@@ -395,8 +403,9 @@ in
         done
 
         level_args=()
+        final_level="$level"
         if [[ "$level" -ge 0 ]]; then
-            while [[ "$level" -ge 0 ]]; do
+            while [[ "$level" -gt 0 ]]; do
                 level_args+=( --verbose )
                 level=$(( level - 1 ))
             done
@@ -409,13 +418,13 @@ in
 
         export COLUMNS="''${COLUMNS:-$(tput cols || echo 80)}"
 
-        edo() {
+        ido() {
             # shellcheck disable=SC2015
-            [[ "$level" -ge 2 ]] && printf '$ %s\n' "$*" >&2 || :
+            [[ "$final_level" -ge 0 ]] && printf '$ %s\n' "$*" >&2 || :
             "$@"
         }
 
-        [[ "$level" -ge 2 ]] && set -x
+        [[ "$final_level" -ge 3 ]] && set -x
 
         # Keep the old and new revisions so we can compare them later.
         _nixos_old_system=$(get_system_generation)
@@ -427,12 +436,12 @@ in
 
         # Disable logging before the switch, just in case we touch the
         # log filesystem in a way it doesn't like...
-        systemctl -q is-active systemd-journald.service && edo sudo journalctl --sync --relinquish-var
+        systemctl -q is-active systemd-journald.service && ido sudo journalctl --sync --relinquish-var
 
         e=0
-        edo nixos-rebuild --use-remote-sudo --no-update-lock-file "''${level_args[@]}" "''${@:-switch}" || e=$?
+        ido nixos-rebuild --use-remote-sudo --no-update-lock-file "''${level_args[@]}" "''${@:-switch}" || e=$?
 
-        systemctl -q is-active systemd-journald.service && edo sudo journalctl --flush
+        systemctl -q is-active systemd-journald.service && ido sudo journalctl --flush
 
         if fwupdmgr get-updates --json --no-authenticate | jq -e '.Devices | length > 0' >/dev/null; then
             fwupdmgr update
@@ -447,13 +456,13 @@ in
         case "$1" in
             switch|test)
                 # Start default.target again, since there might be new additions via home-manager.
-                edo systemctl --user start default.target \
-                    || edo systemctl --user list-dependencies default.target
+                ido systemctl --user start default.target \
+                    || ido systemctl --user list-dependencies default.target
 
                 # Start graphical-session.target again, if Xorg is running.
                 if [[ -n "$DISPLAY" ]]; then
-                    edo systemctl --user start graphical-session.target \
-                        || edo systemctl --user list-dependencies graphical-session.target
+                    ido systemctl --user start graphical-session.target \
+                        || ido systemctl --user list-dependencies graphical-session.target
                 fi
 
                 journalctl \
@@ -469,10 +478,10 @@ in
         diff_system=
         diff_home=
         {
-            [[ "$_nixos_new_system" = "$_nixos_old_system" ]] || diff_system=$(NIXOS_DIFF_TABLE=false edo nixos-diff "$_nixos_old_system" "$_nixos_new_system")
+            [[ "$_nixos_new_system" = "$_nixos_old_system" ]] || diff_system=$(NIXOS_DIFF_TABLE=false nixos-diff "$_nixos_old_system" "$_nixos_new_system")
             if [[ -n "$_nixos_old_home" ]] && [[ -n "$_nixos_new_home" ]]; then
                 if [[ "$_nixos_new_home" != "$_nixos_old_home" ]]; then
-                    diff_home=$(NIXOS_DIFF_TABLE=false edo nixos-diff "$_nixos_old_home" "$_nixos_new_home")
+                    diff_home=$(NIXOS_DIFF_TABLE=false nixos-diff "$_nixos_old_home" "$_nixos_new_home")
                 fi
             fi
 
