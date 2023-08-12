@@ -366,5 +366,12 @@ with lib;
 
         inherit default description;
       };
+
+    drvOrPath = x:
+      if ! lib.isDerivation x then
+        pkgs.writeText (builtins.baseNameOf x) (builtins.readFile x)
+      else
+        x
+    ;
   };
 }
