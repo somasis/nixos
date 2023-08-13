@@ -39,7 +39,7 @@
     "adblockEasyListRussian": {
       "flake": false,
       "locked": {
-        "narHash": "sha256-lJ1t8wPOJKrVJl4iR7fp47Oe20MNRnBJNZWIZo/tRAU=",
+        "narHash": "sha256-1SoVROwVTAzRdFDYtAA3X54nM40XPCOzdmKOX3Sm75E=",
         "type": "file",
         "url": "https://easylist-downloads.adblockplus.org/advblock.txt"
       },
@@ -51,7 +51,7 @@
     "adblockEasyListSpanish": {
       "flake": false,
       "locked": {
-        "narHash": "sha256-Zf1c6+9EJqLOSe1djxxgeitIJID2VqI+QBXy6rhNOg0=",
+        "narHash": "sha256-V9e6/rT0qCR9rZbZ+T7IVbRglMryu4XqeB3i5G6Qq5w=",
         "type": "file",
         "url": "https://easylist-downloads.adblockplus.org/easylistspanish.txt"
       },
@@ -63,7 +63,7 @@
     "adblockFanboySocial": {
       "flake": false,
       "locked": {
-        "narHash": "sha256-Vpov5+sXUQB2ip3sI/5qAvocwQWfqh+asyFGimDZ0V0=",
+        "narHash": "sha256-TjBEBj3Abt4rVWf/kPFjDY8BxAFegaol7ItlV4pxiTA=",
         "type": "file",
         "url": "https://easylist.to/easylist/fanboy-social.txt"
       },
