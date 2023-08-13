@@ -3,7 +3,7 @@
     "adblockAntiAdblockFilters": {
       "flake": false,
       "locked": {
-        "narHash": "sha256-Mk0+H7WUpIypAk3JEoRmMoVaT1VQ1is2zBDxtTA31pU=",
+        "narHash": "sha256-wpkNc9uviR87EqhogZ0c2NxKI7RNimH1RLVkGSfZ9qM=",
         "type": "file",
         "url": "https://easylist-downloads.adblockplus.org/antiadblockfilters.txt"
       },
@@ -15,7 +15,7 @@
     "adblockEasyList": {
       "flake": false,
       "locked": {
-        "narHash": "sha256-hd3SHmavxP/803eDigjEaHzvsOv0ArHqk2S6exGx5ws=",
+        "narHash": "sha256-gZdQn2rKTfPOkMwcY2YC9p+13vZ9akfa61TDRaZMFUk=",
         "type": "file",
         "url": "https://easylist.to/easylist/easylist.txt"
       },
@@ -27,7 +27,7 @@
     "adblockEasyListCookies": {
       "flake": false,
       "locked": {
-        "narHash": "sha256-JEM4CTb3wH5t/2Zqu9iJR8F2AoLTPQeLu80GJffAz28=",
+        "narHash": "sha256-4J2XuDK6h1lWJHO/5zlemB5P7jcWwwWXFXJ40L9O3kE=",
         "type": "file",
         "url": "https://secure.fanboy.co.nz/fanboy-cookiemonster.txt"
       },
@@ -39,7 +39,7 @@
     "adblockEasyListRussian": {
       "flake": false,
       "locked": {
-        "narHash": "sha256-isGSa/cHwwG6gW1P1QN322imSb/99EBdQayIMgS2r4k=",
+        "narHash": "sha256-lJ1t8wPOJKrVJl4iR7fp47Oe20MNRnBJNZWIZo/tRAU=",
         "type": "file",
         "url": "https://easylist-downloads.adblockplus.org/advblock.txt"
       },
@@ -51,7 +51,7 @@
     "adblockEasyListSpanish": {
       "flake": false,
       "locked": {
-        "narHash": "sha256-4WrSoodw78GmV/2o5ks4JOHxcn/nV3kxT9ekM4T9AVs=",
+        "narHash": "sha256-Zf1c6+9EJqLOSe1djxxgeitIJID2VqI+QBXy6rhNOg0=",
         "type": "file",
         "url": "https://easylist-downloads.adblockplus.org/easylistspanish.txt"
       },
@@ -63,7 +63,7 @@
     "adblockFanboySocial": {
       "flake": false,
       "locked": {
-        "narHash": "sha256-LFA73MCnKAwps9j2Ta27NbVfd6mpRLm5wZ6BpqYVVZI=",
+        "narHash": "sha256-Vpov5+sXUQB2ip3sI/5qAvocwQWfqh+asyFGimDZ0V0=",
         "type": "file",
         "url": "https://easylist.to/easylist/fanboy-social.txt"
       },
@@ -243,11 +243,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1691292840,
-        "narHash": "sha256-NA+o/NoOOQhzAQwB2JpeKoG+iYQ6yn/XXVxaGd5HSQI=",
+        "lastModified": 1691897365,
+        "narHash": "sha256-jvWIU4ht3YAmF8TDVM2Ps2+Gf4MtNGLL1zEWQZdTrzU=",
         "owner": "Mic92",
         "repo": "nix-index-database",
-        "rev": "6c626d54d0414d34c771c0f6f9d771bc8aaaa3c4",
+        "rev": "f4d70d098f066a30c7087144063dca179495f7d6",
         "type": "github"
       },
       "original": {
