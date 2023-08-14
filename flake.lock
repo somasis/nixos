@@ -3,7 +3,7 @@
     "adblockAntiAdblockFilters": {
       "flake": false,
       "locked": {
-        "narHash": "sha256-wpkNc9uviR87EqhogZ0c2NxKI7RNimH1RLVkGSfZ9qM=",
+        "narHash": "sha256-+lBqjUs0AzrkZSPwPyMFc5nM+mCMX0XACM/593a+6eI=",
         "type": "file",
         "url": "https://easylist-downloads.adblockplus.org/antiadblockfilters.txt"
       },
@@ -15,7 +15,7 @@
     "adblockEasyList": {
       "flake": false,
       "locked": {
-        "narHash": "sha256-gZdQn2rKTfPOkMwcY2YC9p+13vZ9akfa61TDRaZMFUk=",
+        "narHash": "sha256-TE3poeESFBjNXTvyvAGCIdMvEu3u8ENh+NuHkjW9sFw=",
         "type": "file",
         "url": "https://easylist.to/easylist/easylist.txt"
       },
@@ -27,7 +27,7 @@
     "adblockEasyListCookies": {
       "flake": false,
       "locked": {
-        "narHash": "sha256-4J2XuDK6h1lWJHO/5zlemB5P7jcWwwWXFXJ40L9O3kE=",
+        "narHash": "sha256-v8gUl6z2RVbdF/xH7G2Q0jHgEHVsZ2TI68Awcdn+FhA=",
         "type": "file",
         "url": "https://secure.fanboy.co.nz/fanboy-cookiemonster.txt"
       },
@@ -39,7 +39,7 @@
     "adblockEasyListRussian": {
       "flake": false,
       "locked": {
-        "narHash": "sha256-1SoVROwVTAzRdFDYtAA3X54nM40XPCOzdmKOX3Sm75E=",
+        "narHash": "sha256-BE7lD+gbuCO9el6r63iNmB2sXMHNKKL1C2tqzuTxf+A=",
         "type": "file",
         "url": "https://easylist-downloads.adblockplus.org/advblock.txt"
       },
@@ -51,7 +51,7 @@
     "adblockEasyListSpanish": {
       "flake": false,
       "locked": {
-        "narHash": "sha256-V9e6/rT0qCR9rZbZ+T7IVbRglMryu4XqeB3i5G6Qq5w=",
+        "narHash": "sha256-7I/nhOnFN/MMDcTLrNoQSgKdSxNT8VbO0jgEOBrtj1I=",
         "type": "file",
         "url": "https://easylist-downloads.adblockplus.org/easylistspanish.txt"
       },
@@ -63,7 +63,7 @@
     "adblockFanboySocial": {
       "flake": false,
       "locked": {
-        "narHash": "sha256-TjBEBj3Abt4rVWf/kPFjDY8BxAFegaol7ItlV4pxiTA=",
+        "narHash": "sha256-Gqrj8VuQY/DuJPK2oplI93VaKmeTZ7fcu/e0Vt/NARE=",
         "type": "file",
         "url": "https://easylist.to/easylist/fanboy-social.txt"
       },
@@ -75,11 +75,11 @@
     "adblockHosts": {
       "flake": false,
       "locked": {
-        "lastModified": 1691676178,
-        "narHash": "sha256-4d05pGZ8D90JL5zD9KKT4dPb3T12aYoP/69J9mVYn+M=",
+        "lastModified": 1691977436,
+        "narHash": "sha256-0GgQndhR4wMrvbNWrlDFTpbsKQSj/4U9xsodxFgcS4g=",
         "owner": "StevenBlack",
         "repo": "hosts",
-        "rev": "7ecb84e53b2a4d1e439a4fafb367ea1a45ca7808",
+        "rev": "23b74c7756e473d6e0f813f1f28f650972f6fe53",
         "type": "github"
       },
       "original": {
@@ -160,11 +160,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1691856649,
-        "narHash": "sha256-1/KYCwNyOPpUoyno9Yj3zMHITQaW+wPzVlJFPOPPCo4=",
+        "lastModified": 1691882297,
+        "narHash": "sha256-e1/LAQSGLnBywfA1TfMl0Vj3tvYka73XOZ/D2/CJowE=",
         "owner": "nix-community",
         "repo": "home-manager",
-        "rev": "406d34d919e9e8b831b531782cf5ef6995188566",
+        "rev": "c3ab5ea047e6dc73df530948f7367455749d8906",
         "type": "github"
       },
       "original": {
@@ -205,6 +205,22 @@
         "type": "github"
       }
     },
+    "loujine-musicbrainz": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1680045348,
+        "narHash": "sha256-00ryJvQGwMajf2sQ2FfHwpRUkyYid5xqGMEO+GQ3QoM=",
+        "owner": "loujine",
+        "repo": "musicbrainz-scripts",
+        "rev": "ab70378a0344bc222c17eed6ddad0734598a8f9d",
+        "type": "github"
+      },
+      "original": {
+        "owner": "loujine",
+        "repo": "musicbrainz-scripts",
+        "type": "github"
+      }
+    },
     "mblaze": {
       "flake": false,
       "locked": {
@@ -218,6 +234,22 @@
       "original": {
         "owner": "leahneukirchen",
         "repo": "mblaze",
+        "type": "github"
+      }
+    },
+    "murdos-musicbrainz": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1690104635,
+        "narHash": "sha256-Pt422ttouhbMNNu6yENxPVZaeFkVCY1a1rc5pOd91b0=",
+        "owner": "murdos",
+        "repo": "musicbrainz-userscripts",
+        "rev": "8faf3d24182055510d0d0c8ef933ce51acdd6cb1",
+        "type": "github"
+      },
+      "original": {
+        "owner": "murdos",
+        "repo": "musicbrainz-userscripts",
         "type": "github"
       }
     },
@@ -273,11 +305,11 @@
     },
     "nixpkgs": {
       "locked": {
-        "lastModified": 1691654369,
-        "narHash": "sha256-gSILTEx1jRaJjwZxRlnu3ZwMn1FVNk80qlwiCX8kmpo=",
+        "lastModified": 1691899779,
+        "narHash": "sha256-IBf4KVr/UQJlzrqB2/IHtlvmwsvyIVLPerSzCPU/6Xk=",
         "owner": "nixos",
         "repo": "nixpkgs",
-        "rev": "ce5e4a6ef2e59d89a971bc434ca8ca222b9c7f5e",
+        "rev": "100a1550b0e7a64b960c625b656f9229bdef5f87",
         "type": "github"
       },
       "original": {
@@ -289,11 +321,11 @@
     },
     "nixpkgsStable": {
       "locked": {
-        "lastModified": 1691693223,
-        "narHash": "sha256-9t8ZY1XNAsWqxAJmXgg+GXqF5chORMVnBT6PSHaRV3I=",
+        "lastModified": 1691950488,
+        "narHash": "sha256-iUNEeudc4dGjx+HsHccnGiuZUVE/nhjXuQ1DVCsHIUY=",
         "owner": "nixos",
         "repo": "nixpkgs",
-        "rev": "18784aac1013da9b442adf29b6c7c228518b5d3f",
+        "rev": "720e61ed8de116eec48d6baea1d54469b536b985",
         "type": "github"
       },
       "original": {
@@ -319,7 +351,9 @@
         "home-manager": "home-manager",
         "impermanence": "impermanence",
         "lemonbar": "lemonbar",
+        "loujine-musicbrainz": "loujine-musicbrainz",
         "mblaze": "mblaze",
+        "murdos-musicbrainz": "murdos-musicbrainz",
         "nix-filter": "nix-filter",
         "nix-index-database": "nix-index-database",
         "nixos-hardware": "nixos-hardware",
@@ -351,7 +385,7 @@
     "uAssetsPrivacy": {
       "flake": false,
       "locked": {
-        "narHash": "sha256-+b/8bRsSV9zO0fRw5ljrpqtrHsodMpP4KjhhcX0E4Kg=",
+        "narHash": "sha256-SOcWQiuyD99jBgJoaVPJZeeCNnrFG7x1lXeBH21rnB4=",
         "type": "file",
         "url": "https://raw.githubusercontent.com/uBlockOrigin/uAssetsCDN/main/filters/privacy.min.txt"
       },
