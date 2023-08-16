@@ -57,7 +57,6 @@ in
       minimizeToTray = true;
       tray = true;
       trayIcon = "dsc-tray";
-      dynamicIcon = true;
 
       performanceMode = "battery";
 
