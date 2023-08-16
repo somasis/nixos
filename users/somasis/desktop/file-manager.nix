@@ -55,15 +55,19 @@ in
   home.packages = [
     thunar
 
-    pkgs.xfce.tumbler
-    pkgs.webp-pixbuf-loader # .webp
-    pkgs.libgsf # .odf
-    pkgs.nufraw-thumbnailer # .raw
-    pkgs.gnome-epub-thumbnailer # .epub, .mobi
+    (pkgs.symlinkJoin {
+      name = "tumbler-final";
+
+      paths = [
+        pkgs.xfce.tumbler
+        pkgs.webp-pixbuf-loader # .webp
+        pkgs.libgsf # .odf
+        pkgs.nufraw-thumbnailer # .raw
+        pkgs.gnome-epub-thumbnailer # .epub, .mobi
+      ];
+    })
 
     pkgs.xfce.xfconf
-
-    pkgs.ffmpegthumbnailer
 
     (pkgs.writeShellScriptBin "mount-archive" ''
       set -e
@@ -122,7 +126,7 @@ in
 
       # Display > Thumbnails
       misc-thumbnail-mode = "THUNAR_THUMBNAIL_MODE_ONLY_LOCAL"; # Local files only
-      misc-thumbnail-max-file-size = 1048576 * 10; # Only show thumbnails for files smaller than 10MiB
+      misc-thumbnail-max-file-size = 1048576 * 100; # Only show thumbnails for files smaller than 100MiB
       misc-thumbnail-draw-frames = true;
 
       # Display > Icon view
