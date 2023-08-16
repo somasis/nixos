@@ -256,6 +256,8 @@ in
         url = "https://www.democracynow.org/democracynow.rss";
         tags = [ "news" ];
       }
+      { url = "https://www.japantimes.co.jp/feed/"; tags = [ "news" ]; }
+
       {
         url = "https://www.currentaffairs.org/feed";
         tags = [ "news" ];

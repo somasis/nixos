@@ -117,6 +117,16 @@
     profilePath = "etc/xorg/xprofile";
   };
 
+  i18n.inputMethod = {
+    enabled = "fcitx5";
+    fcitx5.addons = [
+      pkgs.fcitx5-anthy
+      pkgs.fcitx5-gtk
+      pkgs.libsForQt5.fcitx5-qt
+      pkgs.fcitx5-mozc
+    ];
+  };
+
   xresources.path = "${config.xdg.configHome}/xorg/xresources";
 
   services.xsuspender = {

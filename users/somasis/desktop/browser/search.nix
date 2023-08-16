@@ -114,6 +114,7 @@ in
       "!wikt" = "https://en.wiktionary.org/wiki/{}";
       "!en" = "${searchEngines."!wikt"}#English";
       "!es" = "${searchEngines."!wikt"}#Spanish";
+      "!jp" = "${searchEngines."!wikt"}#Japanese";
       "!esen" = "https://www.wordreference.com/es/en/translation.asp?spen={}";
       "!enes" = "https://www.wordreference.com/es/translation.asp?tranword={}";
 
