@@ -31,6 +31,11 @@
     };
   };
 
+  # Force replacing mimeapps.list, since it might have been changed
+  # during system runtime (and thus de-symlinked).
+  # <https://github.com/nix-community/home-manager/issues/4199#issuecomment-1620657055>
+  xdg.configFile."mimeapps.list".force = true;
+
   home = {
     packages = [
       (pkgs.writeShellScriptBin "open" ''

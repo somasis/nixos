@@ -6,11 +6,7 @@
 , osConfig
 , lib
 , ...
-}:
-let
-  inherit (config.lib.somasis) programPath;
-in
-{
+}: {
   persist.directories = [
     ".gnupg"
     { method = "symlink"; directory = "share/password-store"; }
@@ -20,6 +16,7 @@ in
   services.gpg-agent = {
     enable = true;
     enableExtraSocket = true;
+    enableSshSupport = false;
     pinentryFlavor = "gtk2";
   };
 
@@ -436,4 +433,14 @@ in
           )
       ;
     };
+
+  # NOTE Workaround <https://github.com/NixOS/nixpkgs/issues/183604>
+  programs.bash.initExtra =
+    let
+      completions = "${config.programs.password-store.package}/share/bash-completion/completions";
+    in
+    lib.mkAfter ''
+      source ${completions}/pass-*
+      source ${completions}/pass
+    '';
 }

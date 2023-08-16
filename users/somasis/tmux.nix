@@ -57,6 +57,8 @@
 
       set-option -g pane-active-border-style "bg=default,fg=magenta"
 
+      set-option -g set-clipboard on
+
       # Binds
       bind-key -T root F1 set-option status
     '';

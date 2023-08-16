@@ -1,5 +1,6 @@
-{ lib
-, config
+{ config
+, pkgs
+, lib
 , ...
 }:
 let
@@ -48,10 +49,4 @@ in
         "--bind=${binds}"
       ];
   };
-
-  programs.kakoune.extraConfig = ''
-    hook -once global ModuleLoaded fzf %{
-        set-option global fzf_implementation "sk"
-    }
-  '';
 }
