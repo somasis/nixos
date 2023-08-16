@@ -109,6 +109,7 @@
     pull = "git pull -vv";
 
     log = "git log --patch-with-stat --summary";
+    status = "git status";
     merge = "git merge";
 
     stash = "git stash";
