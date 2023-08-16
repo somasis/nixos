@@ -2,12 +2,16 @@
 , pkgs
 , ...
 }: {
-  persist.directories = [{
-    method = "symlink";
-    directory = "etc/Kvantum";
-  }];
+  persist.directories = [
+    { method = "symlink"; directory = "etc/Kvantum"; }
+    { method = "symlink"; directory = "etc/qt5ct"; }
+    { method = "symlink"; directory = "etc/qt6ct"; }
+  ];
 
   home.packages = [
+    pkgs.libsForQt5.qt5ct
+    pkgs.qt6Packages.qt6ct
+
     pkgs.papirus-icon-theme
 
     # GTK theming
@@ -170,7 +174,8 @@
     QT_AUTO_SCREEN_SCALE_FACTOR = 0;
     QT_AUTO_SCREEN_SCALE_FACTORS = 1.5;
 
-    QT_STYLE_OVERRIDE = config.qt.style.name; # TODO: why is this necessary
+    # Not required when using qt{5,6}ct.
+    # QT_STYLE_OVERRIDE = config.qt.style.name;
 
     # Improve Java GUI font rendering (really necessary for using
     # LangaugeTool on LibreOffice)
@@ -179,18 +184,7 @@
 
   qt = {
     enable = true;
-
-    style = {
-      name = "kvantum";
-      package = pkgs.symlinkJoin {
-        name = "kvantum";
-
-        paths = [
-          pkgs.libsForQt5.qtstyleplugin-kvantum
-          pkgs.qt6Packages.qtstyleplugin-kvantum
-        ];
-      };
-    };
+    platformTheme = "qtct";
   };
 
   services.xsettingsd = {
