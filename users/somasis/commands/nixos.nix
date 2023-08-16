@@ -34,13 +34,6 @@
       exec nix build --no-link --print-out-paths "$@"
     '')
 
-    (pkgs.writeShellScriptBin "nixos-repl" ''
-      exec nix repl \
-          --argstr host ${lib.escapeShellArg osConfig.networking.hostName} \
-          --argstr user ${lib.escapeShellArg config.home.username} \
-          "$@" --file "/etc/nixos/repl.nix" --argstr flake "/etc/nixos"
-    '')
-
     (pkgs.writeShellApplication {
       name = "nixos-search";
 
