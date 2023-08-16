@@ -81,7 +81,7 @@ in
     }
 
     (philpapers { keyword = "polyamory"; })
-    (philpapers { keyword = "gender"; })
+    # (philpapers { keyword = "gender"; })
     # TODO: Does Duke University Press have a feed for Transgender Studies Quarterly?
   ];
 }

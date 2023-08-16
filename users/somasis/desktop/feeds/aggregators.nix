@@ -184,14 +184,14 @@ in
   };
 
   programs.newsboat.urls = [
-    { tags = [ "aggregator" "hacker news" ]; url = "https://hnrss.org/frontpage"; title = "Hacker News"; }
-    { tags = [ "aggregator" "hacker news" ]; url = "https://hnrss.org/show"; title = "Hacker News: show"; }
+    { tags = [ "aggregator" "hacker news" ]; url = "https://hnrss.org/frontpage?points=25&comments=5"; title = "Hacker News"; }
+    { tags = [ "aggregator" "hacker news" ]; url = "https://hnrss.org/show?points=25&comments=5"; title = "Hacker News: show"; }
 
-    {
-      url = feeds.urls.secret "https://lobste.rs/rss?token=%s" "www/lobste.rs/somasis.rss";
-      title = "Lobsters";
-      tags = [ "aggregator" ];
-    }
+    # {
+    #   url = feeds.urls.secret "https://lobste.rs/rss?token=%s" "www/lobste.rs/somasis.rss";
+    #   title = "Lobsters";
+    #   tags = [ "aggregator" ];
+    # }
 
     {
       url = "https://tilde.news/rss";
@@ -257,8 +257,8 @@ in
       pointsInTitle = false;
     })
 
-    (lemmy { community = "technology"; })
-    (lemmy { community = "worldnews"; })
-    (lemmy { community = "usa"; title = "Lemmy: USA"; })
+    # (lemmy { community = "technology"; })
+    # (lemmy { community = "worldnews"; })
+    # (lemmy { community = "usa"; title = "Lemmy: USA"; })
   ];
 }
