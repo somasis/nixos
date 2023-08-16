@@ -3,7 +3,7 @@
     "adblockAntiAdblockFilters": {
       "flake": false,
       "locked": {
-        "narHash": "sha256-pKTAxwD+KYILk6lQml14LOCtobnztYrlx8WPjfRv+jc=",
+        "narHash": "sha256-MZm9KgoMBYXxO+U5CZBVKtKJKLDCmtcZiqFJOKfbnBo=",
         "type": "file",
         "url": "https://easylist-downloads.adblockplus.org/antiadblockfilters.txt"
       },
@@ -27,7 +27,7 @@
     "adblockEasyListCookies": {
       "flake": false,
       "locked": {
-        "narHash": "sha256-9Rck8F9WN8Eu/vmaPacIOR69Vq+H/baqEOpjWKCivro=",
+        "narHash": "sha256-4nDbaQ106T3THOYcj7qaNsU7zUhvrm37gGeOgq3LqGk=",
         "type": "file",
         "url": "https://secure.fanboy.co.nz/fanboy-cookiemonster.txt"
       },
@@ -39,7 +39,7 @@
     "adblockEasyListRussian": {
       "flake": false,
       "locked": {
-        "narHash": "sha256-W4MJOy9RDqSF6K/kWTEBEBV6v0VJuI+oLOYiOXtXyIg=",
+        "narHash": "sha256-S1G1xJT5OxSprvI+vlHfma8zm704nkzNC+KL7vXhkyM=",
         "type": "file",
         "url": "https://easylist-downloads.adblockplus.org/advblock.txt"
       },
@@ -51,7 +51,7 @@
     "adblockEasyListSpanish": {
       "flake": false,
       "locked": {
-        "narHash": "sha256-Fm4m98IAotunqRc5MfQ3D1pTPexHcDM6k7XaAw6QG1M=",
+        "narHash": "sha256-IZlQ+Nk471u+nKVLsQohPnRlT2gmmEp9ulO7Ksyiv4I=",
         "type": "file",
         "url": "https://easylist-downloads.adblockplus.org/easylistspanish.txt"
       },
@@ -75,11 +75,11 @@
     "adblockHosts": {
       "flake": false,
       "locked": {
-        "lastModified": 1691977436,
-        "narHash": "sha256-0GgQndhR4wMrvbNWrlDFTpbsKQSj/4U9xsodxFgcS4g=",
+        "lastModified": 1692198400,
+        "narHash": "sha256-NuHkshew4x94RMB53z7aY++PoIyF8q9gXawyxPWNwzg=",
         "owner": "StevenBlack",
         "repo": "hosts",
-        "rev": "23b74c7756e473d6e0f813f1f28f650972f6fe53",
+        "rev": "7311969c450a7d455378b73992466ff53323c0dc",
         "type": "github"
       },
       "original": {
@@ -160,11 +160,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1692131549,
-        "narHash": "sha256-MFjI8NL63/6HjMZpvJgnB/Pgg2dht22t45jOYtipZig=",
+        "lastModified": 1692200694,
+        "narHash": "sha256-A8hHkA+sJ04Agvu9OoVJ3ouak1e2hze9Ev+c71oGLAk=",
         "owner": "nix-community",
         "repo": "home-manager",
-        "rev": "75cfe974e2ca05a61b66768674032b4c079e55d4",
+        "rev": "9db5b89f40736943d017a761da044479044be182",
         "type": "github"
       },
       "original": {
