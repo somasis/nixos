@@ -3,7 +3,7 @@
     "adblockAntiAdblockFilters": {
       "flake": false,
       "locked": {
-        "narHash": "sha256-B+tjuydPEKZWjpjx4X+/vwZRD/CnrWq5n3p7Ps0oRvM=",
+        "narHash": "sha256-pKTAxwD+KYILk6lQml14LOCtobnztYrlx8WPjfRv+jc=",
         "type": "file",
         "url": "https://easylist-downloads.adblockplus.org/antiadblockfilters.txt"
       },
@@ -27,7 +27,7 @@
     "adblockEasyListCookies": {
       "flake": false,
       "locked": {
-        "narHash": "sha256-BPE71gXMvWGW2TIlfzwQuiADefPbB8dCWDHjfUKjrJ8=",
+        "narHash": "sha256-9Rck8F9WN8Eu/vmaPacIOR69Vq+H/baqEOpjWKCivro=",
         "type": "file",
         "url": "https://secure.fanboy.co.nz/fanboy-cookiemonster.txt"
       },
@@ -39,7 +39,7 @@
     "adblockEasyListRussian": {
       "flake": false,
       "locked": {
-        "narHash": "sha256-Tj+BVov1r6t+fGdBSh/n9tuLaBXwZNl9g9S/7RfzFug=",
+        "narHash": "sha256-W4MJOy9RDqSF6K/kWTEBEBV6v0VJuI+oLOYiOXtXyIg=",
         "type": "file",
         "url": "https://easylist-downloads.adblockplus.org/advblock.txt"
       },
@@ -51,7 +51,7 @@
     "adblockEasyListSpanish": {
       "flake": false,
       "locked": {
-        "narHash": "sha256-RsAt+xVKjj6geukluQF2Q8kzLFYWcd/48xGCO1qv3wM=",
+        "narHash": "sha256-Fm4m98IAotunqRc5MfQ3D1pTPexHcDM6k7XaAw6QG1M=",
         "type": "file",
         "url": "https://easylist-downloads.adblockplus.org/easylistspanish.txt"
       },
@@ -140,15 +140,15 @@
     "flake-compat": {
       "flake": false,
       "locked": {
-        "lastModified": 1687265871,
-        "narHash": "sha256-P8AOiQk/XN8/ia4289hDHlTfWB70cRQ5pc9GRfmEdpc=",
-        "owner": "inclyc",
+        "lastModified": 1673956053,
+        "narHash": "sha256-4gtG9iQuiKITOjNQQeQIpoIB6b16fm+504Ch3sNKLd8=",
+        "owner": "edolstra",
         "repo": "flake-compat",
-        "rev": "70e56389c58bbd300d11778913b255477ebbae22",
+        "rev": "35bb57c0c8d8b62bbfd284272c928ceb64ddbde9",
         "type": "github"
       },
       "original": {
-        "owner": "inclyc",
+        "owner": "edolstra",
         "repo": "flake-compat",
         "type": "github"
       }
