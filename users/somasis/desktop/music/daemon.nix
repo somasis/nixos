@@ -40,13 +40,6 @@ in
 
         auto_update "yes"
         auto_update_depth "1"
-
-        audio_output {
-          type "pulse"
-          name "PulseAudio"
-          format "48000:24:2"
-          replay_gain_handler "mixer"
-        }
       '';
   };
 
