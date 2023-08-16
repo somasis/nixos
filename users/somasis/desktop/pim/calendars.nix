@@ -73,6 +73,8 @@ rec {
 
           collections = [
             "a24bf95b-ef6e-428e-a5d9-26be33dffce5"
+            "46897711-6880-4dc7-bc48-be23a8c86df5"
+            "0df570cd-038d-4a55-b7b4-4d522deb4321"
           ];
 
           conflictResolution = "remote wins";
