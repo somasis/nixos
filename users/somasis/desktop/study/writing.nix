@@ -125,7 +125,7 @@ in
   #     system = osConfig.nixpkgs.localSystem.uname;
   #   in
   #   {
-  #     "libreoffice/4/user/config/javasettings_${system.system}_${lib.toUpper system.processor}.xml".text = toXML {
+  #     "libreoffice/4/user/config/javasettings_${system.system}_${lib.toUpper system.processor}.xml".text = toXML {} {
   #       java = {
   #         "@xmlns" = "http://openoffice.org/2004/java/framework/1.0";
   #         "@xmlns:xsi" = "http://www.w3.org/2001/XMLSchema-instance";
