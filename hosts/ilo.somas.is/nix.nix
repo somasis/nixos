@@ -74,8 +74,6 @@
         "cache.ngi0.nixos.org-1:KqH5CBLNSyX184S9BKZJo1LxrxJ9ltnY2uAs5c/f1MA="
       ];
 
-      plugin-files = [ "${pkgs.nix-doc}/lib/libnix_doc_plugin.so" ];
-
       # TODO Use content-addressed derivations?
       # <https://discourse.nixos.org/t/content-addressed-nix-call-for-testers/12881#:~:text=Level%203%20%E2%80%94%20Raider%20of%20the%20unknown>
     };
@@ -115,7 +113,6 @@
   };
 
   environment.etc."nix/inputs/nixpkgs".source = nixpkgs;
-  environment.systemPackages = [ pkgs.nix-doc ];
 
   programs.ssh.extraConfig = ''
     Host spinoza.7596ff.com
