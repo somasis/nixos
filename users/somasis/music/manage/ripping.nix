@@ -33,7 +33,7 @@
       };
 
       "whipper.cd.rip" = {
-        working_directories = "${config.xdg.userDirs.music}/source/rip";
+        working_directory = "${config.xdg.userDirs.music}/source/rip";
 
         track_template = "%A - %d (%y)/%t - %a - %n";
         disc_template = "%A - %d (%y)/%A - %d (%y) (disc %N)";
