@@ -215,10 +215,17 @@ in
       enabled_layouts = "fat";
       tab_bar_style = "hidden";
       remember_window_size = false;
+
+      # Reading clipboard without permission is a security risk but I simply don't care :]
+      clipboard_control = "write-clipboard write-primary read-clipboard read-primary";
     };
 
-    # like Alacritty
     extraConfig = ''
+      # Click the link under the mouse or move the cursor even when grabbed
+      # <https://sw.kovidgoyal.net/kitty/conf/#shortcut-kitty.Click-the-link-under-the-mouse-or-move-the-cursor>
+      mouse_map left click ungrabbed mouse_handle_click selection link prompt
+
+      # cell height like Alacritty
       modify_font cell_height 105%
     '';
 
@@ -274,8 +281,9 @@ in
   programs.bash.initExtra = ''
     [ -n "$KITTY_WINDOW_ID" ] \
         && alias \
-            ssh="kitty +kitten ssh" \
-            icat="kitty +kitten icat"
+            clipboard="kitty +kitten clipboard" \
+            icat="kitty +kitten icat" \
+            ssh="kitty +kitten ssh"
   '';
 
   programs.kakoune.config.hooks = [{
