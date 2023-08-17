@@ -13,10 +13,10 @@
   systemd = {
     timers.fwupd-refresh = {
       after = [ "network-online.target" ];
-      wantedBy = [ "default.target" ];
+      wantedBy = [ "timers.target" ];
     };
 
-    # Necessary beacuse otherwise it spits a terminal-only progress bar into
+    # Necessary because otherwise it spits a terminal-only progress bar into
     # the system journal.
     services.fwupd-refresh.serviceConfig = {
       StandardOutput = "null";
