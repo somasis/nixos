@@ -84,7 +84,6 @@
 
   programs.kakoune = {
     enable = true;
-    defaultEditor = true;
 
     config = {
       # Highlighters
@@ -454,4 +453,11 @@
       "{*.c,*.h,*.cpp,*.hpp}".indent_style = "tab";
     };
   };
+
+  home.sessionVariables.EDITOR =
+    lib.warnIf
+      ((builtins.compareVersions config.home.version.release "21.11") >= 0)
+      ''users/somasis/editor/default.nix: since home-manager 21.11, `programs.kakoune.defaultEditor = true` is used instead of `home.sessionVariables.EDITOR = "kak"`.''
+      "kak"
+  ;
 }
