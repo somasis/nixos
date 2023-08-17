@@ -1,4 +1,5 @@
-{ pkgs
+{ config
+, pkgs
 , lib
 , osConfig
 , ...
@@ -47,17 +48,22 @@
       ${pkgs.xe}/bin/xe -LL -j0 "$@" | sort -snk1 | cut -d' ' -f2-
     '')
 
-    (pkgs.wrapCommand {
-      package = pkgs.comma;
-      wrappers = [{
-        prependFlags = lib.escapeShellArgs [
-          "--picker"
-          (pkgs.writeShellScript "comma-picker" ''
-            exec dmenu -p "," -S 2>/dev/null
-          '')
-        ];
-      }];
-    })
+    (if (config.programs.dmenu.enable || config.programs.skim.enable) then
+      (pkgs.wrapCommand {
+        package = pkgs.comma;
+        wrappers = [{
+          prependFlags = lib.escapeShellArgs [
+            "--picker"
+            (pkgs.writeShellScript "comma-picker" (
+              if config.programs.dmenu.enable then ''exec dmenu -p "," -S 2>/dev/null''
+              else ''exec sk -p ", " --no-sort 2>/dev/null''
+            ))
+          ];
+        }];
+      })
+    else
+      pkgs.comma
+    )
 
     (pkgs.writeShellScriptBin ",m" ''
       usage() {
