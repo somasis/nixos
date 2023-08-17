@@ -273,19 +273,11 @@ in
 
   home.packages = [
     # panel
-    (pkgs.lemonbar-xft.overrideAttrs (
-      let
-        year = builtins.substring 0 4 inputs.lemonbar.lastModifiedDate;
-        month = builtins.substring 4 2 inputs.lemonbar.lastModifiedDate;
-        day = builtins.substring 6 2 inputs.lemonbar.lastModifiedDate;
-      in
-      prev:
-      {
-        pname = "lemonbar-xft";
-        version = "unstable-${year}-${month}-${day}";
-        src = inputs.lemonbar;
-      }
-    ))
+    (pkgs.lemonbar-xft.overrideAttrs (prev: {
+      pname = "lemonbar-xft";
+      version = config.lib.somasis.flakeModifiedDateToVersion inputs.lemonbar;
+      src = inputs.lemonbar;
+    }))
 
     pkgs.procps
     pkgs.xdotool

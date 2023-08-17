@@ -35,14 +35,9 @@ let
   };
 
   sbase =
-    let
-      year = builtins.substring 0 4 inputs.sbase.lastModifiedDate;
-      month = builtins.substring 4 2 inputs.sbase.lastModifiedDate;
-      day = builtins.substring 6 2 inputs.sbase.lastModifiedDate;
-    in
     pkgs.stdenv.mkDerivation rec {
       pname = "sbase";
-      version = "unstable-${year}-${month}-${day}";
+      version = config.lib.somasis.flakeModifiedDateToVersion inputs.sbase;
 
       src = inputs.sbase;
 
@@ -68,14 +63,9 @@ let
     };
 
   ubase =
-    let
-      year = builtins.substring 0 4 inputs.ubase.lastModifiedDate;
-      month = builtins.substring 4 2 inputs.ubase.lastModifiedDate;
-      day = builtins.substring 6 2 inputs.ubase.lastModifiedDate;
-    in
     pkgs.stdenv.mkDerivation rec {
       pname = "ubase";
-      version = "unstable-${year}-${month}-${day}";
+      version = config.lib.somasis.flakeModifiedDateToVersion inputs.ubase;
 
       src = inputs.ubase;
 

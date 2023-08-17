@@ -19,19 +19,11 @@ let
     ;
   };
 
-  catgirl = pkgs.catgirl.overrideAttrs (
-    let
-      year = builtins.substring 0 4 inputs.catgirl.lastModifiedDate;
-      month = builtins.substring 4 2 inputs.catgirl.lastModifiedDate;
-      day = builtins.substring 6 2 inputs.catgirl.lastModifiedDate;
-    in
-    oldAttrs:
-    {
-      name = "catgirl";
-      version = "unstable-${year}-${month}-${day}";
-      src = inputs.catgirl;
-    }
-  );
+  catgirl = pkgs.catgirl.overrideAttrs (oldAttrs: {
+    name = "catgirl";
+    version = config.lib.somasis.flakeModifiedDateToVersion inputs.catgirl;
+    src = inputs.catgirl;
+  });
 
   catgirls = pkgs.writeShellApplication {
     name = "catgirls";

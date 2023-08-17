@@ -1,17 +1,9 @@
 { pkgs, config, inputs, ... }: {
   home.packages = [
-    (pkgs.mblaze.overrideAttrs (
-      prev:
-      let
-        year = builtins.substring 0 4 inputs.mblaze.lastModifiedDate;
-        month = builtins.substring 4 2 inputs.mblaze.lastModifiedDate;
-        day = builtins.substring 6 2 inputs.mblaze.lastModifiedDate;
-      in
-      {
-        src = inputs.mblaze;
-        version = "unstable-${year}-${month}-${day}";
-      }
-    ))
+    (pkgs.mblaze.overrideAttrs (prev: {
+      src = inputs.mblaze;
+      version = config.lib.somasis.flakeModifiedDateToVersion inputs.mblaze;
+    }))
 
     # (pkgs.writeShellScriptBin "minbox" ''
     #     if [ $# -gt 0 ]; then

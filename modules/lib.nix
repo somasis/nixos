@@ -419,5 +419,17 @@ with lib;
               (if lib.isList list then list else [ list ])
           )}
     '';
+
+    # Return from a flake argument, a string suitable for use as a package version.
+    #
+    # Type: :: flake -> str
+    flakeModifiedDateToVersion = flake:
+      let
+        year = builtins.substring 0 4 flake.lastModifiedDate;
+        month = builtins.substring 4 2 flake.lastModifiedDate;
+        day = builtins.substring 6 2 flake.lastModifiedDate;
+      in
+      "unstable-${year}-${month}-${day}"
+    ;
   };
 }
