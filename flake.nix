@@ -45,6 +45,12 @@
     ubase.flake = false;
     ubase.url = "github:michaelforney/ubase";
 
+    murdos-musicbrainz.flake = false;
+    murdos-musicbrainz.url = "github:murdos/musicbrainz-userscripts";
+
+    loujine-musicbrainz.flake = false;
+    loujine-musicbrainz.url = "github:loujine/musicbrainz-scripts";
+
     # replugged.url = "github:LunNova/replugged-nix-flake";
     # replugged.inputs.nixpkgs.follows = "nixpkgs";
     # repluggedPluginBetterCodeblocks.flake = false;

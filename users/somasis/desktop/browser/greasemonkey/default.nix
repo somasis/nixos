@@ -6,7 +6,7 @@
   cache.directories = [ "share/qutebrowser/greasemonkey/requires" ];
 
   imports = [
-    # ./musicbrainz.nix
+    ./musicbrainz.nix
     ./search.nix
     ./social.nix
     ./video.nix
