@@ -3,7 +3,8 @@
 , osConfig
 , lib
 , ...
-}: {
+}:
+{
   persist.directories = [ "etc/ssh" ];
   cache.directories = [ "var/cache/ssh" ];
 
@@ -109,8 +110,6 @@
       };
     };
   };
-
-  services.ssh-agent.enable = true;
 
   home.packages = [ pkgs.mosh ];
   home.sessionVariables."MOSH_TITLE_NOPREFIX" = 1; # Disable prepending "[mosh]" to terminal title
