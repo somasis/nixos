@@ -2,6 +2,7 @@
 , osConfig
 , pkgs
 , lib
+, theme
 , ...
 }:
 let
@@ -94,7 +95,7 @@ in
     package = pkgs.qutebrowser.override { withPdfReader = false; };
 
     loadAutoconfig = true;
-    settings = let xres = config.xresources.properties; in rec {
+    settings = rec {
       logging.level.console = "error";
 
       # Clear default aliases
@@ -232,10 +233,10 @@ in
 
       # Downloads bar.
       downloads.position = "top";
-      colors.downloads.start.bg = xres."*darkBackground";
-      colors.downloads.stop.bg = xres."*color2";
-      colors.downloads.error.bg = xres."*color1";
-      colors.downloads.bar.bg = xres."*darkBackground";
+      colors.downloads.start.bg = theme.colors.darkBackground;
+      colors.downloads.stop.bg = theme.colors.color2;
+      colors.downloads.error.bg = theme.colors.color1;
+      colors.downloads.bar.bg = theme.colors.darkBackground;
 
       # Statusbar.
       statusbar.position = "top";
@@ -248,54 +249,54 @@ in
         "filesystem"
       ];
 
-      colors.statusbar.normal.bg = xres."*background";
-      colors.statusbar.normal.fg = xres."*foreground";
+      colors.statusbar.normal.bg = theme.colors.background;
+      colors.statusbar.normal.fg = theme.colors.foreground;
 
-      colors.statusbar.command.bg = xres."*lightBackground";
-      colors.statusbar.command.fg = xres."*lightForeground";
+      colors.statusbar.command.bg = theme.colors.lightBackground;
+      colors.statusbar.command.fg = theme.colors.lightForeground;
 
-      colors.statusbar.insert.bg = xres."*color2";
-      colors.statusbar.insert.fg = xres."*foreground";
+      colors.statusbar.insert.bg = theme.colors.color2;
+      colors.statusbar.insert.fg = theme.colors.foreground;
 
-      colors.statusbar.passthrough.bg = xres."*color4";
-      colors.statusbar.passthrough.fg = xres."*foreground";
+      colors.statusbar.passthrough.bg = theme.colors.color4;
+      colors.statusbar.passthrough.fg = theme.colors.foreground;
 
-      colors.statusbar.private.bg = xres."*color5";
-      colors.statusbar.private.fg = xres."*foreground";
+      colors.statusbar.private.bg = theme.colors.color5;
+      colors.statusbar.private.fg = theme.colors.foreground;
 
-      colors.statusbar.progress.bg = xres."*color2";
+      colors.statusbar.progress.bg = theme.colors.color2;
 
-      colors.statusbar.url.fg = xres."*color4";
-      colors.statusbar.url.error.fg = xres."*color9";
-      colors.statusbar.url.hover.fg = xres."*color4";
-      colors.statusbar.url.success.http.fg = xres."*color4";
-      colors.statusbar.url.success.https.fg = xres."*color4";
-      colors.statusbar.url.warn.fg = xres."*color3";
+      colors.statusbar.url.fg = theme.colors.color4;
+      colors.statusbar.url.error.fg = theme.colors.color9;
+      colors.statusbar.url.hover.fg = theme.colors.color4;
+      colors.statusbar.url.success.http.fg = theme.colors.color4;
+      colors.statusbar.url.success.https.fg = theme.colors.color4;
+      colors.statusbar.url.warn.fg = theme.colors.color3;
 
       # Prompts.
 
-      colors.prompts.bg = xres."*lightBackground";
-      colors.prompts.fg = xres."*lightForeground";
-      colors.prompts.border = "1px solid ${xres."*lightBorderColor"}";
-      colors.prompts.selected.bg = xres."*colorAccent";
-      colors.prompts.selected.fg = xres."*foreground";
+      colors.prompts.bg = theme.colors.lightBackground;
+      colors.prompts.fg = theme.colors.lightForeground;
+      colors.prompts.border = "1px solid ${theme.colors.lightBorderColor}";
+      colors.prompts.selected.bg = theme.colors.colorAccent;
+      colors.prompts.selected.fg = theme.colors.foreground;
 
       # Completion.
 
-      colors.completion.category.bg = xres."*lightBackground";
-      colors.completion.category.fg = xres."*lightForeground";
-      colors.completion.category.border.bottom = xres."*lightBackground";
-      colors.completion.category.border.top = xres."*lightBackground";
-      colors.completion.even.bg = xres."*lightBackground";
-      colors.completion.odd.bg = xres."*lightBackground";
-      colors.completion.fg = xres."*lightForeground";
-      colors.completion.item.selected.bg = xres."*colorAccent";
-      colors.completion.item.selected.border.bottom = xres."*colorAccent";
-      colors.completion.item.selected.border.top = xres."*colorAccent";
-      colors.completion.item.selected.fg = xres."*foreground";
-      colors.completion.item.selected.match.fg = xres."*foreground";
-      colors.completion.scrollbar.bg = xres."*lightBackground";
-      colors.completion.scrollbar.fg = xres."*darkBackground";
+      colors.completion.category.bg = theme.colors.lightBackground;
+      colors.completion.category.fg = theme.colors.lightForeground;
+      colors.completion.category.border.bottom = theme.colors.lightBackground;
+      colors.completion.category.border.top = theme.colors.lightBackground;
+      colors.completion.even.bg = theme.colors.lightBackground;
+      colors.completion.odd.bg = theme.colors.lightBackground;
+      colors.completion.fg = theme.colors.lightForeground;
+      colors.completion.item.selected.bg = theme.colors.colorAccent;
+      colors.completion.item.selected.border.bottom = theme.colors.colorAccent;
+      colors.completion.item.selected.border.top = theme.colors.colorAccent;
+      colors.completion.item.selected.fg = theme.colors.foreground;
+      colors.completion.item.selected.match.fg = theme.colors.foreground;
+      colors.completion.scrollbar.bg = theme.colors.lightBackground;
+      colors.completion.scrollbar.fg = theme.colors.darkBackground;
 
       # Tabs.
       tabs.position = "left";
@@ -313,27 +314,27 @@ in
       fonts.tabs.selected = "bold default_size monospace";
 
       # Colors (themed like Arc-Dark).
-      colors.tabs.bar.bg = xres."*sidebarColor";
-      colors.tabs.odd.bg = xres."*sidebarColor";
-      colors.tabs.even.bg = xres."*sidebarColor";
+      colors.tabs.bar.bg = theme.colors.sidebarColor;
+      colors.tabs.odd.bg = theme.colors.sidebarColor;
+      colors.tabs.even.bg = theme.colors.sidebarColor;
 
-      colors.tabs.even.fg = xres."*foreground";
-      colors.tabs.odd.fg = xres."*foreground";
-      colors.tabs.selected.even.fg = xres."*foreground";
-      colors.tabs.selected.odd.fg = xres."*foreground";
+      colors.tabs.even.fg = theme.colors.foreground;
+      colors.tabs.odd.fg = theme.colors.foreground;
+      colors.tabs.selected.even.fg = theme.colors.foreground;
+      colors.tabs.selected.odd.fg = theme.colors.foreground;
 
-      colors.tabs.pinned.even.bg = xres."*background";
-      colors.tabs.pinned.odd.bg = xres."*background";
-      colors.tabs.pinned.selected.even.bg = xres."*colorAccent";
-      colors.tabs.pinned.selected.odd.bg = xres."*colorAccent";
-      colors.tabs.selected.even.bg = xres."*colorAccent";
-      colors.tabs.selected.odd.bg = xres."*colorAccent";
+      colors.tabs.pinned.even.bg = theme.colors.background;
+      colors.tabs.pinned.odd.bg = theme.colors.background;
+      colors.tabs.pinned.selected.even.bg = theme.colors.colorAccent;
+      colors.tabs.pinned.selected.odd.bg = theme.colors.colorAccent;
+      colors.tabs.selected.even.bg = theme.colors.colorAccent;
+      colors.tabs.selected.odd.bg = theme.colors.colorAccent;
 
       colors.messages = rec {
-        error.bg = xres."*color1";
-        warning.bg = xres."*color3";
-        info.bg = xres."*colorAccent";
-        info.fg = xres."*foreground";
+        error.bg = theme.colors.color1;
+        warning.bg = theme.colors.color3;
+        info.bg = theme.colors.colorAccent;
+        info.fg = theme.colors.foreground;
 
         error.border = error.bg;
         warning.border = warning.bg;
@@ -343,7 +344,7 @@ in
       colors.contextmenu = {
         menu.bg = "#ffffff";
         menu.fg = "#5c616c";
-        selected.bg = xres."*colorAccent";
+        selected.bg = theme.colors.colorAccent;
         selected.fg = "#ffffff";
         disabled.fg = "#a6a8ae";
       };

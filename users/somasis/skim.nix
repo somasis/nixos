@@ -1,6 +1,7 @@
 { config
 , pkgs
 , lib
+, theme
 , ...
 }:
 let
@@ -22,7 +23,7 @@ in
           matched = 1;
 
           current_bg = "#ffffff";
-          current = config.xresources.properties."*colorAccent";
+          current = theme.colors.colorAccent;
 
           current_match_bg = 1;
           current_match = -1;
@@ -33,7 +34,7 @@ in
           info = 0;
           border = 0;
           prompt = 9;
-          pointer = config.xresources.properties."*colorAccent";
+          pointer = theme.colors.colorAccent;
           marker = 9;
           spinner = 2;
           header = 12;

@@ -4,7 +4,8 @@
 , pkgs
 , osConfig
 , ...
-}: {
+}:
+{
   imports = [
     ./commands
     ./editor
@@ -21,6 +22,7 @@
     ./ssh.nix
     ./syncthing.nix
     ./text-manipulation.nix
+    ./theme.nix
     ./tmux.nix
     ./xdg.nix
   ];

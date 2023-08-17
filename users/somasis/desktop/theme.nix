@@ -1,7 +1,9 @@
 { config
+, theme
 , pkgs
 , ...
-}: {
+}:
+{
   persist.directories = [
     { method = "symlink"; directory = "etc/Kvantum"; }
     { method = "symlink"; directory = "etc/qt5ct"; }
@@ -44,89 +46,23 @@
   # see the fonts installed by home-manager.
   fonts.fontconfig.enable = true;
 
-  xresources.properties =
-    let
-      darkForeground = "#e0eaf0";
-      darkBackground = "#2f343f";
-      darkCursorColor = lightForeground;
-      darkBorderColor = "#2b2e39";
-      lightForeground = "#696d78";
-      lightBackground = "#f5f6f7";
-      # lightCursorColor = darkBackground;
-      lightBorderColor = "#cfd6e6";
-      color0 = "#755f5f";
-      color1 = "#cf4342";
-      color2 = "#acc044";
-      color3 = "#ef9324";
-      color4 = "#438dc5";
-      color5 = "#c54d7a";
-      color6 = "#499baf";
-      color7 = "#d8c7c7";
-      color8 = "#937474";
-      color9 = "#fe6262";
-      color10 = "#c4e978";
-      color11 = "#f8dc3c";
-      color12 = "#96c7ec";
-      color13 = "#f97cac";
-      color14 = "#30d0f2";
-      color15 = "#e0d6d6";
-      colorAccent = "#5294e2";
-    in
-    {
-      # "Xft.dpi" = 144; # 96 * 1.5
-      "Xft.antialias" = 1;
-      "Xft.hinting" = 1;
-      # "Xft.hintstyle" = "hintslight";
-      "Xft.rgba" = "rgb";
+  xresources.properties = {
+    # "Xft.dpi" = 144; # 96 * 1.5
+    "Xft.antialias" = 1;
+    "Xft.hinting" = 1;
+    # "Xft.hintstyle" = "hintslight";
+    "Xft.rgba" = "rgb";
 
-      # "*faceName" = "monospace";
-
-      # Arc color scheme (light)
-      "*lightForeground" = lightForeground;
-      "*lightBackground" = lightBackground;
-      "*lightCursorColor" = darkBackground;
-      "*lightBorderColor" = lightBorderColor;
-
-      # Arc color scheme (dark)
-      "*darkForeground" = darkForeground;
-      "*darkBackground" = darkBackground;
-      "*darkCursorColor" = lightForeground;
-      "*darkBorderColor" = darkBorderColor;
-
-      "*foreground" = darkForeground;
-      "*background" = darkBackground;
-      "*cursorColor" = darkCursorColor;
-      "*borderColor" = darkBorderColor;
-      "*sidebarColor" = "#353946";
-
-      "*color0" = color0;
-      "*color1" = color1;
-      "*color2" = color2;
-      "*color3" = color3;
-      "*color4" = color4;
-      "*color5" = color5;
-      "*color6" = color6;
-      "*color7" = color7;
-      "*color8" = color8;
-      "*color9" = color9;
-      "*color10" = color10;
-      "*color11" = color11;
-      "*color12" = color12;
-      "*color13" = color13;
-      "*color14" = color14;
-      "*color15" = color15;
-      "*colorAccent" = colorAccent;
-      # "*colorAccent" = color3;
-
-      "panel.background" = darkBackground;
-      # "panel.font" = "-misc-spleen-medium-*-normal-*-24-*-*-*-*-*-*-*";
-      # "panel.boldFont" = "-misc-spleen-medium-*-normal-*-24-*-*-*-*-*-*-*";
-      "panel.font1" = "monospace:size=10";
-      "panel.font2" = "monospace:size=10:style=bold";
-      "panel.font3" = "monospace:size=10:style=light";
-      "panel.font4" = "monospace:size=10:style=heavy";
-      "panel.font5" = "emoji:size=10";
-    };
+    # "*faceName" = "monospace";
+    "panel.background" = theme.colors.darkBackground;
+    # "panel.font" = "-misc-spleen-medium-*-normal-*-24-*-*-*-*-*-*-*";
+    # "panel.boldFont" = "-misc-spleen-medium-*-normal-*-24-*-*-*-*-*-*-*";
+    "panel.font1" = "monospace:size=10";
+    "panel.font2" = "monospace:size=10:style=bold";
+    "panel.font3" = "monospace:size=10:style=light";
+    "panel.font4" = "monospace:size=10:style=heavy";
+    "panel.font5" = "emoji:size=10";
+  };
 
   home.pointerCursor = {
     name = "Hackneyed";
