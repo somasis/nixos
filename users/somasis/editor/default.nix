@@ -456,8 +456,8 @@
 
   home.sessionVariables.EDITOR =
     lib.warnIf
-      ((builtins.compareVersions config.home.version.release "21.11") >= 0)
-      ''users/somasis/editor/default.nix: since home-manager 21.11, `programs.kakoune.defaultEditor = true` is used instead of `home.sessionVariables.EDITOR = "kak"`.''
+      ((builtins.compareVersions config.home.version.release "24.05") < 1)
+      ''users/somasis/editor/default.nix: since home-manager 24.05, `programs.kakoune.defaultEditor = true` is used instead of `home.sessionVariables.EDITOR = "kak"`.''
       "kak"
   ;
 }
