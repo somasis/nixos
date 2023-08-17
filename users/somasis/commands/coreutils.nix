@@ -1,4 +1,9 @@
-{ inputs, pkgs, lib, ... }:
+{ config
+, inputs
+, pkgs
+, lib
+, ...
+}:
 let
   # These would be more correct, but they cause unnecessary rebuilds of the derivations
   # bfs = pkgs.bfs.overrideAttrs (finalAttrs: prevAttrs: {
