@@ -3,7 +3,7 @@
     "adblockAntiAdblockFilters": {
       "flake": false,
       "locked": {
-        "narHash": "sha256-1IUeDJnsV2yF0nMPJmw9jO5YQ4PSUIwAnSGmAOgZCKY=",
+        "narHash": "sha256-5QoNmZvCGZFAYe/ZwtON4RTAQ2hcNcU7YRNVMYkMZTc=",
         "type": "file",
         "url": "https://easylist-downloads.adblockplus.org/antiadblockfilters.txt"
       },
@@ -27,7 +27,7 @@
     "adblockEasyListCookies": {
       "flake": false,
       "locked": {
-        "narHash": "sha256-wJxpkNFd0oY5uSIcPIU6ygQagq4ZpVSqTAQEJ8BWGVA=",
+        "narHash": "sha256-pigA3l6KwxYG5T3lTE5SKsdSnjdRt+8ZeHtp4alZ2EA=",
         "type": "file",
         "url": "https://secure.fanboy.co.nz/fanboy-cookiemonster.txt"
       },
@@ -39,7 +39,7 @@
     "adblockEasyListRussian": {
       "flake": false,
       "locked": {
-        "narHash": "sha256-UDffILNwXz8zZmAIApo2yaV6Ff4UVYivpNGCgNl5pIw=",
+        "narHash": "sha256-mL8Xz7f4QRtEARjnjigxxfeLBj1x/01qAUU4UyuUPRY=",
         "type": "file",
         "url": "https://easylist-downloads.adblockplus.org/advblock.txt"
       },
@@ -51,7 +51,7 @@
     "adblockEasyListSpanish": {
       "flake": false,
       "locked": {
-        "narHash": "sha256-urPqtXWJIzF91hSctmoT1S5Q7bMHPWiQxJ5h2cpzcZg=",
+        "narHash": "sha256-t/P157m66fmYAENXhwvTSRaq4KaAjUWQ3+O+aw2aNU4=",
         "type": "file",
         "url": "https://easylist-downloads.adblockplus.org/easylistspanish.txt"
       },
@@ -75,11 +75,11 @@
     "adblockHosts": {
       "flake": false,
       "locked": {
-        "lastModified": 1692198400,
-        "narHash": "sha256-NuHkshew4x94RMB53z7aY++PoIyF8q9gXawyxPWNwzg=",
+        "lastModified": 1692298772,
+        "narHash": "sha256-AV1MZIlfgSStmsHL7vJ8f7pBeKs5YfSzSZiWt0uDy84=",
         "owner": "StevenBlack",
         "repo": "hosts",
-        "rev": "7311969c450a7d455378b73992466ff53323c0dc",
+        "rev": "03e1e33213c66bd3cf1a690076863b5946fbfdc4",
         "type": "github"
       },
       "original": {
@@ -425,11 +425,11 @@
     "zoteroTranslators": {
       "flake": false,
       "locked": {
-        "lastModified": 1692284770,
-        "narHash": "sha256-cnB9beJonCuD7ACmGOJKhIMdjz9MQqD9uX7jMo4OQz0=",
+        "lastModified": 1692299706,
+        "narHash": "sha256-D8LCc44dMFgRKPuYUiNGejn3eI0pDBly76Sb9n0hLkg=",
         "owner": "zotero",
         "repo": "translators",
-        "rev": "2928aa1bc47ba21e997a6b91acc2ca2fb5b28e71",
+        "rev": "5a6bf029612a128abd6aaf11f45a02727c9832ba",
         "type": "github"
       },
       "original": {
