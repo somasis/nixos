@@ -254,9 +254,13 @@ in
       }
       {
         url = "https://www.democracynow.org/democracynow.rss";
-        tags = [ "news" ];
+        tags = [ "news" "usa" ];
       }
-      { url = "https://www.japantimes.co.jp/feed/"; tags = [ "news" ]; }
+      {
+        url = feeds.urls.filter "https://www.japantimes.co.jp/feed/" feeds.filters.discardContent;
+        title = "The Japan Times";
+        tags = [ "news" "japan" ];
+      }
 
       {
         url = "https://www.currentaffairs.org/feed";
