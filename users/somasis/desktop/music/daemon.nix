@@ -49,6 +49,21 @@ in
       '';
   };
 
+  # Copied from mpd's distributed systemd service.
+  systemd.user.services.mpd.Service = {
+    LimitRTPRIO = 40;
+    LimitRTTIME = "infinity";
+    LimitMEMLOCK = "64M";
+
+    ProtectSystem = true;
+
+    NoNewPrivileges = true;
+    ProtectKernelTunables = true;
+    ProtectControlGroups = true;
+    RestrictAddressFamilies = [ "AF_INET" "AF_INET6" "AF_UNIX" "AF_NETLINK" ];
+    RestrictNamespaces = true;
+  };
+
   services.mpdris2 = {
     inherit (config.services.mpd) enable;
     mpd = {
