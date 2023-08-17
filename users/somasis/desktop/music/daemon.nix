@@ -39,7 +39,13 @@ in
         metadata_to_use "${commaList tags}"
 
         auto_update "yes"
-        auto_update_depth "1"
+        auto_update_depth "3"
+
+        audio_output {
+            type "pulse"
+            name "PulseAudio"
+            replay_gain_handler "software"
+        }
       '';
   };
 
