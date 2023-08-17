@@ -271,6 +271,10 @@ with lib;
     };
 
     colors = rec {
+      # Output a given color (any `pastel` format accepted) in a given format, as
+      # accepted by `pastel`.
+      #
+      # Type: :: str -> str
       format = format: color:
         assert (lib.isString format);
         assert (lib.isString color);
@@ -282,9 +286,19 @@ with lib;
           ''${lib.getExe pkgs.pastel} format "$format" "$color" > "$out" | tr -d " "''
         );
 
+      # Format a given color to hexadecimal ("#ffffff").
+      #
+      # Type: :: str -> str
       hex = format "hex";
+
+      # Format a given color to an RGB color ("rgb(255,255,255)").
+      #
+      # Type: :: str -> str
       rgb = format "rgb";
 
+      # Execute a given `pastel` operation on a given color, accepting a given amount as an argument.
+      #
+      # Type: :: str -> str
       amountOp = operation: amount: color:
         assert (lib.isString operation);
         assert (lib.isFloat amount);
@@ -295,9 +309,24 @@ with lib;
           ''${lib.getExe pkgs.pastel} "$operation" "$amount" "$color" > "$out"''
         );
 
+      # Saturate, with a given amount, a given color.
+      #
+      # Type: :: str -> str
       saturate = amountOp "saturate";
+
+      # Desaturate, with a given amount, a given color.
+      #
+      # Type: :: str -> str
       desaturate = amountOp "desaturate";
+
+      # Lighten, with a given amount, a given color.
+      #
+      # Type: :: str -> str
       lighten = amountOp "lighten";
+
+      # Darken, with a given amount, a given color.
+      #
+      # Type: :: str -> str
       darken = amountOp "darken";
     };
 
@@ -367,6 +396,11 @@ with lib;
         inherit default description;
       };
 
+    # Convert an argument (either a path, or a path-like string) into a derivation
+    # by reading the path into a text file. If passed a derivation, the function
+    # does nothing and simply returns the argument.
+    #
+    # Type: :: (derivation|str|path) -> derivation
     drvOrPath = x:
       if ! lib.isDerivation x then
         pkgs.writeText (builtins.baseNameOf x) (builtins.readFile x)
