@@ -33,11 +33,7 @@
   };
 
   cache.allowOther = true;
-
-  log = {
-    allowOther = true;
-    directories = [{ method = "symlink"; directory = "logs"; }];
-  };
+  log.allowOther = true;
 
   home.keyboard.options = [ "compose:ralt" ];
 

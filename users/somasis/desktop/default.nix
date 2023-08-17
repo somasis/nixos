@@ -61,6 +61,8 @@
 
   home.extraOutputsToInstall = [ "doc" "devdoc" "man" ];
 
+  log.directories = [{ method = "symlink"; directory = "logs"; }];
+
   home.packages = [
     (pkgs.stdenv.mkDerivation rec {
       pname = "execshell";
