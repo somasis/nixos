@@ -9,8 +9,9 @@
                 _before_command_command="''${_before_command_command#* }"
                 ;;
             '$'*)
-                _before_command_command="''${_before_command_command#$}"
+                _before_command_command="''${_before_command_command#* }"
                 _before_command_command="''${!_before_command_command}"
+                _before_command_command="''${_before_command_command#$}"
                 ;;
             _*) return ;;
         esac
