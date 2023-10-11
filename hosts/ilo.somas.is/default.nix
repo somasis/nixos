@@ -4,6 +4,7 @@
 , overlays
 , ...
 }:
+let prevOverlays = overlays; in
 nixpkgs.lib.nixosSystem {
   inherit (nixpkgs) lib;
 
