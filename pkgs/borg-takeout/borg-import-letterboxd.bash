@@ -7,32 +7,36 @@ EOF
 
 [[ "$#" -ge 1 ]] || usage
 
-n=$(basename "$1")
+n=$(basename "$1" .zip)
 n=${n#letterboxd-}
 
-a=${n%-*-*-*-*-*-utc.zip}
+account=${n%-*-*-*-*-*-utc}
 
-d=${n#*-}
-d=${d%-*.zip}
-d=${d:0:10}T${d:11:2}:${d:14:2}:00Z
+temp=$(mktemp -d)
+first_file=$(bsdtar -tf "$1" | head -n1) || [[ -n "${first_file}" ]]
+bsdtar -C "${temp}" -xf "$(readlink -f "$1")" "${first_file}"
+date=$(TZ=UTC stat -c '%Y' "${temp}"/"${first_file}")
+date=$(dateconv -i "%s" -z UTC -f "%Y-%m-%dT%H:%M:%SZ" "${date}")
+rm -r "${temp}"
 
-printf '::letterboxd-%s-%s\n' "${a}" "${d}"
+printf '::letterboxd-%s-%s\n' "${account}" "${date}"
 
 # shellcheck disable=SC2016
-bsdtar -cf - --format=ustar "$1" \
+bsdtar -cf - --format=ustar @"$1" \
     | borg \
         import-tar \
             --stats -p \
             --comment='imported with `borg import-tar`, via borg-import-letterboxd' \
-            "::letterboxd-${a}-${d}.failed" \
+            --timestamp="${date}" \
+            "::letterboxd-${account}-${date}.failed" \
             -
 
 borg \
     rename \
-        "::letterboxd-${a}-${d}.failed" \
-        "letterboxd-${a}-${d}"
+        "::letterboxd-${account}-${date}.failed" \
+        "letterboxd-${account}-${date}"
 
 borg \
     prune \
         --keep-monthly=12 --keep-yearly=4 \
-        -a "letterboxd-${a}-*"
+        -a "letterboxd-${account}-*"

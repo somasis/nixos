@@ -10,28 +10,25 @@ EOF
 date=$(TZ=UTC date +%Y-%m-%dT%H:%M:%SZ)
 
 files=()
-for f; do
-    files+=("@${f}")
+for file; do
+    files+=("@${file}")
 done
 
-t=$(mktemp -d)
+temp=$(mktemp -d)
 
 bsdtar -cf - --format=ustar "${files[@]}" \
-    | bsdtar -C "${t}" -x -f - "payload-0.json"
+    | bsdtar -C "${temp}" -xf - "payload-0.json"
 
-a=$(
-    jq -r '.[0].data.email' <"${t}"/payload-0.json
+account=$(
+    jq -r '.[0].data.email' <"${temp}"/payload-0.json
 )
 
-d=$(
-    TZ=UTC date \
-        --date="@$(TZ=UTC stat -c %Y "${t}"/payload-0.json)" \
-        +%Y-%m-%dT%H:%M:%SZ
-)
+date=$(TZ=UTC stat -c %Y "${temp}"/payload-0.json)
+date=$(dateconv -i '%s' -z UTC -f '%Y-%m-%dT%H:%M:%SZ' "${date}")
 
-rm -r "${t}"
+rm -r "${temp}"
 
-printf '::tumblr-%s-%s (%s)\n' "${a}" "${date}" "${d}"
+printf '::tumblr-%s-%s\n' "${account}" "${date}"
 
 # shellcheck disable=SC2016
 bsdtar -cf - --format=ustar "${files[@]}" \
@@ -39,16 +36,16 @@ bsdtar -cf - --format=ustar "${files[@]}" \
         import-tar \
             --stats -p \
             --comment='imported with `borg import-tar`, via borg-import-tumblr' \
-            --timestamp="${d}" \
-            "::tumblr-${a}-${date}.failed" \
+            --timestamp="${date}" \
+            "::tumblr-${account}-${date}.failed" \
             -
 
 borg \
     rename \
-        "::tumblr-${a}-${date}.failed" \
-        "tumblr-${a}-${date}"
+        "::tumblr-${account}-${date}.failed" \
+        "tumblr-${account}-${date}"
 
 borg \
     prune \
         --keep-monthly=12 --keep-yearly=4 \
-        -a "tumblr-${a}-*"
+        -a "tumblr-${account}-*"

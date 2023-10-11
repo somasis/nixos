@@ -69,11 +69,12 @@ symlinkJoin {
   name = "borg-takeout";
 
   paths = [
-    (make "borg-import-google" [ coreutils gnugrep htmlq libarchive ])
-    (make "borg-import-instagram" [ coreutils dateutils jq libarchive ])
+    (make "borg-import-google" [ coreutils dateutils gnugrep htmlq libarchive ])
+    (make "borg-import-facebook" [ coreutils dateutils gnugrep libarchive ])
+    (make "borg-import-instagram" [ coreutils dateutils gnugrep libarchive ])
     (make "borg-import-letterboxd" [ coreutils jq libarchive ])
-    (make "borg-import-tumblr" [ coreutils jq libarchive ])
-    (make "borg-import-twitter" [ coreutils gnused jq libarchive ])
+    (make "borg-import-tumblr" [ coreutils dateutils jq libarchive ])
+    (make "borg-import-twitter" [ coreutils dateutils gnused jq libarchive ])
   ];
 
   meta = with lib; {

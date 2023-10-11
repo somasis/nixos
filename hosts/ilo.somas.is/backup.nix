@@ -62,12 +62,8 @@ let
       "re:/persist/home/somasis/etc/discord(canary)?/[0-9\.]+/.*"
     ];
 
-    extraArgs = lib.cli.toGNUCommandLineShell { } { lock-wait = 600; };
-    extraCreateArgs = lib.cli.toGNUCommandLineShell { } {
-      stats = true;
-      progress = true;
-      exclude-if-present = [ ".stfolder" ];
-    };
+    extraArgs = "--lock-wait 600 --progress";
+    extraCreateArgs = "-c 300 --stats --exclude-caches --keep-exclude-tags --exclude-if-present .stfolder";
 
     inhibitsSleep = true;
 
@@ -119,6 +115,11 @@ in
   environment.systemPackages =
     let
       borgJobs = builtins.attrNames config.services.borgbackup.jobs;
+      defaultArgs = lib.cli.toGNUCommandLineShell { } {
+        progress = true;
+        verbose = true;
+        lock-wait = 600;
+      };
     in
     [
       (pkgs.borg-takeout.override {
@@ -127,7 +128,7 @@ in
     ]
     ++ (lib.optional (builtins.length borgJobs == 1) (
       pkgs.writeShellScriptBin "borg" ''
-        exec borg-job-${lib.escapeShellArg (builtins.elemAt borgJobs 0)} "$@"
+        exec borg-job-${lib.escapeShellArg (builtins.elemAt borgJobs 0)} ${defaultArgs} "$@"
       ''
     ))
   ;

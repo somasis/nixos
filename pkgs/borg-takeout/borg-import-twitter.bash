@@ -7,29 +7,27 @@ EOF
 
 [[ "$#" -ge 1 ]] || usage
 
-date=$(TZ=UTC date +%Y-%m-%dT%H:%M:%SZ)
-
 files=()
-for f; do
-    files+=("@${f}")
+for file; do
+    files+=("@${file}")
 done
 
-a=$(
+account=$(
     bsdtar -cf - --format=ustar "${files[@]}" \
         | bsdtar -Ox -f - "data/account.js" \
         | sed '/\[$/d; /^\]$/d' \
         | jq -r '"\(.account.accountId)-\(.account.username)"'
 )
 
-aid=${a%-*}
+accountid=${account%%-*}
 
-d=${1##*/}
-d=${d%.*}
-d=${d%-*}
-d=${d#twitter-}
-d="${d}"T00:00:00
+date=${1##*/}
+date=${date%.*}
+date=${date%-*}
+date=${date#twitter-}
+date="${date}"T00:00:00
 
-printf '::twitter-%s-%s (%s)\n' "${a}" "${date}" "${d}"
+printf '::twitter-%s-%s\n' "${account}" "${date}"
 
 # shellcheck disable=SC2016
 bsdtar -cf - --format=ustar "${files[@]}" \
@@ -37,16 +35,16 @@ bsdtar -cf - --format=ustar "${files[@]}" \
         import-tar \
             --stats -p \
             --comment='imported with `borg import-tar`, via borg-import-twitter' \
-            --timestamp="${d}" \
-            "::twitter-${a}-${date}.failed" \
+            --timestamp="${date}" \
+            "::twitter-${account}-${date}.failed" \
             -
 
 borg \
     rename \
-        "::twitter-${a}-${date}.failed" \
-        "twitter-${a}-${date}"
+        "::twitter-${account}-${date}.failed" \
+        "twitter-${account}-${date}"
 
 borg \
     prune \
         --keep-monthly=12 --keep-yearly=4 \
-        -a "twitter-${aid}-*"
+        -a "twitter-${accountid}-*"
