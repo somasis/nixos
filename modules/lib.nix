@@ -221,17 +221,20 @@ with lib;
                 strings
             ;
           in
-          ''"'' + escape [ "\"" ] (concatMapStringsSep ":" (escape [ ":" ]) strings') + ''"''
+          ''"'' + escape [ "\"" ] (concatStringsSep ":" strings') + ''"''
         ;
 
         exec = command: special {
           type = "exec";
-          value = "${command}";
+
+          # Use an additional layer of indirection,
+          # because newsboat's backslash escape parsing is a little inscrutable...
+          value = builtins.toString (pkgs.writeShellScript "execute-command" "exec ${command}");
         };
 
         filter = urlToFilter: filterProgram: special {
           type = "filter";
-          value = filterProgram;
+          value = builtins.toString (pkgs.writeShellScript "execute-filter" "exec ${filterProgram} ${lib.escapeShellArg urlToFilter}");
           extra = urlToFilter;
         };
 
@@ -254,20 +257,125 @@ with lib;
       };
 
       filters = {
-        discardContent = pkgs.writeShellScript "filter-discard-content" ''
-          ${getExe pkgs.yq-go} -p xml -o json --xml-strict-mode \
-              | ${getExe config.programs.jq.package} -e '
-                  if has("rss") then
-                      del(.rss.channel.item[]["description", "encoded"])
-                  elif has("feed") then
-                      del(.feed.entry[]["content"])
-                  else
-                      .
-                  end
-              ' \
-              | ${getExe pkgs.yq-go} -p json -o xml --xml-strict-mode
-        '';
+        discardContent =
+          let
+            filter = pkgs.writeJqScript "filter" { exit-status = true; } ''
+              if has("rss") then
+                del(.rss.channel.item[]["description", "encoded"])
+              elif has("feed") then
+                del(.feed.entry[]["content"])
+              else
+                .
+              end
+            '';
+          in
+          pkgs.writeShellScript "discard-content" ''
+            ${getExe pkgs.yq-go} -p xml -o json --xml-strict-mode \
+                | ${filter} \
+                | ${getExe pkgs.yq-go} -p json -o xml --xml-strict-mode
+          '';
       };
+
+      urls.gemini = url:
+        let
+          fetchGemini = pkgs.writeShellScript "fetch-gemini" ''
+            PATH=${lib.makeBinPath [
+              config.programs.jq.package
+              pkgs.coreutils
+              pkgs.dateutils
+              pkgs.gemget
+              pkgs.gmnitohtml
+              pkgs.moreutils
+              pkgs.pup
+              pkgs.teip
+            ]}:"$PATH"
+
+            set -euo pipefail
+
+            : "''${XDG_CACHE_HOME:=$HOME/.cache}"
+
+            if [ "$#" -ne 1 ]; then
+                printf 'error: no URL provided\n' >&2
+                exit 1
+            fi
+
+            url="$1" # ex. gemini://git.skyjake.fi/lagrange/release
+            url_hash=$(sha256sum <<<"$url")
+            url_hash=''${url_hash%% *}
+
+            gmni=$(gemget -o - "$url")
+            gmni_hash=$(sha256sum <<<"$gmni")
+            gmni_hash=''${gmni_hash%% *}
+
+            output_hash="$XDG_CACHE_HOME/newsboat/gemini/$url_hash.hash"
+            output_feed="$XDG_CACHE_HOME/newsboat/gemini/$url_hash.atom"
+            output_feed_temp=$(mktemp)
+
+            mkdir -p "$XDG_CACHE_HOME/newsboat/gemini"
+
+            printf '%s\n' "$gmni_hash" > "$output_hash"
+
+            if [ -s "$output_hash" ]; then
+                old_gmni_hash=$(cat "$output_hash")
+                old_gmni_hash=''${old_gmni_hash%% *}
+
+                if [ -s "$output_feed" ] && [ "$gmni_hash" = "$old_gmni_hash" ]; then
+                    cat "$output_feed"
+                    exit 0
+                fi
+            fi
+
+            html=$(gmnitohtml <<<"$gmni")
+
+            # <https://geminiprotocol.net/docs/companion/subscription.gmi>
+
+            title=$(pup 'h1:first-of-type text{}' <<<"$html")
+            entries=$(
+                <<<"$html" pup -i 0 'a[href] json{}' \
+                    | jq -r \
+                        --arg url "$url" '
+                        .[]
+                            | ($url + "/" + (.href | sub("^\\./|//"; ""))) as $link
+                            | (.text | match("^[0-9]{4}-[0-9]{2}-[0-9]{2}").string) as $date
+                            | (.text | sub("^[0-9]{4}-[0-9]{2}-[0-9]{2}( - |: | )?|^ *"; "")) as $title
+                            | [ $date, ($link), ($title | @html) ]
+                            | @tsv
+                    ' \
+                    | teip -d $'\t' -f1 -- dateconv -f '%Y-%m-%dT12:00:00Z'
+            )
+
+            updated=$(<<<"$entries" head -n1 | cut -f1)
+
+            {
+                cat <<EOF
+            <?xml version="1.0" encoding="utf-8"?>
+            <feed xmlns="http://www.w3.org/2005/Atom">
+              <title>$title</title>
+              <id>$url</id>
+              <link href="$url" rel="self" />
+              <updated>$updated</updated>
+            EOF
+
+                while IFS=$(printf '\t') read -r date link title; do
+                    content=$(gemget -o - "$link" | gmnitohtml | jq -Rr '@html')
+
+                    cat <<EOF
+              <entry>
+                <title type="html">$title</title>
+                <link rel="alternate" href="$link" />
+                <id>$link</id>
+                <updated>$date</updated>
+                <content type="html">$content</content>
+              </entry>
+            EOF
+                done <<<"$entries"
+
+                printf '</feed>\n'
+            } | ifne sponge "$output_feed"
+          '';
+        in
+        feeds.urls.exec "${fetchGemini} ${lib.escapeShellArg url}"
+      ;
     };
 
     colors = rec {

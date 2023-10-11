@@ -172,6 +172,11 @@ in
         title = "Susam Pal: maze";
         tags = [ "blog" "computer" ];
       }
+      {
+        url = feeds.urls.gemini "gemini://journcy.net";
+        title = "journcy";
+        tags = [ "blog" ];
+      }
 
       # Comics
       {
@@ -190,7 +195,7 @@ in
 
       # Computers
       {
-        url = "https://latacora.micro.blog/feed.xml";
+        url = "https://www.latacora.com/blog/index.xml";
         tags = [ "blog" "computer" ];
       }
       {
@@ -243,7 +248,7 @@ in
         tags = [ "review" "music" ];
       }
       {
-        url = "https://expandingdan.substack.comfeed";
+        url = "https://expandingdan.substack.com/feed";
         tags = [ "music" ];
       }
 
@@ -260,6 +265,21 @@ in
         url = feeds.urls.filter "https://www.japantimes.co.jp/feed/" feeds.filters.discardContent;
         title = "The Japan Times";
         tags = [ "news" "japan" ];
+      }
+      {
+        url = feeds.urls.filter "https://www.abc.net.au/news/feed/45910/rss.xml" feeds.filters.discardContent;
+        title = "ABC News: top stories";
+        tags = [ "news" "australia" "local" ];
+      }
+      {
+        url = feeds.urls.filter "https://www.abc.net.au/news/feed/8057540/rss.xml" feeds.filters.discardContent;
+        title = "ABC News: Adelaide";
+        tags = [ "news" "australia" "local" ];
+      }
+      {
+        url = feeds.urls.filter "https://www.abc.net.au/news/feed/472/rss.xml" feeds.filters.discardContent;
+        title = "ABC News: Arts and Entertainment";
+        tags = [ "news" "australia" "local" ];
       }
 
       {
@@ -319,6 +339,11 @@ in
       {
         url = "https://newleftreview.org/feed";
         tags = [ "journal" ];
+      }
+
+      {
+        url = "https://www.404media.co/rss";
+        tags = [ "news" "media" ];
       }
 
       # Notifications
@@ -396,7 +421,11 @@ in
 
       # System
       { url = "https://nixos.org/blog/announcements-rss.xml"; tags = [ "computer" "NixOS" ]; }
-
+      {
+        url = "https://discourse.nixos.org/t/breaking-changes-announcement-for-unstable/17574.rss";
+        title = "NixOS: Breaking changes on nixos-unstable";
+        tags = [ "computer" "NixOS" ];
+      }
 
       # toki pona
       {
@@ -443,8 +472,9 @@ in
         tags = [ "blog" "philosophy" ];
       }
       {
-        url = "http://blog.vernonwcisney.com/1/feed";
+        url = "https://blog.vernonwcisney.com/1/feed";
         tags = [ "blog" "philosophy" ];
+        title = "Flows and Becomings";
       }
       { url = feeds.urls.filter "https://medium.com/feed/@vcisney" feeds.filters.discardContent; tags = [ "blog" "philosophy" "medium" ]; }
     ];
@@ -476,7 +506,9 @@ in
 
         Service = {
           Type = "oneshot";
-          ExecCondition = [ "${pkgs.playtime}/bin/playtime -q" if-newsboat-not-running ]
+          ExecCondition = [ ]
+            # ++ [ "${pkgs.playtime}/bin/playtime -q" ]
+            ++ [ if-newsboat-not-running ]
             ++ lib.optional osConfig.networking.networkmanager.enable if-network;
 
           ExecStart = [ "${pkgs.limitcpu}/bin/cpulimit -qf -l 25 -- ${pkgs.newsboat}/bin/newsboat -x reload" ];
@@ -527,7 +559,10 @@ in
           ExecCondition = [ if-newsboat-not-running if-network ];
           ExecStart = pkgs.writeShellScript "newsboat-check-broken" ''
             PATH=${lib.makeBinPath [ config.programs.jq.package pkgs.lychee pkgs.newsboat pkgs.yq-go ]}
-            newsboat -e | yq -p xml -o json | jq -er '.opml.body.outline[]."+@xmlUrl"' | lychee --no-progress - >/dev/null
+            newsboat -e \
+                | yq -p xml -o json \
+                | jq -er '.opml.body.outline[]."+@xmlUrl"' \
+                | lychee --no-progress - >/dev/null
           '';
         };
       };
