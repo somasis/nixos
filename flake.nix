@@ -45,6 +45,9 @@
     ubase.flake = false;
     ubase.url = "github:michaelforney/ubase";
 
+    qutebrowser-zotero.flake = false;
+    qutebrowser-zotero.url = "github:parchd-1/qutebrowser-zotero";
+
     murdos-musicbrainz.flake = false;
     murdos-musicbrainz.url = "github:murdos/musicbrainz-userscripts";
 

@@ -6,25 +6,27 @@
 , ...
 }:
 let
+  inherit (config.lib.somasis) flakeModifiedDateToVersion;
   inherit (inputs) csl zoteroTranslators;
   inherit (osConfig.services) tor;
 
-  libgen = "${pkgs.libgen-cli}/bin/libgen-cli";
-
-  qute-zotero = pkgs.callPackage
+  qutebrowser-zotero = pkgs.callPackage
     ({ lib, fetchurl, fetchFromGitHub, python3Packages }:
       python3Packages.buildPythonApplication rec {
-        pname = "qute-zotero";
-        version = "unstable-2019-06-15";
+        pname = "qutebrowser-zotero";
 
         format = "other";
 
-        src = fetchFromGitHub {
-          owner = "parchd-1";
-          repo = "qutebrowser-zotero";
-          rev = "54706b43433c3ea8da6b7b410d67528da9779657";
-          hash = "sha256-Jv5qrpWSMrfGr6gV8PxELCOfZ0PyGBPO+nBt2czYuu4=";
-        };
+        # version = "unstable-2019-06-15";
+        # src = fetchFromGitHub {
+        #   owner = "parchd-1";
+        #   repo = "qutebrowser-zotero";
+        #   rev = "54706b43433c3ea8da6b7b410d67528da9779657";
+        #   hash = "sha256-Jv5qrpWSMrfGr6gV8PxELCOfZ0PyGBPO+nBt2czYuu4=";
+        # };
+
+        version = flakeModifiedDateToVersion inputs.qutebrowser-zotero;
+        src = inputs.qutebrowser-zotero;
 
         propagatedBuildInputs = with python3Packages; [ requests ];
 
@@ -37,6 +39,7 @@ let
           homepage = "https://github.com/parchd-1/qutebrowser-zotero";
           maintainers = with maintainers; [ somasis ];
           license = licenses.gpl3;
+          mainProgram = "qute-zotero";
         };
       })
     { };
@@ -460,8 +463,8 @@ in
   services.sxhkd.keybindings."super + z" = "${config.programs.zotero.package}/bin/zotero";
 
   programs.qutebrowser = {
-    aliases.zotero = "spawn -u ${qute-zotero}/bin/qute-zotero";
-    aliases.Zotero = "hint links userscript ${qute-zotero}/bin/qute-zotero";
+    aliases.zotero = "spawn -u ${qutebrowser-zotero}/bin/qute-zotero";
+    aliases.Zotero = "hint links userscript ${qutebrowser-zotero}/bin/qute-zotero";
     keyBindings.normal = let open = x: "open -rt ${x}"; in {
       "zpz" = "zotero";
       "zpZ" = "Zotero";
