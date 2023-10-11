@@ -108,7 +108,7 @@
     # QT_STYLE_OVERRIDE = config.qt.style.name;
 
     # Improve Java GUI font rendering (really necessary for using
-    # LangaugeTool on LibreOffice)
+    # LanguageTool on LibreOffice)
     _JAVA_OPTIONS = "-Dawt.useSystemAAFontSettings=on";
   };
 

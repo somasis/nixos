@@ -6,12 +6,14 @@
 }:
 let
   inherit (lib) replaceStrings;
+  inherit (config.lib.somasis) commaList;
   inherit (config.lib.somasis.generators) toXML;
 
   lo = pkgs.libreoffice-still;
+
   loInstallExtensions = exts: assert (builtins.isList exts);
     let
-      installer = pkgs.writeShellScript "libreoffice-install-extensions" ''
+      libreoffice-install-extensions = pkgs.writeShellScript "libreoffice-install-extensions" ''
         export PATH=${lib.makeBinPath [ pkgs.gnugrep pkgs.coreutils lo ]}
 
         ext_is_installed() {
@@ -29,7 +31,7 @@ let
         done
       '';
     in
-    "${installer} ${lib.escapeShellArgs exts}"
+    "${libreoffice-install-extensions} ${lib.escapeShellArgs exts}"
   ;
 
   loExtensions = [
@@ -79,11 +81,10 @@ let
     (pkgs.fetchurl {
       url = "https://extensions.libreoffice.org/assets/downloads/3710/1691498123/LanguageTool-6.2.oxt";
       hash = "sha256-Ck0SyckcoAz8fWgy/LQHRoTNtbvKkaH6xk0UovpRagg=";
-      # url = "https://extensions.libreoffice.org/assets/downloads/99/1667923733/LanguageTool-5.9.1.oxt";
-      # hash = "sha256-tWUqzvpeeAdxccgz/LBjK6hPFtxzfR3YGivaldhUN0U=";
     })
   ]
-  ++ lib.optional config.programs.zotero.enable "${config.programs.zotero.package}/usr/lib/zotero-bin-${pkgs.zotero.version}/extensions/zoteroOpenOfficeIntegration@zotero.org/install/Zotero_OpenOffice_Integration.oxt"
+  ++ lib.optional config.programs.zotero.enable
+    "${config.programs.zotero.package}/usr/lib/zotero-bin-${pkgs.zotero.version}/extensions/zoteroOpenOfficeIntegration@zotero.org/install/Zotero_OpenOffice_Integration.oxt"
   ;
 in
 rec {
@@ -117,67 +118,84 @@ rec {
 
   # See for more details:
   # <https://wiki.documentfoundation.org/UserProfile#User_profile_content>
-  persist.directories = [
-    { method = "symlink"; directory = "etc/libreoffice/4"; }
-    { method = "symlink"; directory = "etc/LanguageTool/LibreOffice"; }
-  ];
+  persist.directories = [{ method = "symlink"; directory = "etc/libreoffice/4"; }];
+
+  cache.directories = [{ method = "symlink"; directory = "etc/LanguageTool/cache"; }];
+  log.files = [ "etc/LanguageTool/LanguageTool.log" ];
 
   xdg.configFile = {
-    "libreoffice/jre".source = pkgs.openjdk19;
+    "libreoffice/jre".source = lo.unwrapped.jdk;
 
-    # "LanguageTool/LibreOffice/Languagetool.cfg".text = lib.generators.toKeyValue { } {
-    #   motherTongue = "en-US";
-    #   "disabledCategories.en-US" = "Creative Writing,Wikipedia";
-    #   "disabledRules.en-US" = "HASH_SYMBOL,WIKIPEDIA_CONTRACTIONS,WIKIPEDIA_CURRENTLY,TOO_LONG_SENTENCE,WIKIPEDIA_12_PM,WIKIPEDIA_12_AM";
-    #   "enabledRules.en-US" = "WHITESPACE_PARAGRAPH,THREE_NN,EN_REDUNDANCY_REPLACE";
-    #   noDefaultCheck = true;
+    "LanguageTool/LibreOffice/Languagetool.cfg".text = lib.generators.toKeyValue
+      {
+        mkKeyValue = k: v:
+          let
+            v' =
+              if lib.isList v then
+                commaList v
+              else
+                v
+            ;
+          in
+          lib.generators.mkKeyValueDefault { } "=" k (lib.escape [ ":" ] v')
+        ;
+      }
+      rec {
+        motherTongue = "en-US";
+        fixedLanguage = motherTongue;
+        autoDetect = false;
 
-    #   noSynonymsAsSuggestions = false;
+        "enabledRules.en-US" = [ "WHITESPACE_PARAGRAPH" "THREE_NN" "EN_REDUNDANCY_REPLACE" ];
+        "disabledCategories.en-US" = [ "Creative Writing" "Wikipedia" ];
+        "disabledRules.en-US" = [ "HASH_SYMBOL" "WIKIPEDIA_CONTRACTIONS" "WIKIPEDIA_CURRENTLY" "TOO_LONG_SENTENCE" "WIKIPEDIA_12_PM" "WIKIPEDIA_12_AM" ];
 
-    #   serverMode = false;
-    #   serverPort = 8081;
+        noDefaultCheck = true;
+        noSynonymsAsSuggestions = false;
 
-    #   doRemoteCheck = true;
-    #   useOtherServer = true;
-    #   otherServerUrl = "http://localhost:3864";
-    # };
+        numberParagraphs = -2;
+
+        serverMode = false;
+        serverPort = 8081;
+
+        doRemoteCheck = true;
+        useOtherServer = true;
+        otherServerUrl = "http://localhost:3864";
+      };
+
+    # TODO: why doesn't this work?
+    #       LibreOffice will fail to recognize the Java environment at all, if I
+    #       generate the javasettings XML file during build time...
+    #   let
+    #     system = osConfig.nixpkgs.localSystem.uname;
+    #   in
+    #   {
+    #     "libreoffice/4/user/config/javasettings_${system.system}_${lib.toUpper system.processor}.xml".text = toXML {} {
+    #       java = {
+    #         "@xmlns" = "http://openoffice.org/2004/java/framework/1.0";
+    #         "@xmlns:xsi" = "http://www.w3.org/2001/XMLSchema-instance";
+
+    #         enabled."@xsi:nil" = "true";
+    #         userClassPath."@xsi:nil" = "false";
+    #         vmParameters."@xsi:nil" = "false";
+    #         jreLocations."@xsi:nil" = "true";
+
+    #         # We can't use LibreOffice's own buildInput jdk because it's headless.
+    #         # javaInfo = let inherit (lo.unwrapped) jdk; in {
+    #         javaInfo = let jdk = pkgs.openjdk19; in {
+    #           "@xsi:nil" = "false";
+    #           "@vendorUpdate" = "2019-07-26"; # ?
+    #           "@autoSelect" = "true";
+    #           vendor = "N/A";
+    #           location = "file://${jdk}/lib/openjdk";
+    #           version = replaceStrings [ "+.*" ] [ "" ] jdk.version;
+    #           features = 0;
+    #           requirements = 1;
+
+    #           vendorData = "660069006C0065003A002F002F002F006E00690078002F00730074006F00720065002F007A003000300066006D0035003200760078007900670069006B007300620067007000770067006D00770036006A00310066006100370062007700360071006E002D006F00700065006E006A0064006B002D00310039002E0030002E0032002B0037002F006C00690062002F006F00700065006E006A0064006B002F006C00690062002F007300650072007600650072002F006C00690062006A0076006D002E0073006F000A002F006E00690078002F00730074006F00720065002F007A003000300066006D0035003200760078007900670069006B007300620067007000770067006D00770036006A00310066006100370062007700360071006E002D006F00700065006E006A0064006B002D00310039002E0030002E0032002B0037002F006C00690062002F006F00700065006E006A0064006B002F006C00690062002F0061006D006400360034002F0063006C00690065006E0074003A002F006E00690078002F00730074006F00720065002F007A003000300066006D0035003200760078007900670069006B007300620067007000770067006D00770036006A00310066006100370062007700360071006E002D006F00700065006E006A0064006B002D00310039002E0030002E0032002B0037002F006C00690062002F006F00700065006E006A0064006B002F006C00690062002F0061006D006400360034002F007300650072007600650072003A002F006E00690078002F00730074006F00720065002F007A003000300066006D0035003200760078007900670069006B007300620067007000770067006D00770036006A00310066006100370062007700360071006E002D006F00700065006E006A0064006B002D00310039002E0030002E0032002B0037002F006C00690062002F006F00700065006E006A0064006B002F006C00690062002F0061006D006400360034002F006E00610074006900760065005F0074006800720065006100640073003A002F006E00690078002F00730074006F00720065002F007A003000300066006D0035003200760078007900670069006B007300620067007000770067006D00770036006A00310066006100370062007700360071006E002D006F00700065006E006A0064006B002D00310039002E0030002E0032002B0037002F006C00690062002F006F00700065006E006A0064006B002F006C00690062002F0061006D006400360034000A00"; # wtf
+    #         };
+    #       };
+    #     };
   };
-
-  # TODO: why doesn't this work?
-  #       LibreOffice will fail to recognize the Java environment at all, if I
-  #       generate the javasettings XML file during build time...
-  # xdg.configFile =
-  #   let
-  #     system = osConfig.nixpkgs.localSystem.uname;
-  #   in
-  #   {
-  #     "libreoffice/4/user/config/javasettings_${system.system}_${lib.toUpper system.processor}.xml".text = toXML {} {
-  #       java = {
-  #         "@xmlns" = "http://openoffice.org/2004/java/framework/1.0";
-  #         "@xmlns:xsi" = "http://www.w3.org/2001/XMLSchema-instance";
-
-  #         enabled."@xsi:nil" = "true";
-  #         userClassPath."@xsi:nil" = "false";
-  #         vmParameters."@xsi:nil" = "false";
-  #         jreLocations."@xsi:nil" = "true";
-
-  #         # We can't use LibreOffice's own buildInput jdk because it's headless.
-  #         # javaInfo = let inherit (lo.unwrapped) jdk; in {
-  #         javaInfo = let jdk = pkgs.openjdk19; in {
-  #           "@xsi:nil" = "false";
-  #           "@vendorUpdate" = "2019-07-26"; # ?
-  #           "@autoSelect" = "true";
-  #           vendor = "N/A";
-  #           location = "file://${jdk}/lib/openjdk";
-  #           version = replaceStrings [ "+.*" ] [ "" ] jdk.version;
-  #           features = 0;
-  #           requirements = 1;
-
-  #           vendorData = "660069006C0065003A002F002F002F006E00690078002F00730074006F00720065002F007A003000300066006D0035003200760078007900670069006B007300620067007000770067006D00770036006A00310066006100370062007700360071006E002D006F00700065006E006A0064006B002D00310039002E0030002E0032002B0037002F006C00690062002F006F00700065006E006A0064006B002F006C00690062002F007300650072007600650072002F006C00690062006A0076006D002E0073006F000A002F006E00690078002F00730074006F00720065002F007A003000300066006D0035003200760078007900670069006B007300620067007000770067006D00770036006A00310066006100370062007700360071006E002D006F00700065006E006A0064006B002D00310039002E0030002E0032002B0037002F006C00690062002F006F00700065006E006A0064006B002F006C00690062002F0061006D006400360034002F0063006C00690065006E0074003A002F006E00690078002F00730074006F00720065002F007A003000300066006D0035003200760078007900670069006B007300620067007000770067006D00770036006A00310066006100370062007700360071006E002D006F00700065006E006A0064006B002D00310039002E0030002E0032002B0037002F006C00690062002F006F00700065006E006A0064006B002F006C00690062002F0061006D006400360034002F007300650072007600650072003A002F006E00690078002F00730074006F00720065002F007A003000300066006D0035003200760078007900670069006B007300620067007000770067006D00770036006A00310066006100370062007700360071006E002D006F00700065006E006A0064006B002D00310039002E0030002E0032002B0037002F006C00690062002F006F00700065006E006A0064006B002F006C00690062002F0061006D006400360034002F006E00610074006900760065005F0074006800720065006100640073003A002F006E00690078002F00730074006F00720065002F007A003000300066006D0035003200760078007900670069006B007300620067007000770067006D00770036006A00310066006100370062007700360071006E002D006F00700065006E006A0064006B002D00310039002E0030002E0032002B0037002F006C00690062002F006F00700065006E006A0064006B002F006C00690062002F0061006D006400360034000A00"; # wtf
-  #         };
-  #       };
-  #     };
-  #   };
 
   xdg.mimeApps.associations.removed = lib.genAttrs [ "text/plain" ] (_: "libreoffice.desktop");
 
@@ -225,6 +243,7 @@ rec {
   somasis.tunnels.tunnels.languagetool = {
     port = 3864;
     remote = "somasis@spinoza.7596ff.com";
+    linger = "15m";
   };
 
   home.sessionVariables = {
