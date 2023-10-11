@@ -27,7 +27,14 @@
       | .[1];  # answer
   '';
 
+  home.shellAliases = {
+    diff = "diff --color";
+    g = "find -L ./ -type f \! -path '*/.*/*' -print0 | xe -0 -N0 grep -n";
+    number = "nl -b a -d '' -f n -w 1";
+  };
+
   home.packages = [
+    pkgs.ellipsis
     pkgs.frangipanni
     pkgs.fx
     pkgs.html-tidy
@@ -36,6 +43,12 @@
     pkgs.lowdown
     pkgs.patchutils
     pkgs.xmlstarlet
+
+    pkgs.table
+    pkgs.ugrep
+
+    pkgs.ini2nix
+    pkgs.json2nix
 
     (pkgs.symlinkJoin {
       name = "yq-go-with-completion";

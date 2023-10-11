@@ -49,6 +49,7 @@ rec
   screenshot = callPackage ./screenshot { };
   xinput-notify = callPackage ./xinput-notify { };
 
+  ellipsis = callPackage ./ellipsis { };
   dates = callPackage ./dates { };
   json2nix = callPackage ./json2nix { };
   mimetest = callPackage ./mimetest { };
