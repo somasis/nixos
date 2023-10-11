@@ -68,6 +68,7 @@ rec
   borg-takeout = callPackage ./borg-takeout { };
   qutebrowser-sync = callPackage ./qutebrowser-sync { };
 
+  execshell = callPackage ./execshell { };
   ffsclient = callPackage ./ffsclient { };
   mail-deduplicate = python3Packages.callPackage ./mail-deduplicate { };
   notify-send-all = callPackage ./notify-send-all { };
