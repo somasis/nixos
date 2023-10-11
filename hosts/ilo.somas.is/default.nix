@@ -100,8 +100,9 @@ nixpkgs.lib.nixosSystem {
 
         directories = [
           "/var/lib/systemd/timers"
-          "/var/lib/systemd/timesync"
+          { directory = "/var/lib/systemd/timesync"; user = "systemd-timesync"; group = "systemd-timesync"; }
           "/var/lib/systemd/backlight"
+          "/var/lib/systemd/linger"
         ];
         files = [ "/var/lib/systemd/random-seed" ];
       };
