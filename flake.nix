@@ -2,16 +2,16 @@
   description = "somas.is";
 
   inputs = {
-    # avatarSomasis = {
-    #   # jq -nrR \
-    #   #     --arg hash "$(printf '%s' 'kylie@somas.is' | md5sum | cut -d ' ' -f1)" \
-    #   #     --arg size 512 \
-    #   #     --arg fallback "https://avatars.githubusercontent.com/${USER}?size=512" \
-    #   #     '"url = \"https://www.gravatar.com/avatar/\($hash)?s=\($size)&d=\($fallback | @uri)\";"'
-    #   #     '
-    #   flake = false;
-    #   url = "https://www.gravatar.com/avatar/a187e38560bb56f5231cd19e45ad80f6?s=512&d=https%3A%2F%2Favatars.githubusercontent.com%2Fsomasis%3Fsize%3D512";
-    # };
+    avatarSomasis = {
+      # jq -nrR \
+      #     --arg hash "$(printf '%s' 'kylie@somas.is' | md5sum | cut -d ' ' -f1)" \
+      #     --arg size 512 \
+      #     --arg fallback "https://avatars.githubusercontent.com/${USER}?size=512" \
+      #     '"url = \"https://www.gravatar.com/avatar/\($hash)?s=\($size)&d=\($fallback | @uri)\";"'
+      #     '
+      flake = false;
+      url = "https://www.gravatar.com/avatar/a187e38560bb56f5231cd19e45ad80f6?s=512&d=https%3A%2F%2Favatars.githubusercontent.com%2Fsomasis%3Fsize%3D512";
+    };
 
     flake-compat.url = "github:edolstra/flake-compat";
     flake-compat.flake = false;

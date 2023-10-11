@@ -107,7 +107,10 @@
     pkgs.xzoom
   ];
 
-  # home.file.".face".source = inputs.avatarSomasis;
+  home.file = {
+    ".face".source = inputs.avatarSomasis;
+    ".face.png".source = inputs.avatarSomasis;
+  };
 
   xsession = {
     enable = true;
