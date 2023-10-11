@@ -3,9 +3,9 @@
 , ...
 }: {
   fonts = {
-    enableDefaultFonts = false;
+    enableDefaultPackages = false;
 
-    fonts = [
+    packages = [
       pkgs.noto-fonts
 
       pkgs.iosevka-bin
@@ -24,7 +24,8 @@
 
       pkgs.spleen
 
-      pkgs.twitter-color-emoji
+      # pkgs.twitter-color-emoji
+      pkgs.openmoji-color
     ];
 
     fontconfig = {
@@ -58,7 +59,7 @@
           "nasin-nanpa"
           "emoji"
         ];
-        emoji = lib.mkBefore [ "Twitter Color Emoji" ];
+        emoji = lib.mkBefore [ "OpenMoji-Color" ];
       };
     };
   };
