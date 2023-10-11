@@ -518,15 +518,26 @@ with lib;
 
     # jhide can handle multiple lists, but the memory usage is much better
     # if you have a script per list.
-    greasemonkey.jhide = list: pkgs.runCommandLocal "jhide.user.js" { } ''
-      ${lib.getExe pkgs.jhide} \
-          -o $out \
-          ${lib.escapeShellArgs (
-            map
-              (lib.replaceStrings [ "file://" ] [ "" ])
-              (if lib.isList list then list else [ list ])
-          )}
-    '';
+    greasemonkey.jhide = lists:
+      assert (lib.isString lists || lib.isList lists);
+
+      let
+        lists' =
+          if lib.isList lists then
+            lists
+          else
+            [ lists ]
+        ;
+
+        excludeDomains = [ "mail.google.com" ];
+      in
+
+      pkgs.runCommandLocal "jhide-${builtins.hashString ''sha256'' (lib.concatStringsSep '','' (map (builtins.hashFile ''sha256'') lists'))}.user.js" { } ''
+        ${lib.getExe pkgs.jhide} \
+            -o $out \
+            --whitelist ${lib.escapeShellArg (lib.concatStringsSep "," excludeDomains)} \
+            ${lib.escapeShellArgs lists'}
+      '';
 
     # Return from a flake argument, a string suitable for use as a package version.
     #
