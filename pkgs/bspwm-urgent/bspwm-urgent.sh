@@ -1,7 +1,5 @@
 # shellcheck shell=sh
 
-set -x
-
 set_window_variables() {
     : "${id:?set_window_variables(): no \$id provided}"
 
@@ -16,7 +14,9 @@ set_notification_variables() {
 
     notification_id=
     notification_file="${runtime}/${hash}.notification"
-    [ -e "${notification_file}" ] && notification_id=$(cat "${notification_file}") || :
+    if [ -e "${notification_file}" ]; then
+        notification_id=$(cat "${notification_file}")
+    fi
 }
 
 notify() {
