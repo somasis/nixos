@@ -164,7 +164,7 @@ in
         '';
 
         wayback = pkgs.writeShellScript "wayback" ''
-          PATH=${lib.makeBinPath [ pkgs.curl pkgs.wayback-machine-archiver ]}:"$PATH"
+          PATH=${lib.makeBinPath [ pkgs.curl pkgs.jq pkgs.wayback-machine-archiver ]}:"$PATH"
 
           : "''${QUTE_FIFO:?}"
           : "''${QUTE_TAB_INDEX:?}"
@@ -174,9 +174,9 @@ in
           wayback_response=
           wayback_archived_url=
 
-          check_wayback()
+          check_wayback() {
               wayback_response=$(
-                  curl -f -s -G --url-query "url=$url" "https://archive.org/wayback/available
+                  curl -f -s -G --url-query "url=$url" "https://archive.org/wayback/available"
               )
 
               wayback_archived_url=$(
