@@ -25,7 +25,7 @@ let
             }' \
             -e 's/ ([!?,\.]) /\1 /g' \
             -e 's/ ([!?,\.])$/\1/g' \
-        | tr -s '[[:blank:]]' \
+        | tr -s '[[:blank:]]'
   '';
 
   fetch-didyouknow = pkgs.writeShellScript "fetch-didyouknow" ''
@@ -158,11 +158,11 @@ in
   services.stw.widgets.didyouknow = {
     text = {
       font = "monospace:style=heavy:size=10";
-      color = config.xresources.properties."*darkForeground";
+      color = config.theme.colors.darkForeground;
     };
 
     window = {
-      color = config.xresources.properties."*darkBackground";
+      color = config.theme.colors.darkBackground;
       opacity = 0.25;
 
       position = {

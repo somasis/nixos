@@ -12,8 +12,6 @@ in
     defaultTarget = config.networking.fqdnOrHostName;
   };
 
-  systemd.packages = [ pkgs.autorandr ];
-
   # TODO(?): Is this still needed? I used acpid for triggering
   #          autorandr on lid events when using my external monitors.
   services.acpid = {

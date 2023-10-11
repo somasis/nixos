@@ -10,8 +10,8 @@
                 ;;
             '$'*)
                 _before_command_command="''${_before_command_command% *}"
-                _before_command_command="''${!_before_command_command}"
                 _before_command_command="''${_before_command_command#$}"
+                _before_command_command="''${!_before_command_command}"
                 ;;
             _*) return ;;
         esac
@@ -73,6 +73,9 @@
       blink-matching-paren = true;
 
       menu-complete-display-prefix = true;
+
+      # Append slashes for completion candidates that are symlinks to directories.
+      # Show symlinks with a @ symbol after the name in completion lists.
       mark-symlinked-directories = true;
 
       # Don't use readline's internal pager for showing completion;

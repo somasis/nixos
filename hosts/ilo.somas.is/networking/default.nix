@@ -103,6 +103,8 @@
     settings = {
       HardwareAccel = 1;
       SafeLogging = 1;
+
+      ControlPort = 9051;
     };
   };
 

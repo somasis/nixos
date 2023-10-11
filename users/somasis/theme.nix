@@ -1,48 +1,44 @@
-{ lib
-, config
+{ config
 , ...
-}:
-let
+}: {
   theme.colors = rec {
     # Arc color scheme (dark)
     darkForeground = "#e0eaf0";
     darkBackground = "#2f343f";
-    darkCursorColor = lightForeground;
-    darkBorderColor = "#2b2e39";
-    darkSidebarColor = "#353946";
+    darkCursor = lightForeground;
+    darkBorder = "#2b2e39";
+    darkSidebar = "#353946";
 
     # Arc color scheme (light)
     lightForeground = "#696d78";
     lightBackground = "#f5f6f7";
-    lightCursorColor = darkBackground;
-    lightBorderColor = "#cfd6e6";
+    lightCursor = darkBackground;
+    lightBorder = "#cfd6e6";
 
-    colorAccent = "#5294e2";
-    color0 = "#755f5f";
-    color1 = "#cf4342";
-    color2 = "#acc044";
-    color3 = "#ef9324";
-    color4 = "#438dc5";
-    color5 = "#c54d7a";
-    color6 = "#499baf";
-    color7 = "#d8c7c7";
-    color8 = "#937474";
-    color9 = "#fe6262";
-    color10 = "#c4e978";
-    color11 = "#f8dc3c";
-    color12 = "#96c7ec";
-    color13 = "#f97cac";
-    color14 = "#30d0f2";
-    color15 = "#e0d6d6";
-
+    # Match Arc-Darker GTK theme
     foreground = darkForeground;
     background = darkBackground;
-    cursorColor = darkCursorColor;
-    borderColor = darkBorderColor;
-    sidebarColor = darkSidebarColor;
+    cursor = darkCursor;
+    border = darkBorder;
+    sidebar = darkSidebar;
+
+    accent = "#5294e2";
+
+    black = "#755f5f";
+    red = "#cf4342";
+    green = "#acc044";
+    yellow = "#ef9324";
+    blue = "#438dc5";
+    magenta = "#c54d7a";
+    cyan = "#499baf";
+    white = "#d8c7c7";
+    brightBlack = "#937474";
+    brightRed = "#fe6262";
+    brightGreen = "#c4e978";
+    brightYellow = "#f8dc3c";
+    brightBlue = "#96c7ec";
+    brightMagenta = "#f97cac";
+    brightCyan = "#30d0f2";
+    brightWhite = "#e0d6d6";
   };
-in
-{
-  _module.args.theme = theme;
-  xresources.properties = lib.mapAttrs' (n: v: lib.nameValuePair "*${n}" v) theme.colors;
 }

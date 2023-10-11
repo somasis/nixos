@@ -4,13 +4,11 @@
 , ...
 }:
 let
-  formatPrettier = pkgs.writeShellScript "format-prettier" ''
-    ${pkgs.nodePackages.prettier}/bin/prettier \
-        --tab-width "$kak_opt_tabstop" \
-        --print-width "$kak_opt_autowrap_column" \
-        --config-precedence prefer-file \
-        --stdin-filepath "$kak_var_buffile"
-  '';
+  formatPrettierWith = extraArgs:
+    "${pkgs.nodePackages.prettier}/bin/prettier --tab-width %opt{indentwidth} --print-width %opt{autowrap_column} --config-precedence prefer-file --stdin-filepath %val{buffile} ${extraArgs}"
+  ;
+
+  formatPrettier = formatPrettierWith "";
 
   # CSS
   # TODO Need a new CSS linting tool; stylelint is broken with recent NixOS updates, it seems, due to
@@ -18,35 +16,46 @@ let
   # lintCSS = pkgs.writeShellScript "lint-css" ''
   #   ${pkgs.nodePackages.stylelint}/bin/stylelint --formatter unix --stdin-filename="$kak_buffile" < "$1"
   # '';
+  # CSS
+  formatCSS = formatPrettier;
 
-  formatHTML = pkgs.writeShellScript "format-html" ''
+  formatHTML =
+    "${pkgs.html-tidy}/bin/tidy --quiet yes --wrap 0 --indent auto --indent-spaces %opt{tabstop} --tab-size %opt{tabstop} --tidy-mark no 2>/dev/null || :"
+  ;
+  lintHTML = pkgs.writeShellScript "lint-html" ''
+    : "''${kak_buffile:=}"
+
     ${pkgs.html-tidy}/bin/tidy \
-        --quiet yes \
-        --indent auto \
-        --indent-spaces "$kak_opt_tabstop" \
-        --tab-size "$kak_opt_tabstop" \
+        --markup no \
+        --gnu-emacs yes \
+        --quiet yes
+        --write-back no \
         --tidy-mark no \
-        2>/dev/null \
-        || true
+        "$1" 2>&1
   '';
 
   # JavaScript
-  lintJavaScript = pkgs.writeShellScript "lint-javascript" ''
+  formatJavascript = formatPrettier;
+  lintJavascript = pkgs.writeShellScript "lint-javascript" ''
+    : "''${kak_buffile:=}"
+
     PATH=${lib.makeBinPath [ pkgs.quick-lint-js pkgs.coreutils ]}
+
     quick-lint-js \
         --stdin \
         --path-for-config-search="$kak_buffile" \
-        < "$1" 2>&1\
+        < "$1" 2>&1 \
         | cut -d: -f2- \
         | while IFS= read -r line; do printf '%s:%s\n' "$kak_buffile" "$line"; done
   '';
 
   # JSON
-  formatJSON = "${config.programs.jq.package}/bin/jq --indent %opt{tabstop} -S .";
+  # formatJSON = "${config.programs.jq.package}/bin/jq --indent %opt{tabstop} -S .";
+  formatJSON = formatPrettierWith "--parser json";
   lintJSON = pkgs.writeShellScript "lint-json" ''
     PATH=${lib.makeBinPath [ config.programs.jq.package pkgs.gawk ]}
 
-    jq < "$1" 2>&1 \
+    LC_ALL=C jq 'halt' "$1" 2>&1 \
         | awk -v filename="$1" '
             / at line [0-9]+, column [0-9]+$/ {
                 line=$(NF - 2);
@@ -56,35 +65,58 @@ let
             }
         '
   '';
+
+  # YAML
+  # (not really how I mentally categorize YAML, but I don't want to put the
+  # prettier function at a higher scope.)
+  formatYAML = formatPrettierWith "--parser yaml";
+  lintYAML = pkgs.writeShellScript "lint-yaml" ''
+    PATH=${lib.makeBinPath [ pkgs.gnused pkgs.yamllint ]}
+
+    yamllint -f parsable -s "$1" \
+        | sed -E "s/ \[\(.*\)\] / \1: /"
+  '';
 in
 {
-  home.packages = [ pkgs.nodePackages.prettier pkgs.quick-lint-js ];
+  home.packages = [ pkgs.nodePackages.prettier pkgs.quick-lint-js pkgs.yamllint ];
 
   programs.kakoune.config.hooks = [
-    # Format: CSS, JavaScript, YAML
+    # Format: CSS
     {
       name = "WinSetOption";
-      option = "filetype=(css|javascript|yaml)";
-      commands = ''
-        set-option window formatcmd "run() { . ${formatPrettier}; } && run"
-      '';
+      option = "filetype=css";
+      commands = ''set-option window formatcmd "run() { ${formatCSS}; } && run"'';
     }
 
-    # Format: HTML
-    {
-      name = "WinSetOption";
-      option = "filetype=html";
-      commands = ''
-        set-option window formatcmd "run() { . ${formatHTML}; } && run"
-      '';
-    }
-
-    # Lint: JavaScript
+    # Format, lint: JavaScript
     {
       name = "WinSetOption";
       option = "filetype=javascript";
       commands = ''
-        set-option window lintcmd ${lintJavaScript}
+        set-option window tabstop 2
+        set-option window indentwidth 2
+        set-option window formatcmd "run() { ${formatJavascript}; } && run"
+        set-option window lintcmd ${lintJavascript}
+      '';
+    }
+
+    # Format, lint: YAML
+    {
+      name = "WinSetOption";
+      option = "filetype=yaml";
+      commands = ''
+        set-option window formatcmd "run() { ${formatYAML}; } && run"
+        set-option window lintcmd ${lintYAML}
+      '';
+    }
+
+    # Format, lint: HTML
+    {
+      name = "WinSetOption";
+      option = "filetype=html";
+      commands = ''
+        set-option window formatcmd "run() { ${formatHTML}; } && run"
+        set-option window lintcmd ${lintHTML}
       '';
     }
 
@@ -94,7 +126,8 @@ in
       option = "filetype=json";
       commands = ''
         set-option window tabstop 2
-        set-option window formatcmd ${formatJSON}
+        set-option window indentwidth 2
+        set-option window formatcmd ""run() { ${formatJSON}; } && run"
         set-option window lintcmd ${lintJSON}
       '';
     }

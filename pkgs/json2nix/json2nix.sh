@@ -1,7 +1,7 @@
 # shellcheck shell=sh
 
 usage() {
-    cat <<EOF
+    cat <<'EOF'
 usage: json2nix [FILE]
        ... | json2nix
 EOF

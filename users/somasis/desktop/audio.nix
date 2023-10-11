@@ -28,5 +28,5 @@
     "shift + XF86AudioRaiseVolume" = "ponymix-snap -t source increase 5 >/dev/null";
   };
 
-  cache.directories = [{ method = "symlink"; directory = "etc/pulse"; }];
+  cache.directories = [ "etc/pulse" ];
 }

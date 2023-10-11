@@ -52,6 +52,8 @@ in
               };
 
               msmtp.enable = true;
+
+              # thunderbird.enable = true;
             };
           }
           { "${address}" = extraAttrs; }
@@ -66,6 +68,8 @@ in
           "abuse@somas.is"
           "somasis@somas.is"
           "me@somas.is"
+          "somasissounds@gmail.com"
+          "dieselmcclain@gmail.com"
         ];
 
         flavor = "fastmail.com";
@@ -80,19 +84,15 @@ in
 
         offlineimap.extraConfig = offlineimapNametransGmail;
       })
-
-      (account "somasissounds@gmail.com" {
-
-        flavor = "gmail.com";
-        folders.sent = "Sent Mail";
-
-        offlineimap.extraConfig = offlineimapNametransGmail;
-      })
     ]
   ;
 
   programs.offlineimap.enable = true;
   programs.msmtp.enable = true;
+
+  # programs.thunderbird = {
+  #   enable = true;
+  # };
 
   systemd.user = foldr
     (n: a:

@@ -133,7 +133,7 @@ in
   services.stw.widgets.wttr = {
     text = {
       font = "monospace:style=heavy:size=10";
-      color = config.xresources.properties."*darkForeground";
+      color = config.theme.colors.darkForeground;
     };
 
     window = {

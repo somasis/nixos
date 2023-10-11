@@ -65,6 +65,11 @@ in
       tags = [ "journals" "music" ];
     }
     {
+      url = "https://onlinelibrary.wiley.com/feed/14678675/most-recent";
+      title = "Constellations";
+      tags = [ "journals" "philosophy" ];
+    }
+    {
       url = "https://www.cambridge.org/core/rss/product/id/F3D70AB528A9726BC052F1AEB771A611";
       title = "Hypatia";
       tags = [ "philosophy" "journal" ];
@@ -78,6 +83,11 @@ in
       url = "https://www.radicalphilosophy.com/feed";
       title = "Radical Philosophy";
       tags = [ "philosophy" "journal" ];
+    }
+    {
+      url = "https://thepointmag.com/feed/";
+      title = "The Point";
+      tags = [ "criticism" "philosophy" ];
     }
 
     (philpapers { keyword = "polyamory"; })

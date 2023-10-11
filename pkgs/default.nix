@@ -12,66 +12,78 @@ let
     writeTextFile
     ;
 in
-rec
-{
-  wrapCommand = callPackage ./wrapCommand;
+lib.recursiveUpdate
+  prev
+  (rec {
+    wrapCommand = callPackage ./wrapCommand;
 
-  writeJqScript = name: args: text:
-    let
-      args' = lib.cli.toGNUCommandLineShell { } (args // {
-        from-file = writeScript name ''
-          #!${jq}/bin/jq -f
-          ${text}
+    writeJqScript = name: args: text:
+      let
+        args' = lib.cli.toGNUCommandLineShell { } (args // {
+          from-file = writeScript name ''
+            #!${jq}/bin/jq -f
+            ${text}
+          '';
+        });
+      in
+      writeTextFile {
+        inherit name;
+        executable = true;
+
+        checkPhase = ''
+          e=0
+          ${jq}/bin/jq -n ${args'} || e=$?
+
+          # 3: syntax error
+          [ "$e" -eq 3 ] && exit 1 || :
+
+          exit 0
         '';
-      });
-    in
-    writeTextFile {
-      inherit name;
-      executable = true;
 
-      checkPhase = ''
-        e=0
-        ${jq}/bin/jq -n ${args'} || e=$?
+        text = ''
+          #!${runtimeShell}
+          exec ${jq}/bin/jq ${args'} "$@"
+        '';
+      }
+    ;
 
-        # 3: syntax error
-        [ "$e" -eq 3 ] && exit 1 || :
+    screenshot = callPackage ./screenshot { };
+    xinput-notify = callPackage ./xinput-notify { };
 
-        exit 0
-      '';
+    ini2nix = callPackage ./ini2nix { };
+    json2nix = callPackage ./json2nix { };
 
-      text = ''
-        #!${runtimeShell}
-        exec ${jq}/bin/jq ${args'} "$@"
-      '';
-    }
-  ;
+    bspwm-urgent = callPackage ./bspwm-urgent { };
 
-  screenshot = callPackage ./screenshot { };
-  xinput-notify = callPackage ./xinput-notify { };
+    ellipsis = callPackage ./ellipsis { };
+    dates = callPackage ./dates { };
+    mimetest = callPackage ./mimetest { };
+    nocolor = callPackage ./nocolor { };
+    playtime = callPackage ./playtime { };
+    table = callPackage ./table { };
 
-  ellipsis = callPackage ./ellipsis { };
-  dates = callPackage ./dates { };
-  json2nix = callPackage ./json2nix { };
-  mimetest = callPackage ./mimetest { };
-  nocolor = callPackage ./nocolor { };
-  playtime = callPackage ./playtime { };
-  table = callPackage ./table { };
+    dmenu = callPackage ./dmenu { };
+    dmenu-emoji = callPackage ./dmenu-emoji { };
+    dmenu-pass = callPackage ./dmenu-pass { };
+    dmenu-run = callPackage ./dmenu-run { };
+    dmenu-session = callPackage ./dmenu-session { };
 
-  dmenu = callPackage ./dmenu { };
-  dmenu-emoji = callPackage ./dmenu-emoji { };
-  dmenu-pass = callPackage ./dmenu-pass { };
-  dmenu-run = callPackage ./dmenu-run { };
-  dmenu-session = callPackage ./dmenu-session { };
+    nxapi = callPackage ./nxapi { };
 
-  pass-meta = callPackage ./pass-meta { };
-  qute-pass = callPackage ./qute-pass { };
+    pass-meta = callPackage ./pass-meta { };
+    qute-pass = callPackage ./qute-pass { };
 
-  borg-takeout = callPackage ./borg-takeout { };
-  qutebrowser-sync = callPackage ./qutebrowser-sync { };
+    borg-takeout = callPackage ./borg-takeout { };
+    qutebrowser-sync = callPackage ./qutebrowser-sync { };
 
-  execshell = callPackage ./execshell { };
-  ffsclient = callPackage ./ffsclient { };
-  mail-deduplicate = python3Packages.callPackage ./mail-deduplicate { };
-  notify-send-all = callPackage ./notify-send-all { };
-  wcal = callPackage ./wcal { };
-}
+    fcitx5-ilo-sitelen = callPackage ./fcitx5-ilo-sitelen { };
+
+    bandcamp-collection-downloader = callPackage ./bandcamp-collection-downloader { };
+    execshell = callPackage ./execshell { };
+    ffsclient = callPackage ./ffsclient { };
+    mail-deduplicate = final.python3Packages.callPackage ./mail-deduplicate { };
+    notify-send-all = callPackage ./notify-send-all { };
+    wcal = callPackage ./wcal { };
+
+    kakounePlugins.kakoune-fcitx = callPackage ./kakoune-fcitx { };
+  })

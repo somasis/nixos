@@ -1,44 +1,70 @@
 # shellcheck shell=bash
-
+exit 0
 : "${I_WANT_TO_FAIL_ALL_MY_CLASSES:=}"
 
 usage() {
     cat >&2 <<EOF
-usage: [I_WANT_TO_FAIL_ALL_MY_CLASSES=...] playtime [-q]
+usage: [I_WANT_TO_FAIL_ALL_MY_CLASSES=...] playtime [-iqw]
 EOF
     exit 69
 }
 
+consider_any_work_during_day=false
+invert=false
 quiet=false
-while getopts :q arg >/dev/null 2>&1; do
+while getopts :iqw arg >/dev/null 2>&1; do
     case "${arg}" in
+        i) invert=true ;;
         q) quiet=true ;;
+        w) consider_any_work_during_day=true ;;
         *) usage ;;
     esac
 done
 shift $((OPTIND - 1))
 
 work_remains() {
-    cut <<<"${work_remaining}" -f2- \
+    # find if any class events ("XXX-0000: ...") remain
+    cut <<<"${work_events}" -f3- \
         | cut -d: -f1 \
         | grep -qE '^[A-Z]+-'
 }
 
-today=$(date +'%Y-%m-%d')
-from=$(date '+%I:%M %p')
-
-if datetest "$(date +'%I:%M %p')" --lt "07:00 AM"; then
-    exit 0
+if [[ "${invert}" == 'true' ]]; then
+    is_playtime=1
+    is_worktime=0
+else
+    is_playtime=0
+    is_worktime=1
 fi
 
-work_remaining=$(
+today=$(date +'%Y-%m-%d')
+time=$(date +'%I:%M %p')
+
+work_events=$(
     khal list \
         --day-format "" \
-        --format '{end-time}{tab}{title}' \
+        --format '{start-time}{tab}{end-time}{tab}{title}' \
         -a University \
-        "${today} ${from}" \
-        "$(dateadd "${today}" +1d)"
+        today \
+        eod
 )
+
+if [[ "${consider_any_work_during_day}" == true ]]; then
+    # if there's any work at all during the day,
+    # then the whole day is a work day.
+    working_start="${today} 07:00 AM"
+    working_end="eod"
+else
+    # if it's just a regular work day, then the end of the work
+    # day will be the last work event.
+    working_start=$(head -n1 <<<"${work_events}"  | cut -f1)
+    working_start="${today} ${working_start}"
+    working_end="${today} 07:00 PM"
+
+    if datetest -i '%Y-%m-%d %I:%M %p' "${today} ${time}" --ot "${working_start}" || datetest -i '%Y-%m-%d %I:%M %p' "${today} ${time}" --ot "${working_end}"; then
+        exit "${is_playtime}"
+    fi
+fi
 
 if work_remains; then
     if [[ "${I_WANT_TO_FAIL_ALL_MY_CLASSES}" == 'true' ]]; then
@@ -68,18 +94,18 @@ if work_remains; then
         # printf '\e[?1004l' >&2
         trap - INT TERM QUIT EXIT
 
-        exit 0
+        exit "${is_playtime}"
     fi
 
     work_end_time=$(
-        tail <<<"${work_remaining}" -n1 | cut -f1
+        tail <<<"${work_events}" -n1 | cut -f2
     )
 
     [[ "${quiet}" == true ]] \
         && printf \
-            'error: you should be working right now; play time begins at %s\n' \
+            'you should be working right now; play time begins at %s\n' \
             "${work_end_time}"
-    exit 1
+    exit "${is_worktime}"
 else
-    exit 0
+    exit "${is_playtime}"
 fi

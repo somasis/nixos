@@ -6,18 +6,24 @@
   # Necessary for realtime usage.
   security.rtkit.enable = true;
 
-  services.pipewire = {
+  hardware.pulseaudio = {
     enable = true;
-    audio.enable = true;
-
-    alsa = {
-      enable = true;
-      support32Bit = true;
-    };
-
-    pulse.enable = true;
-    jack.enable = true;
+    support32Bit = true;
+    package = pkgs.pulseaudioFull;
   };
+
+  # services.pipewire = {
+  #   enable = true;
+  #   audio.enable = true;
+
+  #   alsa = {
+  #     enable = true;
+  #     support32Bit = true;
+  #   };
+
+  #   pulse.enable = true;
+  #   jack.enable = true;
+  # };
 
   # Sonos output functionality using AirPlay
   # environment.etc."pipewire/pipewire.conf.d/network-audio.conf".text = ''

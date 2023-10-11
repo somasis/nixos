@@ -7,7 +7,7 @@
 
   services.fusuma = {
     enable = true;
-    extraPackages = [ pkgs.coreutils pkgs.xdotool ];
+    extraPackages = [ pkgs.coreutils pkgs.gnugrep pkgs.xdotool ];
 
     settings = {
       swipe = {

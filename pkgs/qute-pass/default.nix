@@ -4,6 +4,7 @@
 , coreutils
 , dmenu-pass
 , gnused
+, libnotify
 , pass
 , trurl
 , util-linux
@@ -16,6 +17,7 @@
     coreutils
     dmenu-pass
     gnused
+    libnotify
     pass
     trurl
     util-linux

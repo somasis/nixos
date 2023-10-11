@@ -59,14 +59,14 @@ in
       in
       {
         # Utility: drag files - super + shift + o
-        "super + shift + o" = builtins.toString (pkgs.writeShellScript "sxhkd-dragon" ''
+        "super + shift + o" = pkgs.writeShellScript "sxhkd-dragon" ''
           export PATH=${lib.makeBinPath [ config.xsession.windowManager.bspwm.package pkgs.coreutils pkgs.procps pkgs.xdragon pkgs.xdotool pkgs.xe pkgs.gnome.zenity ]}:"$PATH"
           window_pid=$(xdotool getactivewindow getwindowpid)
           window_pid_parent=$(pgrep -P "$window_pid" | tail -n1)
           window_cwd=$(readlink -f /proc/"$window_pid_parent"/cwd)
           cd "$window_cwd"
 
-          title='dragon: select a file (select none to create target)'
+          title='Select a file (select none to create target)'
 
           bspc rule -a 'Zenity:*:'"$title" -o sticky=on
           f=$(zenity --title "$title" --file-selection --multiple --separator "$(printf '\n')") || exit 1
@@ -77,13 +77,13 @@ in
           else
               dragon -s 64 -T -A -x -t -k
           fi
-        '');
+        '';
 
         # Utility: color picker - super + g
         "super + g" = "${colorPick} -f hex";
         "super + alt + g" = "${colorPick} -f rgb";
 
-        "super + i" = builtins.toString (pkgs.writeShellScript "xrandr-invert-colors" ''
+        "super + i" = pkgs.writeShellScript "xrandr-invert-colors" ''
           : "''${XDG_RUNTIME_DIR:=/run/user/$(id -un)}"
 
           if [ -e "$XDG_RUNTIME_DIR/xrandr-invert-colors.lock" ]; then
@@ -97,7 +97,7 @@ in
               ${pkgs.systemd}/bin/systemctl --user stop sctd.service
               exec xrandr-invert-colors
           fi
-        '');
+        '';
 
         # Take screenshot of window/selection
         "Print" = "SCREENSHOT_MAIM=-u screenshot -b 6 -p -6 -l -c .6,.4,.98,.5 -r hippie";

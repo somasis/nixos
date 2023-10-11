@@ -15,6 +15,8 @@
         uid = 1000;
 
         extraGroups = [
+          "systemd-journal"
+
           # ./users/somasis/games/retroarch.nix: controller detection
           "input"
         ]
@@ -26,7 +28,7 @@
         ++ lib.optional config.programs.adb.enable "adbusers"
         ;
 
-        hashedPassword = "$6$VfKdDqJkx4JrErSl$eJhjdLheyvqDO0hbWE87WKfr6q7qA6pvtmK.EnP.s5wPL7IBZOl1n6YFyrZdpG98HovE7D6X55B0.6c3NYj600";
+        hashedPassword = "$y$j9T$TBHE4K4AUdpPQS6tXfWJJ.$bi.vigEvgXkq0G.gKZeKVvFX1m4hsiWNzI.SAZ2ConC";
 
         openssh.authorizedKeys.keys = [
           "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIPkmjWLpicEaQOkM7FAv5bctmZjV5GjISYW7re0oknLU somasis@ilo.somas.is_20220603"

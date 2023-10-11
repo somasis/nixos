@@ -578,7 +578,7 @@ in
   services.dunst.settings = {
     zz-catgirl = {
       appname = "catgirl";
-      background = config.xresources.properties."*color2";
+      background = config.theme.colors.green;
     };
 
     zz-catgirl-channel-cassie = {
@@ -611,12 +611,12 @@ in
   };
 
   somasis.tunnels.tunnels.scooper = {
-    location = 9400;
+    port = 9400;
     remote = "somasis@lacan.somas.is";
   };
 
   programs.qutebrowser.searchEngines."!irc" =
-    "http://localhost:${toString config.somasis.tunnels.tunnels.scooper.location}/search?query={}";
+    "http://localhost:${toString config.somasis.tunnels.tunnels.scooper.port}/search?query={}";
 
   services.sxhkd.keybindings."super + c" = "${pkgs.jumpapp}/bin/jumpapp -t catgirl -c catgirl kitty -T catgirl --class catgirl -e catgirls";
 }

@@ -44,7 +44,6 @@ in
         audio_output {
             type "pulse"
             name "PulseAudio"
-            replay_gain_handler "software"
         }
       '';
   };

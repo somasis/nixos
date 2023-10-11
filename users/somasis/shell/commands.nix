@@ -6,7 +6,7 @@
 }: {
   home.shellAliases = rec {
     # LC_COLLATE=C sorts uppercase before lowercase.
-    ls = "LC_COLLATE=C ls --hyperlink=auto --group-directories-first --dereference-command-line-symlink-to-dir --color -AFlh -b";
+    ls = "LC_COLLATE=C ls --hyperlink=auto --group-directories-first --dereference-command-line-symlink-to-dir --time-style=iso --color -AFlh";
     vi = "$EDITOR";
 
     ip = "ip --color=auto";
@@ -17,9 +17,6 @@
     "snake" = "ssh -t play@ascii.town snake";
 
     bc = "bc -q";
-    diff = "diff --color";
-
-    g = "find -L ./ -type f \! -path '*/.*/*' -print0 | xe -0 -N0 grep -n";
 
     xz = "xz -T0 -9 -e";
     zstd = "zstd -T0 -19";
@@ -36,14 +33,11 @@
 
     since = "datediff -f '%Yy %mm %ww %dd %0Hh %0Mm %0Ss'";
 
-    number = "nl -b a -d '' -f n -w 1";
-
     doas = lib.optionalString osConfig.security.sudo.enable "sudo";
   };
 
   home.packages = [
     pkgs.nocolor
-    pkgs.table
     (pkgs.writeShellScriptBin "pe" ''
       ${pkgs.xe}/bin/xe -LL -j0 "$@" | sort -snk1 | cut -d' ' -f2-
     '')

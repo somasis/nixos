@@ -25,10 +25,10 @@ in
     };
   };
 
-  environment.systemPackages = [
-    nixpkgs-manual
-    (pkgs.writeShellScriptBin "nixpkgs-help" ''
-      exec "''${BROWSER:-xdg-open}" "file://${nixpkgs-manual}/share/doc/nixpkgs/manual.html"
-    '')
-  ];
+  # environment.systemPackages = [
+  #   nixpkgs-manual
+  #   (pkgs.writeShellScriptBin "nixpkgs-help" ''
+  #     exec "''${BROWSER:-xdg-open}" "file://${nixpkgs-manual}/share/doc/nixpkgs/manual.html"
+  #   '')
+  # ];
 }

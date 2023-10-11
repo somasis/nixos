@@ -13,20 +13,26 @@ lock_screen_text=
 screensaver_text=
 monitor_text=
 
+choices="Sleep
+Reboot"
+
 if [ "${DMENU_SESSION_ENABLE_LOCKING}" = 'true' ]; then
     lock_screen_text="Lock screen"
     screensaver_text="Toggle screensaver"
     monitor_text="Toggle monitor power saving"
-    lock_screen_choices=$(printf '%s\n' "${lock_screen_text}" "${screensaver_text}" "${monitor_text}")
+    choices="${choices}
+${lock_screen_text}
+${screensaver_text}
+${monitor_text}"
 fi
+
+choices="${choices}
+Power off
+Logout"
 
 choice=$(
     ${DMENU:-dmenu -i} -p "session" "$@" <<EOF
-Sleep
-Reboot
-${lock_screen_choices}
-Power off
-Logout
+${choices}
 EOF
 )
 

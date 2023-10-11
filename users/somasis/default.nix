@@ -14,11 +14,11 @@
     ./shell
 
     ./less.nix
+    ./locale.nix
     ./man.nix
     ./monitor.nix
     ./pass.nix
     ./skim.nix
-    ./spell.nix
     ./ssh.nix
     ./syncthing.nix
     ./text-manipulation.nix
@@ -34,8 +34,6 @@
 
   cache.allowOther = true;
   log.allowOther = true;
-
-  home.keyboard.options = [ "compose:ralt" ];
 
   home.packages = [
     pkgs.dateutils

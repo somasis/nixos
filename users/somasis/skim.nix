@@ -1,7 +1,6 @@
 { config
 , pkgs
 , lib
-, theme
 , ...
 }:
 let
@@ -23,7 +22,7 @@ in
           matched = 1;
 
           current_bg = "#ffffff";
-          current = theme.colors.colorAccent;
+          current = config.theme.colors.accent;
 
           current_match_bg = 1;
           current_match = -1;
@@ -34,7 +33,7 @@ in
           info = 0;
           border = 0;
           prompt = 9;
-          pointer = theme.colors.colorAccent;
+          pointer = config.theme.colors.accent;
           marker = 9;
           spinner = 2;
           header = 12;

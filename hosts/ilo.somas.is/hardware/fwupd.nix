@@ -18,9 +18,9 @@
 
     # Necessary because otherwise it spits a terminal-only progress bar into
     # the system journal.
-    services.fwupd-refresh.serviceConfig = {
-      StandardOutput = "null";
-      SuccessExitStatus = [ 0 2 ];
-    };
+    # services.fwupd-refresh.serviceConfig = {
+    #   # StandardOutput = "null";
+    #   SuccessExitStatus = [ 0 2 ];
+    # };
   };
 }

@@ -61,23 +61,28 @@ in
   #   config.match-edid = true;
   # };
 
-  systemd.user.services.xiccd = lib.mkIf osConfig.services.colord.enable {
-    Unit = {
-      Description = pkgs.xiccd.meta.description;
-      PartOf = [ "graphical-session.target" ];
-      Before = [
-        "sctd.service"
-        "wallpaper.service"
-      ];
+  systemd.user.services = {
+    # autorandr = {
+    #   Unit.PartOf = lib.mkForce [ "graphical-session-pre.target" ];
+    #   Unit.After = lib.mkForce [ ];
+    #   Install.WantedBy = lib.mkForce [ "graphical-session-pre.target" ];
+    # };
 
-      Requires = [ "dbus.service" ];
-      After = [ "dbus.service" ];
-    };
-    Install.WantedBy = [ "graphical-session.target" ];
+    xiccd = lib.mkIf osConfig.services.colord.enable {
+      Unit = {
+        Description = pkgs.xiccd.meta.description;
+        PartOf = [ "graphical-session.target" ];
+        Before = [ "sctd.service" "wallpaper.service" ];
 
-    Service = {
-      Type = "simple";
-      ExecStart = [ "${pkgs.xiccd}/bin/xiccd" ];
+        Requires = [ "dbus.service" ];
+        After = [ "dbus.service" ];
+      };
+      Install.WantedBy = [ "graphical-session-pre.target" ];
+
+      Service = {
+        Type = "simple";
+        ExecStart = [ "${pkgs.xiccd}/bin/xiccd" ];
+      };
     };
   };
 

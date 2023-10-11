@@ -37,6 +37,7 @@
     })
 
     ./recaptcha-unpaid-labor.user.js
+    ./css-fixes.user.js
 
     # <https://adsbypasser.github.io/>
     (pkgs.fetchurl { hash = "sha256-+HDTlu5/WmuXI7vqNDi9XuQ5RvzHXaAf8fK7x3XxEp0="; url = "https://adsbypasser.github.io/releases/adsbypasser.full.es7.user.js"; })
@@ -92,6 +93,6 @@
     ./mediawiki-anchors.js
 
     # zoom.us
-    (pkgs.fetchurl { hash = "sha256-BWIOITDCDnbX2MCIcTK/JtqBaz4SU6nRu5f8WUbN8GE="; url = "https://openuserjs.org/install/clemente/Zoom_redirector.user.js"; })
+    # (pkgs.fetchurl { hash = "sha256-BWIOITDCDnbX2MCIcTK/JtqBaz4SU6nRu5f8WUbN8GE="; url = "https://openuserjs.org/install/clemente/Zoom_redirector.user.js"; })
   ];
 }

@@ -14,7 +14,22 @@ with lib;
         type = types.attrsOf (types.submodule (
           { name, config, ... }: {
             options = {
-              location = mkOption {
+              name = mkOption {
+                type = types.str;
+                description = "Pretty name for use by other stuff";
+                default = name;
+                defaultText = literalExpression ''config.somasis.tunnels.tunnels.<name>.port'';
+                example = "ircd";
+              };
+
+              type = mkOption {
+                type = types.enum [ "local" "dynamic" ];
+                description = "What type of tunnel to create; a local port forward (see option -L on ssh(1)), or a dynamic port forward (see option -D on ssh(1))";
+                default = "local";
+                example = "dynamic";
+              };
+
+              port = mkOption {
                 type = types.int;
                 description = "Local port to use for tunnel";
                 default = null;
@@ -28,19 +43,11 @@ with lib;
                 example = "snowdenej@nsa.gov";
               };
 
-              name = mkOption {
-                type = types.str;
-                description = "Pretty name for use by other stuff";
-                default = name;
-                defaultText = literalExpression ''config.somasis.tunnels.tunnels.<name>.location'';
-                example = "ircd";
-              };
-
-              remoteLocation = mkOption {
+              remotePort = mkOption {
                 type = types.int;
                 description = "Remote port to tunnel to (only does something when type == local)";
-                default = config.location;
-                defaultText = literalExpression ''config.somasis.tunnels.tunnels.<name>.location'';
+                default = config.port;
+                defaultText = literalExpression ''config.somasis.tunnels.tunnels.<name>.port'';
                 example = 9400;
               };
 
@@ -50,13 +57,6 @@ with lib;
                 default = "5m";
                 example = "90s";
               };
-
-              type = mkOption {
-                type = types.enum [ "local" "dynamic" ];
-                description = "What type of tunnel to create; a local port forward (see option -L on ssh(1)), or a dynamic port forward (see option -D on ssh(1))";
-                default = "local";
-                example = "dynamic";
-              };
             };
           }
         ));
@@ -64,10 +64,10 @@ with lib;
         description = "Set of tunnels to create";
         example = {
           ircd = {
-            location = 9400;
+            port = 9400;
 
             remote = "snowdenej@nsa.gov";
-            remoteLocation = 9400;
+            remotePort = 9400;
 
             linger = "600s";
           };
@@ -106,7 +106,7 @@ with lib;
             };
             Install.WantedBy = [ "tunnels@${tunnel.remote}.target" "sockets.target" ];
 
-            Socket.ListenStream = [ tunnel.location ];
+            Socket.ListenStream = [ tunnel.port ];
           };
 
           services."tunnel-proxy@${target}" = lib.optionalAttrs (tunnel.type == "local") {
@@ -169,8 +169,8 @@ with lib;
 
                   ${lib.toShellVar "target" target}
                   ${lib.toShellVar "type" tunnel.type}
-                  ${lib.toShellVar "location" tunnel.location}
-                  ${lib.toShellVar "remote_location" tunnel.remoteLocation}
+                  ${lib.toShellVar "port" tunnel.port}
+                  ${lib.toShellVar "remote_port" tunnel.remotePort}
                   ${lib.toShellVar "remote" tunnel.remote}
                   ${lib.toShellVar "socket" socket}
 
@@ -183,6 +183,7 @@ with lib;
 
                       # Automation-related
                       -o BatchMode=yes
+                      -o KbdInteractiveAuthentication=yes
 
                       # Hardening-related
                       -o StrictHostKeyChecking=no # Never connect when host has new keys
@@ -199,10 +200,10 @@ with lib;
 
                   case "$type" in
                       "dynamic")
-                          ssh_args+=( -D "localhost:$location" )
+                          ssh_args+=( -D "localhost:$port" )
                           ;;
                       "local")
-                          listen="$XDG_RUNTIME_DIR"/ssh-tunnel/"$socket":localhost:"$remote_location"
+                          listen="$XDG_RUNTIME_DIR"/ssh-tunnel/"$socket":localhost:"$remote_port"
                           ssh_args+=( -L "$listen" )
                           ;;
                   esac
@@ -218,8 +219,6 @@ with lib;
                 # forwards have been established successfully. Otherwise, the
                 # socket's first request might not end up being served.
                 Type = "forking";
-
-                ProtectSystem = true;
 
                 ExecStart = ssh-tunnel;
                 ExecStopPost = lib.optional (tunnel.type == "local") "${pkgs.coreutils}/bin/rm -f %t/ssh-tunnel/${socket}";

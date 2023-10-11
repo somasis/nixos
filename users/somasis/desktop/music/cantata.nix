@@ -57,7 +57,7 @@ let
     ${pkgs.coreutils}/bin/rm -rf "''${XDG_CACHE_HOME:=$HOME/.cache}/cantata/covers-scaled"
   '';
 
-  cantata-beets-open = pkgs.writeShellScript "cantata-beets-open" ''
+  cantata-lossless-open = pkgs.writeShellScript "cantata-lossless-open" ''
     set -eu -o pipefail
     export PATH=${lib.makeBinPath [ envtag config.programs.beets.package pkgs.openssh pkgs.s6-portable-utils pkgs.xdg-utils pkgs.xe ]}:"$PATH"
 
@@ -65,7 +65,9 @@ let
         eval "$(envtag "$1")"
 
         for a in \
-            beet list -f '$path' -a \
+            beet list \
+                -f '$path' \
+                -a \
                 "mb_albumartistid:$musicbrainz_albumartistid" \
                 "mb_albumid:$musicbrainz_albumid"; do
                 printf '%s ' "$(s6-quote -d "'" -- "$a")"
@@ -74,6 +76,12 @@ let
     } \
         | ssh spinoza sh -l - \
         | xe -N1 xdg-open
+  '';
+
+  cantata-lossy-open = pkgs.writeShellScript "cantata-lossy-open" ''
+    for d; do
+        [ -d "$d" ] && xdg-open "$d" &
+    done
   '';
 
   cantata-musicbrainz-open = pkgs.writeShellScript "cantata-musicbrainz-open" ''
@@ -160,8 +168,12 @@ let
         command = "${cantata-delete-cover-art} %d";
       }
       {
-        name = "beets: open in library";
-        command = "${cantata-beets-open} %f";
+        name = "Open in lossless library";
+        command = "${cantata-lossless-open} %f";
+      }
+      {
+        name = "Open in lossy library";
+        command = "${cantata-lossy-open} %d";
       }
       {
         name = "MusicBrainz: album artist";
@@ -215,7 +227,7 @@ let
     General.stopOnExit = false; # "Stop playback on exit"
     General.inhibitSuspend = true; # "Inhibit suspend whilst playing"
     Connection.replayGain = "auto"; # Use track ReplayGain during shuffle, album when in order; Playback > output
-    Connection.applyReplayGain = true; # "Apply setting on connect"
+    Connection.applyReplayGain = false; # "Apply setting on connect"
     General.volumeStep = 5;
 
     # Interface > Sidebar

@@ -17,7 +17,7 @@ in
 {
   services.kdeconnect = {
     enable = true;
-    indicator = true;
+    # indicator = true;
   };
 
   xdg.configFile."kdeconnect/config".text = lib.generators.toINI { } {

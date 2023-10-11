@@ -1,5 +1,4 @@
 { config
-, theme
 , pkgs
 , ...
 }:
@@ -11,9 +10,6 @@
   ];
 
   home.packages = [
-    pkgs.libsForQt5.qt5ct
-    pkgs.qt6Packages.qt6ct
-
     pkgs.papirus-icon-theme
 
     # GTK theming
@@ -22,7 +18,6 @@
     # Qt theming
     pkgs.libsForQt5.qtstyleplugin-kvantum
     pkgs.qt6Packages.qtstyleplugin-kvantum
-    pkgs.libsForQt5.qtstyleplugins
     pkgs.arc-kde-theme
 
     # TODO Disable for now until they're in nixpkgs
@@ -47,14 +42,13 @@
   fonts.fontconfig.enable = true;
 
   xresources.properties = {
-    # "Xft.dpi" = 144; # 96 * 1.5
     "Xft.antialias" = 1;
     "Xft.hinting" = 1;
     # "Xft.hintstyle" = "hintslight";
     "Xft.rgba" = "rgb";
 
     # "*faceName" = "monospace";
-    "panel.background" = theme.colors.darkBackground;
+    "panel.background" = config.theme.colors.darkBackground;
     # "panel.font" = "-misc-spleen-medium-*-normal-*-24-*-*-*-*-*-*-*";
     # "panel.boldFont" = "-misc-spleen-medium-*-normal-*-24-*-*-*-*-*-*-*";
     "panel.font1" = "monospace:size=10";
@@ -118,9 +112,12 @@
     _JAVA_OPTIONS = "-Dawt.useSystemAAFontSettings=on";
   };
 
+  systemd.user.sessionVariables._JAVA_OPTIONS = "-Dawt.useSystemAAFontSettings=on";
+
   qt = {
     enable = true;
     platformTheme = "qtct";
+    style.name = "qt5ct";
   };
 
   services.xsettingsd = {
@@ -140,5 +137,10 @@
       "Gtk/PrimaryButtonWarpsSlider" = true;
       "Gtk/MenuImages" = 1;
     };
+  };
+
+  dconf.settings."org/gnome/desktop/interface" = {
+    menubar-accel = "F1";
+    overlay-scrolling = false;
   };
 }

@@ -56,7 +56,7 @@ in
       save-position-on-quit = true;
       resume-playback-check-mtime = true;
 
-      osc = false; # required for thumbnail
+      # osc = false; # required for thumbnail
     };
 
     scriptOpts = {
@@ -89,10 +89,10 @@ in
 
       # We can't use programs.mpv.scripts because of this being set.
       scripts = [
-        pkgs.mpvScripts.autoload
+        # pkgs.mpvScripts.autoload
         pkgs.mpvScripts.mpris
         pkgs.mpvScripts.sponsorblock
-        pkgs.mpvScripts.thumbnail
+        # pkgs.mpvScripts.thumbnail
 
         # Conflicts with mpvScripts.thumbnail
         # pkgs.mpvScripts.youtube-quality
@@ -132,9 +132,13 @@ in
 
       concurrent-fragments = 4;
 
+      trim-filenames = 128;
+
       # Use cookies from qutebrowser if available
       cookies-from-browser = lib.mkIf config.programs.qutebrowser.enable
         "chromium:${config.xdg.dataHome}/qutebrowser/webengine";
+
+      # Mark the video watched on its platform, if possible.
       mark-watched = true;
     };
   };

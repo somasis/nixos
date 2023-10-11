@@ -17,8 +17,9 @@ in
     { method = "symlink"; directory = "tracks"; }
   ];
 
-  # Make syncthing more amicable to running while other programs are.
   systemd.user.services.syncthing = {
+    # Unit.ConditionACPower = true;
+
     Service = {
       Environment = [ "GOMAXPROCS=1" ]
         # Use Tor to get around filters.
@@ -32,6 +33,7 @@ in
         ]
       ;
 
+      # Make syncthing more amicable to running while other programs are.
       Nice = 19;
       CPUSchedulingPolicy = "idle";
       # CPUSchedulingPriority = 15;

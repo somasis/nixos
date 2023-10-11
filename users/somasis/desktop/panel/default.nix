@@ -14,28 +14,28 @@ in
 
   #   debug = true;
 
-  #   colors = let xres = config.xresources.properties; in {
-  #     background = xres."*background";
-  #     foreground = xres."*foreground";
+  #   colors = {
+  #     background = config.theme.colors.background;
+  #     foreground = config.theme.colors.foreground;
 
-  #     accent = xres."*colorAccent";
-  #     black = xres."*color0";
-  #     red = xres."*color1";
-  #     green = xres."*color2";
-  #     yellow = xres."*color3";
-  #     blue = xres."*color4";
-  #     magenta = xres."*color5";
-  #     cyan = xres."*color6";
-  #     white = xres."*color7";
+  #     accent = config.theme.colors.accent;
+  #     black = config.theme.colors.black;
+  #     red = config.theme.colors.red;
+  #     green = config.theme.colors.green;
+  #     yellow = config.theme.colors.yellow;
+  #     blue = config.theme.colors.blue;
+  #     magenta = config.theme.colors.magenta;
+  #     cyan = config.theme.colors.cyan;
+  #     white = config.theme.colors.white;
 
-  #     brightBlack = xres."*color8";
-  #     brightRed = xres."*color9";
-  #     brightGreen = xres."*color10";
-  #     brightYellow = xres."*color11";
-  #     brightBlue = xres."*color12";
-  #     brightMagenta = xres."*color13";
-  #     brightCyan = xres."*color14";
-  #     brightWhite = xres."*color15";
+  #     brightBlack = config.theme.colors.brightBlack;
+  #     brightRed = config.theme.colors.brightRed;
+  #     brightGreen = config.theme.colors.brightGreen;
+  #     brightYellow = config.theme.colors.brightYellow;
+  #     brightBlue = config.theme.colors.brightBlue;
+  #     brightMagenta = config.theme.colors.brightMagenta;
+  #     brightCyan = config.theme.colors.brightCyan;
+  #     brightWhite = config.theme.colors.brightWhite;
   #   };
 
   #   fonts = {
@@ -297,7 +297,7 @@ in
     pkgs.rwc
     pkgs.procps
     # pkgs.apy
-    pkgs.anki
+    pkgs.anki-bin
 
     # panel-articles
     pkgs.newsboat
@@ -334,8 +334,16 @@ in
   ];
 
   programs.autorandr.hooks = {
-    preswitch.panel = "${pkgs.systemd}/bin/systemctl --user stop panel.service";
-    postswitch.panel = "${pkgs.systemd}/bin/systemctl --user start panel.service";
+    # preswitch.panel = "${pkgs.systemd}/bin/systemctl --user stop panel.service";
+    # postswitch.panel = "${pkgs.systemd}/bin/systemctl --user start panel.service";
+    postswitch.panel = builtins.toString (pkgs.writeShellScript "restart-panel" ''
+      ${pkgs.systemd}/bin/systemctl --user is-active -q panel.service >/dev/null 2>&1 \
+          && ${pkgs.systemd}/bin/systemctl --user restart panel.service
+    '');
+    postswitch.snixembed = builtins.toString (pkgs.writeShellScript "restart-snixembed" ''
+      ${pkgs.systemd}/bin/systemctl --user is-active -q snixembed.service >/dev/null 2>&1 \
+          && ${pkgs.systemd}/bin/systemctl --user restart snixembed.service
+    '');
   };
 
   systemd.user.services = {
@@ -344,6 +352,7 @@ in
         Description = "lemonbar(1) based panel";
         PartOf = [ "graphical-session.target" "graphical-session-post.target" "tray.target" ];
         After = [ "picom.service" ];
+        Wants = [ "tray.target" ];
         StartLimitInterval = 0;
       };
       Install.WantedBy = [ "graphical-session.target" "graphical-session-post.target" "tray.target" ];
@@ -353,12 +362,12 @@ in
         ExecStart = [ "${config.home.homeDirectory}/bin/panel" ];
         ExecStartPost = [
           "${bspc} config top_padding ${builtins.toString bspwm.settings.top_padding}"
-          "${bspc} config border_width ${builtins.toString bspwm.settings.border_width}"
+          # "${bspc} config border_width ${builtins.toString bspwm.settings.border_width}"
           "${bspc} config window_gap ${builtins.toString bspwm.settings.window_gap}"
         ];
         ExecStopPost = [
           "${bspc} config top_padding 0"
-          "${bspc} config border_width 0"
+          # "${bspc} config border_width ${builtins.toString bspwm.settings.border_width}"
           "${bspc} config window_gap 0"
         ];
 
@@ -375,8 +384,9 @@ in
       Install.WantedBy = [ "tray.target" ];
 
       Service = {
-        Type = "simple";
-        ExecStart = [ "${pkgs.snixembed}/bin/snixembed" ];
+        # `--fork` means it'll fork *only* once ready.
+        Type = "forking";
+        ExecStart = [ "${pkgs.snixembed}/bin/snixembed --fork" ];
       };
     };
   };

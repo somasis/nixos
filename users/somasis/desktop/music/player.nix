@@ -14,7 +14,7 @@ let
     removeComments
     ;
 
-  colorAccent = pipe config.xresources.properties."*colorAccent" [
+  accent = pipe config.theme.colors.accent [
     colors.rgb
     (replaceStrings [ "rgb" ", " ] [ "Rgb" "," ])
   ];
@@ -58,7 +58,7 @@ in
                           Styled(
                             [Fg(Green)],
                             Parts([
-                              If(Playing, Text("▶️ "), Text("⏸️ ")),
+                              If(Playing, Text("▶ "), Text("⏸ ")),
                               CurrentElapsed,
                               Text("/"),
                               CurrentDuration,
@@ -72,11 +72,11 @@ in
                               Parts([
                                 Styled([Italic, Bold], CurrentTitle),
                                 If(ArtistExist, Parts([
-                                  Text(" — "),
+                                  Text(" - "),
                                   Styled([Italic, Fg(LightMagenta)], CurrentArtist)
                                 ])),
                                 If(AlbumExist, Parts([
-                                  Text(" — "),
+                                  Text(" - "),
                                   Styled([Italic, Fg(LightMagenta)], CurrentAlbum)
                                 ]))
                               ])
@@ -105,7 +105,7 @@ in
                       )
                     ),
                   style: [Fg(Reset)],
-                  selected_style: [Fg(Reset), Bg(${colorAccent})]
+                  selected_style: [Fg(Reset), Bg(${accent})]
                 ),
                 Column(
                   item:
@@ -116,7 +116,7 @@ in
                       )
                     ),
                   style: [Fg(Magenta)],
-                  selected_style: [Fg(Reset), Bg(${colorAccent})]
+                  selected_style: [Fg(Reset), Bg(${accent})]
                 ),
                 Column(
                   item:
@@ -127,7 +127,7 @@ in
                       )
                     ),
                   style: [Fg(Magenta)],
-                  selected_style: [Fg(Reset), Bg(${colorAccent})]
+                  selected_style: [Fg(Reset), Bg(${accent})]
                 ),
                 Column(
                   item:
@@ -138,7 +138,7 @@ in
                       )
                     ),
                   style: [Fg(Magenta)],
-                  selected_style: [Fg(Reset), Bg(${colorAccent})]
+                  selected_style: [Fg(Reset), Bg(${accent})]
                 )
               ])
             )

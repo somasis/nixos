@@ -6,6 +6,9 @@
   programs.qutebrowser.greasemonkey = map config.lib.somasis.drvOrPath [
     ./rewrite-smolweb.user.js
 
+    # MyAnimeList
+    # (pkgs.fetchurl { hash = "sha256-XXjb7HZYobnOfW5fj1LESXb5LRu0ILAqPzaosV7YhfE="; url = "https://greasyfork.org/scripts/445087-anime-recommendations-mal/code/Anime%20Recommendations%20-%20MAL.user.js"; })
+
     # GitHub
     ((pkgs.fetchFromGitHub { owner = "devxoul"; repo = "github-monospace-editor"; rev = "90574105330c6ef66006d1e3c1d22779521da687"; hash = "sha256-0Ref63oUT+59B+i1RnCiq7TrhJZWJ6ka2oEFsYiebmA="; }) + "/script/github-monospace-editor.user.js")
 
@@ -23,7 +26,7 @@
     ((pkgs.fetchFromGitHub { owner = "soundjester"; repo = "lemmy_monkey"; rev = "779d5e2843f5fd7bcc399eb5b122d24be7295e23"; hash = "sha256-7ndLbmTt2baDlVKoCXRIdXtcqjK2S7KUf6kOld/5PBA="; }) + /old.reddit.compact.user.js)
 
     # Facebook
-    (pkgs.fetchurl { hash = "sha256-2v6wiC5yvxvbTDwHrmdnNZjrYKbUXxMXp0qMyMp5EDk="; url = "https://greasyfork.org/scripts/375911-facebook-show-most-recent-posts-by-default/code/Facebook%20-%20Show%20Most%20Recent%20Posts%20by%20Default.user.js"; })
+    # (pkgs.fetchurl { hash = "sha256-2v6wiC5yvxvbTDwHrmdnNZjrYKbUXxMXp0qMyMp5EDk="; url = "https://greasyfork.org/scripts/375911-facebook-show-most-recent-posts-by-default/code/Facebook%20-%20Show%20Most%20Recent%20Posts%20by%20Default.user.js"; })
     (pkgs.fetchurl { hash = "sha256-AZQQZdkBoJZ95BrY21Fn/bJ7zOKOOOqQGbjA3QIj390="; url = "https://greasyfork.org/scripts/431970-fb-clean-my-feeds/code/FB%20-%20Clean%20my%20feeds.user.js"; })
 
     # Instagram
@@ -38,10 +41,6 @@
     # (pkgs.fetchurl { hash = "sha256-tNWUn4LQZxn3ehfSzJ6KFs7H41+I7V8o9773Ua5uQJE="; url = "https://greasyfork.org/scripts/413963-twitter-zoom-cursor/code/Twitter%20Zoom%20Cursor.user.js"; })
     # (pkgs.fetchurl { hash = "sha256-vVd6iKMCV1V5MazeKn8ksfsp7zVt55KOULgkIXt3lms="; url = "https://greasyfork.org/scripts/464506-twitter-advertiser-blocker/code/Twitter%20Advertiser%20Blocker.user.js"; })
 
-    # (pkgs.fetchurl {
-    #   url = "https://greasyfork.org/scripts/387773-control-panel-for-twitter/code/Control%20Panel%20for%20Twitter.user.js";
-    #   hash = lib.fakeHash;
-    # })
     ./Control_Panel_for_Twitter.user.js
 
     # Mastodon

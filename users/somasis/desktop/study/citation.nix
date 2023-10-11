@@ -7,7 +7,6 @@
 }:
 let
   inherit (config.lib.somasis) flakeModifiedDateToVersion;
-  inherit (inputs) csl zoteroTranslators;
   inherit (osConfig.services) tor;
 
   qutebrowser-zotero = pkgs.callPackage
@@ -281,15 +280,17 @@ in
   };
 
   persist = {
-    directories = [{ method = "bindfs"; directory = ".zotero/zotero/default"; }];
+    directories = [
+      { method = "bindfs"; directory = ".zotero/zotero/default"; }
+
+      { method = "bindfs"; directory = "share/zotero/styles"; }
+      { method = "bindfs"; directory = "share/zotero/translators"; }
+    ];
     files = [ "share/zotero/zotero.sqlite" ];
   };
 
   xdg.dataFile = {
     "zotero/storage".source = config.lib.file.mkOutOfStoreSymlink "${config.home.homeDirectory}/study/zotero";
-
-    "zotero/styles".source = csl;
-    "zotero/translators".source = zoteroTranslators;
 
     "zotero/locate/.keep".source = builtins.toFile "keep" "";
     "zotero/locate/engines.json".text = builtins.toJSON [
@@ -477,8 +478,6 @@ in
     };
   };
 
-  home.shellAliases."libgen" = lib.optionalString osConfig.services.tor.client.enable "${pkgs.torsocks}/bin/torsocks " + "${libgen}";
-
   # TODO this should work, but it sure don't
   # services.xsuspender.rules.zotero = {
   #   matchWmClassGroupContains = "Zotero";
@@ -490,7 +489,7 @@ in
   #   # Only suspend if LibreOffice isn't currently open, and qutebrowser isn't
   #   # currently visible, since it would cause the connector to wait until it is
   #   # momentarily unsuspended, which is annoying
-  #
+
   #   execSuspend = builtins.toString (pkgs.writeShellScript "suspend" ''
   #     ! ${pkgs.xdotool}/bin/xdotool search \
   #         --limit 1 \
@@ -505,5 +504,4 @@ in
   #         >/dev/null
   #   '');
   # };
-
 }

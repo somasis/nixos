@@ -1,6 +1,7 @@
 # shellcheck shell=sh
 
-: "${SCREENSHOT_DIR:=$(xdg-user-dir PICTURES)/Screenshots}"
+: "${XDG_PICTURES_DIR:=$(xdg-user-dir PICTURES)}" || :
+: "${SCREENSHOT_DIR:=${XDG_PICTURES_DIR:-~/Pictures}/Screenshots}"
 : "${SCREENSHOT_BARCODE:=true}"
 : "${SCREENSHOT_OCR:=false}"
 : "${SCREENSHOT_MAIM:=}"
@@ -16,7 +17,6 @@ b="${SCREENSHOT_DIR}/$(TZ=UTC date +"%Y-%m-%dT%H:%M:%SZ")"
 case "${SCREENSHOT_GEOMETRY:=selection}" in
     selection)
         slop=$(slop "$@" -f '%g %i') || exit 1
-
         read -r geometry window <<<"${slop}"
 
         window=$(
@@ -65,12 +65,12 @@ elif [ "${SCREENSHOT_BARCODE}" = true ] \
     )"; then
 
     # shellcheck disable=SC2154
-    xclip -i \
-        -selection clipboard \
-        -target UTF8_STRING \
-        -rmlastnl \
-        <<<"${barcode_data}" \
-        >&- 2>&-
+    printf '%s\n' "${barcode_data}" \
+        | xclip -i \
+            -selection clipboard \
+            -target UTF8_STRING \
+            -rmlastnl \
+            >&- 2>&-
 
     # shellcheck disable=SC2154
     notify-send \
@@ -79,12 +79,12 @@ elif [ "${SCREENSHOT_BARCODE}" = true ] \
         "Scanned barcode (${barcode_type})" \
         "\"${barcode_data}\""
 else
-    xclip -i \
-        -selection clipboard \
-        -target UTF8_STRING \
-        -rmlastnl \
-        <<<"${b}.png" \
-        >&- 2>&-
+    printf '%s.png' "${b}" \
+        | xclip -i \
+            -selection clipboard \
+            -target UTF8_STRING \
+            -rmlastnl \
+            >&- 2>&-
 
     xclip -i \
         -selection clipboard \

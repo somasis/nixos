@@ -17,11 +17,11 @@ let
           case "$-" in
               *x*)
                   set +x
-                  TR_AUTH="$(${config.programs.password-store.package}/bin/pass meta "$entry" username):$(pass "$entry")"
+                  TR_AUTH="$(${config.programs.password-store.package}/bin/pass meta "$entry" username):$(pass "$entry" | head -n1)"
                   set -x
                   ;;
               *)
-                  TR_AUTH="$(${config.programs.password-store.package}/bin/pass meta "$entry" username):$(pass "$entry")"
+                  TR_AUTH="$(${config.programs.password-store.package}/bin/pass meta "$entry" username):$(pass "$entry" | head -n1)"
                   ;;
           esac
           export TR_AUTH
@@ -305,10 +305,9 @@ let
 in
 {
   somasis.tunnels.tunnels.transmission = {
-    location = 9091;
-    remoteLocation = 17994;
-
+    port = 9091;
     remote = "somasis@genesis.whatbox.ca";
+    remotePort = 17994;
   };
 
   home.packages = [

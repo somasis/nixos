@@ -26,10 +26,10 @@ in
       split_ratio = 0.5;
 
       # Appearance
-      normal_border_color = config.xresources.properties."*background";
-      active_border_color = config.xresources.properties."*color8"; # used for window on inactive monitor
-      focused_border_color = config.xresources.properties."*colorAccent"; # used for window on active monitor
-      presel_feedback_color = config.xresources.properties."*color11";
+      normal_border_color = config.theme.colors.background;
+      active_border_color = config.theme.colors.brightBlack; # used for window on inactive monitor
+      focused_border_color = config.theme.colors.accent; # used for window on active monitor
+      presel_feedback_color = config.theme.colors.brightYellow;
 
       border_width = 6;
       window_gap = 24;
@@ -41,11 +41,24 @@ in
       pointer_modifier = "mod4";
       pointer_action1 = "move";
       pointer_action3 = "resize_corner";
+
+      # Disallow focus stealing.
+      ignore_ewmh_focus = true;
     };
 
     extraConfig = ''
       ${bspc} config "external_rules_command" "${config.home.homeDirectory}/bin/bspwm-rules"
     '';
+  };
+
+  systemd.user.services = {
+    bspwm-urgent = {
+      Unit.Description = pkgs.bspwm-urgent.meta.description;
+      Service.Type = "simple";
+      Service.ExecStart = lib.getExe pkgs.bspwm-urgent;
+      Unit.PartOf = [ "graphical-session.target" ];
+      Install.WantedBy = [ "graphical-session.target" ];
+    };
   };
 
   xsession.profileExtra = ''

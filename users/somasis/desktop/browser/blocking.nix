@@ -8,6 +8,8 @@ let
   uriList = map (x: "file://${x}");
 
   adblockCustom = pkgs.writeText "custom.txt" ''
+    [Adblock Plus 2.0]
+    ! Title: Custom ad blocking rules
     ! Disable smooth scroll hijacking scripts
     /jquery.nicescroll*.js
     /jquery.smoothscroll*.js
@@ -31,29 +33,51 @@ in
   programs.qutebrowser = {
     settings = {
       # Help with jhide's memory usage.
-      # qt.chromium.process_model = "process-per-site";
+      qt.chromium.process_model = "process-per-site";
 
       content.blocking = {
         enabled = true;
         method = "adblock";
-        adblock.lists = with inputs; uriList [
-          adblockCustom
+        adblock.lists = uriList
+          # (map
+          #   (list:
+          #     pkgs.runCommandLocal (builtins.baseNameOf (list.name or "${list}")) { inherit list; } ''
+          #       ${pkgs.gnugrep}/bin/grep -v \
+          #           -e "^! Last modified: " \
+          #           -e "^! Expires: " \
+          #           -e "^! Checksum: " \
+          #           -e "^! Updated: " \
+          #           ${lib.escapeShellArg list} \
+          #           > "$out"
+          #     ''
+          #   )
+          (with inputs; [
+            adblockCustom
 
-          adblockEasyList
-          adblockEasyListCookies
-          adblockEasyListSpanish
-          adblockEasyListRussian
-          adblockAntiAdblockFilters
-          adblockFanboySocial
-          uAssetsPrivacy
-          uAssetsResourceAbuse
-        ];
+            adblockEasyList
+            adblockEasyListSpanish
+            adblockEasyListRussian
+
+            adblockEasyListCookies
+
+            adblockAntiAdblockFilters
+
+            # adblockFanboySocial
+            # uAssetsPrivacy
+            # uAssetsResourceAbuse
+          ])
+          # )
+        ;
       };
     };
 
-    greasemonkey = map
-      config.lib.somasis.greasemonkey.jhide
-      config.programs.qutebrowser.settings.content.blocking.adblock.lists
-    ;
+    greasemonkey = [
+      (config.lib.somasis.greasemonkey.jhide
+        (map
+          (lib.replaceStrings [ "file://" ] [ "" ])
+          config.programs.qutebrowser.settings.content.blocking.adblock.lists
+        )
+      )
+    ];
   };
 }

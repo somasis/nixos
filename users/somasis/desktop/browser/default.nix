@@ -2,7 +2,6 @@
 , osConfig
 , pkgs
 , lib
-, theme
 , ...
 }:
 let
@@ -21,7 +20,13 @@ let
   yankTextAnchor = pkgs.writeShellScript "yank-text-anchor" ''
     set -euo pipefail
 
-    PATH=${lib.makeBinPath [ config.programs.jq.package pkgs.gnused ] }
+    PATH=${lib.makeBinPath [
+      config.programs.jq.package
+      pkgs.coreutils
+      pkgs.gnused
+      pkgs.trurl
+      pkgs.util-linux
+    ]}
 
     : "''${QUTE_FIFO:?}"
     : "''${QUTE_SELECTED_TEXT:?}"
@@ -29,11 +34,27 @@ let
 
     exec >>"''${QUTE_FIFO}"
 
-    textStart=$(
-        sed 's/^ *//; s/ *$//' <<< "$QUTE_SELECTED_TEXT" | jq -Rr '@uri'
+    # Strip fragment (https://hostname.com/index.html#fragment).
+    url=$(trurl -s fragment= -f - <<<"$QUTE_URL")
+
+    text_end=
+    text_start=$(
+        sed \
+            -e 's/^[[:space:]][[:space:]]*//' \
+            -e 's/[[:space:]][[:space:]]*$//'
+            <<<"$QUTE_SELECTED_TEXT"
     )
 
-    url="''${QUTE_URL%#*}#:~:text=''${textStart}"
+    if [ "''${#text_start}" -ge 300 ]; then
+        # Use range-based matching if >=300 characters in text.
+        text_end=$(<<<"$text_start" tr -d '\n' | tr '[:space:]' ' ' | rev | cut -d' ' -f1-5 | rev)
+        text_start=$(<<<"$text_start" tr '[:space:]' ' ' | cut -d ' ' -f1-5)
+    fi
+
+    [ -n "$text_end" ] && text_end=,$(jq -Rr '@uri' <<<"$text_end")
+    text_start=$(jq -Rr '@uri' <<<"$text_start")
+
+    url="$url#:~:text=$text_start$text_end"
 
     printf 'yank -q inline "%s" ;; message-info "Yanked URL of highlighted text to clipboard: %s"\n' "''${url}" "''${url}"
   '';
@@ -44,7 +65,7 @@ let
       "socks://${tor.client.socksListenAddress.addr}:${toString tor.client.socksListenAddress.port}"
     )
     ++ (lib.mapAttrsToList
-      (_: tunnel: "socks://127.0.0.1:${toString tunnel.location}")
+      (_: tunnel: "socks://127.0.0.1:${toString tunnel.port}")
       (lib.filterAttrs (_: tunnel: tunnel.type == "dynamic") config.somasis.tunnels.tunnels)
     )
   ;
@@ -133,9 +154,9 @@ in
       content = {
         proxy = builtins.toString (builtins.head proxies);
 
-        # Allow JavaScript to read from or write to the clipboard.
         javascript = {
-          can_access_clipboard = true;
+          # Allow JavaScript to read from or write to the xos-upclipboard.
+          clipboard = "access-paste";
           can_open_tabs_automatically = true;
         };
 
@@ -186,13 +207,7 @@ in
       spellcheck.languages = [ "en-US" "en-AU" "en-GB" "es-ES" ];
       content.headers.accept_language = lib.concatStringsSep "," [ "tok;q=0.9" "en-US;q=0.8" "en;q=0.7" "es;q=0.6" ];
 
-      zoom = {
-        # This will be unnecessary if I ever start using Wayland and don't
-        # need to think about monitor DPI stuff anymore.
-        default = "150%";
-
-        mouse_divider = 2048; # Allow for more precise zooming increments.
-      };
+      zoom.mouse_divider = 2048; # Allow for more precise zooming increments.
 
       qt.highdpi = true;
 
@@ -233,10 +248,10 @@ in
 
       # Downloads bar.
       downloads.position = "top";
-      colors.downloads.start.bg = theme.colors.darkBackground;
-      colors.downloads.stop.bg = theme.colors.color2;
-      colors.downloads.error.bg = theme.colors.color1;
-      colors.downloads.bar.bg = theme.colors.darkBackground;
+      colors.downloads.start.bg = config.theme.colors.darkBackground;
+      colors.downloads.stop.bg = config.theme.colors.green;
+      colors.downloads.error.bg = config.theme.colors.red;
+      colors.downloads.bar.bg = config.theme.colors.darkBackground;
 
       # Statusbar.
       statusbar.position = "top";
@@ -249,54 +264,54 @@ in
         "filesystem"
       ];
 
-      colors.statusbar.normal.bg = theme.colors.background;
-      colors.statusbar.normal.fg = theme.colors.foreground;
+      colors.statusbar.normal.bg = config.theme.colors.background;
+      colors.statusbar.normal.fg = config.theme.colors.foreground;
 
-      colors.statusbar.command.bg = theme.colors.lightBackground;
-      colors.statusbar.command.fg = theme.colors.lightForeground;
+      colors.statusbar.command.bg = config.theme.colors.lightBackground;
+      colors.statusbar.command.fg = config.theme.colors.lightForeground;
 
-      colors.statusbar.insert.bg = theme.colors.color2;
-      colors.statusbar.insert.fg = theme.colors.foreground;
+      colors.statusbar.insert.bg = config.theme.colors.green;
+      colors.statusbar.insert.fg = config.theme.colors.foreground;
 
-      colors.statusbar.passthrough.bg = theme.colors.color4;
-      colors.statusbar.passthrough.fg = theme.colors.foreground;
+      colors.statusbar.passthrough.bg = config.theme.colors.blue;
+      colors.statusbar.passthrough.fg = config.theme.colors.foreground;
 
-      colors.statusbar.private.bg = theme.colors.color5;
-      colors.statusbar.private.fg = theme.colors.foreground;
+      colors.statusbar.private.bg = config.theme.colors.magenta;
+      colors.statusbar.private.fg = config.theme.colors.foreground;
 
-      colors.statusbar.progress.bg = theme.colors.color2;
+      colors.statusbar.progress.bg = config.theme.colors.green;
 
-      colors.statusbar.url.fg = theme.colors.color4;
-      colors.statusbar.url.error.fg = theme.colors.color9;
-      colors.statusbar.url.hover.fg = theme.colors.color4;
-      colors.statusbar.url.success.http.fg = theme.colors.color4;
-      colors.statusbar.url.success.https.fg = theme.colors.color4;
-      colors.statusbar.url.warn.fg = theme.colors.color3;
+      colors.statusbar.url.fg = config.theme.colors.blue;
+      colors.statusbar.url.error.fg = config.theme.colors.brightRed;
+      colors.statusbar.url.hover.fg = config.theme.colors.blue;
+      colors.statusbar.url.success.http.fg = config.theme.colors.blue;
+      colors.statusbar.url.success.https.fg = config.theme.colors.blue;
+      colors.statusbar.url.warn.fg = config.theme.colors.yellow;
 
       # Prompts.
 
-      colors.prompts.bg = theme.colors.lightBackground;
-      colors.prompts.fg = theme.colors.lightForeground;
-      colors.prompts.border = "1px solid ${theme.colors.lightBorderColor}";
-      colors.prompts.selected.bg = theme.colors.colorAccent;
-      colors.prompts.selected.fg = theme.colors.foreground;
+      colors.prompts.bg = config.theme.colors.lightBackground;
+      colors.prompts.fg = config.theme.colors.lightForeground;
+      colors.prompts.border = "1px solid ${config.theme.colors.lightBorder}";
+      colors.prompts.selected.bg = config.theme.colors.accent;
+      colors.prompts.selected.fg = config.theme.colors.foreground;
 
       # Completion.
 
-      colors.completion.category.bg = theme.colors.lightBackground;
-      colors.completion.category.fg = theme.colors.lightForeground;
-      colors.completion.category.border.bottom = theme.colors.lightBackground;
-      colors.completion.category.border.top = theme.colors.lightBackground;
-      colors.completion.even.bg = theme.colors.lightBackground;
-      colors.completion.odd.bg = theme.colors.lightBackground;
-      colors.completion.fg = theme.colors.lightForeground;
-      colors.completion.item.selected.bg = theme.colors.colorAccent;
-      colors.completion.item.selected.border.bottom = theme.colors.colorAccent;
-      colors.completion.item.selected.border.top = theme.colors.colorAccent;
-      colors.completion.item.selected.fg = theme.colors.foreground;
-      colors.completion.item.selected.match.fg = theme.colors.foreground;
-      colors.completion.scrollbar.bg = theme.colors.lightBackground;
-      colors.completion.scrollbar.fg = theme.colors.darkBackground;
+      colors.completion.category.bg = config.theme.colors.lightBackground;
+      colors.completion.category.fg = config.theme.colors.lightForeground;
+      colors.completion.category.border.bottom = config.theme.colors.lightBackground;
+      colors.completion.category.border.top = config.theme.colors.lightBackground;
+      colors.completion.even.bg = config.theme.colors.lightBackground;
+      colors.completion.odd.bg = config.theme.colors.lightBackground;
+      colors.completion.fg = config.theme.colors.lightForeground;
+      colors.completion.item.selected.bg = config.theme.colors.accent;
+      colors.completion.item.selected.border.bottom = config.theme.colors.accent;
+      colors.completion.item.selected.border.top = config.theme.colors.accent;
+      colors.completion.item.selected.fg = config.theme.colors.foreground;
+      colors.completion.item.selected.match.fg = config.theme.colors.foreground;
+      colors.completion.scrollbar.bg = config.theme.colors.lightBackground;
+      colors.completion.scrollbar.fg = config.theme.colors.darkBackground;
 
       # Tabs.
       tabs.position = "left";
@@ -306,7 +321,7 @@ in
 
       tabs.favicons.scale = 1.25;
       tabs.indicator.width = 0;
-      tabs.width = "20%";
+      tabs.width = "16%";
       tabs.close_mouse_button = "right";
       tabs.select_on_remove = "next";
 
@@ -314,27 +329,27 @@ in
       fonts.tabs.selected = "bold default_size monospace";
 
       # Colors (themed like Arc-Dark).
-      colors.tabs.bar.bg = theme.colors.sidebarColor;
-      colors.tabs.odd.bg = theme.colors.sidebarColor;
-      colors.tabs.even.bg = theme.colors.sidebarColor;
+      colors.tabs.bar.bg = config.theme.colors.sidebar;
+      colors.tabs.odd.bg = config.theme.colors.sidebar;
+      colors.tabs.even.bg = config.theme.colors.sidebar;
 
-      colors.tabs.even.fg = theme.colors.foreground;
-      colors.tabs.odd.fg = theme.colors.foreground;
-      colors.tabs.selected.even.fg = theme.colors.foreground;
-      colors.tabs.selected.odd.fg = theme.colors.foreground;
+      colors.tabs.even.fg = config.theme.colors.foreground;
+      colors.tabs.odd.fg = config.theme.colors.foreground;
+      colors.tabs.selected.even.fg = config.theme.colors.foreground;
+      colors.tabs.selected.odd.fg = config.theme.colors.foreground;
 
-      colors.tabs.pinned.even.bg = theme.colors.background;
-      colors.tabs.pinned.odd.bg = theme.colors.background;
-      colors.tabs.pinned.selected.even.bg = theme.colors.colorAccent;
-      colors.tabs.pinned.selected.odd.bg = theme.colors.colorAccent;
-      colors.tabs.selected.even.bg = theme.colors.colorAccent;
-      colors.tabs.selected.odd.bg = theme.colors.colorAccent;
+      colors.tabs.pinned.even.bg = config.theme.colors.background;
+      colors.tabs.pinned.odd.bg = config.theme.colors.background;
+      colors.tabs.pinned.selected.even.bg = config.theme.colors.accent;
+      colors.tabs.pinned.selected.odd.bg = config.theme.colors.accent;
+      colors.tabs.selected.even.bg = config.theme.colors.accent;
+      colors.tabs.selected.odd.bg = config.theme.colors.accent;
 
       colors.messages = rec {
-        error.bg = theme.colors.color1;
-        warning.bg = theme.colors.color3;
-        info.bg = theme.colors.colorAccent;
-        info.fg = theme.colors.foreground;
+        error.bg = config.theme.colors.red;
+        warning.bg = config.theme.colors.yellow;
+        info.bg = config.theme.colors.accent;
+        info.fg = config.theme.colors.foreground;
 
         error.border = error.bg;
         warning.border = warning.bg;
@@ -344,7 +359,7 @@ in
       colors.contextmenu = {
         menu.bg = "#ffffff";
         menu.fg = "#5c616c";
-        selected.bg = theme.colors.colorAccent;
+        selected.bg = config.theme.colors.accent;
         selected.fg = "#ffffff";
         disabled.fg = "#a6a8ae";
       };
@@ -365,16 +380,12 @@ in
       };
 
       url.open_base_url = true;
-
-      # NOTE Remove when qutebrowser uses qt6
-      # <https://github.com/qutebrowser/qutebrowser/issues/7572>
-      qt.args = [ "enable-experimental-web-platform-features" ];
     };
 
     extraConfig = ''
       # TODO how is this done properly in programs.qutebrowser.settings?
-      c.statusbar.padding = {"top": 10, "bottom": 10, "left": 6, "right": 6}
-      c.tabs.padding = {"top": 10, "bottom": 9, "left": 8, "right": 8}
+      c.statusbar.padding = {"top": 7, "bottom": 7, "left": 4, "right": 4}
+      c.tabs.padding = {"top": 7, "bottom": 6, "left": 6, "right": 6}
 
       config.unbind("<Escape>")
       config.unbind("F")
@@ -403,34 +414,39 @@ in
     };
 
     keyBindings = {
+      passthrough."<Shift+Escape>" = "mode-leave";
       normal = {
+        "<Shift+Escape>" = "mode-enter passthrough";
+
         "zpt" = "translate";
         "ya" = "yank-text-anchor";
 
-        "qa" = "set-cmd-text :quickmark-add {url} \"{title}\"";
-        "ql" = "set-cmd-text -s :quickmark-load";
-        "qd" = lib.mkMerge [ "set-cmd-text :quickmark-del {url:domain}" "fake-key -g <Tab>" ];
-        "ba" = "set-cmd-text :bookmark-add {url} \"{title}\"";
-        "bl" = "set-cmd-text -s :bookmark-load";
+        "qa" = "cmd-set-text :quickmark-add {url} \"{title}\"";
+        "ql" = "cmd-set-text -s :quickmark-load";
+        "qd" = lib.mkMerge [ "cmd-set-text :quickmark-del {url:domain}" "fake-key -g <Tab>" ];
+        "ba" = "cmd-set-text :bookmark-add {url} \"{title}\"";
+        "bl" = "cmd-set-text -s :bookmark-load";
 
-        "!" = "set-cmd-text :open !";
-        "gss" = "set-cmd-text -s :open site:{url:domain}";
+        "!" = "cmd-set-text :open !";
+        "gss" = "cmd-set-text -s :open site:{url:domain}";
 
         "cnp" = ''config-cycle -p content.proxy ${lib.concatStringsSep " " proxies}'';
 
         ";;" = "hint all";
 
         # Akin to catgirl(1).
-        "<Alt+Left>" = "back";
-        "<Alt+Right>" = "forward";
+        "<Alt+Left>" = "back --quiet";
+        "<Alt+Right>" = "forward --quiet";
         "<Alt+Shift+a>" = "tab-prev";
         "<Alt+a>" = "tab-next";
 
         # Firefox-ish.
+        "<Ctrl+r>" = "reload";
+        "<Ctrl+Shift+r>" = "reload -f";
         "<Ctrl+t>" = "open -t";
-        "<Ctrl+l>" = "set-cmd-text :open {url}";
-        "<Ctrl+f>" = "set-cmd-text /";
-        "<Ctrl+Shift+f>" = "set-cmd-text ?";
+        "<Ctrl+l>" = "cmd-set-text :open {url}";
+        "<Ctrl+f>" = "cmd-set-text /";
+        "<Ctrl+Shift+f>" = "cmd-set-text ?";
         "<Ctrl+Shift+i>" = "devtools";
 
         # Emulate Tree Style Tabs keyboard shortcuts.
@@ -446,6 +462,15 @@ in
 
         "zsm" = "open -rt https://mastodon.social/authorize_interaction?uri={url}";
         "zst" = "open -rt https://twitter.com/share?url={url}";
+
+        "cnt" =
+          lib.optionalString
+            (tor.enable
+              && tor.client.enable
+              && tor.settings.ControlPort != [ ]
+              && tor.settings.ControlPort != null)
+            "spawn --userscript tor_identity"
+        ;
       };
     };
   };
@@ -515,20 +540,20 @@ in
 
   somasis.tunnels.tunnels = {
     kodi-remote = {
-      location = 45780;
+      port = 45780;
       remote = "somasis@spinoza.7596ff.com";
-      remoteLocation = 8080;
+      remotePort = 8080;
     };
 
     kodi-websockets = {
-      location = 9090;
+      port = 9090;
       remote = "somasis@spinoza.7596ff.com";
-      remoteLocation = 9090;
+      remotePort = 9090;
     };
 
     proxy-spinoza = {
       type = "dynamic";
-      location = 9099;
+      port = 9099;
       remote = "somasis@spinoza.7596ff.com";
     };
   };

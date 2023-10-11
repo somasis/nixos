@@ -57,6 +57,8 @@ in
         '';
       in
       ''
+        bind-key O open-in-browser-noninteractively
+
         download-full-page yes
 
         mark-as-read-on-hover yes
@@ -68,7 +70,7 @@ in
         # newsboat(1): "Configure a high number to keep the selected item in the center"
         scrolloff 100000
 
-        show-keymap-hint no
+        show-keymap-hint yes
 
         text-width 100
 

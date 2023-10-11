@@ -1,4 +1,7 @@
-{ config, ... }: {
+{ config
+, pkgs
+, ...
+}: {
   home.sessionVariables = {
     # Colors for man pages
     "LESS_TERMCAP_us" = ''$(printf '%b' "\033[3;32m")''; # italicized in asciidoctor
@@ -32,4 +35,6 @@
   cache.directories = [{ method = "symlink"; directory = "var/cache/less"; }];
 
   programs.less.enable = true;
+  programs.lesspipe.enable = true;
+  home.packages = [ pkgs.lesspipe ];
 }

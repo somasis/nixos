@@ -1,27 +1,47 @@
 # shellcheck shell=bash disable=SC3000-SC3999
 
 set -euo pipefail
-set -x
+
+me="${0##*/}"
+[[ -n "${QUTE_FIFO}" ]] && me=:pass
 
 usage() {
-    me=:pass
-    [[ -n "${QUTE_FIFO}" ]] && me="${0##*/}"
+    usage=$(
+        cat <<EOF
+usage: ${me} [-HS] [-d DELIMITER] -m username|email|password|otp [QUERY]
+       ${me} [-HS] [-d DELIMITER] -m username|email|password|otp -u URL
+       ${me} [-HS] [-d DELIMITER] -m generate [\`pass generate\` arguments] ENTRY
+       ${me} [-HS] [-d DELIMITER] -m generate -u [\`pass generate\` arguments] URL
+       ${me} -m url-to-entry URL
+EOF
+    )
 
-    usage="usage: ${me} [-EH] [-d delimiter] [-m username|password|otp|domain-to-entry] [query]"
-
-    if [[ -n "${QUTE_FIFO}" ]]; then
-        cmd "message-info \"${usage//\"/\"}\""
-        exit 0
-    else
-        printf '%s\n' "${usage}" >&2
+    info "${usage}"
+    if [[ -n "$1" ]]; then
+        error "$1"
         exit 69
+    else
+        exit 0
+    fi
+}
+
+info() {
+    if [[ -n "${QUTE_FIFO}" ]]; then
+        cmd "message-info \"${1//\"/\"}\""
+    else
+        printf '%s\n' "$1"
+    fi
+}
+
+error() {
+    if [[ -n "${QUTE_FIFO}" ]]; then
+        cmd "message-error \"${1//\"/\"}\""
+    else
+        printf '%s\n' "$1" >&2
     fi
 }
 
 cmd() { printf '%s\n' "$@" >"${QUTE_FIFO}";  }
-# commands=
-# cmd() { for c; do commands+="${c:+ ${c}}"; done; }
-# trap 'printf "%s\n" "${commands[@]}" > "${QUTE_FIFO}"' EXIT
 
 key() {
     local keystring
@@ -30,49 +50,60 @@ key() {
     cmd "fake-key \"${keystring}\""
 }
 
+text() {
+    cmd "insert-text $*"
+}
+
 fill() {
     local mode with
 
     mode="$1"
     with=$(dmenu-pass -m "${mode}" -i "$2") || exit 0
 
-    if "${hints}"; then cmd "hint -f ${mode} normal"; fi
-    key "<Ctrl-a>" "<Backspace>" "${with}"
+    if "${hints}"; then
+        # NOTE: would be preferrable to use "spawn", but
+        #       :hint doesn't properly support that with
+        #       <input> elements :(
+        cmd "hint -f ${mode} normal"
+        sleep 1
+    fi
+
+    key "<Ctrl-a>" "<Backspace>"
+    text "${with}"
 }
 
-domain-to-entry() {
-    local query
-    query=$(trurl -f - -g '{host}' <<<"${QUTE_URL}")
+url-to-entry() {
+    local host
+    host=$(trurl -f - -g '{host}' <<<"${QUTE_URL}")
 
-    case "${query}" in
+    case "${host}" in
         *'.'*'.'*)
-            local query_top_level query_main
+            local host_top_level host_main
 
-            query_top_level=${query##*.}
+            host_top_level=${host##*.}
 
-            query_main=${query%."${query_top_level}"}
-            query_main=${query_main##*.}.${query_top_level}
+            host_main=${host%."${host_top_level}"}
+            host_main=${host_main##*.}.${host_top_level}
 
-            # query_extra=${query%"${query_main}"}
+            # host_extra=${host%"${host_main}"}
 
-            # query="(${query_extra//\./\.\)?(})"
-            # query="${query%()}${query_main}"
+            # host="(${host_extra//\./\.\)?(})"
+            # host="${host%()}${host_main}"
 
-            query="${query_main}"
+            host="${host_main}"
             ;;
     esac
-    printf '%s' "${query}"
+    printf '%s' "${host}"
 }
 
-# commands=()
-
 delimiter='<Tab>'
-enter=false
+submit=false
 mode=login
 hints=false
-while getopts :EHd:m: arg >/dev/null 2>&1; do
+query_is_url=false
+while getopts :SHud:m: arg >/dev/null 2>&1; do
     case "${arg}" in
-        E) enter=true ;;
+        S) submit=true ;;
         H) hints=true ;;
 
         d) delimiter="${OPTARG}" ;;
@@ -81,28 +112,31 @@ while getopts :EHd:m: arg >/dev/null 2>&1; do
             mode="${OPTARG}"
 
             case "${mode}" in
-                login | username | password | otp | domain-to-entry) : ;;
+                login | username | password | generate | otp | url-to-entry | generate-for-url) : ;;
                 *)
-                    printf 'error: invalid mode\n' >&2
-                    usage
+                    usage 'error: invalid mode\n'
                     ;;
             esac
             ;;
+
+        u) query_is_url=true ;;
 
         *) usage ;;
     esac
 done
 shift $((OPTIND - 1))
 
-if [[ "${mode}" == "domain-to-entry" ]]; then
-    domain-to-entry "$@"
+if [[ "${mode}" == "url-to-entry" ]]; then
+    url-to-entry "$@"
     exit $?
 fi
 
-if [[ "$#" -eq 1 ]]; then
+if [[ "$#" -gt 0 ]] && [[ "${query_is_url}" == true ]]; then
+    query=$(url-to-entry "$1")
+elif [[ "$#" -gt 0 ]] && [[ "${query_is_url}" == false ]]; then
     query="$1"
 elif [[ "$#" -eq 0 ]]; then
-    query=$(domain-to-entry "${QUTE_URL}")
+    query=$(url-to-entry "${QUTE_URL}")
 else
     usage
 fi
@@ -115,17 +149,60 @@ case "${mode}" in
         choice=$(dmenu-pass -m print -i "${query}") || exit 0
 
         fill username "${choice}"
-        if [[ "${hints}" == true ]]; then
+        if [[ "${delimiter}" != '<Tab>' ]] || [[ "${hints}" != true ]]; then
             key "${delimiter}"
+            sleep 1
         fi
 
         fill password "${choice}"
         ;;
-    username | password | otp)
+
+    username | email | password | otp)
         fill "${mode}" "${query}"
+        ;;
+
+    generate)
+        pass_generate_args=$(getopt -o ncqif -l no-symbols,qrcode,clip,in-place,force -n "${me}" -- "$@")
+        pass_generate_getopt_err=$?
+
+        [[ "${pass_generate_getopt_err}" -eq 0 ]] || usage
+
+        eval set -- "${pass_generate_args}"
+        while true; do
+            case "$1" in
+                -[ncif] | --no-symbols | --qrcode | --clip | --force | --in-place)
+                    pass_generate_args+=("${pass_generate_arg}")
+                    shift
+                    ;;
+                --)
+                    shift
+                    break
+                    ;;
+            esac
+        done
+
+        query="${1}"
+        shift
+
+        if [[ "${query_is_url}" == true ]]; then
+            query=$(url-to-entry "${query}")
+            cmd "cmd-set-text :pass -m generate ${pass_generate_args:+${pass_generate_args[*]} }${query}"
+            exit 0
+        fi
+
+        pass generate "${pass_generate_args[@]}" "${query}" "$@"
+
+        fill new-password "${query}"
+
+        # info "pass: Generated password at '${query}'. Copied to clipboard and will be cleared in ''${PASSWORD_STORE_CLIP_TIME} seconds."
+        # error "pass: \`pass generate -c $*\` failed for some reason..."
         ;;
 esac
 
-if [[ "${enter}" == true ]]; then
-    key "<Enter>"
+if [[ "${submit}" == true ]]; then
+    if [[ "${hints}" == true ]]; then
+        cmd "hint -f submit"
+    else
+        key "<Enter>"
+    fi
 fi

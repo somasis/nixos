@@ -45,7 +45,12 @@
   services.usbguard = {
     enable = true;
     package = pkgs.usbguard;
+
     IPCAllowedGroups = [ "wheel" ];
+
+    # Automatically allow devices.
+    # We will block devices inserted while on the lock screen.
+    implicitPolicyTarget = "allow";
   };
 
   environment.systemPackages = [ pkgs.usbguard-notifier ];

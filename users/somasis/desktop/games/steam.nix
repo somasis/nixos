@@ -33,4 +33,12 @@ lib.mkIf steam.enable {
       IOSchedulingPriority = 7;
     };
   };
+
+  services.xsuspender.rules.steam = {
+    matchWmClassGroupContains = "steam";
+    downclockOnBattery = 0;
+    suspendDelay = 15;
+    resumeEvery = 180;
+    resumeFor = 5;
+  };
 }

@@ -6,11 +6,26 @@
 
 : "${DMENU_PASS_HISTORY:=${XDG_CACHE_HOME}/dmenu/dmenu-pass.cache}"
 
+me=${0##*/}
+
 usage() {
     cat >&2 <<EOF
-usage: dmenu-pass [-cn] [-i query] [-m print|username|password|otp] [-- dmenu options]
+usage: ${me} [-cn] [-i query] -m print|username|password|otp [-- dmenu options]
+       ${me} [-cn] [-i query] -m FIELD [-- dmenu options]
 EOF
     exit 69
+}
+
+pass() {
+    if [[ "${notify}" == true ]]; then
+        stdbuf -o0 -e0 \
+            "$(command -v pass)" "$@" \
+            2> >(while IFS= read -r stderr; do notify-send -a "password-manager" pass "${stderr}"; done) \
+            | tee \
+                >(while IFS= read -r stdout; do notify-send -a "password-manager" -e pass "${stdout}"; done)
+    else
+        command pass "$@"
+    fi
 }
 
 clip=false
@@ -23,13 +38,7 @@ while getopts :cni:m: arg >/dev/null 2>&1; do
         c) clip=true ;;
         n) notify=true ;;
         i) initial="${OPTARG}" ;;
-        m)
-            case "${OPTARG}" in
-                print) mode= ;;
-                username | password | otp) mode="${OPTARG}" ;;
-                *) usage ;;
-            esac
-            ;;
+        m) mode="${OPTARG}" ;;
         *) usage ;;
     esac
 done
@@ -58,25 +67,16 @@ choice=$(
 touch "${DMENU_PASS_HISTORY}"
 
 case "${mode}" in
-    username)
-        username=$(pass meta "${choice}" username)
-
-        if "${clip}"; then
-            xclip -in -selection clipboard -rmlastnl <<<"${username}"
-        else
-            printf '%s\n' "${username}"
-        fi
-        ;;
     password)
         if "${clip}"; then
             pass show -c "${choice}"
-            if "${notify}"; then
-                notify-send \
-                    -a pass \
-                    -i password \
-                    "pass" \
-                    "Copied ${choice} to clipboard. Will clear in ${PASSWORD_STORE_CLIP_TIME} seconds."
-            fi
+            # if "${notify}"; then
+            #     notify-send \
+            #         -a pass \
+            #         -i password \
+            #         "pass" \
+            #         "Copied ${choice} to clipboard. Will clear in ${PASSWORD_STORE_CLIP_TIME} seconds."
+            # fi
         else
             pass show "${choice}" | head -n1
         fi
@@ -84,18 +84,27 @@ case "${mode}" in
     otp)
         if "${clip}"; then
             pass otp -c "${choice}"
-            if "${notify}"; then
-                notify-send \
-                    -a pass \
-                    -i password \
-                    "pass" \
-                    "Copied OTP code for ${choice} to clipboard. Will clear in ${PASSWORD_STORE_CLIP_TIME} seconds."
-            fi
+            # if "${notify}"; then
+            #     notify-send \
+            #         -a pass \
+            #         -i password \
+            #         "pass" \
+            #         "Copied OTP code for ${choice} to clipboard. Will clear in ${PASSWORD_STORE_CLIP_TIME} seconds."
+            # fi
         else
             pass otp "${choice}"
         fi
         ;;
-    '') printf '%s\n' "${choice}" ;;
+    print | '') printf '%s\n' "${choice}" ;;
+    *)
+        field=$(pass meta "${choice}" "${mode}")
+
+        if "${clip}"; then
+            xclip -in -selection clipboard -rmlastnl <<<"${field}"
+        else
+            printf '%s\n' "${field}"
+        fi
+        ;;
 esac
 
 cat - "${DMENU_PASS_HISTORY}" <<<"${choice}" \

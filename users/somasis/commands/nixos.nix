@@ -5,7 +5,7 @@
 , ...
 }: {
   somasis.tunnels.tunnels.nix-serve-http = {
-    location = 5000;
+    port = 5000;
     remote = "somasis@spinoza.7596ff.com";
   };
 
@@ -202,9 +202,13 @@
                         # --atomic is used so the local trees aren't ever left in a weird state.
                         before=$(git -C "$d" rev-parse HEAD)
                         if ido git -C "$d" pull -q --progress -- --atomic; then
-                            after=$(git -C "$d" rev-parse HEAD)
-                            PAGER="cat" git -c color.ui=always -C "$d" \
-                                log --no-merges --reverse --oneline "$before..$after"
+                            # Shorten the hashes, so that it doens't look so noisy on the output
+                            before=$(git -C "$d" rev-parse --short "$before")
+                            after=$(git -C "$d" rev-parse --short HEAD)
+                            if [ "$before" != "$after" ]; then
+                                PAGER="cat" ido git -c color.ui=always -C "$d" \
+                                    log --reverse --no-merges --oneline "$before..$after"
+                            fi
                         else
                             ido git merge --abort
                             exit 1
@@ -216,6 +220,7 @@
 
         ido nix flake update --commit-lock-file "''${level_args[@]}" /etc/nixos
       '';
+
       # vulnix_whitelist=/etc/nixos/hosts/${lib.escapeShellArg osConfig.networking.fqdnOrHostName}/.vulnix.toml
       # [ -e "$vulnix_whitelist" ] && ido vulnix -w "$vulnix_whitelist" -S || exit $?
     })
@@ -227,11 +232,11 @@
         pkgs.coreutils
         pkgs.findutils
         pkgs.gnugrep
-        pkgs.playtime
+        # pkgs.playtime
       ];
 
       text = ''
-        playtime || exit $?
+        # playtime || exit $?
 
         session_active() {
             kak -l 2>/dev/null | grep -Fq "nixos-edit" \
@@ -347,13 +352,13 @@
         pkgs.systemd
         pkgs.ncurses
         pkgs.nixos-rebuild
-        pkgs.playtime
+        # pkgs.playtime
         pkgs.table
         config.programs.jq.package
       ];
 
       text = ''
-        playtime || exit $?
+        # playtime || exit $?
 
         : "''${XDG_STATE_HOME:=$HOME/.local/state}"
         : "''${NIX_USER_PROFILE_DIR:=}"
@@ -425,12 +430,12 @@
 
         # Disable logging before the switch, just in case we touch the
         # log filesystem in a way it doesn't like...
-        systemctl -q is-active systemd-journald.service && ido sudo journalctl --sync --relinquish-var
+        # systemctl -q is-active systemd-journald.service && ido sudo journalctl --sync --relinquish-var
 
         e=0
         ido nixos-rebuild --use-remote-sudo --no-update-lock-file "''${level_args[@]}" "''${@:-switch}" || e=$?
 
-        systemctl -q is-active systemd-journald.service && ido sudo journalctl --flush
+        # systemctl -q is-active systemd-journald.service && ido sudo journalctl --flush
 
         if fwupdmgr get-updates --json --no-authenticate | jq -e '.Devices | length > 0' >/dev/null; then
             fwupdmgr update

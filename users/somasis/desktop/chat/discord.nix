@@ -5,16 +5,18 @@
 , ...
 }:
 let
-  inherit (lib)
-    getExe
-    ;
   inherit (config.lib.somasis)
     camelCaseToScreamingSnakeCase
     getExeName
     ;
 
-  discord = pkgs.armcord;
-  discordWindowClassName = "ArmCord";
+  discord = pkgs.discord.override {
+    withVencord = true;
+    withOpenASAR = true;
+  };
+  # discord = pkgs.armcord;
+  discordWindowClassName = "discord";
+  # discordWindowClassName = "ArmCord";
   discordDescription = discord.meta.description;
   discordName = getExeName discord;
   discordPath = "${discord}/bin/${discordName}";
@@ -38,40 +40,60 @@ in
   persist.directories = [ "etc/${discordWindowClassName}" ];
 
   xdg.configFile = {
-    "${discordWindowClassName}/storage/settings.json".text = lib.generators.toJSON { } {
-      doneSetup = true;
+    "${discordWindowClassName}/settings.json".text = lib.generators.toJSON { } {
+      openasar = {
+        setup = true;
+        quickstart = true;
+      };
 
-      channel = "canary";
-      automaticPatches = true;
+      SKIP_HOST_UPDATE = true;
+      DANGEROUS_ENABLE_DEVTOOLS_ONLY_ENABLE_IF_YOU_KNOW_WHAT_YOURE_DOING = true;
+      trayBalloonShown = true;
 
-      armcordCSP = true;
-      mods = "vencord";
-      inviteWebsocket = true;
-      spellcheck = true;
-
-      skipSplash = true;
-      startMinimized = true;
-      windowStyle = "native";
-      mobileMode = false;
-
-      minimizeToTray = true;
-      tray = true;
-      trayIcon = "dsc-tray";
-
-      performanceMode = "battery";
-
-      useLegacyCapturer = true;
+      css = lib.fileContents (pkgs.runCommandLocal "discord-css" { } ''
+        ${pkgs.minify}/bin/minify --type css --bundle \
+            -o $out \
+            ${inputs.repluggedThemeCustom}/custom.css \
+            ${inputs.repluggedThemeIrc}/irc.css
+      '');
     };
 
-    "${discordWindowClassName}/storage/lang.json".text = lib.generators.toJSON { } {
-      lang = "en-US";
-    };
+    #   "${discordWindowClassName}/storage/settings.json".text = lib.generators.toJSON { } {
+    #     doneSetup = true;
+
+    #     channel = "canary";
+    #     automaticPatches = true;
+
+    #     armcordCSP = true;
+    #     mods = "vencord";
+    #     inviteWebsocket = true;
+    #     spellcheck = true;
+
+    #     skipSplash = true;
+    #     startMinimized = true;
+    #     windowStyle = "native";
+    #     mobileMode = false;
+
+    #     minimizeToTray = true;
+    #     tray = true;
+    #     trayIcon = "dsc-tray";
+
+    #     performanceMode = "battery";
+
+    #     useLegacyCapturer = true;
+    #   };
+
+    #   "${discordWindowClassName}/storage/lang.json".text = lib.generators.toJSON { } {
+    #     lang = "en-US";
+    #   };
   };
 
   systemd.user.services.discord = {
     Unit = {
       Description = discordDescription;
       PartOf = [ "graphical-session.target" ];
+      After = [ "graphical-session-pre.target" "tray.target" ];
+      Requires = [ "tray.target" ];
 
       StartLimitIntervalSec = 1;
       StartLimitBurst = 1;
@@ -82,12 +104,18 @@ in
     Service = {
       Type = "simple";
 
-      ExecStart = "${getExe discord} " + lib.cli.toGNUCommandLineShell { } {
+      ExecStart = "${discordPath} " + lib.cli.toGNUCommandLineShell { } {
         start-minimized = true;
+
+        # FIXME: required as of 2023-08-28 to fix
+        #        <https://github.com/ArmCord/ArmCord/issues/454>
+        #        <https://github.com/electron/electron/issues/39515>
+        # disable-gpu = true;
       };
 
       Restart = "on-abnormal";
     };
+
   };
 
   services.mpd-discord-rpc = {
@@ -97,7 +125,7 @@ in
       hosts = [ "${config.services.mpd.network.listenAddress}:${builtins.toString config.services.mpd.network.port}" ];
       format = {
         details = "$title";
-        state = "$artist - $title ($album)";
+        state = "$artist - $album ($date)";
       };
     };
   };
@@ -148,12 +176,12 @@ in
   services.sxhkd.keybindings."super + d" = pkgs.writeShellScript "discord" ''
     ${pkgs.jumpapp}/bin/jumpapp \
         -c ${lib.escapeShellArg discordWindowClassName} \
-        -i ${lib.escapeShellArg (getExeName discord)} \
+        -i ${lib.escapeShellArg discordName} \
         -f ${pkgs.writeShellScript "start-or-switch" ''
             if ! ${pkgs.systemd}/bin/systemctl --user is-active -q discord.service >/dev/null 2>&1; then
                 ${pkgs.systemd}/bin/systemctl --user start discord.service && sleep 2
             fi
-            exec ${lib.escapeShellArg (getExeName discord)} >/dev/null 2>&1
+            exec ${lib.escapeShellArg discordPath} >/dev/null 2>&1
         ''} \
         >/dev/null
   '';

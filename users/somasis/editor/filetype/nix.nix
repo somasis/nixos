@@ -55,19 +55,21 @@ let
     return "$e"
   '';
 
+  statixFormat = pkgs.writeJqScript "format-statix" { raw-output = true; } ''
+    .file as $file
+      | .report[]
+      | (.severity | ascii_downcase) as $severity
+      | (.note | ascii_downcase) as $note
+      | .diagnostics[]
+      | ([ $file, .at.from.line, .at.to.line ] | join(":"))
+        + ": "
+        + (try ($severity + ": ") catch "")
+        + .message
+        + (try (" (" + $note + ")") catch "")
+  '';
+
   lint = pkgs.writeShellScript "lint-nix" ''
-    statix check -o json "$@" 2>/dev/null \
-        | jq -r '
-            .file as $file
-                | .report
-                | map(
-                    (.severity | ascii_downcase) as $severity
-                        | (.note | ascii_downcase) as $note
-                        | .diagnostics
-                        | map("\($file):\(.at.from.line):\(.at.to.line):\(try $severity + ": ")\(.message)\(try " (" + $note + ")")")
-                )
-                | flatten[]
-        '
+    statix check -o json "$@" | ${statixFormat}
   '';
 in
 {

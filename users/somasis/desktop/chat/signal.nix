@@ -103,6 +103,8 @@ in
     Unit = {
       Description = signalDescription;
       PartOf = [ "graphical-session.target" ];
+      After = [ "graphical-session-pre.target" "tray.target" ];
+      Requires = [ "tray.target" ];
 
       StartLimitIntervalSec = 1;
       StartLimitBurst = 1;

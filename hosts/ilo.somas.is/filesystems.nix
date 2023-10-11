@@ -6,6 +6,8 @@
 
   boot.supportedFilesystems = [ "vfat" "zfs" ];
 
+  boot.swraid.enable = false;
+
   fileSystems = {
     "/" = {
       device = "none";

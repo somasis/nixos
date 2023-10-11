@@ -20,12 +20,12 @@ in
   # time.timeZone = "America/New_York";
   systemd.services.set-default-timezone = {
     description = "Set the default timezone at boot";
-    wantedBy = [ "time-set.target" ];
+    wantedBy = [ "time-set.target" "basic.target" ];
     requires = [ "systemd-timesyncd.service" ];
     before = [ "localtimed.service" ];
     serviceConfig = {
       Type = "oneshot";
-      ExecStart = "${pkgs.systemd}/bin/timedatectl set-timezone America/New_York";
+      ExecStart = "${config.systemd.package}/bin/timedatectl set-timezone America/New_York";
     };
   };
 
@@ -61,22 +61,6 @@ in
     defaultLocale = locale;
     supportedLocales = [ "${locale}/${localeType}" ];
 
-    extraLocaleSettings.LC_COLLATE = "C";
-    # extraLocaleSettings.LC_NUMERIC = "C.UTF-8";
-    # extraLocaleSettings.LC_TIME = "en_DK.UTF-8/UTF-8";
-
-    # TODO: It would be nice to have ISO dates and such as the default
-    #       formats, but people recommend using some European locales
-    #       for that, which feels like a poor solution.
-    #       There's locale-en_XX, but I'm not sure how to put it into glibcLocales.
-    #       <https://xyne.dev/projects/locale-en_xx/>
-    # glibcLocales = pkgs.buildPackages.glibcLocales.overrideAttrs (oldAttrs: {
-    #   allLocales = lib.any (x: x == "all") config.i18n.supportedLocales;
-    #   locales = config.i18n.supportedLocales;
-    #   # TODO: I'd really prefer to not patch it like this.
-    #   patches = [ ./locale-en_XX.patch ];
-    # });
-    #
     # defaultLocale = "en_XX@POSIX";
     # extraLocaleSettings.LC_CTYPE = "en_US.UTF-8";
     # supportedLocales = [ "en_US/UTF-8" "en_XX/UTF-8@POSIX" ];

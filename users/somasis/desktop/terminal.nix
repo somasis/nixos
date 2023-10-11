@@ -4,8 +4,6 @@
 , ...
 }:
 let
-  xres = config.xresources.properties;
-
   inherit (config.lib.somasis.colors) format hex darken;
 
   wordSeparators = lib.concatStrings [
@@ -106,34 +104,34 @@ in
 
         colors = {
           primary = {
-            foreground = config.xresources.properties."*foreground";
-            background = config.xresources.properties."*background";
+            foreground = config.theme.colors.foreground;
+            background = config.theme.colors.background;
           };
 
           normal = {
-            black = config.xresources.properties."*color0";
-            red = config.xresources.properties."*color1";
-            green = config.xresources.properties."*color2";
-            yellow = config.xresources.properties."*color3";
-            blue = config.xresources.properties."*color4";
-            magenta = config.xresources.properties."*color5";
-            cyan = config.xresources.properties."*color6";
-            white = config.xresources.properties."*color7";
+            black = config.theme.colors.black;
+            red = config.theme.colors.red;
+            green = config.theme.colors.green;
+            yellow = config.theme.colors.yellow;
+            blue = config.theme.colors.blue;
+            magenta = config.theme.colors.magenta;
+            cyan = config.theme.colors.cyan;
+            white = config.theme.colors.white;
           };
 
           bright = {
-            black = config.xresources.properties."*color8";
-            red = config.xresources.properties."*color9";
-            green = config.xresources.properties."*color10";
-            yellow = config.xresources.properties."*color11";
-            blue = config.xresources.properties."*color12";
-            magenta = config.xresources.properties."*color13";
-            cyan = config.xresources.properties."*color14";
-            white = config.xresources.properties."*color15";
+            black = config.theme.colors.brightBlack;
+            red = config.theme.colors.brightRed;
+            green = config.theme.colors.brightGreen;
+            yellow = config.theme.colors.brightYellow;
+            blue = config.theme.colors.brightBlue;
+            magenta = config.theme.colors.brightMagenta;
+            cyan = config.theme.colors.brightCyan;
+            white = config.theme.colors.brightWhite;
           };
 
           footer_bar = {
-            background = config.xresources.properties."*colorAccent";
+            background = config.theme.colors.accent;
             foreground = "#ffffff";
           };
         };
@@ -170,29 +168,29 @@ in
       cursor_blink_interval = ".75";
       cursor_stop_blinking_after = 0;
 
-      foreground = config.xresources.properties."*foreground";
-      background = config.xresources.properties."*background";
+      foreground = config.theme.colors.foreground;
+      background = config.theme.colors.background;
       selection_foreground = "none";
       selection_background = "none";
 
-      color0 = config.xresources.properties."*color0";
-      color1 = config.xresources.properties."*color1";
-      color2 = config.xresources.properties."*color2";
-      color3 = config.xresources.properties."*color3";
-      color4 = config.xresources.properties."*color4";
-      color5 = config.xresources.properties."*color5";
-      color6 = config.xresources.properties."*color6";
-      color7 = config.xresources.properties."*color7";
-      color8 = config.xresources.properties."*color8";
-      color9 = config.xresources.properties."*color9";
-      color10 = config.xresources.properties."*color10";
-      color11 = config.xresources.properties."*color11";
-      color12 = config.xresources.properties."*color12";
-      color13 = config.xresources.properties."*color13";
-      color14 = config.xresources.properties."*color14";
-      color15 = config.xresources.properties."*color15";
+      color0 = config.theme.colors.black;
+      color1 = config.theme.colors.red;
+      color2 = config.theme.colors.green;
+      color3 = config.theme.colors.yellow;
+      color4 = config.theme.colors.blue;
+      color5 = config.theme.colors.magenta;
+      color6 = config.theme.colors.cyan;
+      color7 = config.theme.colors.white;
+      color8 = config.theme.colors.brightBlack;
+      color9 = config.theme.colors.brightRed;
+      color10 = config.theme.colors.brightGreen;
+      color11 = config.theme.colors.brightYellow;
+      color12 = config.theme.colors.brightBlue;
+      color13 = config.theme.colors.brightMagenta;
+      color14 = config.theme.colors.brightCyan;
+      color15 = config.theme.colors.brightWhite;
 
-      url_color = config.xresources.properties."*colorAccent";
+      url_color = config.theme.colors.accent;
       url_style = "dotted";
       show_hyperlink_targets = true;
 
@@ -249,41 +247,51 @@ in
   xdg.configFile."kitty/diff.conf".text = ''
     pygments_style          bw
 
-    foreground              ${xres."*foreground"}
-    background              ${xres."*background"}
+    foreground              ${config.theme.colors.foreground}
+    background              ${config.theme.colors.background}
 
-    title_fg                ${xres."*foreground"}
-    title_bg                ${xres."*background"}
+    title_fg                ${config.theme.colors.foreground}
+    title_bg                ${config.theme.colors.background}
 
-    margin_fg               ${xres."*foreground"}
-    margin_bg               ${xres."*color0"}
+    margin_fg               ${config.theme.colors.foreground}
+    margin_bg               ${config.theme.colors.black}
 
-    removed_bg              ${xres."*color1"}
-    highlight_removed_bg    ${hex (darken .325 xres."*color9")}
-    removed_margin_bg       ${xres."*color9"}
+    removed_bg              ${config.theme.colors.red}
+    highlight_removed_bg    ${hex (darken .325 config.theme.colors.brightRed)}
+    removed_margin_bg       ${config.theme.colors.brightRed}
 
-    added_bg                ${xres."*color2"}
-    highlight_added_bg      ${hex (darken .2 xres."*color2")}
-    added_margin_bg         ${xres."*color10"}
+    added_bg                ${config.theme.colors.green}
+    highlight_added_bg      ${hex (darken .2 config.theme.colors.green)}
+    added_margin_bg         ${config.theme.colors.brightGreen}
 
-    filler_bg               ${xres."*color0"}
+    filler_bg               ${config.theme.colors.black}
 
-    hunk_margin_bg          ${xres."*color14"}
-    hunk_bg                 ${xres."*color6"}
+    hunk_margin_bg          ${config.theme.colors.brightCyan}
+    hunk_bg                 ${config.theme.colors.cyan}
 
-    search_fg               ${xres."*color15"}
-    search_bg               ${xres."*colorAccent"}
+    search_fg               ${config.theme.colors.brightWhite}
+    search_bg               ${config.theme.colors.accent}
 
-    select_fg               ${xres."*color15"}
-    select_bg               ${xres."*colorAccent"}
+    select_fg               ${config.theme.colors.brightWhite}
+    select_bg               ${config.theme.colors.accent}
   '';
 
   programs.bash.initExtra = ''
-    [ -n "$KITTY_WINDOW_ID" ] \
-        && alias \
+    if [ -n "$KITTY_WINDOW_ID" ]; then
+        alias \
             clipboard="kitty +kitten clipboard" \
             icat="kitty +kitten icat" \
-            ssh="kitty +kitten ssh"
+            mosh="mosh --ssh='kitty +kitten ssh'"
+
+        ssh() {
+            # Error: The SSH kitten is meant for interactive use only, STDIN must be a terminal
+            if [ -t 0 ]; then
+                kitty +kitten ssh "$@"
+            else
+                command ssh "$@"
+            fi
+        }
+    fi
   '';
 
   programs.kakoune.config.hooks = [{
@@ -295,20 +303,20 @@ in
     '';
   }];
 
-  programs.kakoune.package =
-    if (builtins.compareVersions pkgs.kakoune-unwrapped.version "2022.10.31") <= 0 then
-      pkgs.kakoune-unwrapped.overrideAttrs
-        (final: prev: {
-          patches = [
-            (pkgs.fetchpatch {
-              url = "https://github.com/mawww/kakoune/commit/7c54de233486d29c3c33e4f63774b170a5945564.patch";
-              hash = "sha256-R8zdaLj/icQkTGpkeB+9NfcaKPNssd1zHJIFuX/g/8Y=";
-            })
-          ];
-        })
-    else
-      throw "users/somasis/desktop/terminal.nix: kakoune patch can be removed now"
-  ;
+  # programs.kakoune.package =
+  #   if (builtins.compareVersions pkgs.kakoune-unwrapped.version "2022.10.31") <= 0 then
+  #     pkgs.kakoune-unwrapped.overrideAttrs
+  #       (final: prev: {
+  #         patches = [
+  #           (pkgs.fetchpatch {
+  #             url = "https://github.com/mawww/kakoune/commit/7c54de233486d29c3c33e4f63774b170a5945564.patch";
+  #             hash = "sha256-R8zdaLj/icQkTGpkeB+9NfcaKPNssd1zHJIFuX/g/8Y=";
+  #           })
+  #         ];
+  #       })
+  #   else
+  #     throw "users/somasis/desktop/terminal.nix: kakoune patch can be removed now"
+  # ;
 
   # xresources.properties = {
   #   # xterm(1) settings

@@ -5,48 +5,6 @@
 , ...
 }:
 let
-  bandcamp-collection-downloader = pkgs.callPackage
-    ({ lib, stdenvNoCC, fetchurl, jre, makeWrapper }:
-      stdenvNoCC.mkDerivation rec {
-        pname = "bandcamp-collection-downloader";
-        version = "2021-12-05";
-
-        src = fetchurl {
-          url = "https://framagit.org/Ezwen/bandcamp-collection-downloader/-/jobs/1515933/artifacts/raw/build/libs/bandcamp-collection-downloader.jar";
-          hash = "sha256-nmnPu+E6KgQpwH66Cli0gbDU4PzQQXEscXPyYYkkJC4=";
-        };
-        dontUnpack = true;
-
-        nativeBuildInputs = [ makeWrapper ];
-
-        # src = fetchFromGitLab {
-        #   domain = "framagit.org";
-        #   owner = "Ezwen";
-        #   rev = "v${version}";
-        #   hash = "sha256-uvfpTFt92mp4msm06Y/1Ynwx6+DiE+bR8O2dntTzj9I=";
-        # };
-
-        jar = "${placeholder "out"}/lib/bandcamp-collection-downloader.jar";
-
-        buildPhase = ''
-          install -D -m 0755 $src $jar
-        '';
-
-        installPhase = ''
-          makeWrapper ${jre}/bin/java $out/bin/bandcamp-collection-downloader \
-              --argv0 bandcamp-collection-downloader \
-              --add-flags "-jar $jar"
-        '';
-
-        meta = with lib; {
-          description = "Tool for automatically downloading releases purchased with a Bandcamp account";
-          homepage = "https://framagit.org/Ezwen/bandcamp-collection-downloader";
-          license = licenses.agpl3;
-          maintainers = with maintainers; [ somasis ];
-        };
-      })
-    { };
-
   pass-beets = pkgs.writeShellApplication {
     name = "pass-beets";
     runtimeInputs = [
@@ -229,7 +187,7 @@ let
       # beetcamp = { enable = true; propagatedBuildInputs = [ beetcamp ]; };
       # fetchartist = { enable = true; propagatedBuildInputs = [ beets-fetchartist ]; };
       alternatives = { enable = true; propagatedBuildInputs = [ pkgs.beetsPackages.alternatives ]; };
-      extrafiles = { enable = true; propagatedBuildInputs = [ pkgs.beetsPackages.extrafiles ]; };
+      # extrafiles = { enable = true; propagatedBuildInputs = [ pkgs.beetsPackages.extrafiles ]; };
       noimport = { enable = true; propagatedBuildInputs = [ beets-noimport ]; };
       originquery = {
         enable = true;
@@ -259,7 +217,7 @@ in
   };
 
   home.packages = [
-    bandcamp-collection-downloader
+    pkgs.bandcamp-collection-downloader
 
     # (pkgs.symlinkJoin {
     #   name = "gazelle-origin-final";
@@ -360,8 +318,10 @@ in
       sort_item = "artist+ date+ album+ disc+ track+";
       sort_album = "artist+ date+ album+ disc+ track+";
 
-      plugins = [ "noimport" ]
+      plugins = [ "parentwork" "noimport" ]
         ++ lib.optional config.services.mpd.enable "mpdupdate";
+
+      parentwork.auto = true;
     }
     // lib.optionalAttrs config.services.mpd.enable {
       mpd = {

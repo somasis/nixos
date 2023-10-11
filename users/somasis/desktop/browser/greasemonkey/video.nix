@@ -6,11 +6,12 @@
   programs.qutebrowser.greasemonkey = map config.lib.somasis.drvOrPath [
     # YouTube
     (pkgs.fetchurl { hash = "sha256-YcjlG8GSSynwWvTLiWE+F6Wmdri5ZURSeqWXS1eaOIc="; url = "https://greasyfork.org/scripts/468740-restore-youtube-username-from-handle-to-custom/code/Restore%20YouTube%20Username%20from%20Handle%20to%20Custom.user.js"; })
-    (pkgs.fetchurl { hash = "sha256-UpnrCuxWSkVeVTp2BpCl0FQd85GUVeL2gPkff2f/yQs="; url = "https://greasyfork.org/scripts/811-resize-yt-to-window-size/code/Resize%20YT%20To%20Window%20Size.user.js"; })
-    (pkgs.fetchurl { hash = "sha256-6FK4x/rZA1BxWOmYLjVU4rEFqXHgpwAy0rYedQzza2g="; url = "https://greasyfork.org/scripts/370755-youtube-peek-preview/code/Youtube%20Peek%20Preview.user.js"; })
+    (pkgs.fetchurl { hash = "sha256-d0uEUoCFkh4Wfnr7Kaw/eSvG1Q6r/Fe7hMaTiOmbpOQ="; url = "https://greasyfork.org/scripts/431573-youtube-cpu-tamer-by-animationframe/code/YouTube%20CPU%20Tamer%20by%20AnimationFrame.user.js"; })
+    # (pkgs.fetchurl { hash = "sha256-UpnrCuxWSkVeVTp2BpCl0FQd85GUVeL2gPkff2f/yQs="; url = "https://greasyfork.org/scripts/811-resize-yt-to-window-size/code/Resize%20YT%20To%20Window%20Size.user.js"; })
+    # (pkgs.fetchurl { hash = "sha256-6FK4x/rZA1BxWOmYLjVU4rEFqXHgpwAy0rYedQzza2g="; url = "https://greasyfork.org/scripts/370755-youtube-peek-preview/code/Youtube%20Peek%20Preview.user.js"; })
     (pkgs.fetchurl { hash = "sha256-pKxroIOn19WvcvBKA5/+ZkkA2YxXkdTjN3l2SLLcC0A="; url = "https://gist.githubusercontent.com/codiac-killer/87e027a2c4d5d5510b4af2d25bca5b01/raw/764a0821aa248ec4126b16cdba7516c7190d287d/youtube-autoskip.user.js"; })
     (pkgs.fetchurl { hash = "sha256-LnorSydM+dA/5poDUdOEZ1uPoAOMQwpbLmadng3qCqI="; url = "https://greasyfork.org/scripts/23329-disable-youtube-60-fps-force-30-fps/code/Disable%20YouTube%2060%20FPS%20(Force%2030%20FPS).user.js"; })
-    (pkgs.fetchurl { hash = "sha256-DnGZSjC1YkrJZ1H9qQ50GjR9DK84kc4JPHfA2OxHY14="; url = "https://greasyfork.org/scripts/471062-youtube-shorts-blocker/code/YouTube%20Shorts%20Blocker.user.js"; })
+    # (pkgs.fetchurl { hash = "sha256-DnGZSjC1YkrJZ1H9qQ50GjR9DK84kc4JPHfA2OxHY14="; url = "https://greasyfork.org/scripts/471062-youtube-shorts-blocker/code/YouTube%20Shorts%20Blocker.user.js"; })
 
     (
       let

@@ -27,21 +27,21 @@
       statusbar-h-padding = 6;
       statusbar-v-padding = 10;
 
-      default-bg = config.xresources.properties."*background";
-      default-fg = config.xresources.properties."*foreground";
-      statusbar-bg = config.xresources.properties."*background";
-      statusbar-fg = config.xresources.properties."*foreground";
-      inputbar-bg = config.xresources.properties."*lightBackground";
-      inputbar-fg = config.xresources.properties."*lightForeground";
+      default-bg = config.theme.colors.background;
+      default-fg = config.theme.colors.foreground;
+      statusbar-bg = config.theme.colors.background;
+      statusbar-fg = config.theme.colors.foreground;
+      inputbar-bg = config.theme.colors.lightBackground;
+      inputbar-fg = config.theme.colors.lightForeground;
 
-      completion-bg = config.xresources.properties."*lightBackground";
-      completion-fg = config.xresources.properties."*lightForeground";
-      completion-highlight-bg = config.xresources.properties."*colorAccent";
-      completion-highlight-fg = config.xresources.properties."*foreground";
+      completion-bg = config.theme.colors.lightBackground;
+      completion-fg = config.theme.colors.lightForeground;
+      completion-highlight-bg = config.theme.colors.accent;
+      completion-highlight-fg = config.theme.colors.foreground;
 
       font = "monospace normal 10";
-      recolor-darkcolor = config.xresources.properties."*foreground";
-      recolor-lightcolor = config.xresources.properties."*background";
+      recolor-darkcolor = config.theme.colors.foreground;
+      recolor-lightcolor = config.theme.colors.background;
     };
 
     mappings =

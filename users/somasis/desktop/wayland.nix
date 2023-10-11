@@ -17,8 +17,8 @@
           gaps_in = 0
           gaps_out = 12
 
-          col.active_border = ${builtins.replaceStrings ["#"] [""] config.xresources.properties."*color8"}
-          col.inactive_border = ${builtins.replaceStrings ["#"] [""] config.xresources.properties."*background"}
+          col.active_border = ${builtins.replaceStrings ["#"] [""] config.theme.colors.brightBlack}
+          col.inactive_border = ${builtins.replaceStrings ["#"] [""] config.theme.colors.background}
 
           no_cursor_warps = true
 
@@ -193,24 +193,24 @@
       };
 
       colors = {
-        foreground = lib.replaceStrings [ "#" ] [ "" ] config.xresources.properties."*foreground";
-        background = lib.replaceStrings [ "#" ] [ "" ] config.xresources.properties."*background";
-        regular0 = lib.replaceStrings [ "#" ] [ "" ] config.xresources.properties."*color0";
-        regular1 = lib.replaceStrings [ "#" ] [ "" ] config.xresources.properties."*color1";
-        regular2 = lib.replaceStrings [ "#" ] [ "" ] config.xresources.properties."*color2";
-        regular3 = lib.replaceStrings [ "#" ] [ "" ] config.xresources.properties."*color3";
-        regular4 = lib.replaceStrings [ "#" ] [ "" ] config.xresources.properties."*color4";
-        regular5 = lib.replaceStrings [ "#" ] [ "" ] config.xresources.properties."*color5";
-        regular6 = lib.replaceStrings [ "#" ] [ "" ] config.xresources.properties."*color6";
-        regular7 = lib.replaceStrings [ "#" ] [ "" ] config.xresources.properties."*color7";
-        bright0 = lib.replaceStrings [ "#" ] [ "" ] config.xresources.properties."*color0";
-        bright1 = lib.replaceStrings [ "#" ] [ "" ] config.xresources.properties."*color1";
-        bright2 = lib.replaceStrings [ "#" ] [ "" ] config.xresources.properties."*color2";
-        bright3 = lib.replaceStrings [ "#" ] [ "" ] config.xresources.properties."*color3";
-        bright4 = lib.replaceStrings [ "#" ] [ "" ] config.xresources.properties."*color4";
-        bright5 = lib.replaceStrings [ "#" ] [ "" ] config.xresources.properties."*color5";
-        bright6 = lib.replaceStrings [ "#" ] [ "" ] config.xresources.properties."*color6";
-        bright7 = lib.replaceStrings [ "#" ] [ "" ] config.xresources.properties."*color7";
+        foreground = lib.replaceStrings [ "#" ] [ "" ] config.theme.colors.foreground;
+        background = lib.replaceStrings [ "#" ] [ "" ] config.theme.colors.background;
+        regular0 = lib.replaceStrings [ "#" ] [ "" ] config.theme.colors.black;
+        regular1 = lib.replaceStrings [ "#" ] [ "" ] config.theme.colors.red;
+        regular2 = lib.replaceStrings [ "#" ] [ "" ] config.theme.colors.green;
+        regular3 = lib.replaceStrings [ "#" ] [ "" ] config.theme.colors.yellow;
+        regular4 = lib.replaceStrings [ "#" ] [ "" ] config.theme.colors.blue;
+        regular5 = lib.replaceStrings [ "#" ] [ "" ] config.theme.colors.magenta;
+        regular6 = lib.replaceStrings [ "#" ] [ "" ] config.theme.colors.cyan;
+        regular7 = lib.replaceStrings [ "#" ] [ "" ] config.theme.colors.white;
+        bright0 = lib.replaceStrings [ "#" ] [ "" ] config.theme.colors.black;
+        bright1 = lib.replaceStrings [ "#" ] [ "" ] config.theme.colors.red;
+        bright2 = lib.replaceStrings [ "#" ] [ "" ] config.theme.colors.green;
+        bright3 = lib.replaceStrings [ "#" ] [ "" ] config.theme.colors.yellow;
+        bright4 = lib.replaceStrings [ "#" ] [ "" ] config.theme.colors.blue;
+        bright5 = lib.replaceStrings [ "#" ] [ "" ] config.theme.colors.magenta;
+        bright6 = lib.replaceStrings [ "#" ] [ "" ] config.theme.colors.cyan;
+        bright7 = lib.replaceStrings [ "#" ] [ "" ] config.theme.colors.white;
       };
     };
   };

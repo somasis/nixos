@@ -18,6 +18,13 @@
   persist.directories = [
     { method = "symlink"; directory = "pictures"; }
     { method = "symlink"; directory = "etc/GIMP"; }
+    { method = "symlink"; directory = "etc/darktable"; }
+    { method = "symlink"; directory = "etc/inkscape"; }
+  ];
+
+  cache.directories = [
+    { method = "symlink"; directory = "var/cache/gimp"; }
+    { method = "symlink"; directory = "var/cache/darktable"; }
   ];
 
   xdg.userDirs.pictures = "${config.home.homeDirectory}/pictures";

@@ -12,6 +12,8 @@ let
   loInstallExtensions = exts: assert (builtins.isList exts);
     let
       installer = pkgs.writeShellScript "libreoffice-install-extensions" ''
+        export PATH=${lib.makeBinPath [ pkgs.gnugrep pkgs.coreutils lo ]}
+
         ext_is_installed() {
             for installed_ext in "''${installed_exts[@]}"; do
                 installed_ext_basename=''${installed_ext##*/}
@@ -20,10 +22,10 @@ let
             return 1
         }
 
-        mapfile -t installed_exts < <(${lo}/bin/unopkg list | grep '^  URL:' | cut -d ' ' -f4-)
+        mapfile -t installed_exts < <(unopkg list | grep '^  URL:' | cut -d ' ' -f4-)
 
         for ext; do
-            ext_is_installed "$(basename "$ext")" || ${lo}/bin/unopkg add -v -s "$ext"
+            ext_is_installed "$(basename "$ext")" || unopkg add -v -s "$ext"
         done
       '';
     in
@@ -73,17 +75,22 @@ let
       hash = "sha256-2DDGbz6Fihz7ruGIoA2HZIL78XK7MgJr3UeeoaYywtI=n";
     })
 
+    # <https://extensions.libreoffice.org/en/extensions/show/languagetool>
     (pkgs.fetchurl {
-      url = "https://extensions.libreoffice.org/assets/downloads/99/1667923733/LanguageTool-5.9.1.oxt";
-      hash = "sha256-tWUqzvpeeAdxccgz/LBjK6hPFtxzfR3YGivaldhUN0U=";
+      url = "https://extensions.libreoffice.org/assets/downloads/3710/1691498123/LanguageTool-6.2.oxt";
+      hash = "sha256-Ck0SyckcoAz8fWgy/LQHRoTNtbvKkaH6xk0UovpRagg=";
+      # url = "https://extensions.libreoffice.org/assets/downloads/99/1667923733/LanguageTool-5.9.1.oxt";
+      # hash = "sha256-tWUqzvpeeAdxccgz/LBjK6hPFtxzfR3YGivaldhUN0U=";
     })
   ]
   ++ lib.optional config.programs.zotero.enable "${config.programs.zotero.package}/usr/lib/zotero-bin-${pkgs.zotero.version}/extensions/zoteroOpenOfficeIntegration@zotero.org/install/Zotero_OpenOffice_Integration.oxt"
   ;
 in
-{
+rec {
   home.packages = [
     lo
+
+    pkgs.languagetool
 
     # Free replacements for pkgs.corefonts
     # Arial, Times New Roman
@@ -115,7 +122,26 @@ in
     { method = "symlink"; directory = "etc/LanguageTool/LibreOffice"; }
   ];
 
-  xdg.configFile."libreoffice/jre".source = pkgs.openjdk19;
+  xdg.configFile = {
+    "libreoffice/jre".source = pkgs.openjdk19;
+
+    # "LanguageTool/LibreOffice/Languagetool.cfg".text = lib.generators.toKeyValue { } {
+    #   motherTongue = "en-US";
+    #   "disabledCategories.en-US" = "Creative Writing,Wikipedia";
+    #   "disabledRules.en-US" = "HASH_SYMBOL,WIKIPEDIA_CONTRACTIONS,WIKIPEDIA_CURRENTLY,TOO_LONG_SENTENCE,WIKIPEDIA_12_PM,WIKIPEDIA_12_AM";
+    #   "enabledRules.en-US" = "WHITESPACE_PARAGRAPH,THREE_NN,EN_REDUNDANCY_REPLACE";
+    #   noDefaultCheck = true;
+
+    #   noSynonymsAsSuggestions = false;
+
+    #   serverMode = false;
+    #   serverPort = 8081;
+
+    #   doRemoteCheck = true;
+    #   useOtherServer = true;
+    #   otherServerUrl = "http://localhost:3864";
+    # };
+  };
 
   # TODO: why doesn't this work?
   #       LibreOffice will fail to recognize the Java environment at all, if I
@@ -167,11 +193,14 @@ in
       let
         loWait = pkgs.writeShellScript "libreoffice-wait" ''
           ${pkgs.procps}/bin/pwait -u "$USER" "soffice.bin" || :
-          ${pkgs.coreutils}/bin/rm -f "${config.xdg.configHome}/libreoffice/4/.lock"
+          ${pkgs.coreutils}/bin/rm -f ${lib.escapeShellArg config.xdg.configHome}/libreoffice/4/.lock
         '';
       in
       {
         Type = "simple";
+
+        # Only run the daemon during school. Saves memory.
+        # ExecCondition = [ "${pkgs.playtime}/bin/playtime -iq" ];
 
         # Wait for any standalone instances of libreoffice to quit; there might be one open,
         # which will cause ExecStart to fail if we don't wait for it to end by itself.
@@ -187,11 +216,19 @@ in
         RestartSec = 0;
 
         KillSignal = "SIGQUIT";
+
+        # If using `--headless`, things get echoed to the standard output of this process... :|
+        StandardOutput = "null";
       };
   };
 
   somasis.tunnels.tunnels.languagetool = {
-    location = 3864;
+    port = 3864;
     remote = "somasis@spinoza.7596ff.com";
+  };
+
+  home.sessionVariables = {
+    LANGUAGETOOL_HOSTNAME = "http://localhost:${builtins.toString somasis.tunnels.tunnels.languagetool.port}";
+    LANGUAGETOOL_PORT = builtins.toString somasis.tunnels.tunnels.languagetool.port;
   };
 }

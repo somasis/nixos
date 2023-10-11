@@ -69,17 +69,17 @@ in
       Unit.BindsTo = [ "mpd.service" ];
       Install.WantedBy = [ "mpd.service" ];
 
-      Service.Environment = [
-        "ENTRY=${osConfig.networking.fqdnOrHostName}/listenbrainz-mpd"
-        "PATH=${lib.getBin config.programs.password-store.package}/bin"
-      ];
-
-      Service.ExecStartPre = pkgs.writeShellScript "listenbrainz-mpd-secret" ''
-        : ''${XDG_RUNTIME_DIR:?}
-        umask 0077
-        exec pass "$ENTRY" > "$XDG_RUNTIME_DIR/listenbrainz-mpd.secret"
-      '';
-      Service.ExecStopPost = [ "${pkgs.coreutils}/bin/rm -f %t/listenbrainz-mpd.secret" ];
+      Service = {
+        Environment = [ "ENTRY=www/listenbrainz.org" ];
+        ExecStartPre = pkgs.writeShellScript "listenbrainz-mpd-secret" ''
+          PATH=${lib.makeBinPath [ config.programs.password-store.package pkgs.coreutils ]}:"$PATH"
+          : "''${XDG_RUNTIME_DIR:?}"
+          : "''${ENTRY:?}"
+          umask 0077
+          pass show "$ENTRY" | head -n1 > "$XDG_RUNTIME_DIR/listenbrainz-mpd.secret"
+        '';
+        ExecStopPost = [ "${pkgs.coreutils}/bin/rm -f %t/listenbrainz-mpd.secret" ];
+      };
     };
 
     mpdscribble = {

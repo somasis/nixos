@@ -5,7 +5,7 @@
   imports = [
     ./minecraft.nix
     # TODO ./nx.nix
-    ./retroarch.nix
+    # ./retroarch.nix
     ./steam.nix
     ./urbanterror.nix
   ];
@@ -15,7 +15,7 @@
     pkgs.libsForQt5.kpat
     pkgs.opentyrian
     pkgs.pingus
-    pkgs.sgtpuzzles
+    pkgs.sgt-puzzles
     pkgs.zaz
 
     pkgs.pcsx2

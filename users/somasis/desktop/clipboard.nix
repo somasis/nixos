@@ -1,7 +1,10 @@
 { config
+, lib
 , pkgs
 , ...
-}: {
+}:
+let CM_DIR = "${config.xdg.cacheHome}/clipmenu"; in
+{
   home.packages = [
     (pkgs.writeShellApplication {
       name = "clip";
@@ -16,6 +19,9 @@
   ];
 
   services.clipmenu.enable = true;
+  # systemd.user.services.clipmenu.Service.Environment = lib.mkMerge [ "CM_DIR=${CM_DIR}" ];
+  home.sessionVariables = { inherit CM_DIR; };
+  systemd.user.sessionVariables = { inherit CM_DIR; };
 
   services.sxhkd.keybindings = {
     # Clipboard: show clipboard history - super + x

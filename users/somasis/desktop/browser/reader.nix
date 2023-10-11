@@ -17,8 +17,6 @@ let
 
     PATH=${lib.makeBinPath [ pkgs.rdrview pkgs.coreutils pkgs.gnused ]}:"$PATH"
 
-    exec >> "$QUTE_FIFO"
-
     case "$QUTE_URL" in
         file://*) QUTE_URL=''${QUTE_URL#file://} ;;
     esac
@@ -27,8 +25,7 @@ let
     base=$(printf '%s\n' "$QUTE_URL" | sed -E '/^[^:]+:\/\/.*\// s|^(.*)/[^/]+$|\1|')
 
     if ! rdrview -u "$base" -c "$QUTE_HTML"; then
-        printf "message-error \"rdrview: could not find article content in '%s'\"\n" "$QUTE_URL"
-        cat "$QUTE_HTML" >&2
+        printf "message-error \"rdrview: could not find article content in '%s'\"\n" "$QUTE_URL" > "$QUTE_FIFO"
         exit 1
     fi
 
@@ -62,7 +59,7 @@ let
     </body>
     EOF
 
-    printf 'open -r %s\n' "$tmp"
+    printf 'open -r %s\n' "$tmp" > "$QUTE_FIFO"
   '';
 
   render = pkgs.writeShellScript "render" ''
@@ -109,8 +106,8 @@ in
 {
   programs.qutebrowser = {
     aliases = {
-      rdrview = "spawn -u ${rdrview}";
-      render = "spawn -u ${render}";
+      rdrview = "spawn -m -u ${rdrview}";
+      render = "spawn -m -u ${render}";
     };
 
     keyBindings.normal = {

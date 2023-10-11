@@ -11,7 +11,7 @@ nixpkgs.lib.nixosSystem {
   specialArgs = { inherit self inputs nixpkgs; };
 
   modules = with self; with inputs; [
-    ({ self, ... }: {
+    ({ self, inputs, lib, config, ... }: {
       nixpkgs = {
         config = {
           allowUnfree = true;
@@ -188,6 +188,7 @@ nixpkgs.lib.nixosSystem {
 
         sharedModules = with self; with inputs; [
           nixosModules.lib
+          nixosModules.home-manager.theme
 
           impermanence.nixosModules.home-manager.impermanence
           nixosModules.home-manager.impermanence

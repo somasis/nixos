@@ -33,7 +33,7 @@
       Service.ExecStart = ''
         stw \
             -F 'monospace:style=heavy:size=8' \
-            -f '${config.xresources.properties."*color3"}' \
+            -f '${config.theme.colors.yellow}' \
             -A 0 \
             -x 0 -y -0 \
             -B 24 \

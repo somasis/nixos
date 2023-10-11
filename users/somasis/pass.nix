@@ -289,52 +289,10 @@
       pass = config.programs.password-store.package;
       dmenu-pass = pkgs.dmenu-pass.override { inherit dmenu pass; };
       qute-pass = pkgs.qute-pass.override { inherit dmenu-pass pass; };
-
-      # Using the current host, construct the initial entry that should be used for the password
-      # we're generating, and then put it in the command line
-      pass-generate-command = pkgs.writeShellScript "pass-generate-command" ''
-        set -x
-
-        : "''${QUTE_FIFO:?}"
-
-        entry=$(${qute-pass}/bin/qute-pass -m domain-to-entry "$1")
-        printf 'set-cmd-text :pass-generate www/%s/\n' "$entry" >>"$QUTE_FIFO"
-      '';
-
-      # Actually generate the password
-      pass-generate = pkgs.writeShellScript "pass-generate" ''
-        set -x
-
-        : "''${QUTE_FIFO:?}"
-
-        shift
-        for arg; do
-            entry="$arg"
-        done
-
-        if ${config.programs.password-store.package}/bin/pass generate -c "$@" >/dev/null; then
-            ${pkgs.libnotify}/bin/notify-send \
-                -a pass \
-                -i password \
-                -u low \
-                "pass" \
-                "Generated password at '$entry'. Copied to clipboard and will be cleared in ''${PASSWORD_STORE_CLIP_TIME} seconds."
-        else
-            ${pkgs.libnotify}/bin/notify-send \
-                -a pass \
-                -i password \
-                pass \
-                "\`pass generate -c $*\` failed for some reason..."
-            exit 1
-        fi
-      '';
     in
     {
-      aliases."pass-generate-command" = "spawn -u ${pass-generate-command}";
-      aliases."pass-generate" = "spawn -u ${pass-generate}";
-
-      keyBindings.normal."zlg" = "pass-generate-command {url:host}";
-      keyBindings.normal."zlG" = "pass-generate-command -n {url:host}";
+      keyBindings.normal."zlg" = "pass -m generate-for-url {url:host}";
+      keyBindings.normal."zlG" = "pass -m generate-for-url -n {url:host}";
 
       # selectors for username/password/otp input boxes. I know right
       extraConfig =
@@ -345,7 +303,12 @@
           # ensure that specific forms come before non-specific
           inForms = l:
             [ ]
+            ++ (flatMap (x: ''form[id*=log_in i] ${x}'') l)
+            ++ (flatMap (x: ''form[id*=log-in i] ${x}'') l)
             ++ (flatMap (x: ''form[id*=login i] ${x}'') l)
+            ++ (flatMap (x: ''form[id*=sign_in i] ${x}'') l)
+            ++ (flatMap (x: ''form[id*=sign-in i] ${x}'') l)
+            ++ (flatMap (x: ''form[id*=signin i] ${x}'') l)
             ++ (flatMap (x: ''form ${x}'') l)
           ;
 
@@ -391,7 +354,7 @@
           #        'form[id*=login i] ' and 'form ' so that we prefer login forms before
           #        any other forms.
           #     ∴  giant huge priority-sorted list of selectors
-          usernameSelectors = lib.pipe (map (quote "\"") [ "username" "user" "" ]) [
+          usernameSelectors = lib.pipe (map (quote "\"") [ "login" "user" "alias" "username" "" ]) [
             asNames
             (map (x: ''input[type="text"]${x}''))
             preferSpecial
@@ -405,7 +368,14 @@
             inForms
           ];
 
-          passwordSelectors = lib.pipe (map (quote "\"") [ "password" "" ]) [
+          passwordSelectors = lib.pipe (map (quote "\"") [ "current-password" "password" "" ]) [
+            asNames
+            (map (x: ''input[type="password"]${x}''))
+            preferSpecial
+            inForms
+          ];
+
+          newPasswordSelectors = lib.pipe (map (quote "\"") [ "new-password" "password" "" ]) [
             asNames
             (map (x: ''input[type="password"]${x}''))
             preferSpecial
@@ -419,10 +389,102 @@
             inForms
           ];
 
+          # stolen from browserpass
+          # <https://github.com/browserpass/browserpass-extension/blob/858cc821d20df9102b8040b78d79893d4b7af352/src/inject.js#L62-L134>
+          submitSelectors = lib.pipe
+            [
+              "[type=submit i]"
+              "button[name=login i]"
+              "button[name=log-in i]"
+              "button[name=log_in i]"
+              "button[name=signin i]"
+              "button[name=sign-in i]"
+              "button[name=sign_in i]"
+              "button[id=login i]"
+              "button[id=log-in i]"
+              "button[id=log_in i]"
+              "button[id=signin i]"
+              "button[id=sign-in i]"
+              "button[id=sign_in i]"
+              "button[class=login i]"
+              "button[class=log-in i]"
+              "button[class=log_in i]"
+              "button[class=signin i]"
+              "button[class=sign-in i]"
+              "button[class=sign_in i]"
+              "input[type=button i][name=login i]"
+              "input[type=button i][name=log-in i]"
+              "input[type=button i][name=log_in i]"
+              "input[type=button i][name=signin i]"
+              "input[type=button i][name=sign-in i]"
+              "input[type=button i][name=sign_in i]"
+              "input[type=button i][id=login i]"
+              "input[type=button i][id=log-in i]"
+              "input[type=button i][id=log_in i]"
+              "input[type=button i][id=signin i]"
+              "input[type=button i][id=sign-in i]"
+              "input[type=button i][id=sign_in i]"
+              "input[type=button i][class=login i]"
+              "input[type=button i][class=log-in i]"
+              "input[type=button i][class=log_in i]"
+              "input[type=button i][class=signin i]"
+              "input[type=button i][class=sign-in i]"
+              "input[type=button i][class=sign_in i]"
+
+              "button[name*=login i]"
+              "button[name*=log-in i]"
+              "button[name*=log_in i]"
+              "button[name*=signin i]"
+              "button[name*=sign-in i]"
+              "button[name*=sign_in i]"
+              "button[id*=login i]"
+              "button[id*=log-in i]"
+              "button[id*=log_in i]"
+              "button[id*=signin i]"
+              "button[id*=sign-in i]"
+              "button[id*=sign_in i]"
+              "button[class*=login i]"
+              "button[class*=log-in i]"
+              "button[class*=log_in i]"
+              "button[class*=signin i]"
+              "button[class*=sign-in i]"
+              "button[class*=sign_in i]"
+              "input[type=button i][name*=login i]"
+              "input[type=button i][name*=log-in i]"
+              "input[type=button i][name*=log_in i]"
+              "input[type=button i][name*=signin i]"
+              "input[type=button i][name*=sign-in i]"
+              "input[type=button i][name*=sign_in i]"
+              "input[type=button i][id*=login i]"
+              "input[type=button i][id*=log-in i]"
+              "input[type=button i][id*=log_in i]"
+              "input[type=button i][id*=signin i]"
+              "input[type=button i][id*=sign-in i]"
+              "input[type=button i][id*=sign_in i]"
+              "input[type=button i][class*=login i]"
+              "input[type=button i][class*=log-in i]"
+              "input[type=button i][class*=log_in i]"
+              "input[type=button i][class*=signin i]"
+              "input[type=button i][class*=sign-in i]"
+              "input[type=button i][class*=sign_in i]"
+            ]
+            [
+              preferSpecial
+              inForms
+            ]
+          ;
+
           selectors = {
-            username = emailSelectors ++ usernameSelectors;
+            username = usernameSelectors;
+            # emailSelectors;
+            email = emailSelectors;
+
             password = passwordSelectors;
+            new-password = newPasswordSelectors;
+
             otp = otpSelectors;
+
+            submit = submitSelectors;
           };
         in
         lib.concatStringsSep

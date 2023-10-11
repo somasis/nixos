@@ -24,5 +24,21 @@ in
     keyBindings.normal."zpl" = "mpv";
   };
 
-  programs.gallery-dl.enable = true;
+  programs.gallery-dl = {
+    enable = true;
+    # settings = {
+    #   extractor = {
+    #     ytdl = {
+    #       enabled = true;
+    #       module = "yt_dlp";
+    #     };
+    #   };
+
+    #   downloader = {
+    #     ytdl.module = "yt_dlp";
+    #   };
+    # };
+  };
+
+  cache.directories = [ "var/cache/gallery-dl" ];
 }

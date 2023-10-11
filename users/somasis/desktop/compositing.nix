@@ -64,7 +64,7 @@
     };
   };
 
-  services.sxhkd.keybindings."super + shift + i" = builtins.toString (pkgs.writeShellScript "toggle-invert" ''
+  services.sxhkd.keybindings."super + shift + i" = pkgs.writeShellScript "toggle-invert" ''
     xprop -id "$(xdotool getwindowfocus)" -format KYLIE_INVERT 8c \
         -set KYLIE_INVERT "$(
             xprop -id "$(xdotool getwindowfocus)" 8c KYLIE_INVERT \
@@ -73,7 +73,7 @@
                     -e 's/. * = 0. * /1/' \
                     -e 's/. * not found.*/1/'
         )"
-  '');
+  '';
 
   programs.autorandr.hooks.postswitch.picom = ''
     ${pkgs.systemd}/bin/systemctl --user try-restart picom.service

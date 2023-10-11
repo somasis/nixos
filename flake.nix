@@ -80,19 +80,10 @@
     # repluggedPluginTokiPona.url = "github:somasis/discord-tokipona";
     # repluggedPluginWordFilter.flake = false;
     # repluggedPluginWordFilter.url = "github:A-Trash-Coder/wordfilter";
-    # repluggedThemeCustom.flake = false;
-    # repluggedThemeCustom.url = "path:/home/somasis/src/discord-theme-custom";
-    # repluggedThemeIrc.flake = false;
-    # repluggedThemeIrc.url = "github:somasis/discord-theme-irc";
-
-    csl.flake = false;
-    csl.url = "github:citation-style-language/styles";
-    zoteroTranslators.flake = false;
-    zoteroTranslators.url = "github:zotero/translators";
-
-    # hyprland.flake = true;
-    # hyprland.url = "github:hyprwm/Hyprland";
-    # hyprland.inputs.nixpkgs.follows = "nixpkgs";
+    repluggedThemeCustom.flake = false;
+    repluggedThemeCustom.url = "path:/home/somasis/src/discord-theme-custom";
+    repluggedThemeIrc.flake = false;
+    repluggedThemeIrc.url = "github:somasis/discord-theme-irc";
 
     adblockEasyList.flake = false;
     adblockEasyList.url = "https://easylist.to/easylist/easylist.txt";
@@ -154,6 +145,8 @@
 
       nixosModules = {
         lib = import ./modules/lib.nix;
+        theme = import ./modules/theme.nix;
+        home-manager.theme = import ./modules/theme-hm.nix;
 
         impermanence = import ./modules/impermanence.nix;
         home-manager.impermanence = import ./modules/impermanence-hm.nix;

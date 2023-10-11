@@ -38,6 +38,7 @@ in
       enablePango = true;
       enablePlainPrompt = true;
       enablePassword = true;
+      enablePrefixMatching = true;
       # enableVertFull = true;
       enableWMType = true;
 
@@ -53,14 +54,14 @@ in
 
       font = "monospace 10";
 
-      background = xres."*darkBackground";
-      foreground = xres."*darkForeground";
-      backgroundSelected = xres."*colorAccent";
-      foregroundSelected = xres."*darkForeground";
-      backgroundHighlight = xres."*darkBackground";
-      foregroundHighlight = xres."*color1";
-      backgroundHighlightSelected = xres."*colorAccent";
-      foregroundHighlightSelected = xres."*color1";
+      background = config.theme.colors.darkBackground;
+      foreground = config.theme.colors.darkForeground;
+      backgroundSelected = config.theme.colors.accent;
+      foregroundSelected = config.theme.colors.darkForeground;
+      backgroundHighlight = config.theme.colors.darkBackground;
+      foregroundHighlight = config.theme.colors.red;
+      backgroundHighlightSelected = config.theme.colors.accent;
+      foregroundHighlightSelected = config.theme.colors.red;
     };
   };
 
@@ -70,6 +71,13 @@ in
     ++ lib.optional (osConfig.fonts.fontconfig.defaultFonts.emoji != [ ]) dmenu-emoji
     ++ lib.optional config.programs.password-store.enable dmenu-pass
     ++ lib.optional (config.programs.qutebrowser.enable && config.programs.password-store.enable) qute-pass
+  ;
+
+  xdg.dataFile."dmenu/dmenu-run.sh".text =
+    lib.concatLines (
+      lib.mapAttrsToList (n: v: ''alias ${lib.escapeShellArg n}=${lib.escapeShellArg v}'')
+        (config.home.shellAliases // config.programs.bash.shellAliases)
+    )
   ;
 
   cache.directories = [{ method = "symlink"; directory = "var/cache/dmenu"; }];
@@ -98,11 +106,17 @@ in
   programs.qutebrowser = lib.optionalAttrs config.programs.password-store.enable {
     aliases."pass" = "spawn -u ${qute-pass}/bin/qute-pass";
 
-    keyBindings.normal."zll" = "pass -H";
-    keyBindings.normal."zlL" = "pass -H -d Enter";
-    keyBindings.normal."zlz" = "pass -H -E";
-    keyBindings.normal."zlu" = "pass -m username";
-    keyBindings.normal."zlp" = "pass -m password";
-    keyBindings.normal."zlo" = "pass -m otp";
+    keyBindings.normal = {
+      # Login
+      "zll" = "pass -H";
+      "zlL" = "pass -H -d <Enter>";
+      "zlz" = "pass -H -S";
+
+      # Specific fills
+      "zlu" = "pass -m username";
+      "zle" = "pass -m email";
+      "zlp" = "pass -m password";
+      "zlo" = "pass -m otp";
+    };
   };
 }
