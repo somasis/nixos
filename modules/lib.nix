@@ -181,7 +181,7 @@ with lib;
         let
           xml =
             if (builtins.length (builtins.attrNames attrs)) == 1 then
-              pkgs.runCommand "xml"
+              pkgs.runCommandLocal "xml"
                 { json = pkgs.writeText "xml.json" (builtins.toJSON attrs); }
                 ''
                   ${pkgs.yq-go}/bin/yq \
@@ -496,6 +496,7 @@ with lib;
       { format
       , default ? null
       , description ? null
+        # , type ? (types.color format)
       }:
       mkOption {
         type = types.color format;

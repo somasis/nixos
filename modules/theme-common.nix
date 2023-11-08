@@ -77,47 +77,49 @@ in
   #   (mkAliasOptionModule [ "theme" "colors" "color15" ] [ "theme" "colors" "brightWhite" ])
   # ];
 
-  config.xresources.properties = with cfg.colors; {
-    "*background" = background;
-    "*foreground" = foreground;
+  config = {
+    xresources.properties = with cfg.colors; {
+      "*background" = background;
+      "*foreground" = foreground;
 
-    "*accent" = accent;
-    "*colorAccent" = accent;
+      "*accent" = accent;
+      "*colorAccent" = accent;
 
-    "*color0" = black;
-    "*color1" = red;
-    "*color2" = green;
-    "*color3" = yellow;
-    "*color4" = blue;
-    "*color5" = magenta;
-    "*color6" = cyan;
-    "*color7" = white;
-    "*color8" = brightBlack;
-    "*color9" = brightRed;
-    "*color10" = brightGreen;
-    "*color11" = brightYellow;
-    "*color12" = brightBlue;
-    "*color13" = brightMagenta;
-    "*color14" = brightCyan;
-    "*color15" = brightWhite;
+      "*color0" = black;
+      "*color1" = red;
+      "*color2" = green;
+      "*color3" = yellow;
+      "*color4" = blue;
+      "*color5" = magenta;
+      "*color6" = cyan;
+      "*color7" = white;
+      "*color8" = brightBlack;
+      "*color9" = brightRed;
+      "*color10" = brightGreen;
+      "*color11" = brightYellow;
+      "*color12" = brightBlue;
+      "*color13" = brightMagenta;
+      "*color14" = brightCyan;
+      "*color15" = brightWhite;
 
-    "*colorBlack" = black;
-    "*colorRed" = red;
-    "*colorGreen" = green;
-    "*colorYellow" = yellow;
-    "*colorBlue" = blue;
-    "*colorMagenta" = magenta;
-    "*colorCyan" = cyan;
-    "*colorWhite" = white;
-    "*colorBrightBlack" = brightBlack;
-    "*colorBrightRed" = brightRed;
-    "*colorBrightGreen" = brightGreen;
-    "*colorBrightYellow" = brightYellow;
-    "*colorBrightBlue" = brightBlue;
-    "*colorBrightMagenta" = brightMagenta;
-    "*colorBrightCyan" = brightCyan;
-    "*colorBrightWhite" = brightWhite;
-  }
-  // lib.optionalAttrs (cfg.allowCustomXresources) (lib.mapAttrs' (n: v: lib.nameValuePair "*${n}" v) cfg.colors)
-  ;
+      "*colorBlack" = black;
+      "*colorRed" = red;
+      "*colorGreen" = green;
+      "*colorYellow" = yellow;
+      "*colorBlue" = blue;
+      "*colorMagenta" = magenta;
+      "*colorCyan" = cyan;
+      "*colorWhite" = white;
+      "*colorBrightBlack" = brightBlack;
+      "*colorBrightRed" = brightRed;
+      "*colorBrightGreen" = brightGreen;
+      "*colorBrightYellow" = brightYellow;
+      "*colorBrightBlue" = brightBlue;
+      "*colorBrightMagenta" = brightMagenta;
+      "*colorBrightCyan" = brightCyan;
+      "*colorBrightWhite" = brightWhite;
+    }
+    // lib.optionalAttrs (cfg.allowCustomXresources) (lib.mapAttrs' (n: v: lib.nameValuePair "*${n}" v) cfg.colors)
+    ;
+  };
 }

@@ -57,7 +57,7 @@ in
         '';
       in
       ''
-        bind-key O open-in-browser-noninteractively
+        bind-key o open-in-browser-noninteractively
 
         download-full-page yes
 
@@ -230,6 +230,10 @@ in
         title = "Planet NixOS";
       }
       {
+        url = "https://blog.qutebrowser.org/feeds/all.atom.xml";
+        tags = [ "computer" "blog" ];
+      }
+      {
         url = "https://frame.work/blog.rss";
         tags = [ "computer" ];
       }
@@ -346,6 +350,11 @@ in
       {
         url = "https://www.404media.co/rss";
         tags = [ "news" "media" ];
+      }
+
+      {
+        url = "https://www.jphilll.com/feed";
+        tags = [ "news" ];
       }
 
       # Notifications
@@ -501,17 +510,25 @@ in
       services.feeds = {
         Unit = {
           Description = "Update feeds (if not during working hours)";
-          StartLimitIntervalSec = 1;
-          StartLimitBurst = 1;
-          StartLimitAction = "none";
+          # StartLimitIntervalSec = 1;
+          # StartLimitBurst = 1;
+          # StartLimitAction = "none";
         };
 
         Service = {
           Type = "oneshot";
           ExecCondition = [ ]
             # ++ [ "${pkgs.playtime}/bin/playtime -q" ]
-            ++ [ if-newsboat-not-running ]
             ++ lib.optional osConfig.networking.networkmanager.enable if-network;
+
+          ExecStartPre =
+            let
+              newsboat-wait = pkgs.writeShellScript "newsboat-wait" ''
+                ${pkgs.procps}/bin/pwait -u "$USER" "newsboat" || :
+              '';
+            in
+            [ newsboat-wait ]
+          ;
 
           ExecStart = [ "${pkgs.limitcpu}/bin/cpulimit -qf -l 25 -- ${pkgs.newsboat}/bin/newsboat -x reload" ];
           ExecStartPost = ''-${pkgs.writeShellScript "newsboat-cleanup" "${pkgs.limitcpu}/bin/cpulimit -qf -l 25 -- ${pkgs.newsboat}/bin/newsboat --cleanup >/dev/null"}'';
@@ -544,9 +561,9 @@ in
       timers.feeds-check-broken = {
         Unit = {
           Description = "Check if there are any broken feed URLs every week";
-          PartOf = [ "default.target" ];
+          PartOf = [ "timers.target" ];
         };
-        Install.WantedBy = [ "default.target" ];
+        Install.WantedBy = [ "timers.target" ];
 
         Timer = {
           OnCalendar = "weekly";

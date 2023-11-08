@@ -101,13 +101,15 @@
       options = "--delete-older-than 7d";
     };
 
+    channel.enable = false;
+
     registry = {
       nixpkgs.flake = nixpkgs;
       self.flake = self;
     };
 
     nixPath = [
-      "nixpkgs=flake:nixpkgs"
+      # "nixpkgs=flake:nixpkgs"
       "nixpkgs=/etc/nix/inputs/nixpkgs"
     ];
   };

@@ -5,7 +5,7 @@
 , ...
 }:
 let
-  remoteFastmail = type: userName: {
+  fastmail = type: userName: {
     inherit type;
     url = "https://${type}.messagingengine.com";
     inherit userName;
@@ -28,17 +28,16 @@ rec {
           fileExt = ".vcf";
         };
 
-        remote = remoteFastmail "carddav" "kylie@somas.is";
+        remote = fastmail "carddav" "kylie@somas.is";
 
         vdirsyncer = {
           enable = true;
-
           collections = [ "Default" ];
-
+          metadata = [ "displayname" "color" ];
           conflictResolution = "remote wins";
-
-          metadata = [ "displayname" ];
         };
+
+        khard.enable = true;
       };
     };
   };
@@ -51,72 +50,40 @@ rec {
     )
   ];
 
-  home.packages = [ pkgs.khard ];
+  programs.khard = {
+    enable = true;
 
-  # Uses configobj, like vdirsyncer.
-  # <https://configobj.readthedocs.io/en/latest/configobj.html#the-config-file-format>
-  xdg.configFile."khard/khard.conf".text =
-    let
-      # Generate collection configurations.
-      #
-      # ex. ''
-      # [[contacts_Default]]
-      # path = "/home/somasis/contacts/contacts/Default"
-      # ''
+    settings = {
+      general.default_action = "list";
 
-      collections =
-        lib.concatLines (
-          lib.flatten
-            (lib.mapAttrsToList
-              (accountName: accountValue:
-                map
-                  (collection:
-                    ''
-                      [[${accountName}_${collection}]]
-                      path = "${lib.escape [ "\"" ] "${config.accounts.contact.basePath}/${accountName}/${collection}"}"
-                    ''
-                  )
-                  accountValue.vdirsyncer.collections
-              )
-              config.accounts.contact.accounts
-            )
-        )
-      ;
+      "contact table" = {
+        display = "formatted_name";
 
-    in
-    ''
-      [general]
-      default_action = list
+        # Use ISO dates (YYYY-MM-DD)
+        localize_dates = false;
 
-      [addressbooks]
-      ${collections}
+        preferred_email_address_type = [ "pref" "work" "home" ];
+        preferred_phone_number_type = [ "pref" "main" "voice" "cell" "home" ];
 
-      [contact table]
-      display = formatted_name
+        group_by_addressbook = false;
+        reverse = false;
+        sort = "last_name";
 
-      # Use ISO dates (YYYY-MM-DD)
-      localize_dates = no
+        show_kinds = false;
+        show_nicknames = true;
+        show_uids = false;
+      };
 
-      preferred_email_address_type = pref, work, home
-      preferred_phone_number_type = pref, main, voice, cell, home
+      vcard = {
+        # 3.0 is the version used by Fastmail.
+        preferred_version = "3.0";
 
-      group_by_addressbook = no
-      reverse = no
-      sort = last_name
+        private_objects = [ "Anniversary" "Discord" "Matrix" "Pronouns" "Social-Profile" "Tumblr" "Twitter" ];
 
-      show_kinds = no
-      show_nicknames = yes
-      show_uids = no
+        search_in_source_files = false;
 
-      [vcard]
-
-      # 3.0 is the version used by Fastmail.
-      preferred_version = 3.0
-
-      private_objects = Anniversary, Discord, Matrix, Pronouns, Social-Profile, Tumblr, Twitter
-
-      search_in_source_files = no
-
-      skip_unparsable = yes
-    '';
+        skip_unparsable = true;
+      };
+    };
+  };
 }

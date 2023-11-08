@@ -112,6 +112,11 @@ let
         jq -r '
             .tfa.extract as $extract
             | .tfa.titles.normalized as $title
+            | if $extract == null or $title == null then
+                empty
+            else
+                .
+            end
             | "\($title)\n\n\($extract)"
             ' <<< "$featured" \
             | fixtext \
@@ -185,9 +190,9 @@ in
   systemd.user = {
     timers.fetch-didyouknow = {
       Unit.Description = "Fetch Wikipedia's 'Did you know?' text for the current day, every day";
-      Install.WantedBy = [ "default.target" ];
+      Install.WantedBy = [ "timers.target" ];
       Install.RequiredBy = [ "stw@didyouknow.service" ];
-      Unit.PartOf = [ "default.target" "stw@didyouknow.service" ];
+      Unit.PartOf = [ "timers.target" "stw@didyouknow.service" ];
       Timer = {
         OnCalendar = "daily";
         OnStartupSec = 0;

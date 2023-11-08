@@ -101,6 +101,7 @@ in
 
         # Take screenshot of window/selection
         "Print" = "SCREENSHOT_MAIM=-u screenshot -b 6 -p -6 -l -c .6,.4,.98,.5 -r hippie";
+        "shift + super + Print" = "SCREENSHOT_MAIM=-u SCREENSHOT_FREEZE=true screenshot -b 6 -p -6 -l -c .6,.4,.98,.5 -r hippie";
 
         # Take screenshot of window/selection (and scan its text)
         "shift + Print" = "SCREENSHOT_MAIM=-u SCREENSHOT_OCR=true screenshot -b 6 -p -6 -l -c .6,.4,.98,.5 -r hippie";

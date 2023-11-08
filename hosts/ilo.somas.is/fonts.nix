@@ -21,11 +21,15 @@
       pkgs.lmodern
 
       pkgs.nasin-nanpa
+      pkgs.linja-luka
+      pkgs.linja-pi-tomo-lipu
+      pkgs.linja-pimeja-pona
+      pkgs.linja-pona
+      pkgs.linja-suwi
 
       pkgs.spleen
 
-      # pkgs.twitter-color-emoji
-      pkgs.openmoji-color
+      pkgs.twitter-color-emoji
     ];
 
     fontconfig = {
@@ -59,7 +63,7 @@
           "nasin-nanpa"
           "emoji"
         ];
-        emoji = lib.mkBefore [ "OpenMoji-Color" ];
+        emoji = lib.mkBefore [ "Twitter Color Emoji" ];
       };
     };
   };

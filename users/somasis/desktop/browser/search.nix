@@ -34,6 +34,53 @@ let
         "$date" \
         "''${QUTE_URL:-$2}"
   '';
+
+  wayback = pkgs.writeShellScript "wayback" ''
+    PATH=${lib.makeBinPath [ pkgs.curl pkgs.jq pkgs.savepagenow ]}:"$PATH"
+
+    : "''${QUTE_FIFO:?}"
+    : "''${QUTE_TAB_INDEX:?}"
+
+    url="''${QUTE_URL:-''${1?error: no URL provided}}"
+
+    wayback_response=
+    wayback_archived_url=
+
+    check_wayback() {
+        wayback_response=$(
+            curl -f -s -G --url-query "url=$url" "https://archive.org/wayback/available"
+        )
+
+        wayback_archived_url=$(
+            <<<"$wayback_response" jq -er '
+                if .archived_snapshots == {} then
+                    ""
+                else
+                    .archived_snapshots.closest.url
+                end
+            '
+        )
+    }
+
+    check_wayback
+    # printf 'message-info "wayback: checking if URL archived..."\n' > "$QUTE_FIFO"
+
+    if [ -n "$wayback_archived_url" ]; then
+        printf 'message-info "wayback: has URL, redirecting."\n' > "$QUTE_FIFO"
+        printf 'cmd-run-with-count %s open -r %s\n' "$QUTE_TAB_INDEX" "$wayback_archived_url" > "$QUTE_FIFO"
+    else
+        printf 'message-info "wayback: does not have URL, archiving \"%s\"..."' "$url" > "$QUTE_FIFO"
+        if wayback_archived_url=$(savepagenow -c "$url"); then
+            printf 'message-info "wayback: archived URL, redirecting..."\n' > "$QUTE_FIFO"
+            printf 'cmd-run-with-count %s open -r %s\n' "$QUTE_TAB_INDEX" "$wayback_archived_url" > "$QUTE_FIFO"
+        else
+            printf 'message-error "wayback: failed to archive URL"\n' > "$QUTE_FIFO"
+            exit 1
+        fi
+    fi
+  '';
+
+  wikipedia = lang: "https://${lang}.wikipedia.org/w/index.php?search={}";
 in
 {
   programs.qutebrowser = rec {
@@ -54,6 +101,9 @@ in
 
       "!libgen" = "http://libgen.rs/index.php?req={}";
       "!anna" = "https://annas-archive.org/search?q={}";
+      "!annapdf" = searchEngines."!anna" + "&ext=pdf";
+      "!worldcat" = "https://www.worldcat.org/search?q={}";
+
       "!bookfinder" = "https://www.bookfinder.com/search/?keywords={}";
       "!abebooks" = "https://www.abebooks.com/servlet/SearchResults?kn={}";
       "!plato" = "https://plato.stanford.edu/search/searcher.py?query={}";
@@ -71,14 +121,14 @@ in
       "!mbseries" = "https://musicbrainz.org/search?query={}&type=series";
       "!mbwork" = "https://musicbrainz.org/search?query={}&type=work";
 
-      "!letterboxd" = "https://letterboxd.com/search/{}/";
       "!imdb" = "https://www.imdb.com/find/?s=all&q={}";
+      "!ltrbox" = "https://letterboxd.com/search/{}/";
       "!trakt" = "https://trakt.tv/search?query={}";
 
       "!osm" = "https://www.openstreetmap.org/search?query={}";
       "!osmwiki" = "https://wiki.openstreetmap.org/wiki/Special:Search?search={}&go=Go";
       "!gmaps" = "https://www.google.com/maps/search/{}";
-      "!fa" = "https://flightaware.com/ajax/ignoreall/omnisearch/disambiguation.rvt?searchterm={}&token=";
+      "!flight" = "https://flightaware.com/ajax/ignoreall/omnisearch/disambiguation.rvt?searchterm={}&token=";
 
       "!red" = "https://redacted.ch/torrents.php?searchstr={}";
       "!redartist" = "https://redacted.ch/artist.php?artistname={}";
@@ -87,12 +137,13 @@ in
       "!redrequests" = "https://redacted.ch/requests.php?search={}";
       "!redusers" = "https://redacted.ch/user.php?action=search&search={}";
       "!rutracker" = "https://rutracker.org/forum/tracker.php?nm={}";
+      "!nyaa" = "https://nyaa.si/?q={}";
 
       "!gh" = "https://github.com/search?q={}";
 
       "!nix" = "file://${config.nix.package.doc}/share/doc/nix/manual/index.html?search={}";
       "!nixdiscuss" = "https://discourse.nixos.org/search?q={}";
-      "!nixissues" = "https://github.com/NixOS/nixpkgs/issues?q={}";
+      "!nixpkgsissues" = "https://github.com/NixOS/nixpkgs/issues?q={}";
       "!nixopts" = "https://search.nixos.org/options?channel=unstable&sort=alpha_asc&query={}";
       "!nixpkgs" = "https://search.nixos.org/packages?channel=unstable&sort=alpha_asc&query={}";
       "!nixwiki" = "https://nixos.wiki/index.php?go=Go&search={}";
@@ -108,22 +159,21 @@ in
       "!twitter" = "https://twitter.com/search?q={}";
       "!whosampled" = "https://www.whosampled.com/search/?q={}";
 
-      "!wiki" = "https://www.wikipedia.org/search-redirect.php?family=Wikipedia&go=Go&search={}";
-      "!wiki#en" = "https://www.wikipedia.org/search-redirect.php?family=Wikipedia&language=en&go=Go&search={}";
-      "!wiki#es" = "https://www.wikipedia.org/search-redirect.php?family=Wikipedia&language=es&go=Go&search={}";
-      "!wiki#jp" = "https://www.wikipedia.org/search-redirect.php?family=Wikipedia&language=ja&go=Go&search={}";
-      "!wiki#tok" = "https://wikipesija.org/index.php?go=o+tawa&search={}";
+      "!wiki" = wikipedia "en";
+      "!wiki#en" = wikipedia "en";
+      "!wiki#es" = wikipedia "es";
+      "!wiki#jp" = wikipedia "ja";
+      "!wiki#tok" = "https://wikipesija.org/index.php?search={}";
 
+      "!etym" = "https://www.etymonline.com/search?q={}";
       "!wikt" = "https://en.wiktionary.org/wiki/{}";
       "!en" = "${searchEngines."!wikt"}#English";
       "!es" = "${searchEngines."!wikt"}#Spanish";
       "!jp" = "${searchEngines."!wikt"}#Japanese";
+      "!tok" = "https://wikipesija.org/wiki/nimi:{unquoted}";
       "!esen" = "https://www.wordreference.com/es/en/translation.asp?spen={}";
       "!enes" = "https://www.wordreference.com/es/translation.asp?tranword={}";
-      "!etym" = "https://www.etymonline.com/search?q={}";
-
-      "!tok" = "https://wikipesija.org/wiki/nimi:{}";
-      "!linku" = "https://lipu-linku.github.io/?q={}";
+      "!linku" = "https://linku.la/?q={}";
 
       "!archman" = "https://man.archlinux.org/search?q={}";
       "!archpkgs" = "https://archlinux.org/packages/?sort=&q={}";
@@ -149,7 +199,7 @@ in
 
     aliases =
       let
-        searchWithSelection = pkgs.writeShellScript "search-with-selection" ''
+        search-with-selection = pkgs.writeShellScript "search-with-selection" ''
           PATH=${lib.makeBinPath [ pkgs.s6-portable-utils ]}:"$PATH"
           : "''${QUTE_FIFO:?}"
           : "''${QUTE_SELECTED_TEXT:?}"
@@ -163,62 +213,23 @@ in
           printf 'open -rt %s\n' "''${args[*]}" > "$QUTE_FIFO"
         '';
 
-        wayback = pkgs.writeShellScript "wayback" ''
-          PATH=${lib.makeBinPath [ pkgs.curl pkgs.jq pkgs.wayback-machine-archiver ]}:"$PATH"
-
-          : "''${QUTE_FIFO:?}"
-          : "''${QUTE_TAB_INDEX:?}"
-
-          url="''${QUTE_URL:-''${1?error: no URL provided}}"
-
-          wayback_response=
-          wayback_archived_url=
-
-          check_wayback() {
-              wayback_response=$(
-                  curl -f -s -G --url-query "url=$url" "https://archive.org/wayback/available"
-              )
-
-              wayback_archived_url=$(
-                  <<<"$wayback_response" jq -er '
-                      if .archived_snapshots == {} then
-                          ""
-                      else
-                          .archived_snapshots.closest.url
-                      end
-                  '
-              )
-          }
-
-          check_wayback
-
-          if [ -n "$wayback_archived_url" ]; then
-              printf 'message-info "wayback: has URL, redirecting..."' "$url" >&2
-              printf 'tab-focus %s\n' "$QUTE_TAB_INDEX"
-              printf 'open -r %s\n' "$wayback_archived_url"
-          else
-              printf 'message-info "wayback: does not have URL, archiving \"%s\"..."' "$url" >&2
-              archiver "$url"
-              check_wayback
-              printf 'tab-focus %s\n' "$QUTE_TAB_INDEX"
-              printf 'open -r %s\n' "$wayback_archived_url"
-          fi
-        '';
       in
       {
         memento = "spawn -u ${memento}";
-        search-with-selection = "spawn -u ${searchWithSelection}";
+        search-with-selection = "spawn -u ${search-with-selection}";
         wayback = "spawn -u ${wayback}";
       };
 
-    keyBindings.normal = { "gsw" = "search-with-selection !wikt"; }
-      // (
+    keyBindings.normal = {
+      "gsw" = "search-with-selection !wikt";
+    }
+    // (
       let
         open = x: "open -r ${x}";
         openNewTab = x: "open -rt ${x}";
       in
       mapAttrs' (n: v: nameValuePair "r${n}" v) {
-        "1" = open "https://12ft.io/api/proxy?q={url}";
+        # "1" = open "https://12ft.io/api/proxy?q={url}";
         # "a" = open "https://web.archive.org/web/*/{url}";
         "a" = "wayback {url}";
         "A" = open "https://archive.today/newest/{url}";
@@ -226,5 +237,14 @@ in
         "M" = "memento now";
       }
     );
+
+    greasemonkey = map config.lib.somasis.drvOrPath [
+      # Google
+      (pkgs.fetchurl { hash = "sha256-azHAQKmNxAcnyc7l08oW9X6DuMqAblFGPwD8T9DsrSs="; url = "https://greasyfork.org/scripts/32635-disable-google-search-result-url-redirector/code/Disable%20Google%20Search%20Result%20URL%20Redirector.user.js"; })
+      (pkgs.fetchurl { hash = "sha256-Bb1QsU6R9xU718hRskGbuwNO7rrhuV7S1gvKtC9SlL0="; url = "https://greasyfork.org/scripts/37166-add-site-search-links-to-google-search-result/code/Add%20Site%20Search%20Links%20To%20Google%20Search%20Result.user.js"; })
+      (pkgs.fetchurl { hash = "sha256-5C7No5dYcYfWMY+DwciMeBmkdE/wnplu5fxk4q7OFZc="; url = "https://greasyfork.org/scripts/382039-speed-up-google-captcha/code/Speed%20up%20Google%20Captcha.user.js"; })
+      (pkgs.fetchurl { hash = "sha256-r4UF6jr3jhVP7JxJNPBzEpK1fkx5t97YWPwf37XLHHE="; url = "https://greasyfork.org/scripts/383166-google-images-search-by-paste/code/Google%20Images%20-%20search%20by%20paste.user.js"; })
+      (pkgs.fetchurl { hash = "sha256-O+CuezLYKcK2Qh4jq4XxrtEEIPKOaruHnUGQNwkkCF8="; url = "https://greasyfork.org/scripts/381497-reddit-search-on-google/code/Reddit%20search%20on%20Google.user.js"; })
+    ];
   };
 }

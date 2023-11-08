@@ -72,16 +72,22 @@ in
             # 1 2 3 4 5
   '';
 
-  # systemd.user.services.bspwm-react = {
-  #   Unit.Description = "React to bspwm(1) events";
-  #   Service.Type = "simple";
-  #   Service.ExecStart = "${config.home.homeDirectory}/bin/bspwm-react";
-  #   Unit.PartOf = [ "graphical-session.target" ];
-  #   Install.WantedBy = [ "graphical-session.target" ];
-  # };
+  systemd.user.services.bspwm-react = {
+    Unit.Description = "React to bspwm(1) events";
+    Service.Type = "simple";
+    Service.ExecStart = "${config.home.homeDirectory}/bin/bspwm-react";
+    Unit.PartOf = [ "graphical-session.target" ];
+    Install.WantedBy = [ "graphical-session.target" ];
+  };
 
   home.packages = [
     pkgs.jumpapp
+
+    pkgs.bspwm-center-window
+
+    pkgs.wmutils-core
+    pkgs.wmutils-opt
+    pkgs.mmutils
 
     (pkgs.writeShellScriptBin "bspwm-hide-or-close" ''
       # If we're closing a window,

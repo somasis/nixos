@@ -1,4 +1,5 @@
 { self
+, inputs
 , config
 , lib
 , pkgs
@@ -34,6 +35,29 @@
 
   cache.allowOther = true;
   log.allowOther = true;
+
+  nixpkgs = {
+    config =
+      lib.recursiveUpdate
+        (osConfig.nixpkgs.config or { })
+        {
+          allowUnfree = true;
+        }
+    ;
+
+    overlays =
+      # lib.lists.unique (
+      (osConfig.nixpkgs.overlays or [ ])
+      ++ [
+        self.overlays.default
+
+        (final: prev: {
+          stable = inputs.nixpkgsStable.legacyPackages.${pkgs.stdenv.hostPlatform.system};
+        })
+      ]
+      #)
+    ;
+  };
 
   home.packages = [
     pkgs.dateutils

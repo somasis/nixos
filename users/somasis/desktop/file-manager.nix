@@ -162,7 +162,7 @@ in
     # Advanced > File transfer
     misc-parallel-copy-mode = "THUNAR_PARALLEL_COPY_MODE_ONLY_LOCAL"; # Transfer files in parallel
     misc-transfer-use-partial = "THUNAR_USE_PARTIAL_MODE_REMOTE"; # Use intermediate file on copy
-    misc-transfer-verify-file = "THUNAR_VERIFY_FILE_MODE_ALWAYS"; # Verify file checksum on copy
+    misc-transfer-verify-file = "THUNAR_VERIFY_FILE_MODE_NEVER"; # Don't verify file checksums on copy
 
     # Advanced > Search
     misc-recursive-search = "THUNAR_RECURSIVE_SEARCH_ALWAYS"; # Include subfolders

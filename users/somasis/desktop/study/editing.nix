@@ -23,11 +23,21 @@
   ];
 
   xdg.configFile = {
-    "pdfarranger/config.ini".text = lib.generators.toINI { } {
-      preferences = {
-        content-loss-warning = true;
-      };
-    };
+    "pdfarranger/config.ini".text = lib.generators.toINI
+      {
+        mkKeyValue = k: v:
+          if builtins.isBool v then
+            lib.generators.mkKeyValueDefault { } "=" k (if v then "True" else "False")
+          else
+            lib.generators.mkKeyValueDefault { } "=" k v
+        ;
+      }
+      {
+        preferences = {
+          content-loss-warning = true;
+        };
+      }
+    ;
 
     "scantailor-advanced/scantailor-advanced.ini".text = lib.generators.toINI { } {
       settings = {

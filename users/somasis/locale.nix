@@ -44,7 +44,7 @@ in
     enabled = lib.mkIf config.xsession.enable "fcitx5";
     fcitx5.addons = [
       # ja
-      # pkgs.fcitx5-mozc
+      pkgs.fcitx5-mozc
       pkgs.fcitx5-anthy
 
       # tok
@@ -70,11 +70,11 @@ in
   #   };
   # };
 
-  systemd.user.sessionVariables = {
-    GTK_IM_MODULE = lib.mkForce "xim";
-    QT_IM_MODULE = lib.mkForce "xim";
-    XMODIFIERS = lib.mkForce "@:bim=fcitx";
-  };
+  # systemd.user.sessionVariables = {
+  #   GTK_IM_MODULE = lib.mkForce "xim";
+  #   QT_IM_MODULE = lib.mkForce "xim";
+  #   XMODIFIERS = lib.mkForce "@:bim=fcitx";
+  # };
 
   persist.directories = [{ method = "symlink"; directory = "etc/fcitx5"; }];
   cache.directories = [
@@ -85,6 +85,8 @@ in
   programs.kakoune.plugins = [ pkgs.kakounePlugins.kakoune-fcitx ];
 
   home.packages = [
+    pkgs.location
+
     pkgs.hunspell
     pkgs.hunspellDicts.en-us-large
     pkgs.hunspellDicts.en-gb-ise

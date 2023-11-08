@@ -58,6 +58,8 @@ in
             adblockEasyListSpanish
             adblockEasyListRussian
 
+            adblockEasyPrivacy
+
             adblockEasyListCookies
 
             adblockAntiAdblockFilters

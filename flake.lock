@@ -145,6 +145,35 @@
         "type": "github"
       }
     },
+    "discordThemeCustom": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1698295328,
+        "narHash": "sha256-pXF8qUkLjo+MZfmof+EhocjTlq8M75Y+S6BFVQHgGig=",
+        "path": "/home/somasis/src/discord-theme-custom",
+        "type": "path"
+      },
+      "original": {
+        "path": "/home/somasis/src/discord-theme-custom",
+        "type": "path"
+      }
+    },
+    "discordThemeIrc": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1667835392,
+        "narHash": "sha256-x0OjnntzC71UydZHG4jcNItM/1py/t+PkIiVcx9L8Vw=",
+        "owner": "somasis",
+        "repo": "discord-theme-irc",
+        "rev": "e3405891337de2abc72a21e2be0003f03509a923",
+        "type": "github"
+      },
+      "original": {
+        "owner": "somasis",
+        "repo": "discord-theme-irc",
+        "type": "github"
+      }
+    },
     "dmenu-flexipatch": {
       "flake": false,
       "locked": {
@@ -375,35 +404,6 @@
         "type": "github"
       }
     },
-    "repluggedThemeCustom": {
-      "flake": false,
-      "locked": {
-        "lastModified": 1698295328,
-        "narHash": "sha256-pXF8qUkLjo+MZfmof+EhocjTlq8M75Y+S6BFVQHgGig=",
-        "path": "/home/somasis/src/discord-theme-custom",
-        "type": "path"
-      },
-      "original": {
-        "path": "/home/somasis/src/discord-theme-custom",
-        "type": "path"
-      }
-    },
-    "repluggedThemeIrc": {
-      "flake": false,
-      "locked": {
-        "lastModified": 1667835392,
-        "narHash": "sha256-x0OjnntzC71UydZHG4jcNItM/1py/t+PkIiVcx9L8Vw=",
-        "owner": "somasis",
-        "repo": "discord-theme-irc",
-        "rev": "e3405891337de2abc72a21e2be0003f03509a923",
-        "type": "github"
-      },
-      "original": {
-        "owner": "somasis",
-        "repo": "discord-theme-irc",
-        "type": "github"
-      }
-    },
     "root": {
       "inputs": {
         "adblockAntiAdblockFilters": "adblockAntiAdblockFilters",
@@ -417,6 +417,8 @@
         "avatarSomasis": "avatarSomasis",
         "catgirl": "catgirl",
         "control-panel-for-twitter": "control-panel-for-twitter",
+        "discordThemeCustom": "discordThemeCustom",
+        "discordThemeIrc": "discordThemeIrc",
         "dmenu-flexipatch": "dmenu-flexipatch",
         "flake-compat": "flake-compat",
         "home-manager": "home-manager",
@@ -431,8 +433,6 @@
         "nixpkgs": "nixpkgs",
         "nixpkgsStable": "nixpkgsStable",
         "qutebrowser-zotero": "qutebrowser-zotero",
-        "repluggedThemeCustom": "repluggedThemeCustom",
-        "repluggedThemeIrc": "repluggedThemeIrc",
         "sbase": "sbase",
         "uAssetsPrivacy": "uAssetsPrivacy",
         "uAssetsResourceAbuse": "uAssetsResourceAbuse",

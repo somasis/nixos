@@ -11,20 +11,19 @@ let
   formatPrettier = formatPrettierWith "";
 
   # CSS
+  formatCSS = formatPrettier;
   # TODO Need a new CSS linting tool; stylelint is broken with recent NixOS updates, it seems, due to
   #      not having a default configuration loaded
   # lintCSS = pkgs.writeShellScript "lint-css" ''
   #   ${pkgs.nodePackages.stylelint}/bin/stylelint --formatter unix --stdin-filename="$kak_buffile" < "$1"
   # '';
-  # CSS
-  formatCSS = formatPrettier;
 
+  # HTML
   formatHTML =
     "${pkgs.html-tidy}/bin/tidy --quiet yes --wrap 0 --indent auto --indent-spaces %opt{tabstop} --tab-size %opt{tabstop} --tidy-mark no 2>/dev/null || :"
   ;
   lintHTML = pkgs.writeShellScript "lint-html" ''
     : "''${kak_buffile:=}"
-
     ${pkgs.html-tidy}/bin/tidy \
         --markup no \
         --gnu-emacs yes \
@@ -33,6 +32,12 @@ let
         --tidy-mark no \
         "$1" 2>&1
   '';
+
+  # XML
+  formatXML = "${pkgs.xmlstarlet}/bin/xmlstarlet format -s %opt{tabstop}";
+  # lintXML = pkgs.writeShellScript "lint-xml" ''
+  #   ${pkgs.xmlstarlet}/bin/xmlstarlet validate -w
+  # '';
 
   # JavaScript
   formatJavascript = formatPrettier;
@@ -120,6 +125,15 @@ in
       '';
     }
 
+    # Format: XML
+    {
+      name = "WinSetOption";
+      option = "filetype=xml";
+      commands = ''
+        set-option window formatcmd "run() { ${formatXML}; } && run"
+      '';
+    }
+
     # Format, lint: JSON
     {
       name = "WinSetOption";
@@ -127,7 +141,7 @@ in
       commands = ''
         set-option window tabstop 2
         set-option window indentwidth 2
-        set-option window formatcmd ""run() { ${formatJSON}; } && run"
+        set-option window formatcmd "run() { ${formatJSON}; } && run"
         set-option window lintcmd ${lintJSON}
       '';
     }

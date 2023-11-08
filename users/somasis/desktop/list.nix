@@ -93,17 +93,17 @@ in
     keyBindings.normal."ztw" = "list-add";
   };
 
-  programs.kakoune.plugins = [
-    (pkgs.kakouneUtils.buildKakounePluginFrom2Nix {
-      pname = "todotxt.kak";
-      version = "unstable-2019-04-01";
+  # programs.kakoune.plugins = [
+  #   (pkgs.kakouneUtils.buildKakounePluginFrom2Nix {
+  #     pname = "todotxt.kak";
+  #     version = "unstable-2019-04-01";
 
-      src = pkgs.fetchFromGitHub {
-        owner = "nkoehring";
-        repo = "kakoune-todo.txt";
-        rev = "8856e0dfad09792c80dab07f1ae11e2f6b26cd95";
-        hash = "sha256-b3Q8wWLu+L8/s0aI8exW5iiojfg8phaOWu4lnETflOo=";
-      };
-    })
-  ];
+  #     src = pkgs.fetchFromGitHub {
+  #       owner = "nkoehring";
+  #       repo = "kakoune-todo.txt";
+  #       rev = "8856e0dfad09792c80dab07f1ae11e2f6b26cd95";
+  #       hash = "sha256-b3Q8wWLu+L8/s0aI8exW5iiojfg8phaOWu4lnETflOo=";
+  #     };
+  #   })
+  # ];
 }

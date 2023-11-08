@@ -328,6 +328,16 @@ in
     pkgs.systemd-wait
 
     # panel-tray
+    # (pkgs.stalonetray.overrideAttrs (oldAttrs: finalAttrs: {
+    #   version = "unstable-2023-08-31";
+
+    #   src = pkgs.fetchFromGitHub {
+    #     owner = "kolbusa";
+    #     repo = "stalonetray";
+    #     rev = "96e615af9728f2b60cc4f596f4675c8e61ef34b0";
+    #     hash = "sha256-y8G7/xEOklG5pq3YhdTcxRIKAqFgFMamk3uo4ZA1WxU=";
+    #   };
+    # }))
     pkgs.stalonetray
     pkgs.snixembed
     pkgs.xorg.xwininfo

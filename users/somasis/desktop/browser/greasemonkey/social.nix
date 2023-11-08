@@ -1,6 +1,7 @@
 { config
 , pkgs
 , lib
+, inputs
 , ...
 }: {
   programs.qutebrowser.greasemonkey = map config.lib.somasis.drvOrPath [
@@ -41,10 +42,19 @@
     # (pkgs.fetchurl { hash = "sha256-tNWUn4LQZxn3ehfSzJ6KFs7H41+I7V8o9773Ua5uQJE="; url = "https://greasyfork.org/scripts/413963-twitter-zoom-cursor/code/Twitter%20Zoom%20Cursor.user.js"; })
     # (pkgs.fetchurl { hash = "sha256-vVd6iKMCV1V5MazeKn8ksfsp7zVt55KOULgkIXt3lms="; url = "https://greasyfork.org/scripts/464506-twitter-advertiser-blocker/code/Twitter%20Advertiser%20Blocker.user.js"; })
 
-    ./Control_Panel_for_Twitter.user.js
+    (pkgs.runCommandLocal "control-panel-for-twitter.user.js"
+      {
+        src = inputs.control-panel-for-twitter + "/script.js";
+        patch = ./control-panel-for-twitter.patch;
+      }
+      ''
+        cat "$src" > "$out"
+        ${pkgs.patch}/bin/patch -p1 -i "$patch" "$out"
+      ''
+    )
 
     # Mastodon
-    (pkgs.runCommand "mastodon-larger-preview.user.js"
+    (pkgs.runCommandLocal "mastodon-larger-preview.user.js"
       {
         src = (pkgs.fetchFromGitHub {
           owner = "Frederick888";
@@ -54,7 +64,7 @@
         }) + "/main.user.js";
       } ''sed '/^\/\/ @match/ i // @match https://mastodon.social/*' "$src" > "$out"''
     )
-    (pkgs.runCommand "mastodon-pixiv-preview.user.js"
+    (pkgs.runCommandLocal "mastodon-pixiv-preview.user.js"
       {
         src = (pkgs.fetchFromGitHub {
           owner = "Frederick888";

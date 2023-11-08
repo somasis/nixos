@@ -9,6 +9,57 @@ let
   inherit (config.lib.somasis) commaList;
   inherit (config.lib.somasis.generators) toXML;
 
+  languageToolVersion = pkgs.languagetool.version;
+
+  # "Languagetool.cfg" is not a typo.
+  languageToolConfig = pkgs.writeText "Languagetool.cfg" (
+    lib.generators.toKeyValue
+      {
+        mkKeyValue = k: v:
+          lib.generators.mkKeyValueDefault
+            {
+              mkValueString = value:
+                if lib.isList value then
+                  commaList value
+                else
+                  lib.escape [ ":" ] (lib.generators.mkValueStringDefault { } value)
+              ;
+            } "="
+            k
+            v
+        ;
+      }
+      rec {
+        ltVersion = languageToolVersion;
+        motherTongue = "en-US";
+
+        autoDetect = false;
+
+        "disabledCategories.en-US" = [ "Creative Writing" "Wikipedia" ];
+        "disabledRules.en-US" = [ "HASH_SYMBOL" "WIKIPEDIA_CONTRACTIONS" "WIKIPEDIA_CURRENTLY" "TOO_LONG_SENTENCE" "WIKIPEDIA_12_PM" "WIKIPEDIA_12_AM" ];
+
+        doRemoteCheck = true;
+
+        "enabledRules.en-US" = [ "THREE_NN" "EN_REDUNDANCY_REPLACE" ];
+
+        fixedLanguage = "en-US";
+
+        noDefaultCheck = true;
+        numberParagraphs = -2;
+        otherServerUrl = "http://127.0.0.1:${builtins.toString config.somasis.tunnels.tunnels.languagetool.port}";
+
+        # isPremium = true;
+        remoteUserName = config.home.username;
+
+        serverMode = false;
+        serverPort = 8081;
+        taggerShowsDisambigLog = false;
+
+        useGUIConfig = false;
+        useOtherServer = true;
+      }
+  );
+
   lo = pkgs.libreoffice-still;
 
   loInstallExtensions = exts: assert (builtins.isList exts);
@@ -79,7 +130,7 @@ let
 
     # <https://extensions.libreoffice.org/en/extensions/show/languagetool>
     (pkgs.fetchurl {
-      url = "https://extensions.libreoffice.org/assets/downloads/3710/1691498123/LanguageTool-6.2.oxt";
+      url = "https://extensions.libreoffice.org/assets/downloads/3710/1691498123/LanguageTool-${languageToolVersion}.oxt";
       hash = "sha256-Ck0SyckcoAz8fWgy/LQHRoTNtbvKkaH6xk0UovpRagg=";
     })
   ]
@@ -118,49 +169,18 @@ rec {
 
   # See for more details:
   # <https://wiki.documentfoundation.org/UserProfile#User_profile_content>
-  persist.directories = [{ method = "symlink"; directory = "etc/libreoffice/4"; }];
+  persist = {
+    directories = [{ method = "symlink"; directory = "etc/libreoffice/4"; }];
+    # files = [ "etc/LanguageTool/LibreOffice/Languagetool.cfg" ];
+  };
 
-  cache.directories = [{ method = "symlink"; directory = "etc/LanguageTool/cache"; }];
-  log.files = [ "etc/LanguageTool/LanguageTool.log" ];
+  cache.directories = [{ method = "symlink"; directory = "etc/LanguageTool/LibreOffice/cache"; }];
+  log.files = [ "etc/LanguageTool/LibreOffice/LanguageTool.log" ];
 
   xdg.configFile = {
     "libreoffice/jre".source = lo.unwrapped.jdk;
 
-    "LanguageTool/LibreOffice/Languagetool.cfg".text = lib.generators.toKeyValue
-      {
-        mkKeyValue = k: v:
-          let
-            v' =
-              if lib.isList v then
-                commaList v
-              else
-                v
-            ;
-          in
-          lib.generators.mkKeyValueDefault { } "=" k (lib.escape [ ":" ] v')
-        ;
-      }
-      rec {
-        motherTongue = "en-US";
-        fixedLanguage = motherTongue;
-        autoDetect = false;
-
-        "enabledRules.en-US" = [ "WHITESPACE_PARAGRAPH" "THREE_NN" "EN_REDUNDANCY_REPLACE" ];
-        "disabledCategories.en-US" = [ "Creative Writing" "Wikipedia" ];
-        "disabledRules.en-US" = [ "HASH_SYMBOL" "WIKIPEDIA_CONTRACTIONS" "WIKIPEDIA_CURRENTLY" "TOO_LONG_SENTENCE" "WIKIPEDIA_12_PM" "WIKIPEDIA_12_AM" ];
-
-        noDefaultCheck = true;
-        noSynonymsAsSuggestions = false;
-
-        numberParagraphs = -2;
-
-        serverMode = false;
-        serverPort = 8081;
-
-        doRemoteCheck = true;
-        useOtherServer = true;
-        otherServerUrl = "http://localhost:3864";
-      };
+    "LanguageTool/LibreOffice/.keep".source = builtins.toFile "keep" "";
 
     # TODO: why doesn't this work?
     #       LibreOffice will fail to recognize the Java environment at all, if I
@@ -213,6 +233,9 @@ rec {
           ${pkgs.procps}/bin/pwait -u "$USER" "soffice.bin" || :
           ${pkgs.coreutils}/bin/rm -f ${lib.escapeShellArg config.xdg.configHome}/libreoffice/4/.lock
         '';
+        loSetLanguageToolConfiguration = pkgs.writeShellScript "libreoffice-set-languagetool-configuration" ''
+          cat ${languageToolConfig} > "''${XDG_CONFIG_HOME:=$HOME/.config}"/LanguageTool/LibreOffice/Languagetool.cfg
+        '';
       in
       {
         Type = "simple";
@@ -224,8 +247,12 @@ rec {
         # which will cause ExecStart to fail if we don't wait for it to end by itself.
         # We especially do not want to kill it since it might be some in-progress writing.
         # If there is no process matching the pattern, pwait will exit non-zero.
-        ExecStartPre = [ "-${loWait}" ]
-          ++ [ (loInstallExtensions loExtensions) ]
+        ExecStartPre =
+          [ "-${loWait}" ]
+          ++ [
+            (loInstallExtensions loExtensions)
+            loSetLanguageToolConfiguration
+          ]
         ;
 
         ExecStart = [ "${lo}/bin/soffice --quickstart --nologo --nodefault" ];
@@ -247,7 +274,7 @@ rec {
   };
 
   home.sessionVariables = {
-    LANGUAGETOOL_HOSTNAME = "http://localhost:${builtins.toString somasis.tunnels.tunnels.languagetool.port}";
+    LANGUAGETOOL_HOSTNAME = "127.0.0.1";
     LANGUAGETOOL_PORT = builtins.toString somasis.tunnels.tunnels.languagetool.port;
   };
 }

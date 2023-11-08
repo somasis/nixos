@@ -79,7 +79,7 @@
         # Application-specific rules
         # HACK(?) I have to prefix these with zz- so they get sorted after global
         #         and don't get overriden by it.
-        zz-z.default_icon = "info";
+        zz-z.default_icon = "dialog-information";
       };
     };
 

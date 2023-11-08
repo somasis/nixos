@@ -20,9 +20,9 @@ pass() {
     if [[ "${notify}" == true ]]; then
         stdbuf -o0 -e0 \
             "$(command -v pass)" "$@" \
-            2> >(while IFS= read -r stderr; do notify-send -a "password-manager" pass "${stderr}"; done) \
+            2> >(while IFS= read -r stderr; do notify-send -a "pass" -i "password-manager" pass "${stderr}"; done) \
             | tee \
-                >(while IFS= read -r stdout; do notify-send -a "password-manager" -e pass "${stdout}"; done)
+                >(while IFS= read -r stdout; do notify-send -a "pass" -i "password-manager" -e pass "${stdout}"; done)
     else
         command pass "$@"
     fi
@@ -70,13 +70,6 @@ case "${mode}" in
     password)
         if "${clip}"; then
             pass show -c "${choice}"
-            # if "${notify}"; then
-            #     notify-send \
-            #         -a pass \
-            #         -i password \
-            #         "pass" \
-            #         "Copied ${choice} to clipboard. Will clear in ${PASSWORD_STORE_CLIP_TIME} seconds."
-            # fi
         else
             pass show "${choice}" | head -n1
         fi
@@ -84,13 +77,6 @@ case "${mode}" in
     otp)
         if "${clip}"; then
             pass otp -c "${choice}"
-            # if "${notify}"; then
-            #     notify-send \
-            #         -a pass \
-            #         -i password \
-            #         "pass" \
-            #         "Copied OTP code for ${choice} to clipboard. Will clear in ${PASSWORD_STORE_CLIP_TIME} seconds."
-            # fi
         else
             pass otp "${choice}"
         fi

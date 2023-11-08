@@ -47,13 +47,11 @@ in
 
               imapnotify = {
                 enable = true;
-                onNotify = "${systemctl} start offlineimap-${mkPathSafeName address}.service";
+                onNotify = "offlineimap -a ${address} -u syslog";
                 boxes = [ "INBOX" ];
               };
 
               msmtp.enable = true;
-
-              # thunderbird.enable = true;
             };
           }
           { "${address}" = extraAttrs; }
@@ -90,69 +88,65 @@ in
   programs.offlineimap.enable = true;
   programs.msmtp.enable = true;
 
-  # programs.thunderbird = {
-  #   enable = true;
-  # };
-
-  systemd.user = foldr
-    (n: a:
-      recursiveUpdate a {
-        services."offlineimap-${mkPathSafeName n}" = {
-          Unit.Description = "Synchronize IMAP boxes for account ${n}";
-          Service = {
-            Type = "oneshot";
-
-            ExecStart = [ "${pkgs.limitcpu}/bin/cpulimit -qf -l 25 -- ${pkgs.offlineimap}/bin/offlineimap -o -u quiet -a ${n}" ];
-
-            SyslogIdentifier = "offlineimap";
-
-            Nice = 19;
-            CPUSchedulingPolicy = "idle";
-            IOSchedulingClass = "idle";
-            IOSchedulingPriority = 7;
-          } // (optionalAttrs osConfig.networking.networkmanager.enable { ExecStartPre = [ "${pkgs.networkmanager}/bin/nm-online -q" ]; });
-        };
-
-        timers."offlineimap-${mkPathSafeName n}" = {
-          Unit.Description = "Synchronize IMAP boxes for account ${n} every two hours, and fifteen minutes after startup";
-          Timer = {
-            OnCalendar = "1/2:00:00";
-            OnStartupSec = 60 * 15;
-            Persistent = true;
-            RandomizedDelaySec = "1m";
-          };
-
-          Unit.PartOf = [ "mail.target" ];
-          Install.WantedBy = [ "mail.target" ];
-        };
-
-        paths."offlineimap-${mkPathSafeName n}" = {
-          Unit.Description = "Synchronize IMAP boxes on local changes";
-          Path.PathChanged = config.accounts.email.accounts."${n}".maildir.absPath;
-
-          Unit.PartOf = [ "mail.target" ];
-          Install.WantedBy = [ "mail.target" ];
-        };
-
-        services."imapnotify-${mkPathSafeName n}" = {
-          Unit.PartOf = [ "mail.target" ];
-          Install.WantedBy = [ "mail.target" ];
-        };
-      })
-    {
-      targets.mail = {
-        Unit = {
-          Description = "All mail management services";
-          PartOf = [ "default.target" ];
-        };
-
-        Install.WantedBy = [ "default.target" ];
-      };
-    }
-    (builtins.attrNames config.accounts.email.accounts)
-  ;
-
   services.imapnotify.enable = true;
+
+  # systemd.user = foldr
+  #   (n: a:
+  #     recursiveUpdate a {
+  #       services."offlineimap-${mkPathSafeName n}" = {
+  #         Unit.Description = "Synchronize IMAP boxes for account ${n}";
+  #         Service = {
+  #           Type = "oneshot";
+
+  #           ExecStart = [ "${pkgs.limitcpu}/bin/cpulimit -qf -l 25 -- ${pkgs.offlineimap}/bin/offlineimap -o -u quiet -a ${n}" ];
+
+  #           SyslogIdentifier = "offlineimap";
+
+  #           Nice = 19;
+  #           CPUSchedulingPolicy = "idle";
+  #           IOSchedulingClass = "idle";
+  #           IOSchedulingPriority = 7;
+  #         } // (optionalAttrs osConfig.networking.networkmanager.enable { ExecStartPre = [ "${pkgs.networkmanager}/bin/nm-online -q" ]; });
+  #       };
+
+  #       timers."offlineimap-${mkPathSafeName n}" = {
+  #         Unit.Description = "Synchronize IMAP boxes for account ${n} every two hours, and fifteen minutes after startup";
+  #         Timer = {
+  #           OnCalendar = "1/2:00:00";
+  #           OnStartupSec = 60 * 15;
+  #           Persistent = true;
+  #           RandomizedDelaySec = "1m";
+  #         };
+
+  #         Unit.PartOf = [ "mail.target" ];
+  #         Install.WantedBy = [ "mail.target" ];
+  #       };
+
+  #       paths."offlineimap-${mkPathSafeName n}" = {
+  #         Unit.Description = "Synchronize IMAP boxes on local changes";
+  #         Path.PathChanged = config.accounts.email.accounts."${n}".maildir.absPath;
+
+  #         Unit.PartOf = [ "mail.target" ];
+  #         Install.WantedBy = [ "mail.target" ];
+  #       };
+
+  #       services."imapnotify-${mkPathSafeName n}" = {
+  #         Unit.PartOf = [ "mail.target" ];
+  #         Install.WantedBy = [ "mail.target" ];
+  #       };
+  #     })
+  #   {
+  #     targets.mail = {
+  #       Unit = {
+  #         Description = "All mail management services";
+  #         PartOf = [ "default.target" ];
+  #       };
+
+  #       Install.WantedBy = [ "default.target" ];
+  #     };
+  #   }
+  #   (builtins.attrNames config.accounts.email.accounts)
+  # ;
 
   # xdg.configFile."tmux/mtui.conf".text = ''
   #   source "$XDG_CONFIG_HOME/tmux/unobtrusive.conf"

@@ -69,7 +69,6 @@ let
         "anime"
         "pones"
         "wifes"
-        "wives"
       ];
     };
 

@@ -9,6 +9,7 @@
 , gnused
 , libnotify
 , moreutils
+, systemd
 , uq
 }:
 (writeShellApplication {
@@ -23,6 +24,7 @@
     gnused
     libnotify
     moreutils
+    systemd
     uq
   ];
 

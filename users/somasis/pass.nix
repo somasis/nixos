@@ -389,6 +389,18 @@
             inForms
           ];
 
+          # cardSelectors = lib.pipe (map (quote "\"") [ "credit" "card" [
+          #   asNames
+          #   (map (x: ''input[type="text"]${x}''))
+          #   inForms
+          # ];
+
+          # cvvSelectors = lib.pipe (map (quote "\"") [ "cvv" [
+          #   asNames
+          #   (map (x: ''input[type="text"]${x}''))
+          #   inForms
+          # ];
+
           # stolen from browserpass
           # <https://github.com/browserpass/browserpass-extension/blob/858cc821d20df9102b8040b78d79893d4b7af352/src/inject.js#L62-L134>
           submitSelectors = lib.pipe

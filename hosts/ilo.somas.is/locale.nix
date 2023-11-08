@@ -2,6 +2,8 @@
 let
   locale = "en_US.UTF-8";
   localeType = builtins.toString (builtins.tail (lib.splitString "." "${locale}"));
+
+  normalUsers = lib.mapAttrsToList (n: v: toString v.uid) (lib.filterAttrs (n: v: v.isNormalUser) config.users.users);
 in
 {
   # Boone, NC, USA
@@ -11,44 +13,79 @@ in
   };
 
   # Automatically update location and timezone when traveling,
-  services.localtimed.enable = true;
   # with a fallback timezone.
+  # services.automatic-timezoned.enable = true;
+  services.localtimed.enable = true;
+  networking.networkmanager.dispatcherScripts = [
+    {
+      source = pkgs.writeShellScript "nm-localtimed" ''
+        if [ "$2" = "connectivity-change" ]; then systemctl start localtimed.service; fi
+      '';
+    }
+
+    # {
+    #   source = pkgs.writeShellScript "nm-chrony" ''
+    #     PATH=${lib.makeBinPath [ config.services.chrony.package ]}:"$PATH"
+
+    #     case "''${NM_DISPATCHER_ACTION,,}" in
+    #         connectivity-change)
+    #             case "''${CONNECTIVITY_STATE,,}" in
+    #                 limited|full) chronyc online ;;
+    #                 *) chronyc offline ;;
+    #             esac
+    #             ;;
+    #         up|vpn-up) chronyc online ;;
+    #         down|vpn-down) chronyc offline ;;
+    #     esac
+    #   '';
+    # }
+  ];
+
   # time.timeZone can't be set when using automatic-timezoned; but that's bullshit.
+  #
   # See <https://github.com/NixOS/nixpkgs/issues/68489>
   # and <https://github.com/NixOS/nixpkgs/blob/master/pkgs/os-specific/linux/systemd/0006-hostnamed-localed-timedated-disable-methods-that-cha.patch#L79-L82>
-  #
-  # time.timeZone = "America/New_York";
-  systemd.services.set-default-timezone = {
-    description = "Set the default timezone at boot";
-    wantedBy = [ "time-set.target" "basic.target" ];
-    requires = [ "systemd-timesyncd.service" ];
-    before = [ "localtimed.service" ];
-    serviceConfig = {
-      Type = "oneshot";
-      ExecStart = "${config.systemd.package}/bin/timedatectl set-timezone America/New_York";
-    };
-  };
 
-  networking.networkmanager.dispatcherScripts = [{
-    source = pkgs.writeShellScript "nm-localtimed" ''
-      if [ "$2" = "up" ]; then systemctl start localtimed.service; fi
-    '';
-  }];
+  # time.timeZone = "America/New_York";
+
+  boot.postBootCommands = ''
+    ln -fs /etc/zoneinfo/America/New_York /etc/localtime
+  '';
+
+  # systemd.services.set-default-timezone = {
+  #   description = "Set the default timezone at boot";
+  #   wantedBy = [ "time-set.target" "basic.target" ];
+  #   requires = [ "systemd-timesyncd.service" ];
+  #   before = [ "localtimed.service" ];
+  #   serviceConfig = {
+  #     Type = "oneshot";
+  #     ExecStart = "${config.systemd.package}/bin/timedatectl set-timezone America/New_York";
+  #   };
+  # };
 
   services.geoclue2 = {
     enable = true;
     submitData = true;
 
-    # Used by users/somasis/desktop/stw/wttr.nix.
-    appConfig."geoclue-where-am-i" = {
-      isAllowed = true;
-      isSystem = false;
-      users = [ (builtins.toString config.users.users.somasis.uid) ];
+    appConfig = {
+      where-am-i = {
+        isAllowed = true;
+        isSystem = false;
+      };
+
+      "org.qutebrowser.qutebrowser" = {
+        isAllowed = true;
+        isSystem = false;
+      };
     };
   };
+
   location.provider = "geoclue2";
 
-  cache.directories = [ "/var/lib/geoclue" ];
+  cache.directories = [
+    { directory = "/var/lib/geoclue"; user = "geoclue"; group = "geoclue"; }
+    { directory = "/var/lib/systemd/timesync"; user = "systemd-timesync"; group = "systemd-timesync"; }
+  ];
 
   # TODO: o kepeken toki pona
   #       ilo glibc nanpa 2.36 li jo e sona pi toki pona.

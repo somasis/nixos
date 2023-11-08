@@ -98,6 +98,11 @@ let
 in
 {
   home.packages = [
+    pkgs.comic-neue
+
+    pkgs.fortune
+    # pkgs.fortune-kind
+
     (pkgs.writeShellApplication {
       name = "sonapona";
 

@@ -69,12 +69,8 @@
     pkgs.ffmpeg-full
     pkgs.gnome.zenity
     pkgs.hyperfine
-    pkgs.mmutils
     pkgs.nurl
-    pkgs.wmutils-core
-    pkgs.wmutils-opt
     pkgs.xcolor
-    pkgs.xdragon
     pkgs.xorg.xinput
     pkgs.xzoom
   ];

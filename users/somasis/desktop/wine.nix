@@ -12,7 +12,7 @@
   # Disable Wine's fixme messages.
   home.sessionVariables.WINEDEBUG = "fixme-all";
 
-  xsession.windowManager.bspwm.rules."fl64.exe:*:FL Studio 21".state = "tiled";
+  xsession.windowManager.bspwm.rules."fl64.exe".state = "tiled";
 
   persist.directories = [
     "etc/wine"

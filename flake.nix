@@ -54,39 +54,16 @@
     loujine-musicbrainz.flake = false;
     loujine-musicbrainz.url = "github:loujine/musicbrainz-scripts";
 
-    # replugged.url = "github:LunNova/replugged-nix-flake";
-    # replugged.inputs.nixpkgs.follows = "nixpkgs";
-    # repluggedPluginBetterCodeblocks.flake = false;
-    # repluggedPluginBetterCodeblocks.url = "github:replugged-org/better-codeblocks";
-    # repluggedPluginBotInfo.flake = false;
-    # repluggedPluginBotInfo.url = "github:IRONM00N/bot-details";
-    # repluggedPluginCanaryLinks.flake = false;
-    # repluggedPluginCanaryLinks.url = "github:asportnoy/CanaryLinks";
-    # repluggedPluginChannelTyping.flake = false;
-    # repluggedPluginChannelTyping.url = "github:powercord-community/channel-typing";
-    # repluggedPluginClickableEdits.flake = false;
-    # repluggedPluginClickableEdits.url = "github:replugged-org/clickable-edits";
-    # repluggedPluginCutecord.flake = false;
-    # repluggedPluginCutecord.url = "github:powercord-community/cutecord";
-    # repluggedPluginEmojiUtility.flake = false;
-    # repluggedPluginEmojiUtility.url = "github:replugged-org/emoji-utility";
-    # repluggedPluginPersistSettings.flake = false;
-    # repluggedPluginPersistSettings.url = "github:venplugs/persistsettings";
-    # repluggedPluginThemeToggler.flake = false;
-    # repluggedPluginThemeToggler.url = "github:redstonekasi/theme-toggler";
-    # repluggedPluginTimestampSender.flake = false;
-    # repluggedPluginTimestampSender.url = "github:Anime-Forevere/Timestamp-Sender";
-    # repluggedPluginTokiPona.flake = false;
-    # repluggedPluginTokiPona.url = "github:somasis/discord-tokipona";
-    # repluggedPluginWordFilter.flake = false;
-    # repluggedPluginWordFilter.url = "github:A-Trash-Coder/wordfilter";
-    repluggedThemeCustom.flake = false;
-    repluggedThemeCustom.url = "path:/home/somasis/src/discord-theme-custom";
-    repluggedThemeIrc.flake = false;
-    repluggedThemeIrc.url = "github:somasis/discord-theme-irc";
+    discordThemeCustom.flake = false;
+    discordThemeCustom.url = "path:/home/somasis/src/discord-theme-custom";
+    discordThemeIrc.flake = false;
+    discordThemeIrc.url = "github:somasis/discord-theme-irc";
 
     adblockEasyList.flake = false;
     adblockEasyList.url = "https://easylist.to/easylist/easylist.txt";
+
+    adblockEasyPrivacy.flake = false;
+    adblockEasyPrivacy.url = "https://easylist.to/easylist/easyprivacy.txt";
 
     adblockEasyListCookies.flake = false;
     adblockEasyListCookies.url = "https://secure.fanboy.co.nz/fanboy-cookiemonster.txt";
@@ -110,6 +87,9 @@
 
     adblockHosts.flake = false;
     adblockHosts.url = "github:StevenBlack/hosts";
+
+    control-panel-for-twitter.flake = false;
+    control-panel-for-twitter.url = "github:insin/control-panel-for-twitter";
   };
 
   outputs = { self, nixpkgs, home-manager, ... }@inputs:

@@ -100,7 +100,6 @@ nixpkgs.lib.nixosSystem {
 
         directories = [
           "/var/lib/systemd/timers"
-          { directory = "/var/lib/systemd/timesync"; user = "systemd-timesync"; group = "systemd-timesync"; }
           "/var/lib/systemd/backlight"
           "/var/lib/systemd/linger"
         ];
@@ -181,7 +180,7 @@ nixpkgs.lib.nixosSystem {
       home-manager = {
         verbose = true;
 
-        useGlobalPkgs = true;
+        useGlobalPkgs = false;
         useUserPackages = true;
 
         extraSpecialArgs = { inherit self inputs nixpkgs; };
@@ -194,13 +193,14 @@ nixpkgs.lib.nixosSystem {
           nixosModules.home-manager.impermanence
 
           nix-index-database.hmModules.nix-index
-          # hyprland.homeManagerModules.default
         ];
 
-        users.somasis.imports = [
-          ../../users/somasis
-          ../../users/somasis/desktop
-        ];
+        users.somasis = { pkgs, ... }: {
+          imports = [
+            ../../users/somasis
+            ../../users/somasis/desktop
+          ];
+        };
       };
     }
   ];

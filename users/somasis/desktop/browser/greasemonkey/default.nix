@@ -7,14 +7,10 @@
 
   imports = [
     ./musicbrainz.nix
-    ./search.nix
     ./social.nix
-    ./video.nix
   ];
 
   programs.qutebrowser.greasemonkey = map config.lib.somasis.drvOrPath [
-    # *
-
     # Automatically load higher quality versions of images.
     ((pkgs.fetchFromGitHub {
       owner = "navchandar";
@@ -54,7 +50,7 @@
 
     ((pkgs.fetchFromGitHub { owner = "daijro"; repo = "always-on-focus"; rev = "106714a3e4f3a2b895dafd10e806939acfe87198"; hash = "sha256-N6dWry8YaZfBxEpqZPH8xIH7jhNcqevYVOxVtEVNodc="; }) + "/alwaysonfocus.user.js")
 
-    (pkgs.runCommand "ISO-8601-dates.user.js"
+    (pkgs.runCommandLocal "ISO-8601-dates.user.js"
       {
         src = (pkgs.fetchFromGitHub {
           owner = "chocolateboy";
@@ -89,8 +85,7 @@
     # substack.com
     (pkgs.fetchurl { hash = "sha256-fOTbMhKEw7To5/CDPmnwj5oVGzrFOCPri+edxZodb9g="; url = "https://greasyfork.org/scripts/465222-substack-popup-dismisser/code/substack_popup_dismisser.user.js"; })
 
-    # wikipedia.org / wikipesija.org
-    ./mediawiki-anchors.js
+    ./anchor-links.user.js
 
     # zoom.us
     # (pkgs.fetchurl { hash = "sha256-BWIOITDCDnbX2MCIcTK/JtqBaz4SU6nRu5f8WUbN8GE="; url = "https://openuserjs.org/install/clemente/Zoom_redirector.user.js"; })

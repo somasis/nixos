@@ -47,6 +47,10 @@ let
   proxy = "https://login.proxy006.nclive.org/login";
 in
 {
+  nixpkgs.config.permittedInsecurePackages = [
+    "zotero-6.0.27" # CVE-2023-5217 / libvpx heap buffer overflow
+  ];
+
   programs.zotero = {
     enable = true;
 
@@ -197,6 +201,15 @@ in
           # Custom wildcards
           "extensions.zotfile.wildcards.user" = builtins.toString (builtins.toJSON {
             "B" = "bookTitle"; # %B: For book sections.
+            "4" = {
+              field = "dateAdded";
+              operations = [{
+                flags = "g";
+                function = "replace";
+                regex = "(\\d{4})-(\\d{2})-(\\d{2})(.*)";
+                replacement = "$1$2$3";
+              }];
+            };
           });
 
           "extensions.zotfile.authors_delimiter" = ", "; # ZotFile > Renaming Rules > "Delimiter between multiple authors"
@@ -297,6 +310,24 @@ in
       {
         _hidden = false;
 
+        _name = "WorldCat";
+        _alias = "WorldCat";
+        _description = "WorldCat Search";
+        _icon = "https://worldcat.org/favicons/favicon-16x16.png";
+
+        _urlTemplate = "https://worldcat.org/search?q=bn%3A{rft:ISBN}+AND+ti%3A{z:title}+AND+au%3A{rft:aufirst?}+{rft:aulast?}";
+        _urlParams = [ ];
+
+        _urlNamespaces = {
+          "" = "http://a9.com/-/spec/opensearch/1.1/";
+          z = "http://www.zotero.org/namespaces/openSearch#";
+          rft = "info:ofi/fmt:kev:mtx:book";
+        };
+      }
+
+      {
+        _hidden = false;
+
         _name = "CrossRef Lookup";
         _alias = "CrossRef";
         _description = "CrossRef Search Engine";
@@ -373,6 +404,24 @@ in
         _icon = "https://www.abebooks.com/favicon.ico";
 
         _urlTemplate = "https://www.abebooks.com/servlet/SearchResults?isbn={rft:isbn}";
+        _urlParams = [ ];
+
+        _urlNamespaces = {
+          "" = "http://a9.com/-/spec/opensearch/1.1/";
+          z = "http://www.zotero.org/namespaces/openSearch#";
+          rft = "info:ofi/fmt:kev:mtx:book";
+        };
+      }
+
+      {
+        _hidden = false;
+
+        _name = "Anna's Archive";
+        _alias = "Anna's";
+        _description = "Search Anna's Archive";
+        _icon = "https://annas-archive.org/favicon-32x32.png";
+
+        _urlTemplate = "https://annas-archive.org/search?index=&q={rft:isbn}";
         _urlParams = [ ];
 
         _urlNamespaces = {

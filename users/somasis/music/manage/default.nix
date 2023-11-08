@@ -52,6 +52,9 @@ let
           hash = "sha256-7N7LiOdDZD/JIEwx7Dfl58bxk4NEOmUe6jziS8EHNcQ=";
         };
 
+        # there are no tests
+        doCheck = false;
+
         nativeBuildInputs = [ beets ];
 
         meta = with lib; {
@@ -162,6 +165,9 @@ let
           hash = "sha256-32S8Ik6rzw6kx69o9G/v7rVsVzGA1qv5pHegYDmTW68=";
         };
 
+        # there are no tests
+        doCheck = false;
+
         nativeBuildInputs = [ beets ];
 
         propagatedBuildInputs = with python3Packages; [
@@ -203,10 +209,10 @@ let
 in
 {
   imports = [
-    ./convert.nix
-    ./extrafiles.nix
+    # ./convert.nix
+    # ./extrafiles.nix
     ./ripping.nix
-    ./tagging.nix
+    # ./tagging.nix
   ];
 
   xdg.userDirs.music = "${config.home.homeDirectory}/audio/library";
@@ -233,105 +239,105 @@ in
     #   '';
     # })
 
-    pass-beets
+    # pass-beets
   ];
 
-  programs.beets = {
-    enable = true;
-    package = pkgs.symlinkJoin {
-      name = "beets-final";
+  # programs.beets = {
+  #   enable = true;
+  #   package = pkgs.symlinkJoin {
+  #     name = "beets-final";
 
-      paths = [
-        # Provide a wrapper for the actual `beet` program, so that we can perform some
-        # pre-command-initialization actions.
-        # <https://nixos.wiki/wiki/Nix_Cookbook#Wrapping_packages>
-        (pkgs.writeShellScriptBin "beet" ''
-          #! ${pkgs.runtimeShell}
-          set -eu
-          set -o pipefail
+  #     paths = [
+  #       # Provide a wrapper for the actual `beet` program, so that we can perform some
+  #       # pre-command-initialization actions.
+  #       # <https://nixos.wiki/wiki/Nix_Cookbook#Wrapping_packages>
+  #       (pkgs.writeShellScriptBin "beet" ''
+  #         #! ${pkgs.runtimeShell}
+  #         set -eu
+  #         set -o pipefail
 
-          ${lib.toShellVar "PATH" (lib.makeBinPath [ pkgs.coreutils pkgs.utillinux pkgs.systemd ])}":${placeholder "out"}:$PATH"
-          directory=$(readlink -m ${lib.escapeShellArg config.programs.beets.settings.directory})
-          BEETS_LOCK="$directory/beets.lock"
+  #         ${lib.toShellVar "PATH" (lib.makeBinPath [ pkgs.coreutils pkgs.utillinux pkgs.systemd ])}":${placeholder "out"}:$PATH"
+  #         directory=$(readlink -m ${lib.escapeShellArg config.programs.beets.settings.directory})
+  #         BEETS_LOCK="$directory/beets.lock"
 
-          # Mount any required mount units
-          directory_escaped=$(systemd-escape -p "$directory")
-          user_mount_units=$(systemctl --user --plain --full --all --no-legend list-units -t mount | cut -d' ' -f1)
+  #         # Mount any required mount units
+  #         directory_escaped=$(systemd-escape -p "$directory")
+  #         user_mount_units=$(systemctl --user --plain --full --all --no-legend list-units -t mount | cut -d' ' -f1)
 
-          # Work through the parts of the escaped path and find the longest
-          # unit name prefix match.
-          # 1. Split apart the escaped path
-          # 2. Accumulate parts for each run of the `for` loop
-          # 3. Read in the list of user mount units
-          # The longest matching one will be the final line.
-          unit=$(
-              directory_acc=
-              IFS=-
-              for directory_part in $directory_escaped; do
-                  directory_acc="''${directory_acc:+$directory_acc-}$directory_part"
+  #         # Work through the parts of the escaped path and find the longest
+  #         # unit name prefix match.
+  #         # 1. Split apart the escaped path
+  #         # 2. Accumulate parts for each run of the `for` loop
+  #         # 3. Read in the list of user mount units
+  #         # The longest matching one will be the final line.
+  #         unit=$(
+  #             directory_acc=
+  #             IFS=-
+  #             for directory_part in $directory_escaped; do
+  #                 directory_acc="''${directory_acc:+$directory_acc-}$directory_part"
 
-                  while IFS="" read -r unit; do
-                      case "$unit" in
-                          "$directory_acc"*.mount) printf '%s\n' "$unit"; break ;;
-                      esac
-                  done <<< "$user_mount_units"
-              done | tail -n1
-          )
+  #                 while IFS="" read -r unit; do
+  #                     case "$unit" in
+  #                         "$directory_acc"*.mount) printf '%s\n' "$unit"; break ;;
+  #                     esac
+  #                 done <<< "$user_mount_units"
+  #             done | tail -n1
+  #         )
 
-          [[ -n "$unit" ]] && systemctl --user start "$unit"
+  #         [[ -n "$unit" ]] && systemctl --user start "$unit"
 
-          # Maintain a cross-device lock, so that we don't conflict if the directory is
-          # over a network device of some sort (sshfs)
-          [[ -e "$BEETS_LOCK" ]] && printf 'Lock "%s" is currently held, sleeping until free...\n' "$BEETS_LOCK" >&2
-          while [[ -e "$BEETS_LOCK" ]]; do
-              sleep 5
-          done
-          touch "$BEETS_LOCK"
+  #         # Maintain a cross-device lock, so that we don't conflict if the directory is
+  #         # over a network device of some sort (sshfs)
+  #         [[ -e "$BEETS_LOCK" ]] && printf 'Lock "%s" is currently held, sleeping until free...\n' "$BEETS_LOCK" >&2
+  #         while [[ -e "$BEETS_LOCK" ]]; do
+  #             sleep 5
+  #         done
+  #         touch "$BEETS_LOCK"
 
-          # Trap Ctrl-C, since it seems really problematic for database health
-          e=0
-          trap : INT
-          trap 'rm -f "$BEETS_LOCK"' EXIT
+  #         # Trap Ctrl-C, since it seems really problematic for database health
+  #         e=0
+  #         trap : INT
+  #         trap 'rm -f "$BEETS_LOCK"' EXIT
 
-          # Feed pass-beets info via a FIFO so it never hits the disk.
-          ${beets}/bin/beet -c <(pass-beets) "$@" || e=$?
+  #         # Feed pass-beets info via a FIFO so it never hits the disk.
+  #         ${beets}/bin/beet -c <(pass-beets) "$@" || e=$?
 
-          trap - INT
-          exit $?
-          EOF
-        '')
+  #         trap - INT
+  #         exit $?
+  #         EOF
+  #       '')
 
-        pass-beets
+  #       pass-beets
 
-        beets.man
-        beets.doc
-        beets
-      ];
-    };
+  #       beets.man
+  #       beets.doc
+  #       beets
+  #     ];
+  #   };
 
-    settings = {
-      directory = "${config.xdg.userDirs.music}/lossless";
-      library = "${config.xdg.userDirs.music}/lossless/beets.db";
+  #   settings = {
+  #     directory = "${config.xdg.userDirs.music}/lossless";
+  #     library = "${config.xdg.userDirs.music}/lossless/beets.db";
 
-      # Default `beet list` options
-      sort_case_insensitive = false;
-      sort_item = "artist+ date+ album+ disc+ track+";
-      sort_album = "artist+ date+ album+ disc+ track+";
+  #     # Default `beet list` options
+  #     sort_case_insensitive = false;
+  #     sort_item = "artist+ date+ album+ disc+ track+";
+  #     sort_album = "artist+ date+ album+ disc+ track+";
 
-      plugins = [ "parentwork" "noimport" ]
-        ++ lib.optional config.services.mpd.enable "mpdupdate";
+  #     plugins = [ "parentwork" "noimport" ]
+  #       ++ lib.optional config.services.mpd.enable "mpdupdate";
 
-      parentwork.auto = true;
-    }
-    // lib.optionalAttrs config.services.mpd.enable {
-      mpd = {
-        host = config.services.mpd.network.listenAddress;
-        inherit (config.services.mpd.network) port;
-      };
-    }
-    ;
-  };
+  #     parentwork.auto = true;
+  #   }
+  #   // lib.optionalAttrs config.services.mpd.enable {
+  #     mpd = {
+  #       host = config.services.mpd.network.listenAddress;
+  #       inherit (config.services.mpd.network) port;
+  #     };
+  #   }
+  #   ;
+  # };
 
-  home.shellAliases."beet-import-all" = "beet import --flat --timid ${lib.escapeShellArg config.xdg.userDirs.music}/source/*/*";
-  programs.qutebrowser.searchEngines."!beets" = "file:///${beets.doc}/share/doc/beets-${beets.version}/html/search.html?q={}";
+  # home.shellAliases."beet-import-all" = "beet import --flat --timid ${lib.escapeShellArg config.xdg.userDirs.music}/source/*/*";
+  # programs.qutebrowser.searchEngines."!beets" = "file:///${beets.doc}/share/doc/beets-${beets.version}/html/search.html?q={}";
 }

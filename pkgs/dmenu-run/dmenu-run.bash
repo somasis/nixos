@@ -9,17 +9,17 @@ mkdir -p "${DMENU_RUN_HISTORY%/*}"
 # shellcheck source=/dev/null
 [[ -e "${DMENU_RUN_SCRIPT}" ]] && . "${DMENU_RUN_SCRIPT}"
 
+executable_paths=()
+mapfile -t -d : executable_paths <<<"${PATH}"
+
 choice=$(
     {
-        IFS=:
-        # We want the $PATH to be split here.
-        # shellcheck disable=SC2086
-        find ${PATH} \
+        find -L \
+            "${executable_paths[@]}" \
             ! -type d \
             -executable \
             -printf '%f\n' \
             2>/dev/null
-        unset IFS
 
         declare -F | cut -d ' ' -f3-
         alias | cut -c7- | cut -d= -f1
@@ -34,7 +34,8 @@ choice=$(
 [[ -n "${choice}" ]] || exit 0
 
 {
-    eval "set -x; ${choice}"
+    systemd-cat -t "dmenu-run" --level-prefix=false \
+        "${SHELL:-/bin/sh}" -x -c "${choice}"
 } &
 
 touch "${DMENU_RUN_HISTORY}"
@@ -53,7 +54,7 @@ cat - "${DMENU_RUN_HISTORY}" <<<"${choice}" \
         elif [[ "${line_i}" -eq 0 ]]; then
             # don't notify for every invalid command in the history;
             # only notify for the first line, the most recent command
-            notify-send -a dmenu-run -i system-run "dmenu-run" "${base}: command not found"
+            notify-send -a dmenu-run -i launch "dmenu-run" "${base}: command not found"
         fi
 
         line_i=$((line_i + 1))

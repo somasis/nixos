@@ -79,7 +79,7 @@ in
     });
 
   services.dunst.settings.zz-signal = {
-    appname = "signal-desktop.*";
+    desktop_entry = "signal-desktop*";
 
     # Signal blue
     background = "#3a76f0";

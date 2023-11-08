@@ -75,174 +75,237 @@ in
     # '';
   };
 
-  programs.alacritty = {
-    enable = true;
+  programs = {
+    alacritty = {
+      enable = true;
 
-    settings =
-      let
-        alacrittyExtendedKeys = pkgs.fetchFromGitHub {
-          owner = "alexherbo2";
-          repo = "alacritty-extended-keys";
-          rev = "acbdcb765550b8d52eb77a5e47f5d2a0ff7a2337";
-          hash = "sha256-KKzJWZ1PEKHVl7vBiRuZg8TyhE0nWohDNWxkP53amZ8=";
-        };
-      in
-      {
-        include = [ "${alacrittyExtendedKeys}/keys.yml" ];
-
-        cursor = {
-          style = {
-            shape = "Beam";
-            blinking = "On";
+      settings =
+        let
+          alacrittyExtendedKeys = pkgs.fetchFromGitHub {
+            owner = "alexherbo2";
+            repo = "alacritty-extended-keys";
+            rev = "acbdcb765550b8d52eb77a5e47f5d2a0ff7a2337";
+            hash = "sha256-KKzJWZ1PEKHVl7vBiRuZg8TyhE0nWohDNWxkP53amZ8=";
           };
-          unfocused_hollow = false;
-          thickness = 0.25;
-          blink_interval = 750;
-        };
+        in
+        {
+          include = [ "${alacrittyExtendedKeys}/keys.yml" ];
 
-        font.size = 10.0;
-
-        colors = {
-          primary = {
-            foreground = config.theme.colors.foreground;
-            background = config.theme.colors.background;
+          cursor = {
+            style = {
+              shape = "Beam";
+              blinking = "On";
+            };
+            unfocused_hollow = false;
+            thickness = 0.25;
+            blink_interval = 750;
           };
 
-          normal = {
-            black = config.theme.colors.black;
-            red = config.theme.colors.red;
-            green = config.theme.colors.green;
-            yellow = config.theme.colors.yellow;
-            blue = config.theme.colors.blue;
-            magenta = config.theme.colors.magenta;
-            cyan = config.theme.colors.cyan;
-            white = config.theme.colors.white;
+          font.size = 10.0;
+
+          colors = {
+            primary = {
+              inherit (config.theme.colors)
+                foreground
+                background
+                ;
+            };
+
+            normal = {
+              inherit (config.theme.colors)
+                black
+                red
+                green
+                yellow
+                blue
+                magenta
+                cyan
+                white
+                ;
+            };
+
+            bright = {
+              black = config.theme.colors.brightBlack;
+              red = config.theme.colors.brightRed;
+              green = config.theme.colors.brightGreen;
+              yellow = config.theme.colors.brightYellow;
+              blue = config.theme.colors.brightBlue;
+              magenta = config.theme.colors.brightMagenta;
+              cyan = config.theme.colors.brightCyan;
+              white = config.theme.colors.brightWhite;
+            };
+
+            footer_bar = {
+              background = config.theme.colors.accent;
+              foreground = "#ffffff";
+            };
           };
 
-          bright = {
-            black = config.theme.colors.brightBlack;
-            red = config.theme.colors.brightRed;
-            green = config.theme.colors.brightGreen;
-            yellow = config.theme.colors.brightYellow;
-            blue = config.theme.colors.brightBlue;
-            magenta = config.theme.colors.brightMagenta;
-            cyan = config.theme.colors.brightCyan;
-            white = config.theme.colors.brightWhite;
+          scrolling = {
+            multiplier = 2;
+            history = 20000;
           };
 
-          footer_bar = {
-            background = config.theme.colors.accent;
-            foreground = "#ffffff";
+          selection = {
+            save_to_clipboard = true;
+            semantic_escape_chars = wordSeparators;
           };
         };
+    };
 
-        scrolling = {
-          multiplier = 2;
-          history = 20000;
-        };
+    kitty = {
+      enable = true;
 
-        selection = {
-          save_to_clipboard = true;
-          semantic_escape_chars = wordSeparators;
-        };
+      font = {
+        name = "monospace";
+        size = 10.0;
       };
+
+      settings = rec {
+        cursor = "none";
+        cursor_shape = "beam";
+        cursor_beam_thickness = "1.5";
+        cursor_blink_interval = ".75";
+        cursor_stop_blinking_after = 0;
+
+
+        inherit (config.theme.colors) foreground background;
+        selection_foreground = "none";
+        selection_background = "none";
+        color0 = config.theme.colors.black;
+        color1 = config.theme.colors.red;
+        color2 = config.theme.colors.green;
+        color3 = config.theme.colors.yellow;
+        color4 = config.theme.colors.blue;
+        color5 = config.theme.colors.magenta;
+        color6 = config.theme.colors.cyan;
+        color7 = config.theme.colors.white;
+        color8 = config.theme.colors.brightBlack;
+        color9 = config.theme.colors.brightRed;
+        color10 = config.theme.colors.brightGreen;
+        color11 = config.theme.colors.brightYellow;
+        color12 = config.theme.colors.brightBlue;
+        color13 = config.theme.colors.brightMagenta;
+        color14 = config.theme.colors.brightCyan;
+        color15 = config.theme.colors.brightWhite;
+        url_color = config.theme.colors.accent;
+
+        url_style = "dotted";
+        show_hyperlink_targets = true;
+
+        wheel_scroll_multiplier = "2.0";
+
+        scrollback_lines = 5000;
+        scrollback_fill_enlarged_window = true;
+
+        copy_on_select = "clipboard";
+        placement_strategy = "top-left";
+
+        # Mouse hiding is handled by services.unclutter.
+        mouse_hide_wait = 0;
+
+        allow_remote_control = true;
+
+        clear_all_shortcuts = true;
+
+        # Disable anything related to windows, tabs, etc.
+        enabled_layouts = "fat";
+        tab_bar_style = "hidden";
+        remember_window_size = false;
+
+        # Reading clipboard without permission is a security risk but I simply don't care :]
+        clipboard_control = "write-clipboard write-primary read-clipboard read-primary";
+
+        # Used for clone-in-kitty.
+        allow_cloning = true;
+
+        # kitty_mod = "ctrl";
+      };
+
+      extraConfig = ''
+        # Click the link under the mouse or move the cursor even when grabbed
+        # <https://sw.kovidgoyal.net/kitty/conf/#shortcut-kitty.Click-the-link-under-the-mouse-or-move-the-cursor>
+        mouse_map left click ungrabbed mouse_handle_click selection link prompt
+
+        # cell height like Alacritty
+        modify_font cell_height 105%
+      '';
+
+      keybindings = {
+        # "ctrl+shift+n" =
+        #   let
+        #     kitty-clone =
+        #       pkgs.writeShellScript "kitty-clone" ''
+        #         export PATH=${lib.makeBinPath [ pkgs.moreutils ]}:"$PATH"
+        #         if [ -n "$(</dev/stdin)" ]; then
+        #             kitty @send-text \
+        #                 --match=self \
+        #                 clone-in-kitty \
+        #                     --type=os-window \
+        #                     --match=self
+        #       '';
+        #   in
+        #   ''
+        #     launch \
+        #           --stdin-source @alternate \
+        #           --type background \
+        #           --dont-take-focus \
+        #           --match=self \
+        #           ${kitty-clone}
+        #   ''
+        # ;
+
+        "kitty_mod+n" = "new_window_with_cwd";
+
+        "kitty_mod+c" = "copy_to_clipboard";
+        "kitty_mod+v" = "paste_from_clipboard";
+
+        "shift+home" = "scroll_home";
+        "shift+page_up" = "scroll_page_up";
+        "shift+page_down" = "scroll_page_down";
+        "shift+end" = "scroll_end";
+
+        "kitty_mod+equal" = "change_font_size +0.5";
+        "kitty_mod+minus" = "change_font_size -0.5";
+        "ctrl+equal" = "change_font_size 0";
+      };
+    };
+
+    bash.initExtra = ''
+      if [ -n "$KITTY_WINDOW_ID" ]; then
+          alias \
+              clipboard="kitty +kitten clipboard" \
+              icat="kitty +kitten icat" \
+              mosh="mosh --ssh='kitty +kitten ssh'"
+
+          ssh() {
+              # Error: The SSH kitten is meant for interactive use only, STDIN must be a terminal
+              if [ -t 0 ]; then
+                  kitty +kitten ssh "$@"
+              else
+                  command ssh "$@"
+              fi
+          }
+      fi
+
+      # Disable flow control keybinds.
+      PROMPT_COMMAND="''${PROMPT_COMMAND:+$PROMPT_COMMAND; }stty -ixon"
+    '';
+
+    kakoune.config.hooks = [{
+      name = "ModuleLoaded";
+      option = "kitty";
+      commands = ''
+        # Use real windows instead of Kitty's split "windows".
+        set-option global kitty_window_type "os-window"
+      '';
+    }];
   };
 
   home.packages = [
     # (pkgs.writeShellScriptBin "xterm" ''exec alacritty "$@"'')
     (pkgs.writeShellScriptBin "xterm" ''exec kitty "$@"'')
   ];
-
-  programs.kitty = {
-    enable = true;
-
-    font = {
-      name = "monospace";
-      size = 10.0;
-    };
-
-    settings = rec {
-      cursor = "none";
-      cursor_shape = "beam";
-      cursor_beam_thickness = "1.5";
-      cursor_blink_interval = ".75";
-      cursor_stop_blinking_after = 0;
-
-      foreground = config.theme.colors.foreground;
-      background = config.theme.colors.background;
-      selection_foreground = "none";
-      selection_background = "none";
-
-      color0 = config.theme.colors.black;
-      color1 = config.theme.colors.red;
-      color2 = config.theme.colors.green;
-      color3 = config.theme.colors.yellow;
-      color4 = config.theme.colors.blue;
-      color5 = config.theme.colors.magenta;
-      color6 = config.theme.colors.cyan;
-      color7 = config.theme.colors.white;
-      color8 = config.theme.colors.brightBlack;
-      color9 = config.theme.colors.brightRed;
-      color10 = config.theme.colors.brightGreen;
-      color11 = config.theme.colors.brightYellow;
-      color12 = config.theme.colors.brightBlue;
-      color13 = config.theme.colors.brightMagenta;
-      color14 = config.theme.colors.brightCyan;
-      color15 = config.theme.colors.brightWhite;
-
-      url_color = config.theme.colors.accent;
-      url_style = "dotted";
-      show_hyperlink_targets = true;
-
-      wheel_scroll_multiplier = "2.0";
-
-      scrollback_lines = 5000;
-      scrollback_fill_enlarged_window = true;
-
-      copy_on_select = "clipboard";
-      placement_strategy = "top-left";
-
-      # Mouse hiding is handled by services.unclutter.
-      mouse_hide_wait = 0;
-
-      allow_remote_control = true;
-
-      clear_all_shortcuts = true;
-
-      # Disable anything related to windows, tabs, etc.
-      enabled_layouts = "fat";
-      tab_bar_style = "hidden";
-      remember_window_size = false;
-
-      # Reading clipboard without permission is a security risk but I simply don't care :]
-      clipboard_control = "write-clipboard write-primary read-clipboard read-primary";
-    };
-
-    extraConfig = ''
-      # Click the link under the mouse or move the cursor even when grabbed
-      # <https://sw.kovidgoyal.net/kitty/conf/#shortcut-kitty.Click-the-link-under-the-mouse-or-move-the-cursor>
-      mouse_map left click ungrabbed mouse_handle_click selection link prompt
-
-      # cell height like Alacritty
-      modify_font cell_height 105%
-    '';
-
-    keybindings = {
-      "ctrl+shift+n" = "launch --cwd=current";
-
-      "ctrl+shift+c" = "copy_to_clipboard";
-      "ctrl+shift+v" = "paste_from_clipboard";
-
-      "shift+home" = "scroll_home";
-      "shift+page_up" = "scroll_page_up";
-      "shift+page_down" = "scroll_page_down";
-      "shift+end" = "scroll_end";
-
-      "ctrl+shift+equal" = "change_font_size all +0.5";
-      "ctrl+shift+minus" = "change_font_size all -0.5";
-      "ctrl+equal" = "change_font_size all 0";
-    };
-  };
 
   xdg.configFile."kitty/diff.conf".text = ''
     pygments_style          bw
@@ -275,48 +338,6 @@ in
     select_fg               ${config.theme.colors.brightWhite}
     select_bg               ${config.theme.colors.accent}
   '';
-
-  programs.bash.initExtra = ''
-    if [ -n "$KITTY_WINDOW_ID" ]; then
-        alias \
-            clipboard="kitty +kitten clipboard" \
-            icat="kitty +kitten icat" \
-            mosh="mosh --ssh='kitty +kitten ssh'"
-
-        ssh() {
-            # Error: The SSH kitten is meant for interactive use only, STDIN must be a terminal
-            if [ -t 0 ]; then
-                kitty +kitten ssh "$@"
-            else
-                command ssh "$@"
-            fi
-        }
-    fi
-  '';
-
-  programs.kakoune.config.hooks = [{
-    name = "ModuleLoaded";
-    option = "kitty";
-    commands = ''
-      # Use real windows instead of Kitty's split "windows".
-      set-option global kitty_window_type "os-window"
-    '';
-  }];
-
-  # programs.kakoune.package =
-  #   if (builtins.compareVersions pkgs.kakoune-unwrapped.version "2022.10.31") <= 0 then
-  #     pkgs.kakoune-unwrapped.overrideAttrs
-  #       (final: prev: {
-  #         patches = [
-  #           (pkgs.fetchpatch {
-  #             url = "https://github.com/mawww/kakoune/commit/7c54de233486d29c3c33e4f63774b170a5945564.patch";
-  #             hash = "sha256-R8zdaLj/icQkTGpkeB+9NfcaKPNssd1zHJIFuX/g/8Y=";
-  #           })
-  #         ];
-  #       })
-  #   else
-  #     throw "users/somasis/desktop/terminal.nix: kakoune patch can be removed now"
-  # ;
 
   # xresources.properties = {
   #   # xterm(1) settings

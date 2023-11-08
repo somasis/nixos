@@ -387,34 +387,12 @@
     '';
 
     plugins = [
-      # File management commands
-      (pkgs.kakouneUtils.buildKakounePluginFrom2Nix rec {
-        pname = "tug";
-        version = "unstable-2020-02-22";
-        src = pkgs.fetchFromGitHub {
-          repo = pname;
-          owner = "matthias-margush";
-          rev = "23adaadb795af2d86dcb3daf7af3ebe12e932441";
-          hash = "sha256-cW11DPsjBBtjOfU9gizH8dGSV3B1rQiD0qeO/Ab8jWI=";
-        };
-      })
-
-      # Find and replace across buffers.
-      (pkgs.kakouneUtils.buildKakounePluginFrom2Nix rec {
-        pname = "kakoune-find";
-        version = "unstable-2022-09-25";
-        src = pkgs.fetchFromGitHub {
-          repo = pname;
-          owner = "occivink";
-          rev = "09afcc8520d4c92928fe69da4c370b9979aa90d3";
-          hash = "sha256-AyG0AbQOTFDQ/jrhtyb5ajWlvWO+h0JDe5SEtTyTkfQ=";
-        };
-      })
-
       pkgs.kakounePlugins.active-window-kak
       pkgs.kakounePlugins.kakoune-extra-filetypes
+      pkgs.kakounePlugins.kakoune-find
       pkgs.kakounePlugins.kakoune-state-save
       pkgs.kakounePlugins.smarttab-kak
+      pkgs.kakounePlugins.tug
     ];
   };
 

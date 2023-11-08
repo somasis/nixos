@@ -53,6 +53,7 @@ lib.recursiveUpdate
     ini2nix = callPackage ./ini2nix { };
     json2nix = callPackage ./json2nix { };
 
+    bspwm-center-window = callPackage ./bspwm-center-window { };
     bspwm-urgent = callPackage ./bspwm-urgent { };
 
     ellipsis = callPackage ./ellipsis { };
@@ -74,6 +75,7 @@ lib.recursiveUpdate
     qute-pass = callPackage ./qute-pass { };
 
     borg-takeout = callPackage ./borg-takeout { };
+    location = callPackage ./location { };
     qutebrowser-sync = callPackage ./qutebrowser-sync { };
 
     fcitx5-ilo-sitelen = callPackage ./fcitx5-ilo-sitelen { };
@@ -85,5 +87,11 @@ lib.recursiveUpdate
     notify-send-all = callPackage ./notify-send-all { };
     wcal = callPackage ./wcal { };
 
-    kakounePlugins.kakoune-fcitx = callPackage ./kakoune-fcitx { };
+    kakounePlugins = import ./kakoune-plugins final prev;
+
+    linja-luka = callPackage ./linja-luka { };
+    linja-pi-tomo-lipu = callPackage ./linja-pi-tomo-lipu { };
+    linja-pimeja-pona = callPackage ./linja-pimeja-pona { };
+    linja-pona = callPackage ./linja-pona { };
+    linja-suwi = callPackage ./linja-suwi { };
   })

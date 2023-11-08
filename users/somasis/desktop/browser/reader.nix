@@ -7,24 +7,27 @@ let
   };
 
   rdrview = pkgs.writeShellScript "rdrview" ''
-    set -x
+    set -euo pipefail -x
 
     : "''${QUTE_FIFO:?}"
     : "''${QUTE_URL:?}"
     : "''${QUTE_HTML:?}"
 
+    html="''${QUTE_SELECTED_HTML:-$(<"$QUTE_HTML")}"
+
     umask 0077
 
-    PATH=${lib.makeBinPath [ pkgs.rdrview pkgs.coreutils pkgs.gnused ]}:"$PATH"
+    PATH=${lib.makeBinPath [ pkgs.html-tidy pkgs.rdrview pkgs.trurl pkgs.coreutils ]}:"$PATH"
 
     case "$QUTE_URL" in
         file://*) QUTE_URL=''${QUTE_URL#file://} ;;
     esac
 
     tmp=$(mktemp -t --suffix .html rdrview.XXXXXXXXX)
-    base=$(printf '%s\n' "$QUTE_URL" | sed -E '/^[^:]+:\/\/.*\// s|^(.*)/[^/]+$|\1|')
+    base=$(trurl --redirect / -f - <<<"$QUTE_URL")
+    html=$(tidy --quiet yes --tidy-mark no --show-body-only yes <<<"$html")
 
-    if ! rdrview -u "$base" -c "$QUTE_HTML"; then
+    if ! rdrview -u "$base" -c <<< "$html"; then
         printf "message-error \"rdrview: could not find article content in '%s'\"\n" "$QUTE_URL" > "$QUTE_FIFO"
         exit 1
     fi
@@ -54,7 +57,7 @@ let
     <body>
     $(
         rdrview ''${QUTE_USER_AGENT:+-A "$QUTE_USER_AGENT"} \
-            -T title,byline,body -u "$base" -H "$QUTE_HTML"
+            -T title,byline,body -u "$base" -H <<<"$html"
     )
     </body>
     EOF
@@ -64,7 +67,6 @@ let
 
   render = pkgs.writeShellScript "render" ''
     set -euo pipefail
-    set -x
 
     : "''${QUTE_FIFO:?}"
     : "''${QUTE_URL:?}"
@@ -106,8 +108,8 @@ in
 {
   programs.qutebrowser = {
     aliases = {
-      rdrview = "spawn -m -u ${rdrview}";
-      render = "spawn -m -u ${render}";
+      rdrview = "spawn -u ${rdrview}";
+      render = "spawn -u ${render}";
     };
 
     keyBindings.normal = {

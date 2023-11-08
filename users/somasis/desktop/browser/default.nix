@@ -17,32 +17,34 @@ let
     printf 'open -t -r %s\n' "$url" > "''${QUTE_FIFO}"
   '';
 
-  yankTextAnchor = pkgs.writeShellScript "yank-text-anchor" ''
+  yank-text-anchor = pkgs.writeShellScript "yank-text-anchor" ''
     set -euo pipefail
 
-    PATH=${lib.makeBinPath [
-      config.programs.jq.package
-      pkgs.coreutils
-      pkgs.gnused
-      pkgs.trurl
-      pkgs.util-linux
-    ]}
+    PATH=${lib.makeBinPath [ config.programs.jq.package pkgs.coreutils pkgs.gnused pkgs.trurl pkgs.util-linux ]}
 
     : "''${QUTE_FIFO:?}"
-    : "''${QUTE_SELECTED_TEXT:?}"
-    : "''${QUTE_URL:?}"
-
     exec >>"''${QUTE_FIFO}"
+
+    : "''${QUTE_SELECTED_TEXT:-}"
+    if [ -z "$QUTE_SELECTED_TEXT" ]; then
+        printf 'message-error "%s"\n' "yank-text-anchor: no text selected"
+        exit 1
+    fi
+
+    : "''${QUTE_URL:?}"
 
     # Strip fragment (https://hostname.com/index.html#fragment).
     url=$(trurl -s fragment= -f - <<<"$QUTE_URL")
+
+    # Strip trailing newline.
+    text_start=$(printf '%s' "$QUTE_SELECTED_TEXT")
 
     text_end=
     text_start=$(
         sed \
             -e 's/^[[:space:]][[:space:]]*//' \
-            -e 's/[[:space:]][[:space:]]*$//'
-            <<<"$QUTE_SELECTED_TEXT"
+            -e 's/[[:space:]][[:space:]]*$//' \
+            <<<"$text_start"
     )
 
     if [ "''${#text_start}" -ge 300 ]; then
@@ -51,10 +53,13 @@ let
         text_start=$(<<<"$text_start" tr '[:space:]' ' ' | cut -d ' ' -f1-5)
     fi
 
-    [ -n "$text_end" ] && text_end=,$(jq -Rr '@uri' <<<"$text_end")
+    if [ -n "$text_end" ]; then
+        text_end=$(jq -Rr '@uri' <<<"$text_end")
+    fi
+
     text_start=$(jq -Rr '@uri' <<<"$text_start")
 
-    url="$url#:~:text=$text_start$text_end"
+    url="$url#:~:text=$text_start''${text_end:+,$text_end}"
 
     printf 'yank -q inline "%s" ;; message-info "Yanked URL of highlighted text to clipboard: %s"\n' "''${url}" "''${url}"
   '';
@@ -113,10 +118,16 @@ in
   programs.qutebrowser = {
     enable = true;
 
-    package = pkgs.qutebrowser.override { withPdfReader = false; };
+    package = pkgs.qutebrowser.override {
+      withPdfReader = false;
+      enableWideVine = true;
+    };
 
     loadAutoconfig = true;
+
     settings = rec {
+      changelog_after_upgrade = "patch";
+
       logging.level.console = "error";
 
       # Clear default aliases
@@ -130,7 +141,12 @@ in
       session.lazy_restore = true;
 
       # Unlimited tab focus switching history.
-      tabs.focus_stack_size = -1;
+      tabs = {
+        focus_stack_size = -1;
+        undo_stack_size = -1;
+      };
+
+      completion.cmd_history_max_items = 10000;
 
       # Close when the last tab is closed.
       tabs.last_close = "close";
@@ -151,8 +167,19 @@ in
         };
       };
 
+      hints = {
+        uppercase = true;
+        radius = 0;
+        border = "1px solid ${config.theme.colors.accent}";
+      };
+
+      keyhint.radius = 0;
+      prompt.radius = 0;
+
       content = {
         proxy = builtins.toString (builtins.head proxies);
+
+        tls.certificate_errors = "ask-block-thirdparty";
 
         javascript = {
           # Allow JavaScript to read from or write to the xos-upclipboard.
@@ -168,7 +195,7 @@ in
 
         # List of user stylesheet filenames to use. These apply globally.
         user_stylesheets = map builtins.toString [
-          (pkgs.writeText "fonts.user.css" ''
+          (pkgs.writeText "system-fonts.user.css" ''
             @font-face {
                 font-family: ui-sans-serif;
                 src: local(sans-serif);
@@ -195,6 +222,12 @@ in
             }
           '')
 
+          (pkgs.writeText "system-highlight-color.user.css" ''
+            :focus {
+                outline-color: ${config.lib.somasis.colors.rgb config.theme.colors.accent};
+            }
+          '')
+
           (pkgs.writeText "highlight-anchors.user.css" ''
             h1:target,h2:target,h3:target,h4:target,h5:target,h6:target {
                 background-color: #ffff00;
@@ -205,7 +238,11 @@ in
 
       # Languages preferences.
       spellcheck.languages = [ "en-US" "en-AU" "en-GB" "es-ES" ];
-      content.headers.accept_language = lib.concatStringsSep "," [ "tok;q=0.9" "en-US;q=0.8" "en;q=0.7" "es;q=0.6" ];
+      content.headers.accept_language = lib.concatStringsSep "," [ "en-US;q=0.9" "tok;q=0.8" "en;q=0.7" "es;q=0.6" ];
+
+      # Use the actual title for notification titles, rather
+      # than the site's URL of origin.
+      content.notifications.show_origin = false;
 
       zoom.mouse_divider = 2048; # Allow for more precise zooming increments.
 
@@ -235,6 +272,9 @@ in
         statusbar = "default_size monospace";
         keyhint = "default_size monospace";
 
+        contextmenu = "10pt sans-serif";
+        tooltip = "10pt sans-serif";
+
         downloads = "11pt monospace";
 
         messages = {
@@ -244,17 +284,19 @@ in
         };
       };
 
-      colors.webpage.bg = "";
-
       # Downloads bar.
-      downloads.position = "top";
-      colors.downloads.start.bg = config.theme.colors.darkBackground;
-      colors.downloads.stop.bg = config.theme.colors.green;
-      colors.downloads.error.bg = config.theme.colors.red;
-      colors.downloads.bar.bg = config.theme.colors.darkBackground;
+      downloads.position = "bottom";
 
       # Statusbar.
       statusbar.position = "top";
+      statusbar.widgets = [
+        "keypress"
+        "url"
+        "scroll"
+        "history"
+        "tabs"
+        "progress"
+      ];
 
       completion.open_categories = [
         "quickmarks"
@@ -264,54 +306,128 @@ in
         "filesystem"
       ];
 
-      colors.statusbar.normal.bg = config.theme.colors.background;
-      colors.statusbar.normal.fg = config.theme.colors.foreground;
+      colors = {
+        webpage.bg = "";
 
-      colors.statusbar.command.bg = config.theme.colors.lightBackground;
-      colors.statusbar.command.fg = config.theme.colors.lightForeground;
+        downloads = {
+          start.bg = config.theme.colors.darkBackground;
+          stop.bg = config.theme.colors.green;
+          error.bg = config.theme.colors.red;
+          bar.bg = config.theme.colors.darkBackground;
+        };
 
-      colors.statusbar.insert.bg = config.theme.colors.green;
-      colors.statusbar.insert.fg = config.theme.colors.foreground;
+        statusbar = {
+          normal.bg = config.theme.colors.background;
+          normal.fg = config.theme.colors.foreground;
 
-      colors.statusbar.passthrough.bg = config.theme.colors.blue;
-      colors.statusbar.passthrough.fg = config.theme.colors.foreground;
+          command.bg = config.theme.colors.lightBackground;
+          command.fg = config.theme.colors.lightForeground;
 
-      colors.statusbar.private.bg = config.theme.colors.magenta;
-      colors.statusbar.private.fg = config.theme.colors.foreground;
+          insert.bg = config.theme.colors.green;
+          insert.fg = config.theme.colors.foreground;
 
-      colors.statusbar.progress.bg = config.theme.colors.green;
+          passthrough.bg = config.theme.colors.blue;
+          passthrough.fg = config.theme.colors.foreground;
 
-      colors.statusbar.url.fg = config.theme.colors.blue;
-      colors.statusbar.url.error.fg = config.theme.colors.brightRed;
-      colors.statusbar.url.hover.fg = config.theme.colors.blue;
-      colors.statusbar.url.success.http.fg = config.theme.colors.blue;
-      colors.statusbar.url.success.https.fg = config.theme.colors.blue;
-      colors.statusbar.url.warn.fg = config.theme.colors.yellow;
+          private.bg = config.theme.colors.magenta;
+          private.fg = config.theme.colors.foreground;
 
-      # Prompts.
+          progress.bg = config.theme.colors.green;
 
-      colors.prompts.bg = config.theme.colors.lightBackground;
-      colors.prompts.fg = config.theme.colors.lightForeground;
-      colors.prompts.border = "1px solid ${config.theme.colors.lightBorder}";
-      colors.prompts.selected.bg = config.theme.colors.accent;
-      colors.prompts.selected.fg = config.theme.colors.foreground;
+          url = {
+            fg = config.theme.colors.green;
+            hover.fg = config.theme.colors.yellow;
 
-      # Completion.
+            error.fg = config.theme.colors.brightRed;
+            warn.fg = config.theme.colors.yellow;
 
-      colors.completion.category.bg = config.theme.colors.lightBackground;
-      colors.completion.category.fg = config.theme.colors.lightForeground;
-      colors.completion.category.border.bottom = config.theme.colors.lightBackground;
-      colors.completion.category.border.top = config.theme.colors.lightBackground;
-      colors.completion.even.bg = config.theme.colors.lightBackground;
-      colors.completion.odd.bg = config.theme.colors.lightBackground;
-      colors.completion.fg = config.theme.colors.lightForeground;
-      colors.completion.item.selected.bg = config.theme.colors.accent;
-      colors.completion.item.selected.border.bottom = config.theme.colors.accent;
-      colors.completion.item.selected.border.top = config.theme.colors.accent;
-      colors.completion.item.selected.fg = config.theme.colors.foreground;
-      colors.completion.item.selected.match.fg = config.theme.colors.foreground;
-      colors.completion.scrollbar.bg = config.theme.colors.lightBackground;
-      colors.completion.scrollbar.fg = config.theme.colors.darkBackground;
+            success.http.fg = config.theme.colors.yellow;
+            success.https.fg = config.theme.colors.green;
+          };
+        };
+
+        tooltip.bg = "#474d5d";
+        tooltip.fg = "#bac3cf";
+
+        keyhint = {
+          bg = config.theme.colors.background;
+          fg = config.theme.colors.foreground;
+          suffix.fg = config.theme.colors.red;
+        };
+
+        prompts = {
+          bg = config.theme.colors.lightBackground;
+          fg = config.theme.colors.lightForeground;
+          border = "1px solid ${config.theme.colors.lightBorder}";
+          selected.bg = config.theme.colors.accent;
+          selected.fg = config.theme.colors.foreground;
+        };
+
+        completion = {
+          category = {
+            bg = config.theme.colors.lightBackground;
+            fg = config.theme.colors.lightForeground;
+            border.bottom = config.theme.colors.lightBackground;
+            border.top = config.theme.colors.lightBackground;
+          };
+
+          even.bg = config.theme.colors.lightBackground;
+          odd.bg = config.theme.colors.lightBackground;
+          fg = config.theme.colors.lightForeground;
+
+          item.selected = {
+            bg = config.theme.colors.accent;
+            border.bottom = config.theme.colors.accent;
+            border.top = config.theme.colors.accent;
+            fg = config.theme.colors.foreground;
+            match.fg = config.theme.colors.foreground;
+          };
+
+          scrollbar.bg = config.theme.colors.lightBackground;
+          scrollbar.fg = config.theme.colors.darkBackground;
+        };
+
+        tabs = {
+          bar.bg = config.theme.colors.sidebar;
+          odd.bg = config.theme.colors.sidebar;
+          even.bg = config.theme.colors.sidebar;
+
+          even.fg = config.theme.colors.foreground;
+          odd.fg = config.theme.colors.foreground;
+          selected = {
+            even.bg = config.theme.colors.accent;
+            even.fg = config.theme.colors.foreground;
+            odd.bg = config.theme.colors.accent;
+            odd.fg = config.theme.colors.foreground;
+          };
+
+          pinned = {
+            even.bg = config.theme.colors.background;
+            odd.bg = config.theme.colors.background;
+            selected.even.bg = config.theme.colors.accent;
+            selected.odd.bg = config.theme.colors.accent;
+          };
+        };
+
+        messages = rec {
+          error.bg = config.theme.colors.red;
+          warning.bg = config.theme.colors.yellow;
+          info.bg = config.theme.colors.accent;
+          info.fg = config.theme.colors.foreground;
+
+          error.border = error.bg;
+          warning.border = warning.bg;
+          info.border = info.bg;
+        };
+
+        contextmenu = {
+          menu.bg = "#ffffff";
+          menu.fg = "#5c616c";
+          selected.bg = config.theme.colors.accent;
+          selected.fg = "#ffffff";
+          disabled.fg = "#a6a8ae";
+        };
+      };
 
       # Tabs.
       tabs.position = "left";
@@ -328,44 +444,8 @@ in
       fonts.tabs.unselected = "default_size monospace";
       fonts.tabs.selected = "bold default_size monospace";
 
-      # Colors (themed like Arc-Dark).
-      colors.tabs.bar.bg = config.theme.colors.sidebar;
-      colors.tabs.odd.bg = config.theme.colors.sidebar;
-      colors.tabs.even.bg = config.theme.colors.sidebar;
-
-      colors.tabs.even.fg = config.theme.colors.foreground;
-      colors.tabs.odd.fg = config.theme.colors.foreground;
-      colors.tabs.selected.even.fg = config.theme.colors.foreground;
-      colors.tabs.selected.odd.fg = config.theme.colors.foreground;
-
-      colors.tabs.pinned.even.bg = config.theme.colors.background;
-      colors.tabs.pinned.odd.bg = config.theme.colors.background;
-      colors.tabs.pinned.selected.even.bg = config.theme.colors.accent;
-      colors.tabs.pinned.selected.odd.bg = config.theme.colors.accent;
-      colors.tabs.selected.even.bg = config.theme.colors.accent;
-      colors.tabs.selected.odd.bg = config.theme.colors.accent;
-
-      colors.messages = rec {
-        error.bg = config.theme.colors.red;
-        warning.bg = config.theme.colors.yellow;
-        info.bg = config.theme.colors.accent;
-        info.fg = config.theme.colors.foreground;
-
-        error.border = error.bg;
-        warning.border = warning.bg;
-        info.border = info.bg;
-      };
-
-      colors.contextmenu = {
-        menu.bg = "#ffffff";
-        menu.fg = "#5c616c";
-        selected.bg = config.theme.colors.accent;
-        selected.fg = "#ffffff";
-        disabled.fg = "#a6a8ae";
-      };
-
       # Window.
-      window.title_format = "qutebrowser{title_sep}{current_title}";
+      window.title_format = "qutebrowser{title_sep}{host}{title_sep}{current_title}";
 
       # Messages.
       messages.timeout = 5000;
@@ -410,7 +490,7 @@ in
     # enableDefaultBindings = false;
     aliases = {
       translate = "spawn -u ${translate} {url}";
-      yank-text-anchor = "spawn -u ${yankTextAnchor}";
+      yank-text-anchor = "spawn -u ${yank-text-anchor}";
     };
 
     keyBindings = {
@@ -421,11 +501,15 @@ in
         "zpt" = "translate";
         "ya" = "yank-text-anchor";
 
-        "qa" = "cmd-set-text :quickmark-add {url} \"{title}\"";
         "ql" = "cmd-set-text -s :quickmark-load";
+        "qL" = "bookmark-list";
+        "qa" = "cmd-set-text -s :quickmark-add {url} \"{url:host}\"";
         "qd" = lib.mkMerge [ "cmd-set-text :quickmark-del {url:domain}" "fake-key -g <Tab>" ];
-        "ba" = "cmd-set-text :bookmark-add {url} \"{title}\"";
+
         "bl" = "cmd-set-text -s :bookmark-load";
+        "bL" = "bookmark-list -j";
+        "ba" = "cmd-set-text -s :bookmark-add {url} \"{title}\"";
+        "bd" = lib.mkMerge [ "cmd-set-text :bookmark-del {url:domain}" "fake-key -g <Tab>" ];
 
         "!" = "cmd-set-text :open !";
         "gss" = "cmd-set-text -s :open site:{url:domain}";
@@ -437,6 +521,7 @@ in
         # Akin to catgirl(1).
         "<Alt+Left>" = "back --quiet";
         "<Alt+Right>" = "forward --quiet";
+        "<Alt+Up>" = "navigate up";
         "<Alt+Shift+a>" = "tab-prev";
         "<Alt+a>" = "tab-next";
 
@@ -447,7 +532,7 @@ in
         "<Ctrl+l>" = "cmd-set-text :open {url}";
         "<Ctrl+f>" = "cmd-set-text /";
         "<Ctrl+Shift+f>" = "cmd-set-text ?";
-        "<Ctrl+Shift+i>" = "devtools";
+        "<Ctrl+Shift+i>" = "devtools window";
 
         # Emulate Tree Style Tabs keyboard shortcuts.
         "<F1>" = lib.mkMerge [
@@ -559,4 +644,8 @@ in
   };
 
   home.packages = [ pkgs.qutebrowser-sync ];
+
+  # services.dunst.settings.zz-qutebrowser = {
+  #   desktop_entry = "org.qutebrowser.qutebrowser";
+  # };
 }

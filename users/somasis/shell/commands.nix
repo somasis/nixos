@@ -34,10 +34,51 @@
     since = "datediff -f '%Yy %mm %ww %dd %0Hh %0Mm %0Ss'";
 
     doas = lib.optionalString osConfig.security.sudo.enable "sudo";
+
+    which = "{ alias; declare -f; } | which --read-functions --read-alias";
   };
 
   home.packages = [
     pkgs.nocolor
+
+    (pkgs.writeShellScriptBin "execurl" ''
+      fetch_directory=$(${pkgs.coreutils}/bin/mktemp -d)
+
+      fetch() {
+          local file
+
+          printf '%s\n' "$1" >&2
+          file=$(
+              ${pkgs.curl}/bin/curl \
+                  -g \
+                  -Lfs# \
+                  --output-dir "$fetch_directory" \
+                  --remote-header-name \
+                  --remote-name-all \
+                  --remove-on-error \
+                  -w '%{filename_effective}\n' \
+                  "$1"
+          )
+
+          printf '%s\n' "$file"
+      }
+
+      error_code=0
+      arguments=()
+
+      for argument; do
+          if ${pkgs.trurl}/bin/trurl --no-guess-scheme --verify --url "$argument" >/dev/null 2>&1; then
+              arguments+=( "$(fetch "$argument")" )
+          else
+              arguments+=( "$argument" )
+          fi
+      done
+
+      "''${arguments[@]}" || error_code=$?
+      ${pkgs.coreutils}/bin/rm -rf "$fetch_directory"
+      exit "$error_code"
+    '')
+
     (pkgs.writeShellScriptBin "pe" ''
       ${pkgs.xe}/bin/xe -LL -j0 "$@" | sort -snk1 | cut -d' ' -f2-
     '')
