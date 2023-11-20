@@ -87,11 +87,13 @@ lib.recursiveUpdate
     notify-send-all = callPackage ./notify-send-all { };
     wcal = callPackage ./wcal { };
 
-    kakounePlugins = import ./kakoune-plugins final prev;
-
     linja-luka = callPackage ./linja-luka { };
+    linja-namako = callPackage ./linja-namako { };
     linja-pi-tomo-lipu = callPackage ./linja-pi-tomo-lipu { };
     linja-pimeja-pona = callPackage ./linja-pimeja-pona { };
     linja-pona = callPackage ./linja-pona { };
     linja-suwi = callPackage ./linja-suwi { };
+    sitelen-pona-pi-lasin-lukin = callPackage ./sitelen-pona-pi-lasin-lukin { };
+
+    kakounePlugins = import ./kakoune-plugins final prev;
   })

@@ -1,22 +1,24 @@
-{ lib, fetchurl }:
-
+{ lib
+, stdenvNoCC
+, fetchurl
+}:
 let
-  pname = "linja-pimeja-pona";
-  version = "0.9";
   rev = "c9e403246491f600633daebb85734aa3cb9e3f36";
 in
-fetchurl {
-  name = "${pname}-${version}";
-  url =
-    "https://github.com/RetSamys/linja-pimeja-pona/raw/${rev}/linjapimejapona${version}.otf";
+stdenvNoCC.mkDerivation rec {
+  pname = "linja-pimeja-pona";
+  version = "0.9";
 
-  downloadToTemp = true;
-  recursiveHash = true;
-  postFetch = ''
-    install -D $downloadedFile $out/share/fonts/opentype/${pname}.otf
+  src = fetchurl {
+    url = "https://github.com/RetSamys/linja-pimeja-pona/raw/${rev}/linjapimejapona${version}.otf";
+    hash = "sha256-vi/A88pJJsGDwnGbeSSlX8IeoGuTxDxMIL2xVq6o8jU=";
+  };
+
+  dontUnpack = true;
+
+  installPhase = ''
+    install -D $src $out/share/fonts/opentype/${pname}.otf
   '';
-
-  sha256 = "sha256-focpDTofCAZx3ST3t3xlIrSk7NMqb+e+k00o+o4h5ig=";
 
   meta = with lib; {
     description =

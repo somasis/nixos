@@ -79,7 +79,7 @@ let
                 [ "$lines" -gt 16 ] && stdin="$(head -n 16 <<< "$stdin")"$'\n\t'"[and $lines more...]"
                 printf '%s\n' "$stdin"
             } \
-            | table -R1 -o $'\t'
+            | table -N YEAR,EVENT -R YEAR -d -o $'\t'
     )
 
     onthisday_width=$(cut -f1 <<<"$onthisday" | wc -L)
@@ -113,7 +113,7 @@ let
             .tfa.extract as $extract
             | .tfa.titles.normalized as $title
             | if $extract == null or $title == null then
-                empty
+                halt
             else
                 .
             end

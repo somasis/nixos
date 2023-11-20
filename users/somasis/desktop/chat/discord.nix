@@ -11,15 +11,15 @@ let
     getExeName
     ;
 
-  # discord = pkgs.discord.override {
-  #   withVencord = true;
-  #   withOpenASAR = true;
-  # };
+  discord = pkgs.discord.override {
+    withVencord = true;
+    # withOpenASAR = true;
+  };
 
-  discord = pkgs.armcord;
+  # discord = pkgs.armcord;
 
-  # discordWindowClassName = "discord";
-  discordWindowClassName = "ArmCord";
+  discordWindowClassName = "discord";
+  # discordWindowClassName = "ArmCord";
   discordDescription = discord.meta.description;
   discordName = getExeName discord;
   discordPath = "${discord}/bin/${discordName}";
@@ -86,57 +86,62 @@ in
     pkgs.xe
   ];
 
-  persist.directories = [ "etc/${discordWindowClassName}" ];
+  persist = {
+    directories = [ "etc/${discordWindowClassName}" ];
+    files = [ "etc/Vencord/settings.json" ];
+  };
 
   xdg.configFile = {
-    # "${discordWindowClassName}/settings.json".text = lib.generators.toJSON { } {
-    #   openasar = {
-    #     setup = true;
-    #     quickstart = true;
-    #   };
+    "${discordWindowClassName}/settings.json".text = lib.generators.toJSON { } {
+      openasar = {
+        setup = true;
+        quickstart = true;
+      };
 
-    #   SKIP_HOST_UPDATE = true;
-    #   DANGEROUS_ENABLE_DEVTOOLS_ONLY_ENABLE_IF_YOU_KNOW_WHAT_YOURE_DOING = true;
-    #   trayBalloonShown = true;
+      SKIP_HOST_UPDATE = true;
+      DANGEROUS_ENABLE_DEVTOOLS_ONLY_ENABLE_IF_YOU_KNOW_WHAT_YOURE_DOING = true;
+      trayBalloonShown = true;
 
-    #   css = lib.fileContents discord-css;
+      # css = lib.fileContents discord-css;
+    };
+
+    # "${discordWindowClassName}/storage/settings.json".text = lib.generators.toJSON { } {
+    #   doneSetup = true;
+    #   multiInstance = false;
+
+    #   alternativePaste = false;
+    #   disableAutogain = false;
+
+    #   channel = "canary";
+    #   automaticPatches = true;
+
+    #   armcordCSP = true;
+    #   mods = "vencord";
+    #   inviteWebsocket = true;
+    #   spellcheck = true;
+
+    #   skipSplash = true;
+    #   startMinimized = true;
+    #   minimizeToTray = true;
+    #   windowStyle = "native";
+    #   mobileMode = false;
+
+    #   tray = true;
+    #   trayIcon = "dsc-tray";
+    #   dynamicIcon = false;
+
+    #   performanceMode = "battery";
+
+    #   useLegacyCapturer = true;
     # };
 
-    "${discordWindowClassName}/storage/settings.json".text = lib.generators.toJSON { } {
-      doneSetup = true;
-      multiInstance = false;
+    # "${discordWindowClassName}/storage/lang.json".text = lib.generators.toJSON { } {
+    #   lang = "en-US";
+    # };
 
-      alternativePaste = false;
-      disableAutogain = false;
-
-      channel = "canary";
-      automaticPatches = true;
-
-      armcordCSP = true;
-      mods = "vencord";
-      inviteWebsocket = true;
-      spellcheck = true;
-
-      skipSplash = true;
-      startMinimized = true;
-      minimizeToTray = true;
-      windowStyle = "native";
-      mobileMode = false;
-
-      tray = true;
-      trayIcon = "dsc-tray";
-      dynamicIcon = false;
-
-      performanceMode = "battery";
-
-      useLegacyCapturer = true;
-    };
-
-    "${discordWindowClassName}/storage/lang.json".text = lib.generators.toJSON { } {
-      lang = "en-US";
-    };
-
-    "${discordWindowClassName}/themes/theme".source = discord-theme;
+    # "${discordWindowClassName}/themes/theme".source = discord-theme;
+    # "Vencord/themes/somasis".source = discord-theme;
+    "Vencord/settings/quickCss.css".source = discord-css;
   };
 
   systemd.user.services.discord = {

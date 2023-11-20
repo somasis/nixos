@@ -60,7 +60,7 @@ nixpkgs.lib.nixosSystem {
     impermanence.nixosModules.impermanence
     nixosModules.impermanence
 
-    nixos-hardware.nixosModules.framework
+    nixos-hardware.nixosModules.framework-11th-gen-intel
 
     nix-index-database.nixosModules.nix-index
 

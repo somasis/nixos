@@ -1,21 +1,22 @@
-{ lib, fetchurl }:
-
-let
+{ lib
+, stdenvNoCC
+, fetchurl
+}:
+stdenvNoCC.mkDerivation rec {
   pname = "linja-pi-tomo-lipu";
   version = "0.7";
-in
-fetchurl {
-  name = "${pname}-${version}";
-  url =
-    "https://github.com/pguimier/linjapitomolipu/releases/download/v${version}/linjapitomolipu.${version}.ttf";
 
-  downloadToTemp = true;
-  recursiveHash = true;
-  postFetch = ''
-    install -D $downloadedFile $out/share/fonts/opentype/${pname}.otf
+  src = fetchurl {
+    url =
+      "https://github.com/pguimier/linjapitomolipu/releases/download/v${version}/linjapitomolipu.${version}.ttf";
+    hash = "sha256-Enr2HLTj4ayC1WyeRaHvY7ZLo+q0CEiM7/lzc/d4Oxs=";
+  };
+
+  dontUnpack = true;
+
+  installPhase = ''
+    install -D $src $out/share/fonts/truetype/${pname}.ttf
   '';
-
-  sha256 = "sha256-n36fcadrzZeJH2kublQO4jJdRUS0bBGGMWtCTxqhMI0=";
 
   meta = with lib; {
     description = "a monotype sitelen pona font adapted from tomo-lipu.net";

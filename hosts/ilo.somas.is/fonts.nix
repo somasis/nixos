@@ -20,12 +20,17 @@
 
       pkgs.lmodern
 
-      pkgs.nasin-nanpa
       pkgs.linja-luka
+      pkgs.linja-namako
+      pkgs.linja-pi-pu-lukin
       pkgs.linja-pi-tomo-lipu
       pkgs.linja-pimeja-pona
       pkgs.linja-pona
+      pkgs.linja-sike
       pkgs.linja-suwi
+      pkgs.nasin-nanpa
+      pkgs.sitelen-seli-kiwen
+      pkgs.sitelen-pona-pi-lasin-lukin
 
       pkgs.spleen
 

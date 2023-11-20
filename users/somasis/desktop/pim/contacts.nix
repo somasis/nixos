@@ -56,7 +56,8 @@ rec {
     settings = {
       general.default_action = "list";
 
-      "contact table" = {
+t
+"contact table" = {
         display = "formatted_name";
 
         # Use ISO dates (YYYY-MM-DD)

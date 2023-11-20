@@ -1,6 +1,8 @@
 { config
 , pkgs
 , lib
+
+, inputs
 , self
 , nixpkgs
 , ...
@@ -101,20 +103,26 @@
       options = "--delete-older-than 7d";
     };
 
-    channel.enable = false;
+    # NOTE: Disabling channels breaks pkgs.comma. Instead (and just because we
+    #       still need to use flakes as channels for various nix tools), we just
+    #       make a registry, nixPath, and /etc/nix/inputs from the flake inputs.
+    # channel.enable = false;
 
-    registry = {
-      nixpkgs.flake = nixpkgs;
-      self.flake = self;
-    };
+    registry =
+      lib.mapAttrs' (name: input: lib.nameValuePair name { flake = input; }) inputs
+      // {
+        nixpkgs.flake = nixpkgs;
+        self.flake = self;
+      };
 
-    nixPath = [
-      # "nixpkgs=flake:nixpkgs"
-      "nixpkgs=/etc/nix/inputs/nixpkgs"
-    ];
+    nixPath = lib.mapAttrsToList (name: path: "${name}=/etc/nix/inputs/${name}") inputs;
   };
 
-  environment.etc."nix/inputs/nixpkgs".source = nixpkgs;
+  environment.etc."nix/inputs".source =
+    pkgs.linkFarm "nix-flake-inputs-as-channels" (
+      lib.mapAttrsToList (name: path: { inherit name path; }) inputs
+    )
+  ;
 
   programs.ssh.extraConfig = ''
     Host spinoza.7596ff.com

@@ -47,8 +47,8 @@ check_sneaky_paths "$1"
 
 case "${2:-}" in
     "") cmd_show "$1" | tail -n +2 | cut -d: -f1 ;;
-    login | user | username)
-        username=$(meta "$1" "login|user|username")
+    login | name | user | username)
+        username=$(meta "$1" "login|name|user|username")
         [[ -z "${username}" ]] && exec basename "$1"
         printf '%s\n' "${username}"
         ;;
