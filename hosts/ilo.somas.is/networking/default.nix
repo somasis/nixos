@@ -111,4 +111,6 @@
   powerManagement.resumeCommands = ''
     ${config.systemd.package}/bin/systemctl try-restart tor.service
   '';
+
+  programs.kdeconnect.enable = true;
 }

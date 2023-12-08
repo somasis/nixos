@@ -4,7 +4,7 @@
 , ...
 }:
 let
-  directory = "share/sonapona";
+  directory = config.lib.somasis.xdgDataDir "sonapona";
 
   click-config-file = with pkgs.python3Packages;
     buildPythonPackage rec {

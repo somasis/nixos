@@ -57,6 +57,8 @@ in
         '';
       in
       ''
+        keep-articles-days 365
+
         bind-key o open-in-browser-noninteractively
 
         download-full-page yes
@@ -94,404 +96,124 @@ in
       map (x: { "... ${x}" = ''tags # "${x}"''; }) (unique (concatLists (catAttrs "tags" config.programs.newsboat.urls)))));
 
     urls = [
-      # Blogs
-      {
-        url = "https://leahneukirchen.org/blog/index.atom";
-        tags = [ "blog" "friends" ];
-      }
-      {
-        url = "https://leahneukirchen.org/trivium/index.atom";
-        tags = [ "blog" "friends" ];
-      }
-      {
-        url = "https://text.causal.agency/feed.atom";
-        tags = [ "blog" "computer" "friends" ];
-      }
-      {
-        url = "https://www.7596ff.com/rss.xml";
-        tags = [ "blog" "friends" ];
-      }
-      {
-        url = "https://pikhq.com/index.xml";
-        tags = [ "blog" "friends" ];
-      }
-      {
-        url = "https://www.uninformativ.de/blog/feeds/en.atom";
-        tags = [ "blog" "development" "computer" ];
-      }
-      {
-        url = "https://dataswamp.org/~solene/rss.xml";
-        tags = [ "blog" "computer" "OpenBSD" "NixOS" ];
-      }
-      {
-        url = "https://determinate.systems/posts?format=rss";
-        title = "Determinate Systems";
-        tags = [ "computer" "NixOS" ];
-      }
-      {
-        url = "https://flak.tedunangst.com/rss";
-        title = "Ted Unangst: flak";
-        tags = [ "blog" "OpenBSD" ];
-      }
-
-      {
-        url = "https://mforney.org/blog/atom.xml";
-        tags = [ "blog" "computer" ];
-      }
-      {
-        url = "https://ariadne.space/feed/";
-        tags = [ "blog" "computer" ];
-      }
-      {
-        url = "https://christine.website/blog.atom";
-        tags = [ "blog" "computer" "friends" ];
-      }
-      {
-        url = "https://whynothugo.nl/posts.xml";
-        tags = [ "blog" "computer" ];
-      }
-      {
-        url = "https://jcs.org/rss";
-        tags = [ "blog" "computer" "OpenBSD" ];
-      }
-      {
-        url = "https://hisham.hm/?x=feed:rss2&category=1";
-        title = "hisham.hm";
-        tags = [ "blog" "computer" ];
-      }
-      {
-        url = "https://utcc.utoronto.ca/~cks/space/blog/?atom";
-        title = "Wandering Thoughts: Chris Siebenmann";
-        tags = [ "blog" "computer" ];
-      }
-      {
-        url = "https://susam.net/blog/feed.xml";
-        title = "Susam Pal";
-        tags = [ "blog" "computer" ];
-      }
-      {
-        url = "https://susam.net/maze/feed.xml";
-        title = "Susam Pal: maze";
-        tags = [ "blog" "computer" ];
-      }
-      {
-        url = feeds.urls.gemini "gemini://journcy.net";
-        title = "journcy";
-        tags = [ "blog" ];
-      }
+      { tags = [ "health" "philosophy" "psychoanalysis" ]; title = "Mental Hellth"; url = "https://mentalhellth.xyz/feed"; }
+      { tags = [ "philosophy" ]; title = "The Sooty Empiric"; url = "https://sootyempiric.blogspot.com/feeds/posts/default"; }
+      { tags = [ "philosophy" ]; title = "Flows and Becomings"; url = "https://blog.vernonwcisney.com/1/feed"; }
+      { tags = [ "medium" "philosophy" ]; url = feeds.urls.filter "https://medium.com/feed/@vcisney" feeds.filters.discardContent; }
+      { url = "https://leahneukirchen.org/blog/index.atom"; }
+      { url = "https://leahneukirchen.org/trivium/index.atom"; }
+      { tags = [ "computer" ]; url = "https://text.causal.agency/feed.atom"; }
+      { url = "https://www.7596ff.com/rss.xml"; }
+      { url = "https://pikhq.com/index.xml"; }
+      { tags = [ "computer" "development" ]; url = "https://www.uninformativ.de/blog/feeds/en.atom"; }
+      { tags = [ "computer" "nixos" "openbsd" ]; url = "https://dataswamp.org/~solene/rss.xml"; }
+      { tags = [ "computer" "nixos" ]; title = "Determinate Systems"; url = "https://determinate.systems/posts?format=rss"; }
+      { tags = [ "OpenBSD" ]; title = "Ted Unangst: flak"; url = "https://flak.tedunangst.com/rss"; }
+      { tags = [ "computer" ]; url = "https://mforney.org/blog/atom.xml"; }
+      { tags = [ "computer" ]; url = "https://ariadne.space/feed/"; }
+      { tags = [ "computer" ]; url = "https://christine.website/blog.atom"; }
+      { tags = [ "computer" ]; url = "https://whynothugo.nl/posts.xml"; }
+      { tags = [ "computer" ]; url = "https://jcs.org/rss"; }
+      { tags = [ "computer" ]; title = "hisham.hm"; url = "https://hisham.hm/?x=feed:rss2&category=1"; }
+      { tags = [ "computer" ]; title = "Wandering Thoughts: Chris Siebenmann"; url = "https://utcc.utoronto.ca/~cks/space/blog/?atom"; }
+      { tags = [ "computer" ]; title = "Susam Pal"; url = "https://susam.net/blog/feed.xml"; }
+      { tags = [ "computer" ]; title = "Susam Pal: maze"; url = "https://susam.net/maze/feed.xml"; }
+      { title = "journcy"; url = feeds.urls.gemini "gemini://journcy.net"; }
 
       # Comics
-      {
-        url = "https://xkcd.com/atom.xml";
-        tags = [ "comics" ];
-      }
-      {
-        url = "https://rakhim.org/honestly-undefined/index.xml";
-        title = "Honestly Undefined";
-        tags = [ "comics" ];
-      }
-      {
-        url = "https://wizardzines.com/comics/index.xml";
-        tags = [ "comics" ];
-      }
+      { tags = [ "comics" ]; url = "https://xkcd.com/atom.xml"; }
+      { tags = [ "comics" ]; title = "Honestly Undefined"; url = "https://rakhim.org/honestly-undefined/index.xml"; }
+      { tags = [ "comics" ]; url = "https://wizardzines.com/comics/index.xml"; }
 
       # Computers
-      {
-        url = "https://www.latacora.com/blog/index.xml";
-        tags = [ "blog" "computer" ];
-      }
-      {
-        url = "https://sanctum.geek.nz/arabesque/feed/";
-        tags = [ "blog" "computer" ];
-      }
-      {
-        url = "https://ewontfix.com/feed.rss";
-        tags = [ "blog" "computer" ];
-      }
-      {
-        url = "https://beepb00p.xyz/atom.xml";
-        tags = [ "blog" "computer" ];
-      }
-      {
-        url = "https://onethingwell.org/rss";
-        tags = [ "computer" "tumblr" ];
-      }
-      {
-        url = "https://nixers.net/newsletter/feed.xml";
-        tags = [ "computer" ];
-      }
-      {
-        url = feeds.urls.filter "https://www.phoronix.com/rss.php" feeds.filters.discardContent;
-        tags = [ "computer" "linux" ];
-      }
-      {
-        url = "https://planet.nixos.org/atom.xml";
-        tags = [ "computer" "NixOS" "blog" ];
-        title = "Planet NixOS";
-      }
-      {
-        url = "https://blog.qutebrowser.org/feeds/all.atom.xml";
-        tags = [ "computer" "blog" ];
-      }
-      {
-        url = "https://frame.work/blog.rss";
-        tags = [ "computer" ];
-      }
+      { tags = [ "computer" ]; url = "https://www.latacora.com/blog/index.xml"; }
+      { tags = [ "computer" ]; url = "https://sanctum.geek.nz/arabesque/feed/"; }
+      { tags = [ "computer" ]; url = "https://ewontfix.com/feed.rss"; }
+      { tags = [ "computer" ]; url = "https://beepb00p.xyz/atom.xml"; }
+      { tags = [ "computer" "tumblr" ]; url = "https://onethingwell.org/rss"; }
+      { tags = [ "computer" ]; url = "https://nixers.net/newsletter/feed.xml"; }
+      { tags = [ "computer" "linux" ]; url = feeds.urls.filter "https://www.phoronix.com/rss.php" feeds.filters.discardContent; }
+      { tags = [ "computer" "nixos" ]; title = "Planet NixOS"; url = "https://planet.nixos.org/atom.xml"; }
+      { tags = [ "computer" ]; url = "https://blog.qutebrowser.org/feeds/all.atom.xml"; }
+      { tags = [ "computer" ]; url = "https://frame.work/blog.rss"; }
 
       # Forums
-      {
-        url = "https://discourse.nixos.org/c/announcements/8.rss";
-        title = "NixOS Discourse: announcements";
-        tags = [ "NixOS" ];
-      }
-      { url = "https://discuss.kakoune.com/c/plugins/5.rss"; title = "Kakoune: plugins"; tags = [ "kakoune" "computer" ]; }
-      { url = "https://discuss.kakoune.com/c/recipes-and-guides/8.rss"; title = "Kakoune: recipes and guides"; tags = [ "kakoune" "computer" ]; }
-      { url = "https://discuss.kakoune.com/c/terminal-tools/15.rss"; title = "Kakoune: terminal tools"; tags = [ "kakoune" "computer" ]; }
+      { tags = [ "nixos" ]; title = "NixOS Discourse: announcements"; url = "https://discourse.nixos.org/c/announcements/8.rss"; }
+      { tags = [ "computer" "kakoune" ]; title = "Kakoune: plugins"; url = "https://discuss.kakoune.com/c/plugins/5.rss"; }
+      { tags = [ "computer" "kakoune" ]; title = "Kakoune: recipes and guides"; url = "https://discuss.kakoune.com/c/recipes-and-guides/8.rss"; }
+      { tags = [ "computer" "kakoune" ]; title = "Kakoune: terminal tools"; url = "https://discuss.kakoune.com/c/terminal-tools/15.rss"; }
 
       # Music
-      {
-        url = "https://constantlyhating.substack.com/feed";
-        tags = [ "review" "music" ];
-      }
-      {
-        url = "https://expandingdan.substack.com/feed";
-        tags = [ "music" ];
-      }
+      { tags = [ "music" "review" ]; url = "https://constantlyhating.substack.com/feed"; }
+      { tags = [ "music" ]; url = "https://expandingdan.substack.com/feed"; }
 
       # News
-      {
-        url = "https://lwn.net/headlines/newrss";
-        tags = [ "news" "computer" ];
-      }
-      {
-        url = "https://www.democracynow.org/democracynow.rss";
-        tags = [ "news" "usa" ];
-      }
-      {
-        url = feeds.urls.filter "https://www.japantimes.co.jp/feed/" feeds.filters.discardContent;
-        title = "The Japan Times";
-        tags = [ "news" "japan" ];
-      }
-      {
-        url = feeds.urls.filter "https://www.abc.net.au/news/feed/45910/rss.xml" feeds.filters.discardContent;
-        title = "ABC News: top stories";
-        tags = [ "news" "australia" "local" ];
-      }
-      {
-        url = feeds.urls.filter "https://www.abc.net.au/news/feed/8057540/rss.xml" feeds.filters.discardContent;
-        title = "ABC News: Adelaide";
-        tags = [ "news" "australia" "local" ];
-      }
-      {
-        url = feeds.urls.filter "https://www.abc.net.au/news/feed/472/rss.xml" feeds.filters.discardContent;
-        title = "ABC News: Arts and Entertainment";
-        tags = [ "news" "australia" "local" ];
-      }
+      { tags = [ "computer" "news" ]; url = "https://lwn.net/headlines/newrss"; }
+      { tags = [ "news" "usa" ]; url = "https://www.democracynow.org/democracynow.rss"; }
+      { tags = [ "japan" "news" ]; title = "The Japan Times"; url = feeds.urls.filter "https://www.japantimes.co.jp/feed/" feeds.filters.discardContent; }
+      { tags = [ "australia" "local" "news" ]; title = "ABC News: top stories"; url = feeds.urls.filter "https://www.abc.net.au/news/feed/45910/rss.xml" feeds.filters.discardContent; }
+      { tags = [ "australia" "local" "news" ]; title = "ABC News: Adelaide"; url = feeds.urls.filter "https://www.abc.net.au/news/feed/8057540/rss.xml" feeds.filters.discardContent; }
+      { tags = [ "australia" "local" "news" ]; title = "ABC News: Arts and Entertainment"; url = feeds.urls.filter "https://www.abc.net.au/news/feed/472/rss.xml" feeds.filters.discardContent; }
 
-      {
-        url = "https://www.currentaffairs.org/feed";
-        tags = [ "news" ];
-      }
-      {
-        url = "https://thebaffler.com/feed";
-        tags = [ "news" ];
-      }
-      {
-        url = "https://theappalachianonline.com/feed/";
-        title = "The Appalachian";
-        tags = [ "news" "local" ];
-      }
-      {
-        url = "https://www.townofboone.net/RSSFeed.aspx?ModID=63&CID=All-0";
-        title = "Town of Boone: alerts";
-        tags = [ "notification" "local" ];
-      }
-      {
-        url = "https://www.exploreboone.com/event/rss/";
-        title = "Explore Boone: events";
-        tags = [ "events" "local" ];
-      }
-      {
-        url = "https://www.wataugademocrat.com/search/?f=rss&t=article&c=news/local&l=50&s=start_time&sd=desc";
-        title = "Watauga Democrat: local";
-        tags = [ "news" "local" ];
-      }
-      {
-        url = "https://www.wataugademocrat.com/classifieds/?f=rss&s=start_time&sd=asc";
-        title = "Watauga Democrat: classifieds";
-        tags = [ "local" ];
-      }
-      {
-        url = "https://www.wataugademocrat.com/search/?f=rss&t=article&c=news/asu_news&l=50&s=start_time&sd=desc";
-        title = "Watauga Democrat: Appalachian State University";
-        tags = [ "news" "local" ];
-      }
-      {
-        url = "https://wataugaonline.com/feed/";
-        title = "Watauga Online";
-        tags = [ "news" "local" ];
-      }
-      {
-        url = "https://feeds.feedburner.com/HCPress";
-        title = "High Country Press";
-        tags = [ "news" "local" ];
-      }
+      { tags = [ "news" ]; title = "The Ecologist"; url = "https://theecologist.org/whats_new/feed"; }
 
-      {
-        url = feeds.urls.filter "https://www.avclub.com/rss" feeds.filters.discardContent;
-        tags = [ "news" "media" "film" ];
-      }
+      { tags = [ "news" ]; url = "https://www.currentaffairs.org/feed"; }
+      { tags = [ "news" ]; url = "https://thebaffler.com/feed"; }
+      { tags = [ "local" "news" ]; title = "The Appalachian"; url = "https://theappalachianonline.com/feed/"; }
+      { tags = [ "local" "notification" ]; title = "Town of Boone: alerts"; url = "https://www.townofboone.net/RSSFeed.aspx?ModID=63&CID=All-0"; }
+      { tags = [ "events" "local" ]; title = "Explore Boone: events"; url = "https://www.exploreboone.com/event/rss/"; }
+      { tags = [ "local" "news" ]; title = "Watauga Democrat: local"; url = "https://www.wataugademocrat.com/search/?f=rss&t=article&c=news/local&l=50&s=start_time&sd=desc"; }
+      { tags = [ "local" ]; title = "Watauga Democrat: classifieds"; url = "https://www.wataugademocrat.com/classifieds/?f=rss&s=start_time&sd=asc"; }
+      { tags = [ "local" "news" ]; title = "Watauga Democrat: Appalachian State University"; url = "https://www.wataugademocrat.com/search/?f=rss&t=article&c=news/asu_news&l=50&s=start_time&sd=desc"; }
+      { tags = [ "local" "news" ]; title = "Watauga Online"; url = "https://wataugaonline.com/feed/"; }
+      { tags = [ "local" "news" ]; title = "High Country Press"; url = "https://feeds.feedburner.com/HCPress"; }
 
-      {
-        url = "https://newleftreview.org/feed";
-        tags = [ "journal" ];
-      }
+      { tags = [ "film" "media" "news" ]; url = feeds.urls.filter "https://www.avclub.com/rss" feeds.filters.discardContent; }
+      { tags = [ "film" "media" ]; url = feeds.urls.filter "https://www.filmcomment.com/feed/atom/" feeds.filters.discardContent; }
 
-      {
-        url = "https://www.404media.co/rss";
-        tags = [ "news" "media" ];
-      }
+      { tags = [ "journal" ]; url = "https://newleftreview.org/feed"; }
+      { tags = [ "media" "news" ]; url = "https://www.404media.co/rss"; }
+      { tags = [ "news" ]; url = "https://www.jphilll.com/feed"; }
 
-      {
-        url = "https://www.jphilll.com/feed";
-        tags = [ "news" ];
-      }
+      { tags = [ "news" "technology" ]; title = "Ars Technica"; url = "http://feeds.arstechnica.com/arstechnica/index"; }
 
       # Notifications
-      {
-        url = feeds.urls.secret "https://github.com/somasis.private.atom?token=%s" "www/github.com/somasis.private.atom";
-        title = "GitHub: timeline";
-        tags = [ "notification" "github" "computer" ];
-      }
+      { tags = [ "computer" "github" "notification" ]; title = "GitHub: timeline"; url = feeds.urls.secret "https://github.com/somasis.private.atom?token=%s" "www/github.com/somasis.private.atom"; }
 
       # OpenStreetMap
-      {
-        url = feeds.urls.filter "https://www.weeklyosm.eu/feed" feeds.filters.discardContent;
-        title = "weeklyOSM";
-        tags = [ "news" "OpenStreetMap" ];
-      }
-      {
-        url = "https://www.openstreetmap.org/api/0.6/notes/feed?bbox=-81.918076,36.111477,-81.455917,36.391293";
-        title = "OpenStreetMap: notes in Watauga County";
-        tags = [ "notification" "OpenStreetMap" ];
-      }
-      {
-        url = "https://www.openstreetmap.org/api/0.6/notes/feed?bbox=-80.7872772,35.1850329,-80.2963257,35.5093128";
-        title = "OpenStreetMap: notes in Cabarrus County";
-        tags = [ "notification" "OpenStreetMap" ];
-      }
-      {
-        url = "https://resultmaps.neis-one.org/osm-suspicious-feed-bbox?hours=96&mappingdays=-1&tsearch=review_requested%3Dyes&anyobj=t&bbox=-81.918076,36.111477,-81.455917,36.391293";
-        title = "OpenStreetMap: changes to review in Watauga County";
-        tags = [ "notification" "OpenStreetMap" ];
-      }
-      {
-        url = "https://resultmaps.neis-one.org/osm-suspicious-feed-bbox?hours=96&mappingdays=-1&tsearch=review_requested%3Dyes&anyobj=t&bbox=-80.7872772,35.1850329,-80.2963257,35.5093128";
-        title = "OpenStreetMap: changes to review in Cabarrus County";
-        tags = [ "notification" "OpenStreetMap" ];
-      }
-      {
-        url = "https://us3.campaign-archive.com/feed?u=162692bfdedb78ec46fd108a3&id=801ce00e6d";
-        title = "OpenStreetMap US";
-        tags = [ "newsletter" "OpenStreetMap" ];
-      }
-      {
-        url = "https://osmand.net/rss.xml";
-        tags = [ "development" "OpenStreetMap" ];
-      }
+      { tags = [ "news" "openstreetmap" ]; title = "weeklyOSM"; url = feeds.urls.filter "https://www.weeklyosm.eu/feed" feeds.filters.discardContent; }
+      { tags = [ "notification" "openstreetmap" ]; title = "OpenStreetMap: notes in Watauga County"; url = "https://www.openstreetmap.org/api/0.6/notes/feed?bbox=-81.918076,36.111477,-81.455917,36.391293"; }
+      { tags = [ "notification" "openstreetmap" ]; title = "OpenStreetMap: notes in Cabarrus County"; url = "https://www.openstreetmap.org/api/0.6/notes/feed?bbox=-80.7872772,35.1850329,-80.2963257,35.5093128"; }
+      { tags = [ "notification" "openstreetmap" ]; title = "OpenStreetMap: changes to review in Watauga County"; url = "https://resultmaps.neis-one.org/osm-suspicious-feed-bbox?hours=96&mappingdays=-1&tsearch=review_requested%3Dyes&anyobj=t&bbox=-81.918076,36.111477,-81.455917,36.391293"; }
+      { tags = [ "notification" "openstreetmap" ]; title = "OpenStreetMap: changes to review in Cabarrus County"; url = "https://resultmaps.neis-one.org/osm-suspicious-feed-bbox?hours=96&mappingdays=-1&tsearch=review_requested%3Dyes&anyobj=t&bbox=-80.7872772,35.1850329,-80.2963257,35.5093128"; }
+      { tags = [ "newsletter" "openstreetmap" ]; title = "OpenStreetMap US"; url = "https://us3.campaign-archive.com/feed?u=162692bfdedb78ec46fd108a3&id=801ce00e6d"; }
+      { tags = [ "development" "openstreetmap" ]; url = "https://osmand.net/rss.xml"; }
 
-      {
-        url = "https://drewdevault.com/blog/index.xml";
-        tags = [ "blog" "development" "computer" ];
-      }
-      {
-        url = "https://maia.crimew.gay/feed.xml";
-        tags = [ "blog" "security" ];
-      }
+      { tags = [ "computer" "development" ]; url = "https://drewdevault.com/blog/index.xml"; }
+      { tags = [ "news" "security" ]; url = "https://maia.crimew.gay/feed.xml"; }
 
       # Tumblr
-      {
-        url = "https://phidica.tumblr.com/rss";
-        title = "Phidica";
-        tags = [ "blog" "friends" "tumblr" ];
-      }
-      {
-        url = "https://www.tumblr.com/rf9weu8hjf789234hf9";
-        title = "rf9weu8hjf789234hf9";
-        tags = [ "tumblr" ];
-      }
-      {
-        url = "https://journcy.tumblr.com/rss";
-        title = "Journcy";
-        tags = [ "blog" "friends" "tumblr" ];
-      }
-      {
-        url = "https://control--panel.com/rss";
-        tags = [ "blog" "computer" "tumblr" ];
-      }
+      { tags = [ "tumblr" ]; title = "Phidica"; url = "https://phidica.tumblr.com/rss"; }
+      { tags = [ "tumblr" ]; title = "rf9weu8hjf789234hf9"; url = "https://www.tumblr.com/rf9weu8hjf789234hf9"; }
+      { tags = [ "tumblr" ]; title = "Journcy"; url = "https://journcy.tumblr.com/rss"; }
+      { tags = [ "computer" "tumblr" ]; url = "https://control--panel.com/rss"; }
 
       # System
-      { url = "https://nixos.org/blog/announcements-rss.xml"; tags = [ "computer" "NixOS" ]; }
-      {
-        url = "https://discourse.nixos.org/t/breaking-changes-announcement-for-unstable/17574.rss";
-        title = "NixOS: Breaking changes on nixos-unstable";
-        tags = [ "computer" "NixOS" ];
-      }
+      { tags = [ "computer" "nixos" ]; url = "https://nixos.org/blog/announcements-rss.xml"; }
+      { tags = [ "computer" "nixos" ]; title = "NixOS: Breaking changes on nixos-unstable"; url = "https://discourse.nixos.org/t/breaking-changes-announcement-for-unstable/17574.rss"; }
 
       # toki pona
-      {
-        url = "https://feeds.redcircle.com/901407e0-53e9-4aa2-aa3d-509393d10783";
-        title = "kalama sin";
-        tags = [ "toki pona" "podcast" ];
-      }
-      {
-        url = "https://jonathangabel.com/feed.xml";
-        title = "jan Josan";
-        tags = [ "toki pona" "blog" ];
-      }
-      {
-        url = "https://janketami.wordpress.com/feed/";
-        title = "jan Ke Tami";
-        tags = [ "toki pona" "blog" ];
-      }
-      {
-        url = "https://kijetesantakalu-o.tumblr.com/rss";
-        title = "kijetesantakalu o!";
-        tags = [ "toki pona" "blog" "comics" ];
-      }
+      { tags = [ "podcast" "toki pona" ]; title = "kalama sin"; url = "https://feeds.redcircle.com/901407e0-53e9-4aa2-aa3d-509393d10783"; }
+      { tags = [ "toki pona" ]; title = "jan Josan"; url = "https://jonathangabel.com/feed.xml"; }
+      { tags = [ "toki pona" ]; title = "jan Ke Tami"; url = "https://janketami.wordpress.com/feed/"; }
+      { tags = [ "comics" "toki pona" ]; title = "kijetesantakalu o!"; url = "https://kijetesantakalu-o.tumblr.com/rss"; }
 
-      {
-        url = "https://www.urbanterror.info/rss/news/all";
-        title = "Urban Terror: news";
-        tags = [ "urbanterror" "games" ];
-      }
-      {
-        url = "https://www.urbanterror.info/rss/blogs/all/";
-        title = "Urban Terror: blogs";
-        tags = [ "urbanterror" "blog" ];
-      }
-
-      {
-        url = "https://mentalhellth.xyz/feed";
-        title = "Mental Hellth";
-        tags = [ "blog" "health" "philosophy" "psychoanalysis" ];
-      }
-
-      {
-        url = "https://sootyempiric.blogspot.com/feeds/posts/default";
-        title = "The Sooty Empiric";
-        tags = [ "blog" "philosophy" ];
-      }
-      {
-        url = "https://blog.vernonwcisney.com/1/feed";
-        tags = [ "blog" "philosophy" ];
-        title = "Flows and Becomings";
-      }
-      { url = feeds.urls.filter "https://medium.com/feed/@vcisney" feeds.filters.discardContent; tags = [ "blog" "philosophy" "medium" ]; }
+      { tags = [ "games" "urbanterror" ]; title = "Urban Terror: news"; url = "https://www.urbanterror.info/rss/news/all"; }
+      { tags = [ "urbanterror" ]; title = "Urban Terror: blogs"; url = "https://www.urbanterror.info/rss/blogs/all/"; }
     ];
   };
 
-  cache.directories = [{ method = "symlink"; directory = "var/cache/newsboat"; }];
+  cache.directories = [{ method = "symlink"; directory = config.lib.somasis.xdgCacheDir "newsboat"; }];
 
   systemd.user =
     let

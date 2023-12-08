@@ -36,7 +36,7 @@
       highlight_megabytes = 1; # "Highlight large numbers in memory counters"
 
       # Display options > Global options: threads
-      hide_kernel_threads = 0;
+      hide_kernel_threads = 1;
       hide_userland_threads = 0;
       show_thread_names = 1;
       highlight_threads = 1; # "Display threads in a different color"

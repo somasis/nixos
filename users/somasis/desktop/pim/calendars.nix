@@ -155,13 +155,9 @@ rec {
 
         vdirsyncer = vdirsyncerConfig {
           collections = [
-            "04cd6e3c-f738-45f1-b8f1-736cb5043640"
-            "444c093a-d07c-40f2-b9e3-210fb0467041"
             "5bfbb874-f100-4cd5-8d2f-d2bf13ddf1bf"
             "66c5ec19-fa45-4b8b-9886-48f645c0c15d"
             "792a8695-6ce1-4c55-80fb-f560369a02d4"
-            "c64932da-80e3-4e11-92f2-389a076595a1"
-            "d6c28153-f18e-4ead-aecd-5984f78621fd"
             "e4d7681e-c502-4999-ba48-85d17090d5c3"
           ];
         };
@@ -258,5 +254,5 @@ rec {
     )
   ];
 
-  cache.directories = [{ method = "symlink"; directory = "share/khal"; }];
+  cache.directories = [{ method = "symlink"; directory = config.lib.somasis.xdgDataDir "khal"; }];
 }

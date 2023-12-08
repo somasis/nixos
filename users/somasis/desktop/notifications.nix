@@ -17,14 +17,14 @@
           alignment = "left";
           origin = "top-right";
           offset = "0x0";
-          width = "(${toString (2256 / 24)},${toString (2256 / 3)})";
+          width = "(0,${toString (2256 / 3)})";
           height = 32;
 
           notification_limit = 12;
 
           icon_position = "left";
-          min_height = "32";
-          max_icon_size = "32";
+          min_height = 32;
+          max_icon_size = 32;
 
           shrink = false;
           padding = 0;

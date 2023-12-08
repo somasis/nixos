@@ -6,11 +6,12 @@
 
 mkdir -p "${DMENU_RUN_HISTORY%/*}"
 
+executable_paths=()
+
 # shellcheck source=/dev/null
 [[ -e "${DMENU_RUN_SCRIPT}" ]] && . "${DMENU_RUN_SCRIPT}"
 
-executable_paths=()
-mapfile -t -d : executable_paths <<<"${PATH}"
+mapfile -t executable_paths <<<"${PATH//:/$'\n'}"
 
 choice=$(
     {
@@ -28,7 +29,7 @@ choice=$(
         | sort "${DMENU_RUN_HISTORY}" - \
         | cat "${DMENU_RUN_HISTORY}" - 2>/dev/null \
         | uq \
-        | ${DMENU:-dmenu -g 4 -l 16} -S -p "run" "$@"
+        | ${DMENU:-dmenu -x -g 4 -l 16} -S -p "run" "$@"
 )
 
 [[ -n "${choice}" ]] || exit 0

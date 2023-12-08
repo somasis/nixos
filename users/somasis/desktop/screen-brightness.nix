@@ -1,7 +1,7 @@
 { osConfig, config, pkgs, ... }:
 assert osConfig.hardware.brillo.enable;
 {
-  cache.directories = [{ method = "symlink"; directory = "var/cache/brillo"; }];
+  cache.directories = [{ method = "symlink"; directory = config.lib.somasis.xdgCacheDir "brillo"; }];
   home.packages = [ pkgs.brillo ];
 
   # Hardware: {decrease, increase} screen backlight - fn + {f4,f5}

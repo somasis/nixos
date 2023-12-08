@@ -9,7 +9,7 @@
 }: {
   persist.directories = [
     ".gnupg"
-    { method = "symlink"; directory = "share/password-store"; }
+    { method = "symlink"; directory = config.lib.somasis.xdgDataDir "password-store"; }
   ];
 
   programs.gpg.enable = true;

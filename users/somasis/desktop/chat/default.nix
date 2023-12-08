@@ -1,10 +1,10 @@
 {
   imports = [
-    ./discord.nix
-    ./facebook.nix
+    # ./facebook.nix
     # ./irc.nix
-    ./zoom.nix
     # ./pidgin.nix
     # ./signal.nix
+    ./discord.nix
+    ./zoom.nix
   ];
 }

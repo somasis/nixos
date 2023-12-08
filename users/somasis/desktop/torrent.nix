@@ -215,8 +215,8 @@ let
 
         update-active-only = true;
         update-interval = 2;
-        min-update-interval = 60;
-        session-update-interval = 300;
+        min-update-interval = 120; # 2m
+        session-update-interval = 300; # 5m
         activeonly-fullsync-enabled = true;
         activeonly-fullsync-every = 10;
 
@@ -308,6 +308,7 @@ in
     port = 9091;
     remote = "somasis@genesis.whatbox.ca";
     remotePort = 17994;
+    linger = "2m30s";
   };
 
   home.packages = [

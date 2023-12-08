@@ -48,8 +48,8 @@ let
 in
 {
   cache.directories = [
-    { method = "symlink"; directory = "var/cache/listenbrainz-mpd"; }
-    { method = "symlink"; directory = "var/cache/mpdscribble"; }
+    { method = "symlink"; directory = config.lib.somasis.xdgCacheDir "listenbrainz-mpd"; }
+    { method = "symlink"; directory = config.lib.somasis.xdgCacheDir "mpdscribble"; }
   ];
 
   home.packages = [ mpdscribble ];

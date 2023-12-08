@@ -32,7 +32,7 @@
     "LESSHISTFILE" = "${config.xdg.cacheHome}/less/history";
   };
 
-  cache.directories = [{ method = "symlink"; directory = "var/cache/less"; }];
+  cache.directories = [{ method = "symlink"; directory = config.lib.somasis.xdgCacheDir "less"; }];
 
   programs.less.enable = true;
   programs.lesspipe.enable = true;

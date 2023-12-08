@@ -1,11 +1,29 @@
 { lib
 , pkgs
 , config
+, nixpkgs
 , ...
 }:
 with lib;
 {
+  config.lib.nixos = import (nixpkgs + "/nixos/lib/utils.nix") { inherit lib config pkgs; };
+
   config.lib.somasis = rec {
+    # Make an absolute path that is relative to $HOME... relative to $HOME.
+    relativeToHome = path: lib.strings.removePrefix "./" (
+      builtins.toString (
+        lib.path.removePrefix
+          (/. + config.home.homeDirectory)
+          (/. + path)
+      )
+    );
+
+    # Give XDG paths that are relative to $HOME, mainly for use in impermanence settings
+    xdgConfigDir = x: (relativeToHome config.xdg.configHome) + "/" + x;
+    xdgCacheDir = x: (relativeToHome config.xdg.cacheHome) + "/" + x;
+    xdgDataDir = x: (relativeToHome config.xdg.dataHome) + "/" + x;
+    xdgStateDir = x: (relativeToHome config.xdg.stateHome) + "/" + x;
+
     # Convert a float to an integer.
     #
     # Really, we just treat it as a double. We first make it a string
@@ -58,12 +76,6 @@ with lib;
       assert (isFloat float);
       if fractional >= 5 then whole + 1 else whole
     ;
-
-    # Make a string safe for usage as a systemd path.
-    # Ripped from nixpkgs' systemd.nix module.
-    #
-    # Type: mkPathSafeName :: str -> str
-    mkPathSafeName = replaceStrings [ "@" ":" "\\" "[" "]" ] [ "-" "-" "-" "" "" ];
 
     # Create a comma,separated,string from a list.
     #

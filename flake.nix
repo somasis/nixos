@@ -17,7 +17,7 @@
     flake-compat.flake = false;
 
     nixpkgs.url = "github:nixos/nixpkgs?ref=nixos-unstable";
-    nixpkgsStable.url = "github:nixos/nixpkgs?ref=nixos-23.05";
+    nixpkgsStable.url = "github:nixos/nixpkgs?ref=nixos-23.11";
 
     nixos-hardware.url = "github:nixos/nixos-hardware";
 
@@ -32,8 +32,8 @@
 
     nix-filter.url = "github:numtide/nix-filter";
 
-    catgirl.flake = false;
-    catgirl.url = "git+https://git.causal.agency/catgirl?ref=somasis/tokipona";
+    # catgirl.flake = false;
+    # catgirl.url = "git+https://git.causal.agency/catgirl?ref=somasis/tokipona";
     dmenu-flexipatch.flake = false;
     dmenu-flexipatch.url = "github:bakkeby/dmenu-flexipatch";
     lemonbar.flake = false;
@@ -44,6 +44,9 @@
     sbase.url = "git://git.suckless.org/sbase";
     ubase.flake = false;
     ubase.url = "github:michaelforney/ubase";
+
+    # vencord.flake = false;
+    # vencord.url = "github:Vendicated/Vencord";
 
     qutebrowser-zotero.flake = false;
     qutebrowser-zotero.url = "github:parchd-1/qutebrowser-zotero";
@@ -60,30 +63,10 @@
     discordThemeIrc.url = "github:somasis/discord-theme-irc";
 
     adblockEasyList.flake = false;
-    adblockEasyList.url = "https://easylist.to/easylist/easylist.txt";
+    adblockEasyList.url = "github:thedoggybrad/easylist-mirror";
 
-    adblockEasyPrivacy.flake = false;
-    adblockEasyPrivacy.url = "https://easylist.to/easylist/easyprivacy.txt";
-
-    adblockEasyListCookies.flake = false;
-    adblockEasyListCookies.url = "https://secure.fanboy.co.nz/fanboy-cookiemonster.txt";
-
-    adblockEasyListSpanish.flake = false;
-    adblockEasyListSpanish.url = "https://easylist-downloads.adblockplus.org/easylistspanish.txt";
-    adblockEasyListRussian.flake = false;
-    adblockEasyListRussian.url = "https://easylist-downloads.adblockplus.org/advblock.txt";
-
-    adblockAntiAdblockFilters.flake = false;
-    adblockAntiAdblockFilters.url = "https://easylist-downloads.adblockplus.org/antiadblockfilters.txt";
-
-    adblockFanboySocial.flake = false;
-    adblockFanboySocial.url = "https://easylist.to/easylist/fanboy-social.txt";
-
-    uAssetsPrivacy.flake = false;
-    uAssetsPrivacy.url = "https://raw.githubusercontent.com/uBlockOrigin/uAssetsCDN/main/filters/privacy.min.txt";
-
-    uAssetsResourceAbuse.flake = false;
-    uAssetsResourceAbuse.url = "https://raw.githubusercontent.com/uBlockOrigin/uAssetsCDN/main/filters/resource-abuse.txt";
+    uAssets.flake = false;
+    uAssets.url = "github:uBlockOrigin/uAssetsCDN";
 
     adblockHosts.flake = false;
     adblockHosts.url = "github:StevenBlack/hosts";

@@ -56,7 +56,7 @@
   };
 
   cache.directories = [{
-    directory = "var/lib/w3m";
+    directory = config.lib.somasis.xdgStateDir "w3m";
     method = "symlink";
   }];
 }

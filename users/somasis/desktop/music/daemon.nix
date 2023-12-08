@@ -75,5 +75,5 @@ in
 
   home.packages = [ pkgs.mpc-cli ];
 
-  persist.directories = [{ method = "symlink"; directory = "share/mpd"; }];
+  persist.directories = [{ method = "symlink"; directory = config.lib.somasis.xdgDataDir "mpd"; }];
 }

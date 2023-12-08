@@ -8,6 +8,11 @@
     package = pkgs.zathura.overrideAttrs (oldAttrs: { useMupdf = true; });
 
     options = {
+      # Required so that `xdg-open` can open links...
+      # <https://unix.stackexchange.com/questions/618337/setting-default-browser-for-zathura>
+      # <https://github.com/NixOS/nixpkgs/issues/71249>
+      sandbox = "none";
+
       selection-clipboard = "clipboard";
 
       incremental-search = false;
@@ -99,7 +104,7 @@
 
   persist.directories = [{
     method = "symlink";
-    directory = "share/zathura";
+    directory = config.lib.somasis.xdgDataDir "zathura";
   }];
 
   xdg.mimeApps.defaultApplications = {

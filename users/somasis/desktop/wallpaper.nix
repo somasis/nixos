@@ -73,7 +73,7 @@ in
 
   persist.directories = [{
     method = "symlink";
-    directory = "etc/wallpaper";
+    directory = config.lib.somasis.xdgConfigDir "wallpaper";
   }];
 
   systemd.user.services.wallpaper = {

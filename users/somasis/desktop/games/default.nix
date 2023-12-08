@@ -29,10 +29,10 @@
     directories = [
       { method = "symlink"; directory = ".lbreakout2"; }
       { method = "symlink"; directory = ".zaz"; }
-      { method = "symlink"; directory = "etc/PCSX2"; }
-      { method = "symlink"; directory = "etc/opentyrian"; }
-      { method = "symlink"; directory = "etc/pingus-0.8"; }
-      { method = "symlink"; directory = "share/kpat"; }
+      { method = "symlink"; directory = config.lib.somasis.xdgConfigDir "PCSX2"; }
+      { method = "symlink"; directory = config.lib.somasis.xdgConfigDir "opentyrian"; }
+      { method = "symlink"; directory = config.lib.somasis.xdgConfigDir "pingus-0.8"; }
+      { method = "symlink"; directory = config.lib.somasis.xdgDataDir "kpat"; }
     ];
   };
 }

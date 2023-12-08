@@ -57,6 +57,13 @@ with lib;
                 default = "5m";
                 example = "90s";
               };
+
+              extraOptions = mkOption {
+                type = with types; listOf nonEmptyStr;
+                description = "Extra arguments to pass to the ssh tunnel process";
+                default = [ ];
+                example = [ "-o" "ConnectTimeout=5" ];
+              };
             };
           }
         ));
@@ -144,7 +151,6 @@ with lib;
 
                 listen="$XDG_RUNTIME_DIR/ssh-tunnel/$socket"
 
-                set -x
                 exec ${pkgs.systemd}/lib/systemd/systemd-socket-proxyd --exit-idle-time="$linger" "$listen"
               '';
             };
@@ -208,9 +214,9 @@ with lib;
                           ;;
                   esac
 
+                  ${lib.optionalString (tunnel.extraOptions != []) "ssh_args+=( ${lib.escapeShellArgs tunnel.extraOptions} )"}
                   ssh_args+=( "$remote" )
 
-                  set -x
                   exec ssh "''${ssh_args[@]}"
                 '';
               in
@@ -246,3 +252,4 @@ with lib;
     ;
   };
 }
+

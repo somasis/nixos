@@ -4,9 +4,9 @@
 }:
 {
   persist.directories = [
-    { method = "symlink"; directory = "etc/Kvantum"; }
-    { method = "symlink"; directory = "etc/qt5ct"; }
-    { method = "symlink"; directory = "etc/qt6ct"; }
+    { method = "symlink"; directory = config.lib.somasis.xdgConfigDir "Kvantum"; }
+    { method = "symlink"; directory = config.lib.somasis.xdgConfigDir "qt5ct"; }
+    { method = "symlink"; directory = config.lib.somasis.xdgConfigDir "qt6ct"; }
   ];
 
   home.packages = [
@@ -109,10 +109,11 @@
 
     # Improve Java GUI font rendering (really necessary for using
     # LanguageTool on LibreOffice)
-    _JAVA_OPTIONS = "-Dawt.useSystemAAFontSettings=on";
+    # Crashes constantly.
+    # _JAVA_OPTIONS = "-Dawt.useSystemAAFontSettings=on";
   };
 
-  systemd.user.sessionVariables._JAVA_OPTIONS = "-Dawt.useSystemAAFontSettings=on";
+  # systemd.user.sessionVariables._JAVA_OPTIONS = "-Dawt.useSystemAAFontSettings=on";
 
   qt = {
     enable = true;

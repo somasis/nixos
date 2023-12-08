@@ -296,8 +296,8 @@ in
     directories = [
       { method = "bindfs"; directory = ".zotero/zotero/default"; }
 
-      { method = "bindfs"; directory = "share/zotero/styles"; }
-      { method = "bindfs"; directory = "share/zotero/translators"; }
+      { method = "bindfs"; directory = config.lib.somasis.xdgDataDir "zotero/styles"; }
+      { method = "bindfs"; directory = config.lib.somasis.xdgDataDir "zotero/translators"; }
     ];
     files = [ "share/zotero/zotero.sqlite" ];
   };
@@ -315,7 +315,7 @@ in
         _description = "WorldCat Search";
         _icon = "https://worldcat.org/favicons/favicon-16x16.png";
 
-        _urlTemplate = "https://worldcat.org/search?q=bn%3A{rft:ISBN}+AND+ti%3A{z:title}+AND+au%3A{rft:aufirst?}+{rft:aulast?}";
+        _urlTemplate = "https://worldcat.org/search?q=bn%3A{rft:isbn}+AND+ti%3A{z:title}+AND+au%3A{rft:aufirst?}+{rft:aulast?}";
         _urlParams = [ ];
 
         _urlNamespaces = {

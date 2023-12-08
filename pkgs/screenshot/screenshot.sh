@@ -19,6 +19,13 @@ clip() {
     xclip -in -selection clipboard "$@" >&- 2>&-
 }
 
+tilde() {
+    : "${HOME:?\$HOME is unset}"
+
+    local p="${1:?tilde(): no path given}"
+    printf '%s' "${p/#${HOME}/~}"
+}
+
 mkdir -p "${SCREENSHOT_DIR}"
 b="${SCREENSHOT_DIR}/$(TZ=UTC date +"%Y-%m-%dT%H:%M:%SZ")"
 
@@ -128,7 +135,7 @@ else
             -A "file=Open" \
             -A "directory=Open containing directory" \
             "Took screenshot" \
-            "\"${b}.png\""
+            "\"$(tilde "${b}".png)\""
     )
 
     case "${action}" in

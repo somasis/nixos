@@ -70,15 +70,15 @@ in
   #   };
   # };
 
-  # systemd.user.sessionVariables = {
-  #   GTK_IM_MODULE = lib.mkForce "xim";
-  #   QT_IM_MODULE = lib.mkForce "xim";
-  #   XMODIFIERS = lib.mkForce "@:bim=fcitx";
-  # };
+  systemd.user.sessionVariables = {
+    GTK_IM_MODULE = lib.mkForce "xim";
+    QT_IM_MODULE = lib.mkForce "xim";
+    XMODIFIERS = lib.mkForce "@:bim=fcitx";
+  };
 
-  persist.directories = [{ method = "symlink"; directory = "etc/fcitx5"; }];
+  persist.directories = [{ method = "symlink"; directory = config.lib.somasis.xdgConfigDir "fcitx5"; }];
   cache.directories = [
-    { method = "symlink"; directory = "etc/fcitx"; }
+    { method = "symlink"; directory = config.lib.somasis.xdgConfigDir "fcitx"; }
     { method = "symlink"; directory = ".anthy"; }
   ];
 

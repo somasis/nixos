@@ -87,6 +87,10 @@ lib.recursiveUpdate
     notify-send-all = callPackage ./notify-send-all { };
     wcal = callPackage ./wcal { };
 
+    pidgin-gnome-keyring = callPackage ./pidgin-gnome-keyring { };
+    pidgin-groupchat-typing-notifications = callPackage ./pidgin-groupchat-typing-notifications { };
+    purple-instagram = callPackage ./purple-instagram { };
+
     linja-luka = callPackage ./linja-luka { };
     linja-namako = callPackage ./linja-namako { };
     linja-pi-tomo-lipu = callPackage ./linja-pi-tomo-lipu { };

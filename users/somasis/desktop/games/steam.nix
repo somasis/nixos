@@ -4,7 +4,8 @@
 , ...
 }:
 let inherit (osConfig.programs) steam; in
-lib.mkIf steam.enable {
+assert steam.enable;
+{
   persist.directories = [ "share/Steam" ];
 
   systemd.user.services.steam = {

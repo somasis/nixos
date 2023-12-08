@@ -20,7 +20,6 @@ let
   };
 
   catgirl = pkgs.catgirl.overrideAttrs (oldAttrs: {
-    name = "catgirl";
     version = config.lib.somasis.flakeModifiedDateToVersion inputs.catgirl;
     src = inputs.catgirl;
   });
@@ -55,7 +54,7 @@ let
       case "$mode" in
           catgirl)
               exec catgirl \
-                  -u "${osConfig.networking.fqdnOrHostName}" \
+                  -u ${lib.escapeShellArg osConfig.networking.fqdnOrHostName} \
                   -c "$XDG_CONFIG_HOME/catgirl/client-${osConfig.networking.fqdnOrHostName}.crt" \
                   -N "$0 -n" \
                   "$@"

@@ -10,10 +10,6 @@
     hostKeys = [{ path = "/etc/ssh/host_ed25519"; type = "ed25519"; }];
   };
 
-  # NOTE: remove once home-manager >=24.05 is released
-  # home-manager's `services.ssh-agent.enable = true` can be used instead
-  programs.ssh.startAgent = true;
-
   programs.ssh.knownHosts."spinoza.7596ff.com" = {
     extraHostNames = [ "spinoza" ];
     publicKey = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIAroN0Hvz6bV+aRkm3aEWbP58QsNES5r6mhafHlraKnV";

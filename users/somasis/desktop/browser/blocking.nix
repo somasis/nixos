@@ -38,38 +38,22 @@ in
       content.blocking = {
         enabled = true;
         method = "adblock";
-        adblock.lists = uriList
-          # (map
-          #   (list:
-          #     pkgs.runCommandLocal (builtins.baseNameOf (list.name or "${list}")) { inherit list; } ''
-          #       ${pkgs.gnugrep}/bin/grep -v \
-          #           -e "^! Last modified: " \
-          #           -e "^! Expires: " \
-          #           -e "^! Checksum: " \
-          #           -e "^! Updated: " \
-          #           ${lib.escapeShellArg list} \
-          #           > "$out"
-          #     ''
-          #   )
-          (with inputs; [
-            adblockCustom
+        adblock.lists = uriList (with inputs; [
+          adblockCustom
 
-            adblockEasyList
-            adblockEasyListSpanish
-            adblockEasyListRussian
+          (adblockEasyList + /easylist.txt)
+          (adblockEasyList + /easyprivacy.txt)
+          (adblockEasyList + /easycookie.txt)
+          (adblockEasyList + /easylistspanish.txt)
+          (adblockEasyList + /advblock.txt) # EasyList Russian
+          (adblockEasyList + /fanboysocial.txt)
+          (adblockEasyList + /antiadblock.txt)
+          (adblockEasyList + /abp-filters-anti-cv.txt)
 
-            adblockEasyPrivacy
-
-            adblockEasyListCookies
-
-            adblockAntiAdblockFilters
-
-            # adblockFanboySocial
-            # uAssetsPrivacy
-            # uAssetsResourceAbuse
-          ])
-          # )
-        ;
+          (uAssets + /filters/privacy.min.txt)
+          (uAssets + /filters/resource-abuse.txt)
+        ]);
+        # hosts.lists = uriList (with inputs; [ adblockHosts ]);
       };
     };
 

@@ -6,84 +6,58 @@
 }:
 let
   inherit (lib) replaceStrings;
-  inherit (config.lib.somasis) commaList;
+  inherit (config.lib.somasis) commaList xdgConfigDir;
   inherit (config.lib.somasis.generators) toXML;
 
   languageToolVersion = pkgs.languagetool.version;
 
+  languageToolConfigFormat = lib.generators.toKeyValue {
+    mkKeyValue = k: v:
+      lib.generators.mkKeyValueDefault
+        {
+          mkValueString = value:
+            if lib.isList value then
+              commaList value
+            else
+              lib.escape [ ":" ] (lib.generators.mkValueStringDefault { } value)
+          ;
+        } "="
+        k
+        v
+    ;
+  };
+
   # "Languagetool.cfg" is not a typo.
-  languageToolConfig = pkgs.writeText "Languagetool.cfg" (
-    lib.generators.toKeyValue
-      {
-        mkKeyValue = k: v:
-          lib.generators.mkKeyValueDefault
-            {
-              mkValueString = value:
-                if lib.isList value then
-                  commaList value
-                else
-                  lib.escape [ ":" ] (lib.generators.mkValueStringDefault { } value)
-              ;
-            } "="
-            k
-            v
-        ;
-      }
-      rec {
-        ltVersion = languageToolVersion;
-        motherTongue = "en-US";
+  languageToolConfig = pkgs.writeText "Languagetool.cfg" (languageToolConfigFormat rec {
+    ltVersion = languageToolVersion;
+    motherTongue = "en-US";
 
-        autoDetect = false;
+    autoDetect = false;
 
-        "disabledCategories.en-US" = [ "Creative Writing" "Wikipedia" ];
-        "disabledRules.en-US" = [ "HASH_SYMBOL" "WIKIPEDIA_CONTRACTIONS" "WIKIPEDIA_CURRENTLY" "TOO_LONG_SENTENCE" "WIKIPEDIA_12_PM" "WIKIPEDIA_12_AM" ];
+    "disabledCategories.en-US" = [ "Creative Writing" "Wikipedia" ];
+    "disabledRules.en-US" = [ "HASH_SYMBOL" "WIKIPEDIA_CONTRACTIONS" "WIKIPEDIA_CURRENTLY" "TOO_LONG_SENTENCE" "WIKIPEDIA_12_PM" "WIKIPEDIA_12_AM" ];
+    "enabledRules.en-US" = [ "THREE_NN" "EN_REDUNDANCY_REPLACE" ];
 
-        doRemoteCheck = true;
+    fixedLanguage = motherTongue;
 
-        "enabledRules.en-US" = [ "THREE_NN" "EN_REDUNDANCY_REPLACE" ];
+    isMultiThread = true; # Use multiple cores for checking
+    noDefaultCheck = true;
+    doRemoteCheck = false; # Check locally
+    useOtherServer = false; # Check locally
 
-        fixedLanguage = "en-US";
+    numberParagraphs = -2;
 
-        noDefaultCheck = true;
-        numberParagraphs = -2;
-        otherServerUrl = "http://127.0.0.1:${builtins.toString config.somasis.tunnels.tunnels.languagetool.port}";
+    # otherServerUrl = "http://127.0.0.1:${builtins.toString config.somasis.tunnels.tunnels.languagetool.port}";
 
-        # isPremium = true;
-        remoteUserName = config.home.username;
+    # isPremium = true;
+    # remoteUserName = config.home.username;
 
-        serverMode = false;
-        serverPort = 8081;
-        taggerShowsDisambigLog = false;
+    taggerShowsDisambigLog = false;
 
-        useGUIConfig = false;
-        useOtherServer = true;
-      }
-  );
+    useGUIConfig = false;
+  });
 
-  lo = pkgs.libreoffice-still;
-
-  loInstallExtensions = exts: assert (builtins.isList exts);
-    let
-      libreoffice-install-extensions = pkgs.writeShellScript "libreoffice-install-extensions" ''
-        export PATH=${lib.makeBinPath [ pkgs.gnugrep pkgs.coreutils lo ]}
-
-        ext_is_installed() {
-            for installed_ext in "''${installed_exts[@]}"; do
-                installed_ext_basename=''${installed_ext##*/}
-                [[ "$1" == "$installed_ext_basename" ]] && return 0
-            done
-            return 1
-        }
-
-        mapfile -t installed_exts < <(unopkg list | grep '^  URL:' | cut -d ' ' -f4-)
-
-        for ext; do
-            ext_is_installed "$(basename "$ext")" || unopkg add -v -s "$ext"
-        done
-      '';
-    in
-    "${libreoffice-install-extensions} ${lib.escapeShellArgs exts}"
-  ;
+  lo = pkgs.libreoffice-fresh;
 
   loExtensions = [
     # <https://extensions.libreoffice.org/en/extensions/show/27416>
@@ -129,58 +103,88 @@ let
     })
 
     # <https://extensions.libreoffice.org/en/extensions/show/languagetool>
-    (pkgs.fetchurl {
-      url = "https://extensions.libreoffice.org/assets/downloads/3710/1691498123/LanguageTool-${languageToolVersion}.oxt";
-      hash = "sha256-Ck0SyckcoAz8fWgy/LQHRoTNtbvKkaH6xk0UovpRagg=";
-    })
+    # (pkgs.fetchurl {
+    #   url = "https://extensions.libreoffice.org/assets/downloads/3710/1691498123/LanguageTool-${languageToolVersion}.oxt";
+    #   hash = "sha256-Ck0SyckcoAz8fWgy/LQHRoTNtbvKkaH6xk0UovpRagg=";
+    # })
   ]
   ++ lib.optional config.programs.zotero.enable
     "${config.programs.zotero.package}/usr/lib/zotero-bin-${pkgs.zotero.version}/extensions/zoteroOpenOfficeIntegration@zotero.org/install/Zotero_OpenOffice_Integration.oxt"
   ;
+
+  loInstallExtensions =
+    assert (builtins.isList loExtensions);
+    pkgs.writeShellScript "libreoffice-install-extensions" ''
+      PATH=${lib.makeBinPath [ pkgs.gnugrep pkgs.coreutils lo ]}
+      ${lib.toShellVar "exts" loExtensions}
+
+      ext_is_installed() {
+          for installed_ext in "''${installed_exts[@]}"; do
+              installed_ext_basename=''${installed_ext##*/}
+              [[ "$1" == "$installed_ext_basename" ]] && return 0
+          done
+          return 1
+      }
+
+      mapfile -t installed_exts < <(unopkg list | grep '^  URL:' | cut -d ' ' -f4-)
+
+      for ext in "''${exts[@]}"; do
+          ext_is_installed "$(basename "$ext")" || unopkg add -v -s "$ext"
+      done
+    '';
+
+  loSetLanguageToolConfiguration = pkgs.writeShellScript "libreoffice-set-languagetool-configuration" ''
+    cat ${languageToolConfig} > "''${XDG_CONFIG_HOME:=$HOME/.config}"/LanguageTool/LibreOffice/Languagetool.cfg
+  '';
+
+  loWrapped = pkgs.wrapCommand {
+    package = lo;
+
+    wrappers =
+      map
+        (commandName: {
+          command = "/bin/${commandName}";
+          prependFlags = ''--nologo'';
+          beforeCommand = lib.singleton ''
+            if [[ "$(pgrep -c -u "''${USER:=$(id -un)}" 'soffice\.bin')" -eq 0 ]]; then
+                ${loInstallExtensions} || :
+            fi
+          '';
+          # ${loSetLanguageToolConfiguration} || :
+        })
+        [ "libreoffice" "soffice" "sbase" "scalc" "sdraw" "simpress" "smath" "swriter" ]
+    ;
+  };
 in
 rec {
   home.packages = [
-    lo
+    loWrapped
 
     pkgs.languagetool
 
     # Free replacements for pkgs.corefonts
-    # Arial, Times New Roman
-    pkgs.noto-fonts-extra
-
-    # Cambria
-    pkgs.caladea
-
-    # Calibri
-    pkgs.carlito
-
-    # Comic Sans MS
-    pkgs.comic-relief
-
-    # Georgia
-    pkgs.gelasio
-
-    # Arial Narrow
-    pkgs.liberation-sans-narrow
-
-    # Arial, Helvetica, Times New Roman, Courier New
-    pkgs.liberation_ttf
+    pkgs.caladea # Cambria
+    pkgs.carlito # Calibri
+    pkgs.comic-relief # Comic Sans MS
+    pkgs.gelasio # Georgia
+    pkgs.liberation-sans-narrow # Arial Narrow
+    pkgs.liberation_ttf # Arial, Helvetica, Times New Roman, Courier New
+    pkgs.noto-fonts-extra # Arial, Times New Roman
   ];
 
   # See for more details:
   # <https://wiki.documentfoundation.org/UserProfile#User_profile_content>
   persist = {
-    directories = [{ method = "symlink"; directory = "etc/libreoffice/4"; }];
-    # files = [ "etc/LanguageTool/LibreOffice/Languagetool.cfg" ];
+    directories = [{ method = "symlink"; directory = xdgConfigDir "libreoffice/4"; }];
+    # files = [ xdgConfigDir "LanguageTool/LibreOffice/Languagetool.cfg" ];
   };
 
-  cache.directories = [{ method = "symlink"; directory = "etc/LanguageTool/LibreOffice/cache"; }];
-  log.files = [ "etc/LanguageTool/LibreOffice/LanguageTool.log" ];
+  cache.directories = [{ method = "symlink"; directory = xdgConfigDir "LanguageTool/LibreOffice/cache"; }];
+  # log.files = [ (xdgConfigDir "LanguageTool/LibreOffice/LanguageTool.log") ];
 
   xdg.configFile = {
     "libreoffice/jre".source = lo.unwrapped.jdk;
-
-    "LanguageTool/LibreOffice/.keep".source = builtins.toFile "keep" "";
+    # "LanguageTool/LibreOffice/.keep".source = builtins.toFile "keep" "";
 
     # TODO: why doesn't this work?
     #       LibreOffice will fail to recognize the Java environment at all, if I
@@ -220,52 +224,49 @@ rec {
   xdg.mimeApps.associations.removed = lib.genAttrs [ "text/plain" ] (_: "libreoffice.desktop");
 
   # Do some really convoluted stuff to make LibreOffice run in the background.
-  systemd.user.services.libreoffice = {
-    Unit = {
-      Description = lo.meta.description;
-      PartOf = [ "graphical-session.target" ];
-    };
-    Install.WantedBy = [ "graphical-session.target" ];
+  # systemd.user.services.libreoffice = {
+  #   Unit = {
+  #     Description = lo.meta.description;
+  #     PartOf = [ "graphical-session.target" ];
+  #   };
+  #   Install.WantedBy = [ "graphical-session.target" ];
 
-    Service =
-      let
-        loWait = pkgs.writeShellScript "libreoffice-wait" ''
-          ${pkgs.procps}/bin/pwait -u "$USER" "soffice.bin" || :
-          ${pkgs.coreutils}/bin/rm -f ${lib.escapeShellArg config.xdg.configHome}/libreoffice/4/.lock
-        '';
-        loSetLanguageToolConfiguration = pkgs.writeShellScript "libreoffice-set-languagetool-configuration" ''
-          cat ${languageToolConfig} > "''${XDG_CONFIG_HOME:=$HOME/.config}"/LanguageTool/LibreOffice/Languagetool.cfg
-        '';
-      in
-      {
-        Type = "simple";
+  #   Service =
+  #     let
+  #       loWait = pkgs.writeShellScript "libreoffice-wait" ''
+  #         ${pkgs.procps}/bin/pwait -u "$USER" "soffice.bin" || :
+  #         ${pkgs.coreutils}/bin/rm -f ${lib.escapeShellArg config.xdg.configHome}/libreoffice/4/.lock
+  #       '';
+  #     in
+  #     {
+  #       Type = "simple";
 
-        # Only run the daemon during school. Saves memory.
-        # ExecCondition = [ "${pkgs.playtime}/bin/playtime -iq" ];
+  #       # Only run the daemon during school. Saves memory.
+  #       # ExecCondition = [ "${pkgs.playtime}/bin/playtime -iq" ];
 
-        # Wait for any standalone instances of libreoffice to quit; there might be one open,
-        # which will cause ExecStart to fail if we don't wait for it to end by itself.
-        # We especially do not want to kill it since it might be some in-progress writing.
-        # If there is no process matching the pattern, pwait will exit non-zero.
-        ExecStartPre =
-          [ "-${loWait}" ]
-          ++ [
-            (loInstallExtensions loExtensions)
-            loSetLanguageToolConfiguration
-          ]
-        ;
+  #       # Wait for any standalone instances of libreoffice to quit; there might be one open,
+  #       # which will cause ExecStart to fail if we don't wait for it to end by itself.
+  #       # We especially do not want to kill it since it might be some in-progress writing.
+  #       # If there is no process matching the pattern, pwait will exit non-zero.
+  #       ExecStartPre =
+  #         [ "-${loWait}" ]
+  #         ++ [
+  #           loInstallExtensions
+  #           loSetLanguageToolConfiguration
+  #         ]
+  #       ;
 
-        ExecStart = [ "${lo}/bin/soffice --quickstart --nologo --nodefault" ];
+  #       ExecStart = [ "${lo}/bin/soffice --quickstart --nologo --nodefault" ];
 
-        Restart = "always";
-        RestartSec = 0;
+  #       Restart = "always";
+  #       RestartSec = 0;
 
-        KillSignal = "SIGQUIT";
+  #       KillSignal = "SIGQUIT";
 
-        # If using `--headless`, things get echoed to the standard output of this process... :|
-        StandardOutput = "null";
-      };
-  };
+  #       # If using `--headless`, things get echoed to the standard output of this process... :|
+  #       StandardOutput = "null";
+  #     };
+  # };
 
   somasis.tunnels.tunnels.languagetool = {
     port = 3864;

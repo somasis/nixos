@@ -9,7 +9,7 @@
     ./contacts.nix
   ];
 
-  cache.directories = [{ method = "symlink"; directory = "share/vdirsyncer"; }];
+  cache.directories = [{ method = "symlink"; directory = config.lib.somasis.xdgDataDir "vdirsyncer"; }];
 
   programs.vdirsyncer.enable = true;
   services.vdirsyncer = {

@@ -10,8 +10,8 @@ in
   };
 
   persist.directories = [
-    { method = "symlink"; directory = "etc/syncthing"; }
-    { method = "symlink"; directory = "share/syncthing"; }
+    { method = "symlink"; directory = config.lib.somasis.xdgConfigDir "syncthing"; }
+    { method = "symlink"; directory = config.lib.somasis.xdgDataDir "syncthing"; }
     { method = "symlink"; directory = "shared"; }
     { method = "symlink"; directory = "sync"; }
     { method = "symlink"; directory = "tracks"; }

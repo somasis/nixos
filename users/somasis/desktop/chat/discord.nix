@@ -8,10 +8,27 @@
 let
   inherit (config.lib.somasis)
     camelCaseToScreamingSnakeCase
+    flakeModifiedDateToVersion
     getExeName
     ;
 
+  mkIcon = icon: pkgs.runCommand "discord-tray.png"
+    { inherit icon; }
+    ''
+      ${pkgs.librsvg}/bin/rsvg-convert \
+          --width 26 \
+          --height 26 \
+          --keep-aspect-ratio \
+          --output "$out" \
+          "$icon"
+    '';
+
   discord = pkgs.discord.override {
+    # vencord = pkgs.vencord.overrideAttrs (oldAttrs: {
+    #   version = flakeModifiedDateToVersion inputs.vencord;
+    #   src = inputs.vencord;
+    # });
+
     withVencord = true;
     # withOpenASAR = true;
   };
@@ -52,8 +69,24 @@ let
       ${makeCssFontFamily "ui-serif" osConfig.fonts.fontconfig.defaultFonts.serif}
       ${makeCssFontFamily "ui-monospace" osConfig.fonts.fontconfig.defaultFonts.monospace}
     '')
+
     (inputs.discordThemeCustom + "/custom.css")
     (inputs.discordThemeIrc + "/irc.css")
+
+    (pkgs.writeText "no-crap.css" ''
+      div[class^="sidebar_"] nav[class^="privateChannels__"] ul li:has(
+        a:link[data-list-item-id^="private-channels-"][data-list-item-id*="___shop"], /* DMs > Shop */
+        a:link[data-list-item-id^="private-channels-"][data-list-item-id*="___nitro"] /* DMs > Nitro */
+      ),
+      main section div[class^="toolbar__"] a[href^="https://support.discord.com"], /* Chat toolbar > Help */
+      main section div[class^="toolbar__"] div[class^="recentsIcon__"], /* Chat toolbar > Inbox */
+      main section div[class^="inviteToolbar_"] div[class^="divider_"], /* Chat toolbox > divider before Inbox/Help */
+      main[class^="container__"] div[class^="nowPlayingColumn_"], /* Friends > Active Now sidebar */
+      main[class^="chatContent__"] form div[class^="channelTextArea__"] div[class^="buttons_"] > button:first-of-type[type="button"] /* Chat > Text entry > Gift */
+      {
+        display: none !important;
+      }
+    '')
   ];
 
   discord-theme = pkgs.runCommandLocal "discord-theme"
@@ -88,7 +121,7 @@ in
 
   persist = {
     directories = [ "etc/${discordWindowClassName}" ];
-    files = [ "etc/Vencord/settings.json" ];
+    files = [ "etc/Vencord/settings/settings.json" ];
   };
 
   xdg.configFile = {
@@ -142,6 +175,13 @@ in
     # "${discordWindowClassName}/themes/theme".source = discord-theme;
     # "Vencord/themes/somasis".source = discord-theme;
     "Vencord/settings/quickCss.css".source = discord-css;
+
+    # "discord/tray.png".source = mkIcon "${pkgs.papirus-icon-theme}/share/icons/Papirus/24x24/panel/discord-tray.svg";
+    # "discord/tray-unread.png".source = mkIcon "${pkgs.papirus-icon-theme}/share/icons/Papirus/24x24/panel/discord-tray-unread.svg";
+    # "discord/tray-connected.png".source = mkIcon "${pkgs.papirus-icon-theme}/share/icons/Papirus/24x24/panel/discord-tray-connected.svg";
+    # "discord/tray-deafened.png".source = mkIcon "${pkgs.papirus-icon-theme}/share/icons/Papirus/24x24/panel/discord-tray-deafened.svg";
+    # "discord/tray-muted.png".source = mkIcon "${pkgs.papirus-icon-theme}/share/icons/Papirus/24x24/panel/discord-tray-muted.svg";
+    # "discord/tray-speaking.png".source = mkIcon "${pkgs.papirus-icon-theme}/share/icons/Papirus/24x24/panel/discord-tray-speaking.svg";
   };
 
   systemd.user.services.discord = {

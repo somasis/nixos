@@ -74,13 +74,23 @@ in
   ;
 
   xdg.dataFile."dmenu/dmenu-run.sh".text =
-    lib.concatLines (
-      lib.mapAttrsToList (n: v: ''alias ${lib.escapeShellArg n}=${lib.escapeShellArg v}'')
-        (config.home.shellAliases // config.programs.bash.shellAliases)
-    )
+    let
+      aliases = lib.concatLines (
+        lib.mapAttrsToList (n: v: ''alias ${lib.escapeShellArg n}=${lib.escapeShellArg v}'')
+          (config.home.shellAliases // config.programs.bash.shellAliases)
+      );
+
+      paths = lib.optionalString (config.home.sessionPath != [ ]) ''
+        PATH=${lib.escapeShellArg (lib.concatStringsSep ":" config.home.sessionPath)}"''${PATH:+:$PATH}"
+      '';
+    in
+    ''
+      ${paths}
+      ${aliases}
+    ''
   ;
 
-  cache.directories = [{ method = "symlink"; directory = "var/cache/dmenu"; }];
+  cache.directories = [{ method = "symlink"; directory = config.lib.somasis.xdgCacheDir "dmenu"; }];
 
   services.sxhkd.keybindings = {
     "super + grave" = "dmenu-run";

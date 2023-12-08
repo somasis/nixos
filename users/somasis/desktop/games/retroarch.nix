@@ -39,6 +39,6 @@
 
   persist.directories = [{
     method = "symlink";
-    directory = "etc/retroarch";
+    directory = config.lib.somasis.xdgConfigDir "retroarch";
   }];
 }

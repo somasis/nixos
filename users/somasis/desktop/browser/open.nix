@@ -39,6 +39,4 @@ in
     #   };
     # };
   };
-
-  cache.directories = [ "var/cache/gallery-dl" ];
 }

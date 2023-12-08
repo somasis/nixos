@@ -7,6 +7,8 @@
 let
   inherit (osConfig.services) tor;
 
+  tc = config.theme.colors;
+
   translate = pkgs.writeShellScript "translate" ''
     set -euo pipefail
 
@@ -170,7 +172,7 @@ in
       hints = {
         uppercase = true;
         radius = 0;
-        border = "1px solid ${config.theme.colors.accent}";
+        border = "1px solid ${tc.accent}";
       };
 
       keyhint.radius = 0;
@@ -222,11 +224,13 @@ in
             }
           '')
 
-          (pkgs.writeText "system-highlight-color.user.css" ''
-            :focus {
-                outline-color: ${config.lib.somasis.colors.rgb config.theme.colors.accent};
-            }
-          '')
+          # NOTE: causes problems with some websites (Twitter, for example) not showing
+          #       anything when highlighting text in input boxes and textareas.
+          # (pkgs.writeText "system-highlight-color.user.css" ''
+          #   :focus {
+          #       outline-color: ${config.lib.somasis.colors.rgb tc.accent};
+          #   }
+          # '')
 
           (pkgs.writeText "highlight-anchors.user.css" ''
             h1:target,h2:target,h3:target,h4:target,h5:target,h6:target {
@@ -310,122 +314,123 @@ in
         webpage.bg = "";
 
         downloads = {
-          start.bg = config.theme.colors.darkBackground;
-          stop.bg = config.theme.colors.green;
-          error.bg = config.theme.colors.red;
-          bar.bg = config.theme.colors.darkBackground;
+          start.bg = tc.darkBackground;
+          stop.bg = tc.green;
+          error.bg = tc.red;
+          bar.bg = tc.darkBackground;
         };
 
         statusbar = {
-          normal.bg = config.theme.colors.background;
-          normal.fg = config.theme.colors.foreground;
+          normal.bg = tc.background;
+          normal.fg = tc.foreground;
 
-          command.bg = config.theme.colors.lightBackground;
-          command.fg = config.theme.colors.lightForeground;
+          command.bg = tc.lightBackground;
+          command.fg = tc.lightForeground;
 
-          insert.bg = config.theme.colors.green;
-          insert.fg = config.theme.colors.foreground;
+          insert.bg = tc.green;
+          insert.fg = tc.foreground;
 
-          passthrough.bg = config.theme.colors.blue;
-          passthrough.fg = config.theme.colors.foreground;
+          passthrough.bg = tc.blue;
+          passthrough.fg = tc.foreground;
 
-          private.bg = config.theme.colors.magenta;
-          private.fg = config.theme.colors.foreground;
+          private.bg = tc.magenta;
+          private.fg = tc.foreground;
 
-          progress.bg = config.theme.colors.green;
+          progress.bg = tc.green;
 
           url = {
-            fg = config.theme.colors.green;
-            hover.fg = config.theme.colors.yellow;
+            fg = tc.green;
+            hover.fg = tc.yellow;
 
-            error.fg = config.theme.colors.brightRed;
-            warn.fg = config.theme.colors.yellow;
+            error.fg = tc.brightRed;
+            warn.fg = tc.yellow;
 
-            success.http.fg = config.theme.colors.yellow;
-            success.https.fg = config.theme.colors.green;
+            success.http.fg = tc.yellow;
+            success.https.fg = tc.green;
           };
         };
 
-        tooltip.bg = "#474d5d";
-        tooltip.fg = "#bac3cf";
+        tooltip.bg = tc.tooltipBackground;
+        tooltip.fg = tc.tooltipForeground;
 
         keyhint = {
-          bg = config.theme.colors.background;
-          fg = config.theme.colors.foreground;
-          suffix.fg = config.theme.colors.red;
+          bg = tc.background;
+          fg = tc.foreground;
+          suffix.fg = tc.red;
         };
 
         prompts = {
-          bg = config.theme.colors.lightBackground;
-          fg = config.theme.colors.lightForeground;
-          border = "1px solid ${config.theme.colors.lightBorder}";
-          selected.bg = config.theme.colors.accent;
-          selected.fg = config.theme.colors.foreground;
+          bg = tc.lightBackground;
+          fg = tc.lightForeground;
+          border = "1px solid ${tc.lightBorder}";
+          selected.bg = tc.accent;
+          selected.fg = tc.foreground;
         };
 
         completion = {
           category = {
-            bg = config.theme.colors.lightBackground;
-            fg = config.theme.colors.lightForeground;
-            border.bottom = config.theme.colors.lightBackground;
-            border.top = config.theme.colors.lightBackground;
+            bg = tc.lightBackground;
+            fg = tc.lightForeground;
+            border.bottom = tc.lightBackground;
+            border.top = tc.lightBackground;
           };
 
-          even.bg = config.theme.colors.lightBackground;
-          odd.bg = config.theme.colors.lightBackground;
-          fg = config.theme.colors.lightForeground;
+          even.bg = tc.lightBackground;
+          odd.bg = tc.lightBackground;
+          fg = tc.lightForeground;
 
           item.selected = {
-            bg = config.theme.colors.accent;
-            border.bottom = config.theme.colors.accent;
-            border.top = config.theme.colors.accent;
-            fg = config.theme.colors.foreground;
-            match.fg = config.theme.colors.foreground;
+            bg = tc.accent;
+            border.bottom = tc.accent;
+            border.top = tc.accent;
+            fg = tc.foreground;
+            match.fg = tc.foreground;
           };
 
-          scrollbar.bg = config.theme.colors.lightBackground;
-          scrollbar.fg = config.theme.colors.darkBackground;
+          scrollbar.bg = tc.lightBackground;
+          scrollbar.fg = tc.darkBackground;
         };
 
         tabs = {
-          bar.bg = config.theme.colors.sidebar;
-          odd.bg = config.theme.colors.sidebar;
-          even.bg = config.theme.colors.sidebar;
+          bar.bg = tc.sidebar;
+          odd.bg = tc.sidebar;
+          even.bg = tc.sidebar;
 
-          even.fg = config.theme.colors.foreground;
-          odd.fg = config.theme.colors.foreground;
+          even.fg = tc.foreground;
+          odd.fg = tc.foreground;
           selected = {
-            even.bg = config.theme.colors.accent;
-            even.fg = config.theme.colors.foreground;
-            odd.bg = config.theme.colors.accent;
-            odd.fg = config.theme.colors.foreground;
+            even.bg = tc.accent;
+            even.fg = tc.foreground;
+            odd.bg = tc.accent;
+            odd.fg = tc.foreground;
           };
 
           pinned = {
-            even.bg = config.theme.colors.background;
-            odd.bg = config.theme.colors.background;
-            selected.even.bg = config.theme.colors.accent;
-            selected.odd.bg = config.theme.colors.accent;
+            even.bg = tc.background;
+            odd.bg = tc.background;
+            selected.even.bg = tc.accent;
+            selected.odd.bg = tc.accent;
           };
         };
 
         messages = rec {
-          error.bg = config.theme.colors.red;
-          warning.bg = config.theme.colors.yellow;
-          info.bg = config.theme.colors.accent;
-          info.fg = config.theme.colors.foreground;
-
+          error.bg = tc.errorBackground;
+          error.fg = tc.errorForeground;
           error.border = error.bg;
+          warning.bg = tc.warningBackground;
+          warning.fg = tc.warningForeground;
           warning.border = warning.bg;
+          info.bg = tc.infoBackground;
+          info.fg = tc.infoForeground;
           info.border = info.bg;
         };
 
         contextmenu = {
-          menu.bg = "#ffffff";
-          menu.fg = "#5c616c";
-          selected.bg = config.theme.colors.accent;
-          selected.fg = "#ffffff";
-          disabled.fg = "#a6a8ae";
+          menu.bg = tc.menuBackground;
+          menu.fg = tc.menuForeground;
+          selected.bg = tc.menuSelectedBackground;
+          selected.fg = tc.menuSelectedForeground;
+          disabled.fg = tc.menuDisabledForeground;
         };
       };
 
@@ -519,6 +524,9 @@ in
         ";;" = "hint all";
 
         # Akin to catgirl(1).
+        "<Alt+Shift+Left>" = "navigate prev";
+        "<Alt+Shift+Right>" = "navigate next";
+        "<Alt+Shift+Up>" = "navigate strip";
         "<Alt+Left>" = "back --quiet";
         "<Alt+Right>" = "forward --quiet";
         "<Alt+Up>" = "navigate up";

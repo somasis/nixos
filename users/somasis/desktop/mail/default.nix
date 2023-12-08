@@ -6,29 +6,30 @@
 }:
 let
   inherit (lib) getBin foldr recursiveUpdate optionalAttrs;
-  inherit (config.lib.somasis) mkPathSafeName;
+  inherit (config.lib.nixos) mkPathSafeName;
 
   offlineimapNametransGmail = {
     remote.nametrans = "lambda f: f.replace('[Gmail]/', '') if f.startswith('[Gmail]/') else f";
     local.nametrans = "lambda f: '[Gmail]/' + f if f in ['Drafts', 'Starred', 'Important', 'Spam', 'Trash', 'All Mail', 'Sent Mail'] else f";
   };
 
-  pass = "${getBin config.programs.password-store.package}/bin/pass";
-  systemctl = "${pkgs.systemd}/bin/systemctl --user";
+  pass = lib.getExe config.programs.password-store.package;
 in
 {
-  imports = [ ./mblaze.nix ];
+  imports = [
+    ./mblaze.nix
+    ./thunderbird.nix
+  ];
 
   accounts.email.maildirBasePath = "mail";
 
-  persist.directories = [
-    { method = "symlink"; directory = "share/offlineimap"; }
-    { method = "symlink"; directory = "mail/sms"; }
-  ]
-  ++ map
-    (x: { method = "symlink"; directory = "mail/${x.maildir.path}"; })
-    (builtins.attrValues config.accounts.email.accounts)
-  ;
+  persist = {
+    directories =
+      [{ method = "symlink"; directory = "mail/sms"; }]
+      ++ lib.optional config.programs.offlineimap.enable { method = "symlink"; directory = config.lib.somasis.xdgDataDir "offlineimap"; }
+      ++ map (x: { method = "symlink"; directory = "mail/${x.maildir.path}"; }) (builtins.attrValues config.accounts.email.accounts)
+    ;
+  };
 
   accounts.email.accounts =
     let
@@ -44,6 +45,7 @@ in
               folders.inbox = "INBOX";
 
               offlineimap.enable = true;
+              msmtp.enable = true;
 
               imapnotify = {
                 enable = true;
@@ -51,7 +53,12 @@ in
                 boxes = [ "INBOX" ];
               };
 
-              msmtp.enable = true;
+              thunderbird = {
+                enable = true;
+                # settings = id: {
+                #   "mail.server.server_${id}.directory" = "${config.accounts.email.maildirBasePath}/${address}";
+                # };
+              };
             };
           }
           { "${address}" = extraAttrs; }
@@ -85,10 +92,9 @@ in
     ]
   ;
 
-  programs.offlineimap.enable = true;
-  programs.msmtp.enable = true;
-
-  services.imapnotify.enable = true;
+  # programs.offlineimap.enable = true;
+  # programs.msmtp.enable = true;
+  # services.imapnotify.enable = true;
 
   # systemd.user = foldr
   #   (n: a:
@@ -147,22 +153,4 @@ in
   #   }
   #   (builtins.attrNames config.accounts.email.accounts)
   # ;
-
-  # xdg.configFile."tmux/mtui.conf".text = ''
-  #   source "$XDG_CONFIG_HOME/tmux/unobtrusive.conf"
-
-  #   set-option -g set-titles-string "mtui - #T"
-  #   set-option -g window-status-format          " #I #W "
-  #   set-option -g window-status-current-format  " #I #W "
-
-  #   set-option -g remain-on-exit on
-
-  #   # Binds.
-  #   bind-key -n C-q kill-server
-
-  #   set-option -g status-right ""
-  #   # set-option -g history-limit 10000
-
-  #   # set-hook -t 0.0 pane-exited "kill-session -t mtui"
-  # '';
 }

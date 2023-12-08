@@ -84,6 +84,7 @@
 
   programs.kakoune = {
     enable = true;
+    defaultEditor = true;
 
     config = {
       # Highlighters
@@ -398,7 +399,7 @@
 
   cache.directories = [{
     method = "symlink";
-    directory = "share/kak/state-save";
+    directory = config.lib.somasis.xdgDataDir "kak/state-save";
   }];
 
   editorconfig = {
@@ -431,11 +432,4 @@
       "{*.c,*.h,*.cpp,*.hpp}".indent_style = "tab";
     };
   };
-
-  home.sessionVariables.EDITOR =
-    lib.warnIf
-      ((builtins.compareVersions config.home.version.release "24.05") >= 0)
-      ''users/somasis/editor/default.nix: since home-manager 24.05, `programs.kakoune.defaultEditor = true` is used instead of `home.sessionVariables.EDITOR = "kak"`.''
-      "kak"
-  ;
 }

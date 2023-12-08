@@ -27,7 +27,6 @@
     ./audio.nix
     ./automount.nix
     ./clipboard.nix
-    ./compositing.nix
     ./dates.nix
     ./diary.nix
     ./didyouknow.nix

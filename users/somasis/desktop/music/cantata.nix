@@ -5,7 +5,7 @@
 , ...
 }:
 let
-  inherit (config.lib.somasis) commaList;
+  inherit (config.lib.somasis) commaList xdgCacheDir xdgConfigDir xdgDataDir;
 
   envtag =
     let
@@ -57,26 +57,26 @@ let
     ${pkgs.coreutils}/bin/rm -rf "''${XDG_CACHE_HOME:=$HOME/.cache}/cantata/covers-scaled"
   '';
 
-  cantata-lossless-open = pkgs.writeShellScript "cantata-lossless-open" ''
-    set -eu -o pipefail
-    export PATH=${lib.makeBinPath [ envtag config.programs.beets.package pkgs.openssh pkgs.s6-portable-utils pkgs.xdg-utils pkgs.xe ]}:"$PATH"
+  # cantata-lossless-open = pkgs.writeShellScript "cantata-lossless-open" ''
+  #   set -eu -o pipefail
+  #   export PATH=${lib.makeBinPath [ envtag config.programs.beets.package pkgs.openssh pkgs.s6-portable-utils pkgs.xdg-utils pkgs.xe ]}:"$PATH"
 
-    {
-        eval "$(envtag "$1")"
+  #   {
+  #       eval "$(envtag "$1")"
 
-        for a in \
-            beet list \
-                -f '$path' \
-                -a \
-                "mb_albumartistid:$musicbrainz_albumartistid" \
-                "mb_albumid:$musicbrainz_albumid"; do
-                printf '%s ' "$(s6-quote -d "'" -- "$a")"
-        done
-        printf '\n'
-    } \
-        | ssh spinoza sh -l - \
-        | xe -N1 xdg-open
-  '';
+  #       for a in \
+  #           beet list \
+  #               -f '$path' \
+  #               -a \
+  #               "mb_albumartistid:$musicbrainz_albumartistid" \
+  #               "mb_albumid:$musicbrainz_albumid"; do
+  #               printf '%s ' "$(s6-quote -d "'" -- "$a")"
+  #       done
+  #       printf '\n'
+  #   } \
+  #       | ssh spinoza sh -l - \
+  #       | xe -N1 xdg-open
+  # '';
 
   cantata-lossy-open = pkgs.writeShellScript "cantata-lossy-open" ''
     for d; do
@@ -167,10 +167,10 @@ let
         name = "Delete cover art";
         command = "${cantata-delete-cover-art} %d";
       }
-      {
-        name = "Open in lossless library";
-        command = "${cantata-lossless-open} %f";
-      }
+      # {
+      #   name = "Open in lossless library";
+      #   command = "${cantata-lossless-open} %f";
+      # }
       {
         name = "Open in lossy library";
         command = "${cantata-lossy-open} %d";
@@ -339,11 +339,11 @@ let
   });
 in
 {
-  persist.directories = [{ method = "symlink"; directory = "etc/audacity"; }];
+  persist.directories = [{ method = "symlink"; directory = xdgConfigDir "audacity"; }];
 
   cache.directories = [
-    { method = "symlink"; directory = "share/cantata"; }
-    { method = "symlink"; directory = "var/cache/cantata"; }
+    { method = "symlink"; directory = xdgDataDir "cantata"; }
+    { method = "symlink"; directory = xdgCacheDir "cantata"; }
   ];
 
   home.packages = [

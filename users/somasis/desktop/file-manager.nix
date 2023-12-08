@@ -487,7 +487,7 @@ in
 
   cache.directories = [{
     method = "symlink";
-    directory = "var/cache/thumbnails";
+    directory = config.lib.somasis.xdgCacheDir "thumbnails";
   }];
 
   xdg.mimeApps.defaultApplications = {

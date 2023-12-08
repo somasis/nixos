@@ -15,12 +15,38 @@
     lightCursor = darkBackground;
     lightBorder = "#cfd6e6";
 
+    lightMenuForeground = "#5c616c";
+    lightMenuBackground = "#ffffff";
+    lightMenuBorder = "#dcdfe3";
+    lightMenuSelectedForeground = "#ffffff";
+    lightMenuSelectedBackground = accent;
+    lightMenuDisabledForeground = "#a6a8ae";
+    lightMenuDisabledBackground = "#5c616c";
+    lightTooltipForeground = "#bac3cf";
+    lightTooltipBackground = "#474d5d";
+
     # Match Arc-Darker GTK theme
     foreground = darkForeground;
     background = darkBackground;
     cursor = darkCursor;
     border = darkBorder;
     sidebar = darkSidebar;
+    menuBackground = lightMenuBackground;
+    menuForeground = lightMenuForeground;
+    menuBorder = lightMenuBorder;
+    menuSelectedBackground = lightMenuSelectedBackground;
+    menuSelectedForeground = lightMenuSelectedForeground;
+    menuDisabledForeground = lightMenuDisabledForeground;
+    menuDisabledBackground = lightMenuDisabledBackground;
+    tooltipBackground = lightTooltipBackground;
+    tooltipForeground = lightTooltipForeground;
+
+    errorBackground = red;
+    errorForeground = "#ffffff";
+    warningBackground = yellow;
+    warningForeground = "#ffffff";
+    infoBackground = accent;
+    infoForeground = "#ffffff";
 
     accent = "#5294e2";
 

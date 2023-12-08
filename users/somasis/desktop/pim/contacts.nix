@@ -33,7 +33,7 @@ rec {
         vdirsyncer = {
           enable = true;
           collections = [ "Default" ];
-          metadata = [ "displayname" "color" ];
+          metadata = [ "displayname" ];
           conflictResolution = "remote wins";
         };
 
@@ -56,8 +56,7 @@ rec {
     settings = {
       general.default_action = "list";
 
-t
-"contact table" = {
+      "contact table" = {
         display = "formatted_name";
 
         # Use ISO dates (YYYY-MM-DD)

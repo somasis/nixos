@@ -112,7 +112,7 @@ nixpkgs.lib.nixosSystem {
         directories = [
           "/var/lib/systemd/catalog"
           "/var/lib/systemd/coredump"
-          "/var/log/journal"
+          { directory = "/var/log/journal"; user = "root"; group = "systemd-journal"; mode = "2755"; }
         ];
         files = [
           "/var/log/btmp"
@@ -124,9 +124,11 @@ nixpkgs.lib.nixosSystem {
       services.xserver.enable = true;
 
       programs.command-not-found.enable = false;
+      programs.nano.enable = false;
       environment = {
-        defaultPackages = [ ];
-        etc."nanorc".enable = false;
+        etc."machine-id".text = builtins.hashString "sha256" config.networking.fqdnOrHostName;
+
+        # defaultPackages = [ ];
 
         systemPackages = [
           # Necessary for `nixos-rebuild`'s git stuff

@@ -12,7 +12,7 @@
   cache.directories = [
     "var/lib/nix" # Using `method = "symlink"` will cause issues while switching generations.
 
-    { method = "symlink"; directory = "var/cache/nix"; }
+    { method = "symlink"; directory = config.lib.somasis.xdgCacheDir "nix"; }
     # "var/cache/vulnix"
   ];
 
@@ -23,6 +23,8 @@
       }
     '';
   };
+
+  nix.settings.show-trace = true;
 
   home.packages = [
     # nixosRepl
@@ -176,6 +178,7 @@
         }
 
         nix flake metadata \
+            --no-update-lock-file \
             --no-write-lock-file \
             --json \
             /etc/nixos \

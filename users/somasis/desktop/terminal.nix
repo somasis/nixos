@@ -69,9 +69,18 @@ in
   services.sxhkd.keybindings = {
     # "super + b" = "alacritty";
     "super + b" = "kitty -1";
+    # "super + b" = pkgs.writeShellScript "open-terminal" ''
+    #   args=( -1 )
+    #   case "$(xdotool getactivewindow getwindowclassname)" in
+    #       "kitty")
+    #           args+=( -d "$(${pkgs.xcwd}/bin/xcwd)" )
+    #           ;;
+    #   esac
+    #   kitty "''${args[@]}"
+    # '';
 
     # "super + shift + b" = ''
-    #   alacritty --working-directory "$(${pkgs.xcwd}/bin/xcwd)"
+    #   alacritty --working-directory "$()"
     # '';
   };
 

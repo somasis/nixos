@@ -8,6 +8,7 @@
   persist.directories = [ "etc/ssh" ];
   cache.directories = [ "var/cache/ssh" ];
 
+  services.ssh-agent.enable = true;
   programs.ssh = {
     enable = true;
 

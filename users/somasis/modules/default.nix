@@ -9,6 +9,7 @@ with lib;
     ./panel
 
     ./dmenu.nix
+    ./rclone.nix
     ./stw.nix
     ./tunnels.nix
     ./zotero.nix

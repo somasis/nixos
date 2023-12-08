@@ -1,3 +1,7 @@
+{ pkgs
+, lib
+, ...
+}:
 {
   somasis.tunnels.tunnels = {
     "somasis@lacan.somas.is:syncthing" = {
@@ -25,4 +29,11 @@
       remote = "somasis@spinoza.7596ff.com";
     };
   };
+
+  services.syncthing.tray = {
+    enable = false;
+    package = pkgs.syncthingtray-minimal;
+  };
+
+  persist.files = [ "etc/syncthingtray.ini" ];
 }

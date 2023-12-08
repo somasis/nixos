@@ -16,6 +16,6 @@
 
   persist.directories = [
     "etc/wine"
-    { method = "symlink"; directory = "share/wine"; }
+    { method = "symlink"; directory = config.lib.somasis.xdgDataDir "wine"; }
   ];
 }

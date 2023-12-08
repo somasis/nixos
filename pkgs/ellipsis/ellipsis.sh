@@ -28,6 +28,19 @@ IFS='
 '
 while read -r line; do
     t=$(printf '%s\n' "${line}" | cut -c -$((want_length - ellipsis_width)))
-    [ "${line}" = "${t}" ] || { printf "%s%s\n" "${t}" "${ellipsis}" && continue; }
+
+    if [ "${line}" != "${t}" ]; then
+        # strip trailing space
+        while :; do
+            case "${t}" in
+                *[[:blank:]]) t=${t% } ;;
+                *) break ;;
+            esac
+        done
+
+        printf "%s%s\n" "${t}" "${ellipsis}"
+        continue
+    fi
+
     printf '%s\n' "${line}"
 done

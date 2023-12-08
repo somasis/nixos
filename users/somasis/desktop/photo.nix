@@ -17,14 +17,15 @@
 
   persist.directories = [
     { method = "symlink"; directory = "pictures"; }
-    { method = "symlink"; directory = "etc/GIMP"; }
-    { method = "symlink"; directory = "etc/darktable"; }
-    { method = "symlink"; directory = "etc/inkscape"; }
+    { method = "symlink"; directory = config.lib.somasis.xdgConfigDir "GIMP"; }
+    { method = "symlink"; directory = config.lib.somasis.xdgConfigDir "darktable"; }
+    { method = "symlink"; directory = config.lib.somasis.xdgConfigDir "inkscape"; }
   ];
 
   cache.directories = [
-    { method = "symlink"; directory = "var/cache/gimp"; }
-    { method = "symlink"; directory = "var/cache/darktable"; }
+    { method = "symlink"; directory = config.lib.somasis.xdgCacheDir "gimp"; }
+    { method = "symlink"; directory = config.lib.somasis.xdgCacheDir "darktable"; }
+    { method = "symlink"; directory = config.lib.somasis.xdgCacheDir "gallery-dl"; }
   ];
 
   xdg.userDirs.pictures = "${config.home.homeDirectory}/pictures";
@@ -55,5 +56,26 @@
     );
 
     associations.removed = lib.genAttrs [ "image/jpeg" "image/png" "image/tiff" ] (_: "darktable.desktop");
+  };
+
+  programs.gallery-dl = {
+    enable = true;
+
+    settings = {
+      # Use cookies from qutebrowser if available
+      cookies-from-browser = lib.mkIf config.programs.qutebrowser.enable
+        "chromium:${config.xdg.dataHome}/qutebrowser/webengine";
+
+      # extractor = {
+      #   ytdl = {
+      #     enabled = true;
+      #     module = "yt_dlp";
+      #   };
+      # };
+
+      # downloader = {
+      #   ytdl.module = "yt_dlp";
+      # };
+    };
   };
 }

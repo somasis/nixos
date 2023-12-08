@@ -15,16 +15,15 @@
 var recaptcha = document.getElementsByClassName("g-recaptcha");
 
 try {
-    // if (hcaptcha)       var label = document.getElementById("label");
-    if (recaptcha) var label = document.getElementById("recaptcha-anchor-label");
+  // if (hcaptcha) var label = document.getElementById("label");
+  if (recaptcha) var label = document.getElementById("recaptcha-anchor-label");
 
-    if (label != undefined) {
-        label.innerText = "I want to do unpaid image classification";
-        console.log("Replaced captcha text successfully.");
-    }
-}
-catch ({ name, message }) {
-    console.log(`Failed to replace captcha label: ${name}: ${message}`);
+  if (label != undefined) {
+    label.innerText = "I want to do unpaid image classification";
+    console.log("Replaced captcha text successfully.");
+  }
+} catch ({ name, message }) {
+  console.log(`Failed to replace captcha label: ${name}: ${message}`);
 }
 
 // })();

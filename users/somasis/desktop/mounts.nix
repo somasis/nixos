@@ -1,245 +1,153 @@
 { config
 , pkgs
 , lib
+, osConfig
 , ...
 }: {
-  home.packages = [ pkgs.rclone pkgs.sshfs ];
+  # home.packages = [ pkgs.rclone pkgs.sshfs ];
 
-  persist.directories = [{
-    method = "symlink";
-    directory = "etc/rclone";
-  }];
+  persist.directories = [{ method = "bindfs"; directory = config.lib.somasis.xdgConfigDir "rclone"; }];
+  cache.directories = [{ method = "symlink"; directory = config.lib.somasis.xdgCacheDir "rclone"; }];
+
+  programs.rclone = {
+    enable = true;
+
+    extraOptions =
+      [ ]
+      ++ [ "--default-time" "1970-01-01T00:00:00Z" ]
+      ++ [ "--fast-list" ]
+      ++ [ "--human-readable" ]
+      ++ [ "--use-mmap" ]
+    ;
+
+    remotes =
+      let
+
+        sftp = target: extraAttrs:
+          assert (lib.isString target && target != "");
+          assert (lib.isAttrs extraAttrs);
+          let
+            targetParts = builtins.match "(.*@)?(.+)" target;
+
+            host = builtins.elemAt targetParts 1;
+            user = lib.removeSuffix "@" (builtins.elemAt targetParts 0);
+
+            sshPkg =
+              if lib.isDerivation config.programs.ssh.package then
+                config.programs.ssh.package
+              else
+                osConfig.programs.ssh.package or pkgs.openssh
+            ;
+            sshExe = lib.getExe sshPkg;
+          in
+          assert (lib.isString host && builtins.stringLength host > 0);
+          {
+            type = "sftp";
+
+            # key_file = "${config.xdg.configHome}/ssh/id_ed25519";
+            # known_hosts_file = config.programs.ssh.userKnownHostsFile;
+
+            # This makes rclone not use its internal ssh library at all,
+            # which reduces the potential of ssh-related issues.
+            # inherit host user;
+            ssh = "${sshExe} ${target}";
+          } // extraAttrs
+        ;
+
+      in
+      {
+        "somasis@spinoza.7596ff.com" = sftp "somasis@spinoza.7596ff.com" { };
+        "somasis@lacan.somas.is" = sftp "somasis@lacan.somas.is" { };
+        "somasis@genesis.whatbox.ca" = sftp "somasis@genesis.whatbox.ca" { };
+
+        gdrive-appstate = {
+          type = "drive";
+          scope = "drive";
+          drive-export-formats = [ "docx" "xlsx" "pptx" "svg" ];
+          poll-interval = "15m";
+        };
+
+        gdrive-personal = {
+          type = "drive";
+          scope = "drive";
+          drive-export-formats = [ "docx" "xlsx" "pptx" "svg" ];
+          poll-interval = "15m";
+        };
+
+        gphotos-personal = {
+          type = "google photos";
+          include_archived = true;
+        };
+      };
+  };
+
+  somasis.mounts = {
+    enable = true;
+
+    mounts =
+      let
+        defaultOptions = [ "vfs-cache-mode=full" "vfs-cache-max-size=1G" "vfs-cache-poll-interval=5m" "write-back-cache" ];
+      in
+      {
+        spinoza = {
+          remote = "somasis@spinoza.7596ff.com";
+          what = "";
+          where = "${config.home.homeDirectory}/mnt/sftp/spinoza.7596ff.com";
+        };
+
+        spinoza-raid = {
+          remote = "somasis@spinoza.7596ff.com";
+          what = "/mnt/raid";
+          where = "${config.home.homeDirectory}/mnt/sftp/spinoza.7596ff.com_raid";
+        };
+
+        whatbox = {
+          remote = "somasis@genesis.whatbox.ca";
+          what = "";
+          where = "${config.home.homeDirectory}/mnt/sftp/genesis.whatbox.ca";
+        };
+
+        gdrive-appstate = rec {
+          remote = "gdrive-appstate";
+          what = "";
+          where = "${config.home.homeDirectory}/mnt/gdrive/appstate";
+
+          options = defaultOptions ++ [ "cache-dir=${config.xdg.cacheHome}/rclone/vfs-${remote}" ];
+        };
+
+        gdrive-appstate-shared = rec {
+          remote = "gdrive-appstate,shared_with_me";
+          what = "";
+          where = "${config.home.homeDirectory}/mnt/gdrive/appstate-shared";
+
+          options = defaultOptions ++ [ "cache-dir=${config.xdg.cacheHome}/rclone/vfs-${remote}" ];
+        };
+
+        gdrive-personal = rec {
+          remote = "gdrive-personal";
+          what = "";
+          where = "${config.home.homeDirectory}/mnt/gdrive/personal";
+
+          options = defaultOptions ++ [ "cache-dir=${config.xdg.cacheHome}/rclone/vfs-${remote}" ];
+        };
+
+        gdrive-personal-shared = rec {
+          remote = "gdrive-personal,shared_with_me";
+          what = "";
+          where = "${config.home.homeDirectory}/mnt/gdrive/personal-shared";
+
+          options = defaultOptions ++ [ "cache-dir=${config.xdg.cacheHome}/rclone/vfs-${remote}" ];
+        };
+
+        gphotos-personal = {
+          remote = "gphotos-personal";
+          what = "";
+          where = "${config.home.homeDirectory}/mnt/gphotos/personal";
+        };
+      };
+  };
 
   # systemd.user.tmpfiles.rules = [
   #   "L+ ${config.home.homeDirectory}/vault - - - - ${config.home.homeDirectory}/mnt/sftp/spinoza.7596ff.com_raid/backup/vault"
   # ];
-
-  # TODO This really ought to be templated.
-  systemd.user = {
-    targets = {
-      mounts = {
-        Unit = {
-          Description = "All mounts";
-          PartOf = [ "default.target" ];
-        };
-        Install.WantedBy = [ "default.target" ];
-      };
-
-      gdrive = {
-        Unit = {
-          Description = "All Google Drive mounts";
-          PartOf = [ "mounts.target" ];
-        };
-        Install.WantedBy = [ "mounts.target" ];
-      };
-
-      gphotos = {
-        Unit = {
-          Description = "All Google Photos mounts";
-          PartOf = [ "mounts.target" ];
-        };
-        Install.WantedBy = [ "mounts.target" ];
-      };
-
-      sftp = {
-        Unit = {
-          Description = "All SFTP mounts";
-          PartOf = [ "mounts.target" ];
-        };
-        Install.WantedBy = [ "mounts.target" ];
-      };
-    };
-
-    mounts = {
-      "home-somasis-mnt-sftp-genesis.whatbox.ca" =
-        let
-          What = "somasis@genesis.whatbox.ca:";
-          Where = "${config.home.homeDirectory}/mnt/sftp/genesis.whatbox.ca";
-        in
-        {
-          Unit = {
-            Description = "Mount '${What}' at ${Where}";
-            PartOf = [ "sftp.target" ];
-          };
-          Install.WantedBy = [ "sftp.target" ];
-
-          Mount = {
-            Type = "fuse.sshfs";
-            inherit What Where;
-
-            Options = lib.concatStringsSep "," [
-              "_netdev"
-              "compression=yes"
-              "dir_cache=yes"
-              "idmap=user"
-              "max_conns=4"
-              "follow_symlinks"
-              "delay_connect"
-              "reconnect"
-            ];
-          };
-        };
-
-      "home-somasis-mnt-sftp-lacan.somas.is" =
-        let
-          What = "somasis@lacan.somas.is:";
-          Where = "${config.home.homeDirectory}/mnt/sftp/lacan.somas.is";
-        in
-        {
-          Unit = {
-            Description = "Mount '${What}' at ${Where}";
-            PartOf = [ "sftp.target" ];
-          };
-          Install.WantedBy = [ "sftp.target" ];
-
-          Mount = {
-            Type = "fuse.sshfs";
-            inherit What Where;
-
-            Options = lib.concatStringsSep "," [
-              "_netdev"
-              "compression=yes"
-              "dir_cache=yes"
-              "idmap=user"
-              "max_conns=4"
-              "follow_symlinks"
-              "delay_connect"
-              "reconnect"
-            ];
-          };
-        };
-
-      "home-somasis-mnt-sftp-spinoza.7596ff.com" =
-        let
-          What = "somasis@spinoza.7596ff.com:";
-          Where = "${config.home.homeDirectory}/mnt/sftp/spinoza.7596ff.com";
-        in
-        {
-          Unit = {
-            Description = "Mount '${What}' at ${Where}";
-            PartOf = [ "sftp.target" ];
-          };
-          Install.WantedBy = [ "sftp.target" ];
-
-          Mount = {
-            Type = "fuse.sshfs";
-            inherit What Where;
-
-            Options = lib.concatStringsSep "," [
-              "_netdev"
-              "compression=yes"
-              "dir_cache=yes"
-              "idmap=user"
-              "max_conns=4"
-              "follow_symlinks"
-              "delay_connect"
-              "reconnect"
-            ];
-          };
-        };
-
-      "home-somasis-mnt-sftp-spinoza.7596ff.com_raid" =
-        let
-          What = "somasis@spinoza.7596ff.com:/mnt/raid";
-          Where = "${config.home.homeDirectory}/mnt/sftp/spinoza.7596ff.com_raid";
-        in
-        {
-          Unit = {
-            Description = "Mount '${What}' at ${Where}";
-            PartOf = [ "sftp.target" ];
-          };
-          Install.WantedBy = [ "sftp.target" ];
-
-          Mount = {
-            inherit What Where;
-            Type = "fuse.sshfs";
-
-            Options = lib.concatStringsSep "," [
-              "_netdev"
-              "compression=yes"
-              "dir_cache=yes"
-              "idmap=user"
-              "max_conns=4"
-              "follow_symlinks"
-              "delay_connect"
-              "reconnect"
-            ];
-          };
-        };
-    };
-
-    services = {
-      "rclone@home-somasis-mnt-gdrive-personal" = {
-        Unit = {
-          Description = ''Mount rclone remote "gdrive-personal:" at ${config.home.homeDirectory}/mnt/gdrive/personal'';
-          PartOf = [ "gdrive.target" ];
-        };
-        Install.WantedBy = [ "gdrive.target" ];
-
-        Service = {
-          Type = "notify";
-          ExecStartPre = [ "${pkgs.coreutils}/bin/mkdir -p ${config.home.homeDirectory}/mnt/gdrive/personal" ];
-          ExecStart = [
-            "${pkgs.rclone}/bin/rclone mount --poll-interval=30m --vfs-cache-mode=full --vfs-cache-max-size=1G --vfs-cache-poll-interval=5m --write-back-cache gdrive-personal: ${config.home.homeDirectory}/mnt/gdrive/personal"
-          ];
-          ExecReload = [ "${pkgs.procps}/bin/kill -HUP $MAINPID" ];
-          ExecStopPost = [ "-${pkgs.coreutils}/bin/rmdir -p ${config.home.homeDirectory}/mnt/gdrive/personal" ];
-        };
-      };
-
-      "rclone@home-somasis-mnt-gdrive-appstate" = {
-        Unit = {
-          Description = ''Mount rclone remote "gdrive-appstate:" at ${config.home.homeDirectory}/mnt/gdrive/appstate'';
-          PartOf = [ "gdrive.target" ];
-        };
-        Install.WantedBy = [ "gdrive.target" ];
-
-        Service = {
-          Type = "notify";
-          ExecStartPre = [ "${pkgs.coreutils}/bin/mkdir -p ${config.home.homeDirectory}/mnt/gdrive/appstate" ];
-          ExecStart = [
-            "${pkgs.rclone}/bin/rclone mount --poll-interval=30m --vfs-cache-mode=full --vfs-cache-max-size=1G --vfs-cache-poll-interval=5m --write-back-cache gdrive-appstate: ${config.home.homeDirectory}/mnt/gdrive/appstate"
-          ];
-          ExecReload = [ "${pkgs.procps}/bin/kill -HUP $MAINPID" ];
-          ExecStopPost = [ "-${pkgs.coreutils}/bin/rmdir -p ${config.home.homeDirectory}/mnt/gdrive/appstate" ];
-        };
-      };
-
-      "rclone@home-somasis-mnt-gdrive-appstate-shared" = {
-        Unit = {
-          Description = ''Mount rclone remote "gdrive-appstate-shared:" at ${config.home.homeDirectory}/mnt/gdrive/appstate-shared'';
-          PartOf = [ "gdrive.target" ];
-        };
-        Install.WantedBy = [ "gdrive.target" ];
-
-        Service = {
-          Type = "notify";
-          ExecStartPre = [ "${pkgs.coreutils}/bin/mkdir -p ${config.home.homeDirectory}/mnt/gdrive/appstate-shared" ];
-          ExecStart = [
-            "${pkgs.rclone}/bin/rclone mount --poll-interval=30m --vfs-cache-mode=full --vfs-cache-max-size=1G --vfs-cache-poll-interval=5m --write-back-cache --drive-shared-with-me gdrive-appstate: ${config.home.homeDirectory}/mnt/gdrive/appstate-shared"
-          ];
-          ExecReload = [ "${pkgs.procps}/bin/kill -HUP $MAINPID" ];
-          ExecStopPost = [ "-${pkgs.coreutils}/bin/rmdir -p ${config.home.homeDirectory}/mnt/gdrive/appstate-shared" ];
-        };
-      };
-
-      "rclone@home-somasis-mnt-gphotos-personal" = {
-        Unit = {
-          Description = ''Mount rclone remote "gphotos-personal:" at ${config.home.homeDirectory}/mnt/gphotos/personal'';
-          PartOf = [ "gphotos.target" ];
-        };
-        Install.WantedBy = [ "gphotos.target" ];
-
-        Service = {
-          Type = "notify";
-          ExecStartPre = [ "${pkgs.coreutils}/bin/mkdir -p ${config.home.homeDirectory}/mnt/gphotos/personal" ];
-          ExecStart = [
-            "${pkgs.rclone}/bin/rclone mount gphotos-personal: ${config.home.homeDirectory}/mnt/gphotos/personal"
-          ];
-          ExecReload = [ "${pkgs.procps}/bin/kill -HUP $MAINPID" ];
-          ExecStopPost = [ "-${pkgs.coreutils}/bin/rmdir -p ${config.home.homeDirectory}/mnt/gphotos/personal" ];
-        };
-      };
-    };
-  };
 }
