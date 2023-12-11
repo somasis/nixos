@@ -8,97 +8,11 @@ let
   tc = config.theme.colors;
 in
 {
-  home.packages = lib.mkIf tbEnable [ pkgs.birdtray ];
-
   persist = {
     directories =
       # bindfs required because profile configs are managed by home-manager
       lib.mkIf tbEnable [{ method = "bindfs"; directory = ".thunderbird"; }]
     ;
-
-    # files = lib.mkIf tbEnable [ "etc/birdtray-config.json" ];
-  };
-
-  xdg.configFile."birdtray-config.json" = {
-    onChange = ''
-      ${pkgs.systemd}/bin/systemctl --user -q is-active thunderbird.service \
-          && ${pkgs.systemd}/bin/systemctl --user restart thunderbird.service \
-          || :
-    '';
-
-    text =
-      let
-        mkIcon = icon: lib.fileContents (pkgs.runCommand "birdtray-icon.png.b64"
-          { inherit icon; }
-          ''
-            ${pkgs.librsvg}/bin/rsvg-convert \
-                --width 24 \
-                --height 24 \
-                --keep-aspect-ratio \
-                --format png \
-                "$icon" \
-                | base64 -w 0 > "$out"
-          ''
-        );
-      in
-      lib.generators.toJSON { } rec {
-        accounts =
-          map
-            (attr:
-              let
-                id = builtins.hashString "sha256" attr.value.name;
-                profile = "${config.home.homeDirectory}/.thunderbird/default";
-              in
-              {
-                color = config.theme.colors.accent;
-                path = "${profile}/ImapMail/${id}/INBOX.msf";
-              }
-            )
-            (lib.attrsToList config.accounts.email.accounts)
-        ;
-
-        "common/bordercolor" = "#ffffff";
-        "common/borderwidth" = 0;
-        "common/defaultcolor" = config.theme.colors.accent;
-        "common/exitthunderbirdonquit" = true;
-        "common/forceIgnoreUnreadEmailsOnMinimize" = false;
-        "common/hideWhenStartedManually" = true;
-        "common/hidewhenminimized" = false;
-        "common/hidewhenrestarted" = true;
-        "common/hidewhenstarted" = true;
-        "common/ignoreShowUnreadCount" = false;
-        "common/ignoreStartUnreadCount" = false;
-        "common/launchthunderbird" = true;
-        "common/launchthunderbirddelay" = 0;
-        "common/monitorthunderbirdwindow" = false;
-        "common/newemailEnabled" = false;
-        "common/notificationfont" = "Sans Serif,10,-1,5,50,0,0,0,0,0";
-        "common/notificationfontweight" = 50;
-
-        "common/notificationicon" =
-          mkIcon "${pkgs.papirus-icon-theme}/share/icons/Papirus/24x24/panel/indicator-messages.svg";
-        "common/notificationiconunread" =
-          mkIcon "${pkgs.papirus-icon-theme}/share/icons/Papirus/24x24/panel/indicator-messages-new.svg";
-
-        "common/restartthunderbird" = true;
-        "common/showDialogIfNoAccountsConfigured" = false;
-        "common/showhidethunderbird" = true;
-        "common/showunreademailcount" = true;
-        "common/startClosedThunderbird" = true;
-
-        "advanced/blinkingusealpha" = false;
-        "advanced/forcedRereadInterval" = 0;
-        "advanced/ignoreNetWMhints" = false;
-        "advanced/ignoreUpdateVersion" = "";
-        "advanced/notificationfontmaxsize" = 512;
-        "advanced/notificationfontminsize" = 4;
-        "advanced/onlyShowIconOnUnreadMessages" = false;
-        "advanced/runProcessOnChange" = "";
-        "advanced/tbcmdline" = [ "/usr/bin/env" "thunderbird" ];
-        "advanced/tbprocessname" = "thunderbird";
-        "advanced/tbwindowmatch" = "Mozilla Thunderbird";
-        "advanced/unreadopacitylevel" = 1;
-      };
   };
 
   cache.directories = lib.mkIf tbEnable [{
@@ -260,8 +174,6 @@ in
             --menu-color: ${tc.menuForeground}; /* tc.menuForeground */
             --menu-border-color: ${tc.menuBorder}; /* tc.menuBorder */
             --menu-background-color: ${tc.menuBackground}; /* tc.menuBackground */
-            --menu-item-padding: 0px;
-            --menu-item-margin: 0px;
 
             ${lib.concatLines (
               modulateColor "red" tc.red
@@ -295,10 +207,30 @@ in
           /* Use Arc's style for toolbars */
           #titlebar,
           #toolbar-menubar,
-          unified-toolbar
+          unified-toolbar,
+          #tabs-toolbar
           {
-            background-color: ${tc.background} !important; /* tc.background */
+            background: ${tc.background} !important; /* tc.background */
             color: ${tc.foreground} !important; /* tc.foreground */
+            box-shadow: none !important;
+          }
+
+          #unifiedToolbar > toolbarbutton#spacesPinnedButton,
+          #status-bar > #spacesToolbarReveal {
+            display: none !important;
+          }
+
+          #tabs-toolbar {
+            padding-inline: 0px !important;
+            padding-top: 0px !important;
+          }
+
+          .tab-line[selected="true"] {
+            background-color: transparent !important;
+          }
+
+          .tab-content {
+            padding-inline: 8px;
           }
 
           menubar > menu[open] {
@@ -346,12 +278,26 @@ in
   };
 
   systemd.user.services.thunderbird = lib.mkIf tbEnable {
-    Unit.Description = pkgs.birdtray.meta.description;
-    Install.WantedBy = [ "graphical-session.target" ];
+    Unit.Description = config.programs.thunderbird.package.meta.description;
     Unit.PartOf = [ "graphical-session.target" ];
+    Install.WantedBy = [ "graphical-session.target" ];
 
-    Service.Type = "simple";
-    Service.ExecStart = lib.getExe pkgs.birdtray;
+    Service = {
+      Type = "simple";
+      ExecStart = lib.getExe config.programs.thunderbird.package;
+      ExecStartPost = lib.singleton ''
+        ${pkgs.xdotool}/bin/xdotool \
+            search \
+                --class --classname --role --all \
+                --limit 1 \
+                --sync \
+                '^thunderbird$|^Mail$|^3pane$' \
+            windowunmap --sync
+      '';
+
+      ExitType = "cgroup";
+      SyslogIdentifier = "thunderbird";
+    };
   };
 
   xsession.windowManager.bspwm.rules."thunderbird:Mail:*".locked = lib.mkIf tbEnable true;

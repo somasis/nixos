@@ -13,19 +13,18 @@ let
     ({ lib, fetchurl, fetchFromGitHub, python3Packages }:
       python3Packages.buildPythonApplication rec {
         pname = "qutebrowser-zotero";
+        version = flakeModifiedDateToVersion inputs.qutebrowser-zotero;
+        # version = "unstable-2019-06-15";
 
         format = "other";
 
-        # version = "unstable-2019-06-15";
+        src = inputs.qutebrowser-zotero;
         # src = fetchFromGitHub {
         #   owner = "parchd-1";
         #   repo = "qutebrowser-zotero";
         #   rev = "54706b43433c3ea8da6b7b410d67528da9779657";
         #   hash = "sha256-Jv5qrpWSMrfGr6gV8PxELCOfZ0PyGBPO+nBt2czYuu4=";
         # };
-
-        version = flakeModifiedDateToVersion inputs.qutebrowser-zotero;
-        src = inputs.qutebrowser-zotero;
 
         propagatedBuildInputs = with python3Packages; [ requests ];
 
@@ -34,7 +33,7 @@ let
         '';
 
         meta = with lib; {
-          description = ''Connect qutebrowser to a running Zotero instance'';
+          description = "Connect qutebrowser to a running Zotero instance";
           homepage = "https://github.com/parchd-1/qutebrowser-zotero";
           maintainers = with maintainers; [ somasis ];
           license = licenses.gpl3;
@@ -54,77 +53,77 @@ in
   programs.zotero = {
     enable = true;
 
-    # TODO Package Zotero extensions?
-    # <https://github.com/UB-Mannheim/zotero-ocr>
-    # <https://github.com/dcartertod/zotero-plugins>
-    # <https://github.com/diegodlh/zotero-cita>
-    # <https://github.com/jlegewie/zotfile>
-    # <https://github.com/retorquere/zotero-auto-index>
-    # <https://github.com/retorquere/zotero-open-pdf>
-    # <https://github.com/retorquere/zotero-storage-scanner>
-    # <https://github.com/windingwind/zotero-pdf-preview>
-    # <https://github.com/wshanks/Zutilo>
-    # <https://robustlinks.mementoweb.org/zotero/>
+    # package = pkgs.wrapCommand {
+    #   package = pkgs.zotero;
 
-    package = pkgs.wrapCommand {
-      package = pkgs.zotero;
+    #   wrappers = [{
+    #     command = "/bin/zotero";
 
-      wrappers = [{
-        command = "/bin/zotero";
+    #     # Ensure that there isn't a mismatch between extension settings
+    #     # (which could get modified during runtime, and then be written
+    #     # to prefs.js by Zotero) and our user.js.
+    #     beforeCommand =
+    #       let
+    #         prefs = "${config.home.homeDirectory}/.zotero/zotero/${config.programs.zotero.profiles.default.path}/prefs.js";
+    #         managedPrefs = lib.concatStringsSep " " (map (x: "-e 'user_pref(\"${x}\", '") (builtins.attrNames config.programs.zotero.profiles.default.settings));
 
-        # Ensure that there isn't a mismatch between extension settings
-        # (which could get modified during runtime, and then be written
-        # to prefs.js by Zotero) and our user.js.
-        beforeCommand =
-          let
-            prefs = "${config.home.homeDirectory}/.zotero/zotero/${config.programs.zotero.profiles.default.path}/prefs.js";
-            managedPrefs = lib.concatStringsSep " " (map (x: "-e 'user_pref(\"${x}\", '") (builtins.attrNames config.programs.zotero.profiles.default.settings));
+    #         startService = pkgs.writeShellScript "start-zotero-service" ''
+    #           ${pkgs.systemd}/bin/systemctl --user is-active -q zotero.service \
+    #               || ${pkgs.systemd}/bin/systemctl --user start zotero.service
+    #         '';
 
-            startService = pkgs.writeShellScript "start-zotero-service" ''
-              ${pkgs.systemd}/bin/systemctl --user is-active -q zotero.service \
-                  || ${pkgs.systemd}/bin/systemctl --user start zotero.service
-            '';
+    #         unhideZotero = pkgs.writeShellScript "zotero-unhide" ''
+    #           export PATH=${lib.makeBinPath [ pkgs.xdotool config.xsession.windowManager.bspwm.package ]}:"$PATH"
 
-            unhideZotero = pkgs.writeShellScript "zotero-unhide" ''
-              export PATH=${lib.makeBinPath [ pkgs.xdotool config.xsession.windowManager.bspwm.package ]}:"$PATH"
+    #           # Get only a window that matches class=zotero and role=browser,
+    #           # which matches to the main Zotero window.
+    #           if wid=$(xdotool search --limit 1 --all --class --role 'zotero|browser'); then
+    #               if [ -n "$(bspc query -N "$wid"'.hidden')" ]; then # window isn't hidden
+    #                   # If the window is hidden on a different desktop, bspwm
+    #                   # will not unhide and refocus it on the current desktop-
+    #                   # it will unhide and then focus its own desktop. This
+    #                   # is different from, say, activating a running instance
+    #                   # of Discord, so it trips me up. Move it to the focused
+    #                   # desktop when this is the case.
+    #                   bspc node "$wid" -g hidden=off -d focused -f
+    #               else
+    #                   # If it is not hidden, just focus it on the desktop it is on.
+    #                   bspc node "$wid" -g hidden=off -f
+    #               fi
 
-              # Get only a window that matches class=zotero and role=browser,
-              # which matches to the main Zotero window.
-              if wid=$(xdotool search --limit 1 --all --class --role 'zotero|browser'); then
-                  if [ -n "$(bspc query -N "$wid"'.hidden')" ]; then # window isn't hidden
-                      # If the window is hidden on a different desktop, bspwm
-                      # will not unhide and refocus it on the current desktop-
-                      # it will unhide and then focus its own desktop. This
-                      # is different from, say, activating a running instance
-                      # of Discord, so it trips me up. Move it to the focused
-                      # desktop when this is the case.
-                      bspc node "$wid" -g hidden=off -d focused -f
-                  else
-                      # If it is not hidden, just focus it on the desktop it is on.
-                      bspc node "$wid" -g hidden=off -f
-                  fi
+    #               _skip=true
+    #           fi
+    #         '';
 
-                  _skip=true
-              fi
-            '';
+    #         filterPrefs = pkgs.writeShellScript "filter-prefs" ''
+    #           export PATH="${lib.makeBinPath [ pkgs.coreutils pkgs.gnugrep pkgs.moreutils ]}:$PATH"
 
-            filterPrefs = pkgs.writeShellScript "filter-prefs" ''
-              export PATH="${lib.makeBinPath [ pkgs.coreutils pkgs.gnugrep pkgs.moreutils ]}:$PATH"
-
-              touch "${prefs}"
-              grep -vF ${managedPrefs} "${prefs}" | sponge "${prefs}"
-            '';
-          in
-          [
-            ''[ -z "$_skip" ] && . ${startService}''
-            ''[ -z "$_skip" ] && . ${unhideZotero}''
-            ''[ -z "$_skip" ] && ${filterPrefs}''
-            ''[ -n "$_skip" ] && unset _skip''
-          ];
-      }];
-    };
+    #           touch "${prefs}"
+    #           grep -vF ${managedPrefs} "${prefs}" | sponge "${prefs}"
+    #         '';
+    #       in
+    #       [
+    #         ''[ -z "$_skip" ] && . ${startService}''
+    #         ''[ -z "$_skip" ] && . ${unhideZotero}''
+    #         ''[ -z "$_skip" ] && ${filterPrefs}''
+    #         ''[ -n "$_skip" ] && unset _skip''
+    #       ];
+    #   }];
+    # };
 
     profiles.default = {
+      extensions = with pkgs.zotero-addons; [
+        cita
+        zotero-abstract-cleaner
+        zotero-auto-index
+        zotero-ocr
+        zotero-open-pdf
+        zotero-preview
+        zotero-robustlinks
+        zotero-storage-scanner
+        zotfile
+      ];
+
       settings =
         let
           # Chicago Manual of Style [latest] edition (note)
@@ -495,11 +494,28 @@ in
 
     Service = {
       Type = "simple";
-      ExecStart = "${config.programs.zotero.package}/bin/zotero";
+      ExecStart = lib.getExe config.programs.zotero.package;
+      ExecStartPost = lib.singleton ''
+        ${pkgs.xdotool}/bin/xdotool \
+            search \
+                --class --classname --role --all \
+                --limit 1 \
+                --sync \
+                '^Zotero$|^Navigator$|^browser$' \
+            windowunmap --sync
+      '';
 
+      ExitType = "cgroup";
       SyslogIdentifier = "zotero";
     };
   };
+
+  xsession.windowManager.bspwm.rules."Zotero:Navigator:*".locked = true;
+
+  services.sxhkd.keybindings."super + z" = pkgs.writeShellScript "zotero" ''
+    systemctl start --user zotero.service
+    xdotool-togglewindowmap 'Navigator' 'Zotero' 'browser'
+  '';
 
   xdg.mimeApps.defaultApplications = lib.genAttrs [
     "application/marc"
@@ -509,8 +525,6 @@ in
   ]
     (_: [ "zotero.desktop" ])
   ;
-
-  services.sxhkd.keybindings."super + z" = "${config.programs.zotero.package}/bin/zotero";
 
   programs.qutebrowser = {
     aliases.zotero = "spawn -u ${qutebrowser-zotero}/bin/qute-zotero";

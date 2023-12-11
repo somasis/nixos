@@ -15,6 +15,10 @@ let
   profilesPath =
     if isDarwin then "${zoteroConfigPath}/Profiles" else "${zoteroConfigPath}/zotero";
 
+  # The extensions path shared by all profiles; will not be supported
+  # by future Firefox versions.
+  extensionPath = "extensions/{ec8030f7-c20a-464f-9b0e-13a3a9e97384}";
+
   profiles = flip mapAttrs' cfg.profiles
     (_: profile:
       nameValuePair "Profile${toString profile.id}" {
@@ -114,6 +118,22 @@ in
             '';
           };
 
+          extensions = mkOption {
+            type = types.listOf types.package;
+            default = [ ];
+            example = literalExpression ''
+              with pkgs.nur.repos.somasis.zotero-addons; [
+                privacy-badger
+              ]
+            '';
+            description = ''
+              List of Zotero add-on packages to install for this profile.
+
+              Note that it is necessary to manually enable these extensions
+              inside Zotero after the first installation.
+            '';
+          };
+
           extraConfig = mkOption {
             type = types.lines;
             default = "";
@@ -184,6 +204,20 @@ in
             (profile.settings // { "extensions.zotero.firstRun2" = false; })
             profile.extraConfig;
       };
+
+      "${profilesPath}/${profile.path}/extensions" =
+        mkIf (profile.extensions != [ ]) {
+          source =
+            let
+              extensionsEnvPkg = pkgs.buildEnv {
+                name = "hm-zotero-extensions";
+                paths = profile.extensions;
+              };
+            in
+            "${extensionsEnvPkg}/share/zotero/${extensionPath}";
+          recursive = true;
+          force = true;
+        };
     }));
   };
 }

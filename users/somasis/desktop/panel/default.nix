@@ -368,7 +368,9 @@ in
       Install.WantedBy = [ "graphical-session.target" "graphical-session-post.target" "tray.target" ];
 
       Service = {
-        Type = "simple";
+        Type = "notify";
+        NotifyAccess = "all";
+
         ExecStart = [ "${config.home.homeDirectory}/bin/panel" ];
         ExecStartPost = [
           "${bspc} config top_padding ${builtins.toString bspwm.settings.top_padding}"
@@ -382,6 +384,7 @@ in
         ];
 
         Restart = "on-success";
+        ExitType = "cgroup";
       };
     };
 

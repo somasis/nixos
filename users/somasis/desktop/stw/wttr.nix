@@ -107,7 +107,7 @@ in
       Service = {
         Type = "oneshot";
         ExecStart = [ "${wttr}/bin/wttr" ];
-        ExecStopPost = [ "-${pkgs.systemd}/bin/systemctl reload --user stw@wttr.service" ];
+        ExecStopPost = [ "-${pkgs.systemd}/bin/systemctl reload --user stw-wttr.service" ];
         StandardOutput = "null";
       }
       // (lib.optionalAttrs osConfig.networking.networkmanager.enable { ExecStartPre = [ "${pkgs.networkmanager}/bin/nm-online -q" ]; })

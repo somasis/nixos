@@ -164,10 +164,57 @@ in
   ]
   ++ lib.optionals config.xsession.windowManager.bspwm.enable [
     pkgs.bspwm-center-window
+
+    (pkgs.writeShellScriptBin "xdotool-toggle-windowmap" ''
+      ido() {
+          # shellcheck disable=SC2015
+          printf '$ %s\n' "$*" >&2 || :
+          "$@"
+      }
+
+      PATH=${lib.makeBinPath [
+        config.xsession.windowManager.bspwm.package
+        pkgs.gnugrep
+        pkgs.wmutils-core
+        pkgs.xdotool
+      ]}
+
+      set -eu
+
+      class="$1"
+      classname="$2"
+      role="$3"
+      shift 3
+
+      wait_for_window() {
+          xdotool search \
+              --class \
+              --classname \
+              --role \
+              --all \
+              --limit 1 \
+              --sync \
+              "^$classname$|^$class$|^$role$" \
+              2>/dev/null
+      }
+
+      id=$(wait_for_window)
+
+      if [[ -z "$id" ]]; then
+          printf 'error: no command provided and no windows matching "%s", "%s", and "%s"\n' \
+              "$classname" \
+              "$class" \
+              "$role"
+          exit 1
+      fi
+
+      bspc node "$id" -g locked=on || :
+      mapw -t "$(printf '0x%X\n' "$id")"
+    '')
+
     (pkgs.writeShellScriptBin "bspwm-hide-or-close" ''
       PATH=${lib.makeBinPath (
         [ config.xsession.windowManager.bspwm.package pkgs.coreutils pkgs.xdotool ]
-          ++ lib.optionals config.programs.thunderbird.enable [ pkgs.birdtray ]
       )}
 
       ido() {
@@ -190,12 +237,8 @@ in
       done=false
       for locked_node in "''${locked_nodes[@]}"; do
           if [[ "$node" == "$locked_node" ]]; then
-              # and just mark it hidden.
-              node_class=$(xdotool getwindowclassname "$node")
-              case "$node_class" in
-              ${lib.optionalString config.programs.thunderbird.enable ''"thunderbird") birdtray -s; ido birdtray -H; ;;''}
-              *) ido bspc node "$node" -g hidden=on ;;
-              esac
+              # unmap/minimize it.
+              ido xdotool windowunmap --sync "$node"
               done=true
           fi
       done
@@ -223,7 +266,7 @@ in
       # Window management: rotate desktop layout
       "super + {_,shift} + r" = "${bspc} node @/ -R {90,-90}";
 
-      # Window management: close window
+      # Window management: close (or minimize) window
       "super + w" = "bspwm-hide-or-close";
 
       # Window management: kill window

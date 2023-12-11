@@ -7,16 +7,6 @@
 let
   xdgRuntimeDir = "/run/user/${toString osConfig.users.users.${config.home.username}.uid}";
 
-  mpdscribble = pkgs.symlinkJoin {
-    name = "mpdscribble";
-    paths = [ pkgs.mpdscribble pass-mpdscribble ];
-    buildInputs = [ pkgs.makeWrapper ];
-    postBuild = ''
-      wrapProgram $out/bin/mpdscribble \
-          --add-flags '--conf <(pass-mpdscribble)'
-    '';
-  };
-
   pass-mpdscribble = pkgs.writeShellApplication {
     name = "pass-mpdscribble";
     runtimeInputs = [ config.programs.password-store.package ];
@@ -45,12 +35,25 @@ let
       password = "$(pass www/last.fm/kyliesomasis | tr -d '\n' | md5sum - | cut -d' ' -f1)";
     };
   };
+
+  mpdscribble = pkgs.wrapCommand {
+    package = pkgs.mpdscribble;
+
+    wrappers = [{
+      command = "/bin/mpdscribble";
+      prependFlags = ''--conf <(${pass-mpdscribble}/bin/pass-mpdscribble)'';
+    }];
+  };
 in
 {
-  cache.directories = [
-    { method = "symlink"; directory = config.lib.somasis.xdgCacheDir "listenbrainz-mpd"; }
-    { method = "symlink"; directory = config.lib.somasis.xdgCacheDir "mpdscribble"; }
-  ];
+  cache = {
+    directories = [{
+      method = "symlink";
+      directory = config.lib.somasis.xdgCacheDir "mpdscribble";
+    }];
+
+    files = [ (config.lib.somasis.xdgDataDir "listenbrainz-mpd-cache.sqlite3") ];
+  };
 
   home.packages = [ mpdscribble ];
 
@@ -58,8 +61,10 @@ in
     enable = true;
     settings = {
       submission.token_file = "${xdgRuntimeDir}/listenbrainz-mpd.secret";
-      submission.cache_file = "${config.xdg.cacheHome}/listenbrainz-mpd/cache.sqlite3";
       mpd.address = "${config.services.mpd.network.listenAddress}:${builtins.toString config.services.mpd.network.port}";
+
+      # Doesn't seem to honor this configuration variable...?
+      # submission.cache_file = "${config.xdg.cacheHome}/listenbrainz-mpd/cache.sqlite3";
     };
   };
 
@@ -70,22 +75,24 @@ in
       Install.WantedBy = [ "mpd.service" ];
 
       Service = {
-        Environment = [ "ENTRY=www/listenbrainz.org" ];
+        Environment = [ "TOKEN_ENTRY=www/listenbrainz.org" ];
         ExecStartPre = pkgs.writeShellScript "listenbrainz-mpd-secret" ''
           PATH=${lib.makeBinPath [ config.programs.password-store.package pkgs.coreutils ]}:"$PATH"
           : "''${XDG_RUNTIME_DIR:?}"
-          : "''${ENTRY:?}"
+          : "''${TOKEN_ENTRY:?}"
           umask 0077
-          pass show "$ENTRY" | head -n1 > "$XDG_RUNTIME_DIR/listenbrainz-mpd.secret"
+          pass show "$TOKEN_ENTRY" | head -n1 > "$XDG_RUNTIME_DIR/listenbrainz-mpd.secret"
         '';
         ExecStopPost = [ "${pkgs.coreutils}/bin/rm -f %t/listenbrainz-mpd.secret" ];
       };
     };
 
     mpdscribble = {
-      Unit.Description = pkgs.mpdscribble.meta.description;
-      Unit.BindsTo = [ "mpd.service" ];
-      Unit.After = [ "mpd.service" ];
+      Unit = {
+        Description = pkgs.mpdscribble.meta.description;
+        BindsTo = [ "mpd.service" ];
+        After = [ "mpd.service" ];
+      };
       Install.WantedBy = [ "mpd.service" ];
 
       Service = {

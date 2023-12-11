@@ -254,12 +254,11 @@ in
         -c ${lib.escapeShellArg discordWindowClassName} \
         -i ${lib.escapeShellArg discordName} \
         -f ${pkgs.writeShellScript "start-or-switch" ''
-            if ! ${pkgs.systemd}/bin/systemctl --user is-active -q discord.service >/dev/null 2>&1; then
+            if ! ${pkgs.systemd}/bin/systemctl --user is-active -q discord.service; then
                 ${pkgs.systemd}/bin/systemctl --user start discord.service && sleep 2
             fi
-            exec ${config.systemd.user.services.discord.Service.ExecStart} >/dev/null 2>&1
-        ''} \
-        >/dev/null
+            ${config.systemd.user.services.discord.Service.ExecStart}
+        ''}
   '';
 
   # services.xsuspender.rules.discord = {

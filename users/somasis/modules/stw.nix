@@ -61,7 +61,7 @@ in
               default = name;
               readOnly = true;
               description = ''
-                Name used by `stw-widget-<name>` and stw@<name>.service
+                Name used by `stw-widget-<name>` and stw-<name>.service
               '';
             };
 
@@ -234,7 +234,7 @@ in
             Install.WantedBy = [ "graphical-session-post.target" ];
           };
 
-          services."stw@${widget.name}" = {
+          services."stw-${widget.name}" = {
             Unit.Description = "${pkg.meta.description}, instance '${widget.name}'";
             Unit.PartOf = lib.optional widget.enable "stw.target";
             Install.WantedBy = lib.optional widget.enable "stw.target";

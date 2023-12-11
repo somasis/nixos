@@ -30,10 +30,10 @@
     };
   };
 
-  services.syncthing.tray = {
-    enable = false;
-    package = pkgs.syncthingtray-minimal;
-  };
+  # services.syncthing.tray = {
+  #   enable = false;
+  #   package = pkgs.syncthingtray-minimal;
+  # };
 
-  persist.files = [ "etc/syncthingtray.ini" ];
+  # persist.files = [ "etc/syncthingtray.ini" ];
 }

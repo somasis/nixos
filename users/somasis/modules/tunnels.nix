@@ -98,7 +98,7 @@ with lib;
         in
         units:
         lib.recursiveUpdate units {
-          targets."tunnels@${tunnel.remote}" = {
+          targets."tunnels-${tunnel.remote}" = {
             Unit = {
               Description = "Tunnels to ${tunnel.remote}";
               PartOf = [ "tunnels.target" ];
@@ -106,31 +106,31 @@ with lib;
             Install.WantedBy = [ "tunnels.target" ];
           };
 
-          sockets."tunnel-proxy@${target}" = lib.optionalAttrs (tunnel.type == "local") {
+          sockets."tunnel-proxy-${target}" = lib.optionalAttrs (tunnel.type == "local") {
             Unit = {
               Description = "Listen for requests to connect to ${target}";
-              PartOf = [ "tunnels@${tunnel.remote}.target" ];
+              PartOf = [ "tunnels-${tunnel.remote}.target" ];
             };
-            Install.WantedBy = [ "tunnels@${tunnel.remote}.target" "sockets.target" ];
+            Install.WantedBy = [ "tunnels-${tunnel.remote}.target" "sockets.target" ];
 
             Socket.ListenStream = [ tunnel.port ];
           };
 
-          services."tunnel-proxy@${target}" = lib.optionalAttrs (tunnel.type == "local") {
+          services."tunnel-proxy-${target}" = lib.optionalAttrs (tunnel.type == "local") {
             Unit = {
               Description = "Serve requests to connect to ${target}";
-              PartOf = [ "tunnels@${tunnel.remote}.target" ];
+              PartOf = [ "tunnels-${tunnel.remote}.target" ];
 
-              # Stop when tunnel-proxy@*.service stops/is no longer listening for socket activation
+              # Stop when tunnel-proxy-*.service stops/is no longer listening for socket activation
               BindsTo = [
-                "tunnel-proxy@${target}.socket"
-                "tunnel@${target}.service"
+                "tunnel-proxy-${target}.socket"
+                "tunnel-${target}.service"
               ];
 
-              # Stop when tunnel@*.service stops
+              # Stop when tunnel-*.service stops
               After = [
-                "tunnel-proxy@${target}.socket"
-                "tunnel@${target}.service"
+                "tunnel-proxy-${target}.socket"
+                "tunnel-${target}.service"
               ];
             };
 
@@ -156,10 +156,10 @@ with lib;
             };
           };
 
-          services."tunnel@${target}" = {
+          services."tunnel-${target}" = {
             Unit = {
               Description = "Open tunnel to ${target}";
-              PartOf = [ "tunnels@${tunnel.remote}.target" ];
+              PartOf = [ "tunnels-${tunnel.remote}.target" ];
 
               After = [ "ssh-agent.service" ];
             }
@@ -234,7 +234,7 @@ with lib;
               // lib.optionalAttrs osConfig.networking.networkmanager.enable { ExecStartPre = [ "${pkgs.networkmanager}/bin/nm-online -q" ]; }
             ;
           }
-          // lib.optionalAttrs (tunnel.type == "dynamic") { Install.WantedBy = [ "tunnels@${tunnel.remote}.target" ]; }
+          // lib.optionalAttrs (tunnel.type == "dynamic") { Install.WantedBy = [ "tunnels-${tunnel.remote}.target" ]; }
           ;
         }
       )
@@ -252,4 +252,3 @@ with lib;
     ;
   };
 }
-

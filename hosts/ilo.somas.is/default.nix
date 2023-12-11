@@ -118,6 +118,7 @@ nixpkgs.lib.nixosSystem {
           "/var/log/btmp"
           "/var/log/lastlog"
           "/var/log/wtmp"
+          "/etc/machine-id"
         ];
       };
 
@@ -126,10 +127,6 @@ nixpkgs.lib.nixosSystem {
       programs.command-not-found.enable = false;
       programs.nano.enable = false;
       environment = {
-        etc."machine-id".text = builtins.hashString "sha256" config.networking.fqdnOrHostName;
-
-        # defaultPackages = [ ];
-
         systemPackages = [
           # Necessary for `nixos-rebuild`'s git stuff
           pkgs.extrace

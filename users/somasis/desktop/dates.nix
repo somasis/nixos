@@ -130,16 +130,16 @@ in
   };
 
   systemd.user.services = {
-    "stw@dates" = {
+    "stw-dates" = {
       Unit.BindsTo = [ "panel.service" ];
       Unit.Requires = [ "make-dates-calendar.service" ];
     };
 
     "make-dates-calendar" = {
-      Unit.Description = "Create calendar for stw@dates widget";
-      Unit.BindsTo = [ "stw@dates.service" ];
+      Unit.Description = "Create calendar for stw-dates widget";
+      Unit.BindsTo = [ "stw-dates.service" ];
       Unit.StopWhenUnneeded = true;
-      Unit.PropagatesStopTo = [ "stw@dates.service" ];
+      Unit.PropagatesStopTo = [ "stw-dates.service" ];
       Service = {
         Type = "simple";
         ExecStart = makeDatesCalendar;

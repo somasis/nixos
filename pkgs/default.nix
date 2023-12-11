@@ -100,4 +100,5 @@ lib.recursiveUpdate
     sitelen-pona-pi-lasin-lukin = callPackage ./sitelen-pona-pi-lasin-lukin { };
 
     kakounePlugins = import ./kakoune-plugins final prev;
+    zotero-addons = import ./zotero-addons final prev;
   })

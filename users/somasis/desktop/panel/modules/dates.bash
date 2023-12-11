@@ -31,7 +31,7 @@ while :; do
     o="%{A4:brillo -el -u 25000 -A 2:}%{A5:brillo -el -u 25000 -U 2:}${o}%{A}%{A}"
 
     # Launch big clock
-    o="%{A1:systemctl --user -q is-active stw@dates.service && systemctl --user stop stw@dates.service || systemctl --user start stw@dates.service:}${o}%{A}"
+    o="%{A1:systemctl --user -q is-active stw-dates.service && systemctl --user stop stw-dates.service || systemctl --user start stw-dates.service:}${o}%{A}"
 
     printf '%s\n' "${o}"
 

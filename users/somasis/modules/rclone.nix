@@ -353,8 +353,8 @@ in
               {
                 services."${unitPath}" = {
                   Unit.Description = unitDescription;
-                  Unit.PartOf = [ "${unitPath}.mount" "mounts.target" ];
-                  Install.WantedBy = [ "${unitPath}.mount" "mounts.target" ];
+                  Unit.PartOf = [ "${unitPath}.mount" "rclone.target" ];
+                  Install.WantedBy = [ "${unitPath}.mount" "rclone.target" ];
 
                   Service = {
                     Type = "notify";
@@ -394,7 +394,8 @@ in
 
                 mounts."${unitPath}" = {
                   Unit.Description = unitDescription;
-                  Install.WantedBy = [ "mounts.target" ];
+                  Unit.Requires = [ "${unitPath}.service" "rclone.target" ];
+                  Install.WantedBy = [ "mounts.target" "rclone.target" ];
 
                   Mount = {
                     Type = "rclone";
@@ -406,12 +407,18 @@ in
 
                 automounts."${unitPath}" = {
                   Unit.Description = unitDescription;
+                  Unit.Requires = [ "${unitPath}.service" "rclone.target" ];
                   Automount.Where = mount.where;
                   Automount.TimeoutIdleSec = mount.linger;
                 };
               }
           )
-          { }
+          {
+            targets.rclone = {
+              Unit.Description = "All rclone mounts";
+              Install.WantedBy = [ "default.target" ];
+            };
+          }
           (lib.mapAttrsToList (n: v: v) config.somasis.mounts.mounts)
         )
     ;

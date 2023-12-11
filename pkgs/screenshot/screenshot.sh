@@ -23,7 +23,7 @@ tilde() {
     : "${HOME:?\$HOME is unset}"
 
     local p="${1:?tilde(): no path given}"
-    printf '%s' "${p/#${HOME}/~}"
+    printf '%s' "${p/#${HOME}/\~}"
 }
 
 mkdir -p "${SCREENSHOT_DIR}"

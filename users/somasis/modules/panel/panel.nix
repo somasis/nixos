@@ -2,15 +2,12 @@
 , writeShellApplication
 , writeShellScript
 
-, bspwm
 , coreutils
 , lemonbar
 , procps
 , systemd
 
-, xorg
-, jq
-, jc
+, mmutils
 
 , toEnvVarName
 
@@ -46,8 +43,6 @@ let
     ;
 
   inherit (lib.cli) toGNUCommandLineShell;
-
-  inherit (xorg) xrandr;
 
   moduleToCommand = module:
     let
@@ -129,9 +124,7 @@ in
     systemd
 
     # Used for getting monitor information (list of monitors, primary monitor).
-    xorg.xrandr
-    jq
-    jc
+    mmutils
   ];
 
   text = ''
@@ -194,13 +187,8 @@ in
         done
     }
 
-    monitors=$(xrandr | jc --xrandr | jq '.screens |= sort_by(.screen_number)')
-
-    # primary_monitor=$(bspc query -M --names -m module.primary)
-    primary_monitor=$(jq -r '.screens[].associated_device | select(.is_primary) | .device_name' <<<"$monitors")
-
-    # mapfile -t monitors < <(bspc query -M --names)
-    mapfile -t monitors < <(jq -r '.screens[].associated_device.device_name' <<<"$monitors")
+    mapfile -t monitors < <(lsm)
+    primary_monitor=$(lsm -p)
 
     # Initialize all monitor FIFOs.
     mkdir -p "$PANEL_RUNTIME"/monitors
