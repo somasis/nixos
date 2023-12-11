@@ -209,10 +209,10 @@ let
 in
 {
   imports = [
-    # ./convert.nix
+    ./convert.nix
     # ./extrafiles.nix
     ./ripping.nix
-    # ./tagging.nix
+    ./tagging.nix
   ];
 
   xdg.userDirs.music = "${config.home.homeDirectory}/audio/library";
@@ -288,11 +288,13 @@ in
 
           # Maintain a cross-device lock, so that we don't conflict if the directory is
           # over a network device of some sort (sshfs)
-          [[ -e "$BEETS_LOCK" ]] && printf 'Lock "%s" is currently held, sleeping until free...\n' "$BEETS_LOCK" >&2
-          while [[ -e "$BEETS_LOCK" ]]; do
-              sleep 5
-          done
-          touch "$BEETS_LOCK"
+          if [[ -e "$BEETS_LOCK" ]]; then
+              printf 'Lock "%s" is currently held, sleeping until free...\n' "$BEETS_LOCK" >&2
+              while [[ -e "$BEETS_LOCK" ]]; do
+                  sleep 5
+              done
+          fi
+          printf '%s\n' ${lib.escapeShellArg osConfig.networking.fqdnOrHostName} > "$BEETS_LOCK"
 
           # Trap Ctrl-C, since it seems really problematic for database health
           e=0

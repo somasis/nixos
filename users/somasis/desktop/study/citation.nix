@@ -506,6 +506,7 @@ in
       '';
 
       ExitType = "cgroup";
+      Restart = "on-abnormal";
       SyslogIdentifier = "zotero";
     };
   };
@@ -513,8 +514,8 @@ in
   xsession.windowManager.bspwm.rules."Zotero:Navigator:*".locked = true;
 
   services.sxhkd.keybindings."super + z" = pkgs.writeShellScript "zotero" ''
-    systemctl start --user zotero.service
-    xdotool-togglewindowmap 'Navigator' 'Zotero' 'browser'
+    ${pkgs.systemd}/bin/systemctl start --user zotero.service
+    bspwm-hide-unhide 'Navigator' 'Zotero' 'browser'
   '';
 
   xdg.mimeApps.defaultApplications = lib.genAttrs [

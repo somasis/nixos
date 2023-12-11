@@ -297,8 +297,14 @@ in
 
       ExitType = "cgroup";
       SyslogIdentifier = "thunderbird";
+      Restart = "on-abnormal";
     };
   };
 
-  xsession.windowManager.bspwm.rules."thunderbird:Mail:*".locked = lib.mkIf tbEnable true;
+  services.sxhkd.keybindings."super + t" = pkgs.writeShellScript "thunderbird" ''
+    ${pkgs.systemd}/bin/systemctl start --user thunderbird.service
+    bspwm-hide-unhide 'thunderbird' 'Mail' '3pane'
+  '';
+
+  xsession.windowManager.bspwm.rules."thunderbird:Mail:*".locked = true;
 }

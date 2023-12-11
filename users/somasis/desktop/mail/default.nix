@@ -6,7 +6,7 @@
 }:
 let
   inherit (lib) getBin foldr recursiveUpdate optionalAttrs;
-  inherit (config.lib.nixos) mkPathSafeName;
+  # inherit (config.lib.nixos) mkPathSafeName;
 
   offlineimapNametransGmail = {
     remote.nametrans = "lambda f: f.replace('[Gmail]/', '') if f.startswith('[Gmail]/') else f";

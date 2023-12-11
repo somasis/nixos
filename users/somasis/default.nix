@@ -48,9 +48,8 @@
     overlays =
       # lib.lists.unique (
       (osConfig.nixpkgs.overlays or [ ])
+      ++ lib.optional ((self.overlays.default or null) != null) self.overlays.default
       ++ [
-        self.overlays.default
-
         (final: prev: {
           stable = inputs.nixpkgsStable.legacyPackages.${pkgs.stdenv.hostPlatform.system};
         })

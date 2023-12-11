@@ -22,7 +22,6 @@
 
     remotes =
       let
-
         sftp = target: extraAttrs:
           assert (lib.isString target && target != "");
           assert (lib.isAttrs extraAttrs);
@@ -64,14 +63,14 @@
           type = "drive";
           scope = "drive";
           drive-export-formats = [ "docx" "xlsx" "pptx" "svg" ];
-          poll-interval = "15m";
+          poll-interval = "1m";
         };
 
         gdrive-personal = {
           type = "drive";
           scope = "drive";
           drive-export-formats = [ "docx" "xlsx" "pptx" "svg" ];
-          poll-interval = "15m";
+          poll-interval = "1m";
         };
 
         gphotos-personal = {
@@ -86,25 +85,33 @@
 
     mounts =
       let
-        defaultOptions = [ "vfs-cache-mode=full" "vfs-cache-max-size=1G" "vfs-cache-poll-interval=5m" "write-back-cache" ];
+        defaultOptions = [
+          "vfs-cache-mode=full"
+          "vfs-cache-max-size=1G"
+          "vfs-refresh"
+          "write-back-cache"
+        ];
       in
       {
         spinoza = {
           remote = "somasis@spinoza.7596ff.com";
           what = "";
           where = "${config.home.homeDirectory}/mnt/sftp/spinoza.7596ff.com";
+          options = defaultOptions;
         };
 
         spinoza-raid = {
           remote = "somasis@spinoza.7596ff.com";
           what = "/mnt/raid";
           where = "${config.home.homeDirectory}/mnt/sftp/spinoza.7596ff.com_raid";
+          options = defaultOptions;
         };
 
         whatbox = {
           remote = "somasis@genesis.whatbox.ca";
           what = "";
           where = "${config.home.homeDirectory}/mnt/sftp/genesis.whatbox.ca";
+          options = defaultOptions;
         };
 
         gdrive-appstate = rec {
@@ -143,6 +150,7 @@
           remote = "gphotos-personal";
           what = "";
           where = "${config.home.homeDirectory}/mnt/gphotos/personal";
+          options = defaultOptions;
         };
       };
   };

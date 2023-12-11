@@ -165,7 +165,7 @@ in
   ++ lib.optionals config.xsession.windowManager.bspwm.enable [
     pkgs.bspwm-center-window
 
-    (pkgs.writeShellScriptBin "xdotool-toggle-windowmap" ''
+    (pkgs.writeShellScriptBin "bspwm-hide-unhide" ''
       ido() {
           # shellcheck disable=SC2015
           printf '$ %s\n' "$*" >&2 || :
@@ -201,7 +201,7 @@ in
       id=$(wait_for_window)
 
       if [[ -z "$id" ]]; then
-          printf 'error: no command provided and no windows matching "%s", "%s", and "%s"\n' \
+          printf 'error: no windows matching "%s", "%s", and "%s"\n' \
               "$classname" \
               "$class" \
               "$role"
