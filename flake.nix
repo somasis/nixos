@@ -109,10 +109,12 @@
       nixosModules = {
         lib = import ./modules/lib.nix;
         theme = import ./modules/theme.nix;
-        home-manager.theme = import ./modules/theme-hm.nix;
-
         impermanence = import ./modules/impermanence.nix;
-        home-manager.impermanence = import ./modules/impermanence-hm.nix;
+
+        home-manager = {
+          theme = import ./modules/theme-hm.nix;
+          impermanence = import ./modules/impermanence-hm.nix;
+        };
       };
 
       formatter =
