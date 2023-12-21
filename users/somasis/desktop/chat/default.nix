@@ -3,8 +3,8 @@
     # ./facebook.nix
     # ./irc.nix
     # ./pidgin.nix
-    # ./signal.nix
     ./discord.nix
+    ./signal.nix
     ./zoom.nix
   ];
 }

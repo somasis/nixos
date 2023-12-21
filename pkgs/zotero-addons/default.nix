@@ -166,4 +166,19 @@ in
       platforms = platforms.all;
     };
   };
+
+  zotero-delitemwithatt = buildZoteroXpiAddon rec {
+    pname = "zotero-delitemwithatt";
+    version = "0.1.06";
+    addonId = "delitemwithatt@redleaf.me";
+
+    url = "https://github.com/redleafnew/delitemwithatt/releases/download/${version}/delitemwithatt.xpi";
+    hash = "sha256-VM2TRd/Z9kkivOW6jbFgigvZZt+MpJSdavV6PJNSDe4=";
+
+    meta = with lib; {
+      homepage = "https://github.com/redleafnew/delitemwithatt";
+      license = [ licenses.agpl3 ];
+      platforms = platforms.all;
+    };
+  };
 }

@@ -86,9 +86,8 @@
     mounts =
       let
         defaultOptions = [
-          "vfs-cache-mode=full"
+          "vfs-cache-mode=writes"
           "vfs-cache-max-size=1G"
-          "vfs-refresh"
           "write-back-cache"
         ];
       in
@@ -97,21 +96,21 @@
           remote = "somasis@spinoza.7596ff.com";
           what = "";
           where = "${config.home.homeDirectory}/mnt/sftp/spinoza.7596ff.com";
-          options = defaultOptions;
+          # options = defaultOptions;
         };
 
         spinoza-raid = {
           remote = "somasis@spinoza.7596ff.com";
-          what = "/mnt/raid";
+          what = "/mnt/raid/somasis";
           where = "${config.home.homeDirectory}/mnt/sftp/spinoza.7596ff.com_raid";
-          options = defaultOptions;
+          # options = defaultOptions;
         };
 
         whatbox = {
           remote = "somasis@genesis.whatbox.ca";
           what = "";
           where = "${config.home.homeDirectory}/mnt/sftp/genesis.whatbox.ca";
-          options = defaultOptions;
+          # options = defaultOptions;
         };
 
         gdrive-appstate = rec {
@@ -119,7 +118,7 @@
           what = "";
           where = "${config.home.homeDirectory}/mnt/gdrive/appstate";
 
-          options = defaultOptions ++ [ "cache-dir=${config.xdg.cacheHome}/rclone/vfs-${remote}" ];
+          # options = defaultOptions ++ [ "cache-dir=${config.xdg.cacheHome}/rclone/vfs-${remote}" ];
         };
 
         gdrive-appstate-shared = rec {
@@ -127,7 +126,7 @@
           what = "";
           where = "${config.home.homeDirectory}/mnt/gdrive/appstate-shared";
 
-          options = defaultOptions ++ [ "cache-dir=${config.xdg.cacheHome}/rclone/vfs-${remote}" ];
+          # options = defaultOptions ++ [ "cache-dir=${config.xdg.cacheHome}/rclone/vfs-${remote}" ];
         };
 
         gdrive-personal = rec {
@@ -135,7 +134,7 @@
           what = "";
           where = "${config.home.homeDirectory}/mnt/gdrive/personal";
 
-          options = defaultOptions ++ [ "cache-dir=${config.xdg.cacheHome}/rclone/vfs-${remote}" ];
+          # options = defaultOptions ++ [ "cache-dir=${config.xdg.cacheHome}/rclone/vfs-${remote}" ];
         };
 
         gdrive-personal-shared = rec {
@@ -143,19 +142,19 @@
           what = "";
           where = "${config.home.homeDirectory}/mnt/gdrive/personal-shared";
 
-          options = defaultOptions ++ [ "cache-dir=${config.xdg.cacheHome}/rclone/vfs-${remote}" ];
+          # options = defaultOptions ++ [ "cache-dir=${config.xdg.cacheHome}/rclone/vfs-${remote}" ];
         };
 
         gphotos-personal = {
           remote = "gphotos-personal";
           what = "";
           where = "${config.home.homeDirectory}/mnt/gphotos/personal";
-          options = defaultOptions;
+          # options = defaultOptions;
         };
       };
   };
 
-  # systemd.user.tmpfiles.rules = [
-  #   "L+ ${config.home.homeDirectory}/vault - - - - ${config.home.homeDirectory}/mnt/sftp/spinoza.7596ff.com_raid/backup/vault"
-  # ];
+  home.file."vault".source = lib.mkIf (osConfig.networking.fqdnOrHostName != "spinoza.7596ff.com")
+    (config.lib.file.mkOutOfStoreSymlink "${config.somasis.mounts.mounts.spinoza-raid.where}/backup/vault")
+  ;
 }

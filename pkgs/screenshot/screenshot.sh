@@ -135,7 +135,7 @@ else
             -A "file=Open" \
             -A "directory=Open containing directory" \
             "Took screenshot" \
-            "\"$(tilde "${b}".png)\""
+            "$(tilde "${b}".png)"
     )
 
     case "${action}" in

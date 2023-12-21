@@ -33,6 +33,9 @@
   # Manage CPU temperature.
   services.thermald.enable = true;
 
+  # Manage battery life automatically.
+  services.tlp.enable = true;
+
   # Automatically `nice` programs for better performance.
   services.ananicy = {
     enable = true;

@@ -256,7 +256,7 @@ in
 
     timers.fetch-didyouknow = {
       Unit.Description = "Fetch Wikipedia's 'Did you know?' text for the current day, every day";
-      Install.WantedBy = [ "timers.target" "set-didyouknow.service" ];
+      Install.WantedBy = [ "timers.target" ];
       Unit.PartOf = [ "timers.target" ];
 
       Timer = {
@@ -290,6 +290,7 @@ in
 
     services.set-didyouknow = {
       Unit.Description = "Cycle the currently displaying 'Did you know?' widget text";
+      Unit.Wants = [ "fetch-didyouknow.service" ];
       Install.WantedBy = [ "stw-didyouknow.service" ];
 
       Service = {

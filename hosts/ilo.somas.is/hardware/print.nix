@@ -2,6 +2,8 @@
   services.printing = {
     enable = true;
     browsing = true;
+
+    drivers = [ pkgs.hplip ];
   };
 
   # Necessary for discovering printers on the network.
@@ -9,7 +11,7 @@
   # <https://github.com/apple/cups/issues/5452>
   services.avahi = {
     enable = true;
-    nssmdns = true;
+    nssmdns4 = true;
   };
 
   cache.directories = [ "/var/cache/cups" ];

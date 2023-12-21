@@ -26,7 +26,7 @@ let
   ;
 in
 rec {
-  # nixpkgs-unstable's khal runs into a ridiculous amount of build failures.
+  # NOTE nixpkgs-unstable's khal runs into a ridiculous amount of build failures.
   nixpkgs.overlays = [ (final: prev: { inherit (pkgs.stable) khal; }) ];
 
   accounts.calendar = {

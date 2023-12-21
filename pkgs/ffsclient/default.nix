@@ -5,16 +5,16 @@
 }:
 buildGoModule rec {
   pname = "firefox-sync-client";
-  version = "1.5.0";
+  version = "1.6.0";
 
   src = fetchFromGitHub {
     owner = "Mikescher";
     repo = pname;
     rev = "v${version}";
-    hash = "sha256-9CxXVSPs5BPlt/g50soatIQdjdydgZLkrwgAliH7/Zk=";
+    hash = "sha256-Zl+7JkOcX0R15+s1jZPtoIPPW8yWR2VsgkHyj7DW/F4=";
   };
 
-  vendorHash = "sha256-rR9uQ23llvxVD3+GkfyZJh268G8ugNkrHRC/9kmmpdU=";
+  vendorHash = "sha256-Gb+4fxMBgvPB9Ki7zIwscY9l2kJ+tuE1Mc3W08YTfk8=";
 
   # requires network
   doCheck = false;

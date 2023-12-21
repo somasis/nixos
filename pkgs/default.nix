@@ -83,7 +83,6 @@ lib.recursiveUpdate
     bandcamp-collection-downloader = callPackage ./bandcamp-collection-downloader { };
     execshell = callPackage ./execshell { };
     ffsclient = callPackage ./ffsclient { };
-    mail-deduplicate = final.python3Packages.callPackage ./mail-deduplicate { };
     notify-send-all = callPackage ./notify-send-all { };
     wcal = callPackage ./wcal { };
 
@@ -98,6 +97,9 @@ lib.recursiveUpdate
     linja-pona = callPackage ./linja-pona { };
     linja-suwi = callPackage ./linja-suwi { };
     sitelen-pona-pi-lasin-lukin = callPackage ./sitelen-pona-pi-lasin-lukin { };
+
+    newslinkrss = final.python3Packages.callPackage ./newslinkrss { };
+    mail-deduplicate = final.python3Packages.callPackage ./mail-deduplicate { };
 
     kakounePlugins = import ./kakoune-plugins final prev;
     zotero-addons = import ./zotero-addons final prev;

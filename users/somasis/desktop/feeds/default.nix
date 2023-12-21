@@ -179,6 +179,7 @@ in
 
       # Notifications
       { tags = [ "computer" "github" "notification" ]; title = "GitHub: timeline"; url = feeds.urls.secret "https://github.com/somasis.private.atom?token=%s" "www/github.com/somasis.private.atom"; }
+      { tags = [ "media" "music" "notification" ]; title = "Music: new releases"; url = feeds.urls.secret "https://muspy.com/feed?id=%s" "www/muspy.com/kylie@somas.is.rss"; }
 
       # OpenStreetMap
       { tags = [ "news" "openstreetmap" ]; title = "weeklyOSM"; url = feeds.urls.filter "https://www.weeklyosm.eu/feed" feeds.filters.discardContent; }
@@ -340,4 +341,5 @@ in
 
       keyBindings.normal."zpf" = "feeds";
     };
+  home.packages = [ pkgs.newslinkrss ];
 }

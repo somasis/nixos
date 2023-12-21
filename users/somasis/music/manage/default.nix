@@ -189,6 +189,7 @@ let
   ;
 
   beets = pkgs.beets.override {
+    aacgain = pkgs.stable.aacgain;
     pluginOverrides = {
       # beetcamp = { enable = true; propagatedBuildInputs = [ beetcamp ]; };
       # fetchartist = { enable = true; propagatedBuildInputs = [ beets-fetchartist ]; };
@@ -215,11 +216,14 @@ in
     ./tagging.nix
   ];
 
+  # NOTE fix aacgain build failure on nixpkgs unstable (which causes beets to fail.
+  nixpkgs.overlays = [ (final: prev: { inherit (pkgs.stable) aacgain; }) ];
+
   xdg.userDirs.music = "${config.home.homeDirectory}/audio/library";
 
   home.file = lib.optionalAttrs notServer {
-    "audio/library/source".source = config.lib.file.mkOutOfStoreSymlink "${config.home.homeDirectory}/mnt/sftp/spinoza.7596ff.com_raid/somasis/audio/library/source";
-    "audio/library/lossless".source = config.lib.file.mkOutOfStoreSymlink "${config.home.homeDirectory}/mnt/sftp/spinoza.7596ff.com_raid/somasis/audio/library/lossless";
+    "audio/library/source".source = config.lib.file.mkOutOfStoreSymlink "${config.home.homeDirectory}/mnt/sftp/spinoza.7596ff.com_raid/audio/library/source";
+    "audio/library/lossless".source = config.lib.file.mkOutOfStoreSymlink "${config.home.homeDirectory}/mnt/sftp/spinoza.7596ff.com_raid/audio/library/lossless";
   };
 
   home.packages = [

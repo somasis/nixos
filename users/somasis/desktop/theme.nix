@@ -37,6 +37,11 @@
     # pkgs.roboto
   ];
 
+  xdg.dataFile = {
+    "Kvantum".source = "${pkgs.arc-kde-theme}/share/Kvantum";
+    "color-schemes".source = "${pkgs.arc-kde-theme}/share/color-schemes";
+  };
+
   # See <configuration.nix> for actual font settings; this is just to make fontconfig
   # see the fonts installed by home-manager.
   fonts.fontconfig.enable = true;

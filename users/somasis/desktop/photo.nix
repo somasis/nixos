@@ -1,4 +1,10 @@
-{ lib, config, pkgs, ... }: {
+{ lib
+, config
+, pkgs
+, ...
+}: {
+  xdg.userDirs.pictures = "${config.home.homeDirectory}/pictures";
+
   home.packages = [
     pkgs.nsxiv
 
@@ -16,19 +22,22 @@
   ];
 
   persist.directories = [
-    { method = "symlink"; directory = "pictures"; }
+    { method = "symlink"; directory = config.lib.somasis.relativeToHome config.xdg.userDirs.pictures; }
+
     { method = "symlink"; directory = config.lib.somasis.xdgConfigDir "GIMP"; }
+    { method = "symlink"; directory = config.lib.somasis.xdgConfigDir "gmic"; }
+
     { method = "symlink"; directory = config.lib.somasis.xdgConfigDir "darktable"; }
     { method = "symlink"; directory = config.lib.somasis.xdgConfigDir "inkscape"; }
   ];
 
   cache.directories = [
     { method = "symlink"; directory = config.lib.somasis.xdgCacheDir "gimp"; }
+    { method = "symlink"; directory = config.lib.somasis.xdgCacheDir "gmic"; }
+
     { method = "symlink"; directory = config.lib.somasis.xdgCacheDir "darktable"; }
     { method = "symlink"; directory = config.lib.somasis.xdgCacheDir "gallery-dl"; }
   ];
-
-  xdg.userDirs.pictures = "${config.home.homeDirectory}/pictures";
 
   xdg.mimeApps = {
     defaultApplications = {

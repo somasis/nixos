@@ -13,9 +13,10 @@ let
     set -euo pipefail
 
     : "''${QUTE_FIFO:?}"
+    : "''${QUTE_URL:=''${1?no URL was provided}}"
     PATH=${lib.makeBinPath [ pkgs.translate-shell ] }:"$PATH"
 
-    url=$(trans -no-browser -- "$1")
+    url=$(trans -no-browser -- "$QUTE_URL")
     printf 'open -t -r %s\n' "$url" > "''${QUTE_FIFO}"
   '';
 
@@ -494,7 +495,7 @@ in
 
     # enableDefaultBindings = false;
     aliases = {
-      translate = "spawn -u ${translate} {url}";
+      translate = "spawn -u ${translate}";
       yank-text-anchor = "spawn -u ${yank-text-anchor}";
     };
 
@@ -503,7 +504,7 @@ in
       normal = {
         "<Shift+Escape>" = "mode-enter passthrough";
 
-        "zpt" = "translate";
+        "zpt" = "translate {url}";
         "ya" = "yank-text-anchor";
 
         "ql" = "cmd-set-text -s :quickmark-load";
@@ -651,7 +652,7 @@ in
     };
   };
 
-  home.packages = [ pkgs.qutebrowser-sync ];
+  home.packages = [ pkgs.qutebrowser-sync pkgs.ffsclient ];
 
   # services.dunst.settings.zz-qutebrowser = {
   #   desktop_entry = "org.qutebrowser.qutebrowser";

@@ -1,6 +1,7 @@
 --- ./script.js
 +++ ./script.js
-@@ -40,49 +40,49 @@ const config = {
+@@ -40,51 +40,51 @@ const config = {
+   debug: false,
    // Shared
    addAddMutedWordMenuItem: true,
    alwaysUseLatestTweets: true,
@@ -34,6 +35,7 @@
 +  hideFollowingMetrics: false,
 -  hideForYouTimeline: true,
 +  hideForYouTimeline: false,
+   hideGrokNav: true,
    hideHelpCenterNav: true,
 -  hideKeyboardShortcutsNav: false,
 +  hideKeyboardShortcutsNav: true,

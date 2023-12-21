@@ -16,12 +16,12 @@ stdenvNoCC.mkDerivation rec {
 
   nativeBuildInputs = [ makeWrapper ];
 
-  jar = "${placeholder "out"}/share/bandcamp-collection-downloader/bandcamp-collection-downloader.jar";
-
   installPhase = ''
+    mkdir -p $out/share/bandcamp-collection-downloader/
+    cp $src $out/share/bandcamp-collection-downloader/bandcamp-collection-downloader.jar
     makeWrapper ${jre_headless}/bin/java $out/bin/bandcamp-collection-downloader \
         --argv0 bandcamp-collection-downloader \
-        --add-flags "-jar $jar"
+        --add-flags "-jar $out/share/bandcamp-collection-downloader/bandcamp-collection-downloader.jar"
   '';
 
   meta = with lib; {

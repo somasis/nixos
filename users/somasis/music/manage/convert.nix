@@ -10,7 +10,7 @@
 
     alternatives.lossy = {
       directory = "${config.xdg.userDirs.music}/lossy";
-      formats = [ "opus" ];
+      formats = "opus";
 
       query = "";
 

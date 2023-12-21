@@ -40,7 +40,6 @@
       max-jobs = 8;
       log-lines = 1000;
 
-      connect-timeout = 5;
 
       auto-optimise-store = true;
       min-free = 1024000000; # 512 MB
@@ -54,6 +53,9 @@
 
       builders-use-substitutes = true;
 
+      connect-timeout = 5;
+      http-connections = 64;
+      max-substitution-jobs = 64;
       substituters = [
         # Prefer HTTP nix-serve over the SSH tunnel to the server.
         # Faster for multiple missing-path queries.

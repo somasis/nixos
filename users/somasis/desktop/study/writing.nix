@@ -268,6 +268,14 @@ rec {
   #     };
   # };
 
+  # services.sxhkd.keybindings."@F1" = pkgs.writeShellScript "conditional-f1" ''
+  #   case "$(xprop -id "$(xdotool getactivewindow)" WM_CLASS in
+  #       libreoffice*
+  #   pkill -USR2 -x sxhkd
+  #   ${pkgs.xdotool}/bin/xdotool key F1
+  #   pkill -USR2 -x sxhkd
+  # '';
+
   somasis.tunnels.tunnels.languagetool = {
     port = 3864;
     remote = "somasis@spinoza.7596ff.com";

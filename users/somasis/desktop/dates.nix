@@ -19,6 +19,12 @@ let
     : "''${XDG_RUNTIME_DIR:=/run/user/$(id -u)}"
     runtime="$XDG_RUNTIME_DIR/dates-calendar"
 
+    # current_timezone=$(date +%z)
+    # ${lib.toShellVar "home_timezone" (osConfig.time.timeZone)}
+    # home_timezone=$(TZ="$home_timezone" date +%z)
+    # start_time_current=$(TZ="$current_timezone" date +%H:%M)
+    # start_time_home=$(TZ="$home_timezone" date +%H:%M)
+
     output="$runtime/output.txt"
     calendar="$runtime/calendar.txt"
     dates="$runtime/dates.txt"
@@ -27,6 +33,14 @@ let
     height="$runtime/height.txt"
 
     mkdir -p "$runtime"
+
+    # current_timezone_offset_from_home=
+    # if [[ "$current_timezone" != "$home_timezone" ]]; then
+    #     current_timezone_offset_from_home=$(datediff --from-zone="$home_timezone" -i "%H:%M" -f "%0H:%0M" "$start_time_home" "$start_time_current")
+    #     case "$current_timezone_offset_from_home" in
+    #         *':00') current_timezone_offset_from_home= ;;
+    #     esac
+    # fi
 
     trap 'trap - TERM EXIT; rm -f "$output"' EXIT INT TERM QUIT HUP
     touch "$output" "$calendar" "$dates" "$events" "$width" "$height"

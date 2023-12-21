@@ -60,6 +60,7 @@ in
         "widget.gtk.native-context-menus" = true;
         "widget.gtk.overlay-scrollbars.enabled" = true;
         "widget.gtk.theme-scrollbar-colors.enabled" = false;
+        "mail.openMessageBehavior" = 0; # Open messages in new windows instead of tabs
 
         "mail.tabs.tabMinWidth" = 260; # Align tab with settings sidebar
         "mail.tabs.tabMaxWidth" = 260;
@@ -80,200 +81,256 @@ in
         "toolkit.legacyUserProfileCustomizations.stylesheets" = true;
       };
 
-      userChrome =
-        let
-          modulateColor = colorName: color:
-            map
-              (intensity:
-                let
-                  amount =
-                    if intensity == 50 then
-                      0.0
-                    else
-                      if (intensity - 50) == 0 then
-                        0.0
-                      else if (intensity - 50) < 0 then
-                        ((intensity - 50) / -1) * .01
-                      else
-                        (intensity - 50) * .01
-                  ;
+      userChrome = lib.fileContents (pkgs.runCommandLocal "userChrome.css"
+        {
+          css =
+            let
+              modulateColor = colorName: color:
+                map
+                  (intensity:
+                    let
+                      amount =
+                        if intensity == 50 then
+                          0.0
+                        else
+                          if (intensity - 50) == 0 then
+                            0.0
+                          else if (intensity - 50) < 0 then
+                            ((intensity - 50) / -1) * .01
+                          else
+                            (intensity - 50) * .01
+                      ;
 
-                  modulatedColor =
-                    if intensity == 50 then
-                      color
-                    else if intensity > 50 then
-                      config.lib.somasis.colors.saturate amount color
-                    else # if intensity < 50
-                      config.lib.somasis.colors.desaturate amount color
-                  ;
+                      modulatedColor =
+                        if intensity == 50 then
+                          color
+                        else if intensity > 50 then
+                          config.lib.somasis.colors.saturate amount color
+                        else # if intensity < 50
+                          config.lib.somasis.colors.desaturate amount color
+                      ;
 
-                  paddedIntensity = number:
-                    if (builtins.stringLength "${toString number}") >= 3 then
-                      toString number
-                    else
-                      lib.fixedWidthString 2 "0" (toString number)
-                  ;
-                in
-                "--color-${colorName}-${paddedIntensity intensity}: ${config.lib.somasis.colors.format ''hex'' modulatedColor} !important; /* tc.${colorName} */"
-              )
-              [ 05 10 15 20 25 30 35 40 45 50 55 60 65 70 75 80 85 90 95 100 ]
-          ;
-        in
-        ''
-          * {
-            /* Disable animations */
-            transition: none !important;
+                      paddedIntensity = number:
+                        if (builtins.stringLength "${toString number}") >= 3 then
+                          toString number
+                        else
+                          lib.fixedWidthString 2 "0" (toString number)
+                      ;
+                    in
+                    "--color-${colorName}-${paddedIntensity intensity}: ${config.lib.somasis.colors.format ''hex'' modulatedColor} !important; /* tc.${colorName} */"
+                  )
+                  [ 05 10 15 20 25 30 35 40 45 50 55 60 65 70 75 80 85 90 95 100 ]
+              ;
+            in
+            ''
+              * {
+                /* Disable animations */
+                transition: none !important;
 
-            /* Square everything */
-            border-radius: 0 !important;
+                /* Square everything */
+                border-radius: 0 !important;
 
-            /* No shadows */
-            box-shadow: none !imporatnt;
-          }
+                /* No shadows */
+                box-shadow: none !imporatnt;
+              }
 
-          :host, :root {
-            /* Disable animations */
-            --transition-duration: 0 !important;
+              :host, :root {
+                /* Disable animations */
+                --transition-duration: 0 !important;
 
-            --system-color-accent: ${tc.accent} !important; /* tc.accent */
-            --system-color-accent-hover: ${tc.accent} !important; /* tc.accent */
-            --system-color-accent-active: ${tc.accent} !important; /* tc.accent */
-            --color-accent-primary: ${tc.accent} !important; /* tc.accent */
-            --color-accent-primary-hover: ${tc.accent} !important; /* tc.accent */
-            --color-accent-primary-active: ${tc.accent} !important; /* tc.accent */
+                --system-color-accent: ${tc.accent} !important; /* tc.accent */
+                --system-color-accent-hover: ${tc.accent} !important; /* tc.accent */
+                --system-color-accent-active: ${tc.accent} !important; /* tc.accent */
+                --color-accent-primary: ${tc.accent} !important; /* tc.accent */
+                --color-accent-primary-hover: ${tc.accent} !important; /* tc.accent */
+                --color-accent-primary-active: ${tc.accent} !important; /* tc.accent */
 
-            /* Reset colors to fit with my theme */
-            --primary: ${tc.accent} !important; /* tc.accent */
-            --treeitem-background-active: ${tc.accent} !important; /* tc.accent */
-            --button-active-text-color: #ffffff !important;
-            --button-active-background-color: ${tc.accent} !important; /* tc.accent */
-            --button-primary-active-background-color: ${tc.accent} !important; /* tc.accent */
+                /* Reset colors to fit with my theme */
+                --primary: ${tc.accent} !important; /* tc.accent */
+                --color-accent-primary: ${tc.accent} !important; /* tc.accent */
+                --color-accent-primary-hover: ${tc.accent} !important; /* tc.accent */
+                --color-accent-primary-active: ${tc.accent} !important; /* tc.accent */
 
-            --button-pressed-shadow: none;
+                --button-pressed-shadow: none !important;
+                --button-pressed-indicator-shadow: none !important;
 
-            --listbox-hover: var(--tree-view-bg);
-            --treeitem-background-hover: var(--tree-view-bg);
+                --button-border-color: ${tc.lightBorder} !important;
+                --button-border-size: 1px !important;
+                --button-background-color: #fbfbfc !important;
+                --button-text-color: #5c616c !important;
 
-            --listbox-selected-bg: ${tc.accent} !important; /* tc.accent */
-            --listbox-focused-selected-bg: ${tc.accent} !important; /* tc.accent */
-            --selected-item-color: ${tc.accent} !important; /* tc.accent */
-            --selected-item-text-color: #ffffff !important;
+                --button-background-color-hover: ${tc.accent} !important; /* tc.accent */
+                --button-hover-background-color: #ffffff !important;
+                --button-hover-text-color: #5c616c !important;
 
-            --toolbar-button-hover-background-color: initial;
-            --toolbar-button-hover-border-color: initial;
-            --toolbar-button-hover-checked-color: initial;
-            --toolbarbutton-hover-background: initial;
-            --toolbarbutton-hover-bordercolor: initial;
-            --toolbar-button-active-background-color: ${tc.accent}; /* tc.accent */
-            --toolbar-button-active-border-color: ${tc.accent}; /* tc.accent */
-            --toolbarbutton-active-background: ${tc.accent}; /* tc.accent */
-            --toolbarbutton-active-bordercolor: ${tc.accent}; /* tc.accent */
-            --toolbarbutton-checked-background: ${tc.accent}; /* tc.accent */
-            --toolbarbutton-hover-boxshadow: none;
+                --button-active-background-color: ${tc.accent} !important; /* tc.accent */
+                --button-active-text-color: #ffffff !important;
+                --button-background-color-active: ${tc.accent} !important; /* tc.accent */
 
-            --menu-color: ${tc.menuForeground}; /* tc.menuForeground */
-            --menu-border-color: ${tc.menuBorder}; /* tc.menuBorder */
-            --menu-background-color: ${tc.menuBackground}; /* tc.menuBackground */
+                --button-primary-active-background-color: ${tc.accent} !important; /* tc.accent */
 
-            ${lib.concatLines (
-              modulateColor "red" tc.red
-              ++ modulateColor "green" tc.green
-              ++ modulateColor "orange" tc.yellow
-              ++ modulateColor "yellow" tc.brightYellow
-              ++ modulateColor "teal" tc.cyan
-              ++ modulateColor "amber" tc.brightRed
-              ++ modulateColor "blue" tc.blue
-              ++ modulateColor "purple" tc.magenta
-              ++ modulateColor "magenta" tc.brightMagenta
-              ++ modulateColor "brown" tc.black
-              ++ modulateColor "white" tc.white
-            )}
+                --listbox-hover: #ffffff !important;
+                --treeitem-background-hover: #ffffff !important;
+                --treeitem-background-selected: ${tc.accent} !important; /* tc.accent */
+                --treeitem-background-active: ${tc.accent} !important; /* tc.accent */
 
-            --color-blue-70: ${tc.accent} !important; /* tc.accent */
-          }
 
-          #folderPaneWriteMessage, #folderPaneWriteMessage:hover /* New message button */
-          {
-            background-color: ${tc.accent} !important; /* tc.accent */
-          }
+                --listbox-selected-bg: ${tc.accent} !important; /* tc.accent */
+                --listbox-focused-selected-bg: ${tc.accent} !important; /* tc.accent */
+                --selected-item-color: ${tc.accent} !important; /* tc.accent */
+                --selected-item-text-color: #ffffff !important;
 
-          /* Message list */
+                --toolbar-button-hover-background-color: initial !important;
+                --toolbar-button-hover-border-color: initial !important;
+                --toolbar-button-hover-checked-color: initial !important;
+                --toolbarbutton-hover-background: initial !important;
+                --toolbarbutton-hover-bordercolor: initial !important;
+                --toolbar-button-active-background-color: ${tc.accent} !important; /* tc.accent */
+                --toolbar-button-active-border-color: ${tc.accent} !important; /* tc.accent */
+                --toolbarbutton-active-background: ${tc.accent} !important; /* tc.accent */
+                --toolbarbutton-active-bordercolor: ${tc.accent} !important; /* tc.accent */
+                --toolbarbutton-checked-background: ${tc.accent} !important; /* tc.accent */
+                --toolbarbutton-hover-boxshadow: none !important;
 
-          /* Use correct foreground color on selected messages */
-          [is="tree-view-table-body"] > .selected {
-            color: var(--selected-item-text-color);
-          }
+                --menu-color: ${tc.menuForeground} !important; /* tc.menuForeground */
+                --menu-border-color: ${tc.menuBorder} !important; /* tc.menuBorder */
+                --menu-background-color: ${tc.menuBackground} !important; /* tc.menuBackground */
 
-          /* Use Arc's style for toolbars */
-          #titlebar,
-          #toolbar-menubar,
-          unified-toolbar,
-          #tabs-toolbar
-          {
-            background: ${tc.background} !important; /* tc.background */
-            color: ${tc.foreground} !important; /* tc.foreground */
-            box-shadow: none !important;
-          }
+                --sidebar-background-color: #ffffff !important;
+                --foldertree-background: #ffffff !important;
 
-          #unifiedToolbar > toolbarbutton#spacesPinnedButton,
-          #status-bar > #spacesToolbarReveal {
-            display: none !important;
-          }
+                ${lib.concatLines (
+                  modulateColor "red" tc.red
+                  ++ modulateColor "green" tc.green
+                  ++ modulateColor "orange" tc.yellow
+                  ++ modulateColor "yellow" tc.brightYellow
+                  ++ modulateColor "teal" tc.cyan
+                  ++ modulateColor "amber" tc.brightRed
+                  ++ modulateColor "blue" tc.blue
+                  ++ modulateColor "purple" tc.magenta
+                  ++ modulateColor "magenta" tc.brightMagenta
+                  ++ modulateColor "brown" tc.black
+                  ++ modulateColor "white" tc.white
+                )}
 
-          #tabs-toolbar {
-            padding-inline: 0px !important;
-            padding-top: 0px !important;
-          }
+                --color-blue-70: ${tc.accent} !important; /* tc.accent */
+              }
 
-          .tab-line[selected="true"] {
-            background-color: transparent !important;
-          }
+              /* Don't dim window contents when inactive */
+              :-moz-window-inactive {
+                opacity: 1 !important;
+                color: revert !important;
+              }
 
-          .tab-content {
-            padding-inline: 8px;
-          }
+              /* Folder list */
 
-          menubar > menu[open] {
-            border-color: ${tc.accent} !important; /* tc.accent */
-            background-color: ${tc.accent} !important; /* tc.accent */
-            color: #ffffff !important;
-          }
+              /* Folder list > header toolbar */
+              #folderPaneWriteMessage, #folderPaneWriteMessage:hover /* New message button */
+              {
+                background-color: ${tc.accent} !important; /* tc.accent */
+              }
 
-          unified-toolbar {
-            border-bottom: 0px !important;
-          }
+              .container {
+                margin-inline: 0 !important;
+              }
 
-          .spaces-toolbar:not([hidden]) {
-            border-inline: none !important;
-            background-image: none !important;
-          }
-        '';
+              /* Message list */
 
-      # .button,
-      # .button:not([disabled="true"],
-      # .button:enabled:is([aria-pressed="true"]) {
-      #   color: var(--button-active-text-color) !important;
-      #   background-color: var(--toolbar-button-active-background-color) !important;
-      #   border-color: var(--toolbar-button-active-border-color) !important;
-      # }
+              /* Use correct foreground color on selected messages */
+              [is="tree-view-table-body"] > .selected {
+                color: var(--selected-item-text-color);
+              }
 
-      # .button.toolbar-button,
-      # .button.toolbar-button:active,
-      # .button.toolbar-button:hover:active,
-      # .button.unified-toolbar-button,
-      # .button.unified-toolbar-button:active,
-      # .button.unified-toolbar-button:hover:active,
-      # toolbarbutton:active,
-      # toolbarbutton:hover:active
-      # {
-      #   color: #ffffff;
-      #   background-color: ${tc.accent}; /* tc.accent */
-      # }
-      #
-      # /* Don't dim window contents when inactive */
-      # :-moz-window-inactive {
-      #   opacity: 1 !important;
-      # }
+              /* Message list > Quick filter bar */
+
+              .button.check-button::before {
+                display: none !important;
+              }
+
+              /* Use Arc's style for toolbars */
+              #titlebar,
+              #toolbar-menubar,
+              unified-toolbar,
+              #tabs-toolbar
+              /* #quick-filter-bar, */
+              /* #folderPaneHeaderBar */
+              {
+                background: ${tc.background} !important; /* tc.background */
+                color: ${tc.foreground} !important; /* tc.foreground */
+                box-shadow: none !important;
+              }
+
+              #unifiedToolbar > toolbarbutton#spacesPinnedButton,
+              #status-bar > #spacesToolbarReveal {
+                display: none !important;
+              }
+
+              #tabs-toolbar {
+                padding-inline: 0px !important;
+                padding-top: 0px !important;
+              }
+
+              .tab-line[selected="true"] {
+                background-color: transparent !important;
+              }
+
+              .tab-content {
+                padding-inline: 8px;
+              }
+
+              menubar > menu[open] {
+                border-color: ${tc.accent} !important; /* tc.accent */
+                background-color: ${tc.accent} !important; /* tc.accent */
+                color: #ffffff !important;
+              }
+
+              unified-toolbar {
+                border-bottom: 0px !important;
+              }
+
+              .spaces-toolbar:not([hidden]) {
+                border-inline: none !important;
+                background-image: none !important;
+              }
+
+              /* Message view */
+
+              /* Message view > message notifications (remote content warnings, etc...) */
+              /* Disable box-shadow on remote content blocking notifications */
+              .container.infobar {
+                box-shadow: none !important;
+              }
+
+              /* Message view > message notifications (remote content warnings, etc...) */
+              /* Remove margins */
+              :host([message-bar-type="infobar"]) {
+                margin: 0 !important;
+              }
+            '';
+          # .button,
+          # .button:not([disabled="true"],
+          # .button:enabled:is([aria-pressed="true"]) {
+          #   color: var(--button-active-text-color) !important;
+          #   background-color: var(--toolbar-button-active-background-color) !important;
+          #   border-color: var(--toolbar-button-active-border-color) !important;
+          # }
+
+          # .button.toolbar-button,
+          # .button.toolbar-button:active,
+          # .button.toolbar-button:hover:active,
+          # .button.unified-toolbar-button,
+          # .button.unified-toolbar-button:active,
+          # .button.unified-toolbar-button:hover:active,
+          # toolbarbutton:active,
+          # toolbarbutton:hover:active
+          # {
+          #   color: #ffffff;
+          #   background-color: ${tc.accent}; /* tc.accent */
+          # }
+        } ''
+        ${pkgs.nodePackages.prettier}/bin/prettier --stdin-filepath userChrome.css <<<"$css" > "$out"
+      ''
+      );
     };
   };
 
@@ -301,10 +358,10 @@ in
     };
   };
 
-  services.sxhkd.keybindings."super + t" = pkgs.writeShellScript "thunderbird" ''
-    ${pkgs.systemd}/bin/systemctl start --user thunderbird.service
-    bspwm-hide-unhide 'thunderbird' 'Mail' '3pane'
-  '';
+  # services.sxhkd.keybindings."super + t" = pkgs.writeShellScript "thunderbird" ''
+  #   ${pkgs.systemd}/bin/systemctl start --user thunderbird.service
+  #   bspwm-hide-unhide 'thunderbird' 'Mail' '3pane'
+  # '';
 
   xsession.windowManager.bspwm.rules."thunderbird:Mail:*".locked = true;
 }

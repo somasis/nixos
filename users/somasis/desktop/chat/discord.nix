@@ -126,10 +126,10 @@ in
 
   xdg.configFile = {
     "${discordWindowClassName}/settings.json".text = lib.generators.toJSON { } {
-      openasar = {
-        setup = true;
-        quickstart = true;
-      };
+      # openasar = {
+      #   setup = true;
+      #   quickstart = true;
+      # };
 
       SKIP_HOST_UPDATE = true;
       DANGEROUS_ENABLE_DEVTOOLS_ONLY_ENABLE_IF_YOU_KNOW_WHAT_YOURE_DOING = true;
@@ -260,6 +260,8 @@ in
             ${config.systemd.user.services.discord.Service.ExecStart}
         ''}
   '';
+
+  # xsession.windowManager.bspwm.rules."discord:discord:*".locked = true;
 
   # services.xsuspender.rules.discord = {
   #   matchWmClassGroupContains = "discord";

@@ -46,10 +46,6 @@ let
   proxy = "https://login.proxy006.nclive.org/login";
 in
 {
-  nixpkgs.config.permittedInsecurePackages = [
-    "zotero-6.0.27" # CVE-2023-5217 / libvpx heap buffer overflow
-  ];
-
   programs.zotero = {
     enable = true;
 
@@ -112,17 +108,19 @@ in
     # };
 
     profiles.default = {
-      extensions = with pkgs.zotero-addons; [
-        cita
-        zotero-abstract-cleaner
-        zotero-auto-index
-        zotero-ocr
-        zotero-open-pdf
-        zotero-preview
-        zotero-robustlinks
-        zotero-storage-scanner
-        zotfile
-      ];
+      # TODO installation seems broken?
+      # extensions = with pkgs.zotero-addons; [
+      #   cita
+      #   zotero-abstract-cleaner
+      #   zotero-auto-index
+      #   zotero-ocr
+      #   zotero-open-pdf
+      #   zotero-preview
+      #   zotero-robustlinks
+      #   zotero-storage-scanner
+      #   zotfile
+      #   zotero-delitemwithatt
+      # ];
 
       settings =
         let
@@ -132,7 +130,11 @@ in
         in
         rec
         {
-          "intl.locale.requested" = locale;
+          # See <https://www.zotero.org/support/preferences/hidden_preferences> also.
+
+          # HACK: Workaround for Cita addon error
+          # <https://github.com/diegodlh/zotero-cita/issues/247>
+          "intl.locale.requested" = "en-CA"; # locale;
           "intl.accept_language" = "en-US, en";
 
           # Use Appalachian State University's OpenURL resolver
@@ -163,8 +165,9 @@ in
           "extensions.zotero.sortNotesChronologically" = true;
 
           # Item adding settings
-          "extensions.zotero.automaticSnapshots" = false;
+          "extensions.zotero.automaticSnapshots" = false; # Take snapshots of webpages when items are made from them
           "extensions.zotero.translators.RIS.import.ignoreUnknown" = false; # Don't discard unknown RIS tags when importing
+          "extensions.zotero.translators.attachSupplementary" = true; # "Translators should attempt to attach supplementary data when importing items"
 
           # Citation settings
           "extensions.zotero.export.lastStyle" = style;
@@ -266,7 +269,6 @@ in
           # Zotero PDF Preview
           "extensions.zotero.pdfpreview.previewTabName" = "PDF"; # Default tab name clashes with Zotero Citation Preview
 
-          "extensions.zotero.translators.attachSupplementary" = true;
           "ui.use_activity_cursor" = true;
 
           # LibreOffice extension settings
@@ -278,7 +280,8 @@ in
           "extensions.shortdoi.tag_multiple" = "#multiple_doi";
           "extensions.shortdoi.tag_nodoi" = "#no_doi";
 
-          "extensions.zotero.automaticScraperUpdates" = false; # Translators are sourced from a flake.
+          "extensions.zotero.automaticScraperUpdates" = true;
+
         };
 
       # TODO Hide all chrome: need to find a way to toggle this with <F1>.

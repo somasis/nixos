@@ -4,6 +4,8 @@
 : "${DMENU_RUN_HISTORY:=${XDG_CACHE_HOME}/dmenu/dmenu-run.cache}"
 : "${DMENU_RUN_SCRIPT:=${XDG_DATA_HOME}/dmenu/dmenu-run.sh}"
 
+: "${DMENU_RUN_HISTORY_LENGTH:=$((16 * 4))}"
+
 mkdir -p "${DMENU_RUN_HISTORY%/*}"
 
 executable_paths=()
@@ -43,7 +45,7 @@ touch "${DMENU_RUN_HISTORY}"
 
 line_i=0
 cat - "${DMENU_RUN_HISTORY}" <<<"${choice}" \
-    | head -n 24 \
+    | head -n "${DMENU_RUN_HISTORY_LENGTH}" \
     | grep -v \
         -e "^\s*$" \
         -e '^\..*' \

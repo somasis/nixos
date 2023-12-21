@@ -43,7 +43,11 @@
     implicitPolicyTarget = "allow";
   };
 
-  environment.systemPackages = [ pkgs.usbguard-notifier ];
+  environment.systemPackages = [
+    pkgs.usbguard-notifier
+    pkgs.framework-tool
+  ];
+
   systemd = {
     packages = [ pkgs.usbguard-notifier ];
     user.services.usbguard-notifier = {

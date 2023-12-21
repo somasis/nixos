@@ -86,19 +86,6 @@ in
     foreground = "#ffffff";
   };
 
-  services.sxhkd.keybindings."super + s" = pkgs.writeShellScript "signal" ''
-    ${pkgs.jumpapp}/bin/jumpapp \
-        -c ${lib.escapeShellArg signalWindowClassName} \
-        -i ${lib.escapeShellArg signalName} \
-        -f ${pkgs.writeShellScript "start-or-switch" ''
-            if ! ${pkgs.systemd}/bin/systemctl --user is-active -q signal.service >/dev/null 2>&1; then
-                ${pkgs.systemd}/bin/systemctl --user start signal.service && sleep 2
-            fi
-            exec ${lib.escapeShellArg signalName} >/dev/null 2>&1
-        ''} \
-        >/dev/null
-  '';
-
   systemd.user.services.signal = {
     Unit = {
       Description = signalDescription;
@@ -114,55 +101,54 @@ in
 
     Service = {
       Type = "simple";
-      ExecStart = "${signalPath} " + concatStringsSep " " (map (x: "--${x}") [
-        "start-in-tray"
-
-        # Force GPU-utilizing acceleration
-        # <https://wiki.archlinux.org/title/Chromium#Force_GPU_acceleration>
-        "ignore-gpu-blocklist"
-        "enable-gpu-rasterization"
-        "enable-zero-copy"
-
-        # Enable hardware video acceleration
-        # <https://wiki.archlinux.org/title/Chromium#Hardware_video_acceleration>
-        "enable-features=VaapiVideoDecoder"
-        "enable-accelerated-mjpeg-decode"
-        "enable-accelerated-video-decode"
-      ]);
+      ExecStart = "${signalPath} " + lib.cli.toGNUCommandLineShell { } {
+        start-in-tray = true;
+      };
 
       Restart = "on-abnormal";
     };
   };
 
-  services.xsuspender.rules.signal = {
-    matchWmClassGroupContains = "signal-desktop";
-    downclockOnBattery = 0;
-    suspendDelay = 300;
-    resumeEvery = 10;
-    resumeFor = 5;
+  services.sxhkd.keybindings."super + s" = pkgs.writeShellScript "signal" ''
+    ${pkgs.jumpapp}/bin/jumpapp \
+        -c ${lib.escapeShellArg signalWindowClassName} \
+        -i ${lib.escapeShellArg signalName} \
+        -f ${pkgs.writeShellScript "start-or-switch" ''
+            if ! ${pkgs.systemd}/bin/systemctl --user is-active -q signal.service; then
+                ${pkgs.systemd}/bin/systemctl --user start signal.service && sleep 2
+            fi
+            ${config.systemd.user.services.signal.Service.ExecStart}
+        ''}  '';
 
-    suspendSubtreePattern = ".";
+  # services.xsuspender.rules.signal = {
+  #   matchWmClassGroupContains = "signal-desktop";
+  #   downclockOnBattery = 0;
+  #   suspendDelay = 300;
+  #   resumeEvery = 10;
+  #   resumeFor = 5;
 
-    # Only suspend if signal isn't currently open, and no applications
-    # are playing on pulseaudio
-    execSuspend = builtins.toString (pkgs.writeShellScript "suspend" ''
-      ! ${pkgs.xdotool}/bin/xdotool search \
-          --limit 1 \
-          --onlyvisible \
-          --classname \
-          '^signal-desktop$' \
-          >/dev/null \
-          && test "$(
-              ${pkgs.ponymix}/bin/ponymix \
-                  --short \
-                  --sink-input \
-                  list \
-                  | wc -l
-              )" \
-              -eq 0
-      e=$?
-      ${pkgs.libnotify}/bin/notify-send -a xsuspender xsuspender "suspending $WM_NAME ($PID, $WID)"
-      exit $e
-    '');
-  };
+  #   suspendSubtreePattern = ".";
+
+  #   # Only suspend if signal isn't currently open, and no applications
+  #   # are playing on pulseaudio
+  #   execSuspend = builtins.toString (pkgs.writeShellScript "suspend" ''
+  #     ! ${pkgs.xdotool}/bin/xdotool search \
+  #         --limit 1 \
+  #         --onlyvisible \
+  #         --classname \
+  #         '^signal-desktop$' \
+  #         >/dev/null \
+  #         && test "$(
+  #             ${pkgs.ponymix}/bin/ponymix \
+  #                 --short \
+  #                 --sink-input \
+  #                 list \
+  #                 | wc -l
+  #             )" \
+  #             -eq 0
+  #     e=$?
+  #     ${pkgs.libnotify}/bin/notify-send -a xsuspender xsuspender "suspending $WM_NAME ($PID, $WID)"
+  #     exit $e
+  #   '');
+  # };
 }

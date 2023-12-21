@@ -47,10 +47,7 @@
         src = inputs.control-panel-for-twitter + "/script.js";
         patch = ./control-panel-for-twitter.patch;
       }
-      ''
-        cat "$src" > "$out"
-        ${pkgs.patch}/bin/patch -p1 -i "$patch" "$out"
-      ''
+      ''${pkgs.patch}/bin/patch -p1 -i "$patch" -o "$out" "$src"''
     )
 
     # Mastodon
