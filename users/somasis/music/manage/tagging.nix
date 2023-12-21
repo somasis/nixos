@@ -56,7 +56,6 @@
     ];
 
     artist_credit = true;
-    asciify_paths = true;
     original_date = true;
 
     import = {

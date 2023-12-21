@@ -330,6 +330,9 @@ in
       sort_item = "artist+ date+ album+ disc+ track+";
       sort_album = "artist+ date+ album+ disc+ track+";
 
+      # I simply cannot trust anyone to read tags properly.
+      id3v23 = true;
+
       plugins = [ "parentwork" "noimport" ]
         ++ lib.optional config.services.mpd.enable "mpdupdate";
 
