@@ -47,7 +47,7 @@
     extraConfig = {
       sendemail = {
         annotate = true;
-        smtpserver = "${config.programs.msmtp.package}/bin/msmtp";
+        smtpserver = "${config.programs.msmtp.package or pkgs.msmtp}/bin/msmtp";
       };
 
       init.defaultBranch = "main";

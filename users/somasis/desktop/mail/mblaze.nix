@@ -40,7 +40,7 @@
       Reply-From: ${replyFrom}
       Mailboxes: ${mailboxes}
 
-      Sendmail: ${config.programs.msmtp.package}/bin/sendmail
+      Sendmail: ${config.programs.msmtp.package or pkgs.msmtp}/bin/sendmail
     '';
 
   home.file.".mblaze/filter".text =
