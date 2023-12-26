@@ -1,4 +1,5 @@
 { config
+, pkgs
 , lib
 , osConfig
 , ...
@@ -6,7 +7,13 @@
 let inherit (osConfig.programs) steam; in
 assert steam.enable;
 {
-  persist.directories = [ "share/Steam" ];
+  persist.directories = [
+    "share/Steam"
+    { method = "symlink"; directory = "etc/r2modman"; }
+    { method = "symlink"; directory = "etc/r2modmanPlus-local"; }
+  ];
+
+  home.packages = [ pkgs.r2modman ];
 
   systemd.user.services.steam = {
     Unit = {
