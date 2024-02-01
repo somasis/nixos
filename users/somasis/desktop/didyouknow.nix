@@ -38,6 +38,7 @@ let
       pkgs.pandoc
       pkgs.pup
       pkgs.table
+      pkgs.jq
       pkgs.teip
     ]}:"$PATH"
 

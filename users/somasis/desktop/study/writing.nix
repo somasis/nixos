@@ -6,7 +6,7 @@
 }:
 let
   inherit (lib) replaceStrings;
-  inherit (config.lib.somasis) commaList xdgConfigDir;
+  inherit (config.lib.somasis) commaList xdgCacheDir xdgConfigDir;
   inherit (config.lib.somasis.generators) toXML;
 
   languageToolVersion = pkgs.languagetool.version;
@@ -179,7 +179,10 @@ rec {
     # files = [ xdgConfigDir "LanguageTool/LibreOffice/Languagetool.cfg" ];
   };
 
-  cache.directories = [{ method = "symlink"; directory = xdgConfigDir "LanguageTool/LibreOffice/cache"; }];
+  cache.directories = [
+    { method = "symlink"; directory = xdgConfigDir "LanguageTool/LibreOffice/cache"; }
+    { method = "symlink"; directory = xdgCacheDir "libreoffice/backups"; }
+  ];
   # log.files = [ (xdgConfigDir "LanguageTool/LibreOffice/LanguageTool.log") ];
 
   xdg.configFile = {

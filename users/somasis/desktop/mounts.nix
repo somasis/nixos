@@ -3,7 +3,20 @@
 , lib
 , osConfig
 , ...
-}: {
+}:
+let
+  cacheOptions = [
+    "vfs-cache-mode=full"
+    "vfs-cache-max-size=2G"
+
+    "vfs-read-ahead=128Mi"
+    "buffer-size=8Mi"
+
+    "vfs-fast-fingerprint"
+    # "write-back-cache"
+  ];
+in
+{
   # home.packages = [ pkgs.rclone pkgs.sshfs ];
 
   persist.directories = [{ method = "bindfs"; directory = config.lib.somasis.xdgConfigDir "rclone"; }];
@@ -18,6 +31,7 @@
       ++ [ "--fast-list" ]
       ++ [ "--human-readable" ]
       ++ [ "--use-mmap" ]
+      ++ map (flag: "--${flag}") cacheOptions
     ;
 
     remotes =
@@ -83,75 +97,67 @@
   somasis.mounts = {
     enable = true;
 
-    mounts =
-      let
-        defaultOptions = [
-          "vfs-cache-mode=writes"
-          "vfs-cache-max-size=1G"
-          "write-back-cache"
-        ];
-      in
-      {
-        spinoza = {
-          remote = "somasis@spinoza.7596ff.com";
-          what = "";
-          where = "${config.home.homeDirectory}/mnt/sftp/spinoza.7596ff.com";
-          # options = defaultOptions;
-        };
-
-        spinoza-raid = {
-          remote = "somasis@spinoza.7596ff.com";
-          what = "/mnt/raid/somasis";
-          where = "${config.home.homeDirectory}/mnt/sftp/spinoza.7596ff.com_raid";
-          # options = defaultOptions;
-        };
-
-        whatbox = {
-          remote = "somasis@genesis.whatbox.ca";
-          what = "";
-          where = "${config.home.homeDirectory}/mnt/sftp/genesis.whatbox.ca";
-          # options = defaultOptions;
-        };
-
-        gdrive-appstate = rec {
-          remote = "gdrive-appstate";
-          what = "";
-          where = "${config.home.homeDirectory}/mnt/gdrive/appstate";
-
-          # options = defaultOptions ++ [ "cache-dir=${config.xdg.cacheHome}/rclone/vfs-${remote}" ];
-        };
-
-        gdrive-appstate-shared = rec {
-          remote = "gdrive-appstate,shared_with_me";
-          what = "";
-          where = "${config.home.homeDirectory}/mnt/gdrive/appstate-shared";
-
-          # options = defaultOptions ++ [ "cache-dir=${config.xdg.cacheHome}/rclone/vfs-${remote}" ];
-        };
-
-        gdrive-personal = rec {
-          remote = "gdrive-personal";
-          what = "";
-          where = "${config.home.homeDirectory}/mnt/gdrive/personal";
-
-          # options = defaultOptions ++ [ "cache-dir=${config.xdg.cacheHome}/rclone/vfs-${remote}" ];
-        };
-
-        gdrive-personal-shared = rec {
-          remote = "gdrive-personal,shared_with_me";
-          what = "";
-          where = "${config.home.homeDirectory}/mnt/gdrive/personal-shared";
-
-          # options = defaultOptions ++ [ "cache-dir=${config.xdg.cacheHome}/rclone/vfs-${remote}" ];
-        };
-
-        gphotos-personal = {
-          remote = "gphotos-personal";
-          what = "";
-          where = "${config.home.homeDirectory}/mnt/gphotos/personal";
-          # options = defaultOptions;
-        };
+    mounts = {
+      spinoza = {
+        remote = "somasis@spinoza.7596ff.com";
+        what = "";
+        where = "${config.home.homeDirectory}/mnt/sftp/spinoza.7596ff.com";
+        # options = defaultOptions;
       };
+
+      spinoza-raid = {
+        remote = "somasis@spinoza.7596ff.com";
+        what = "/mnt/raid/somasis";
+        where = "${config.home.homeDirectory}/mnt/sftp/spinoza.7596ff.com_raid";
+        # options = defaultOptions;
+      };
+
+      whatbox = {
+        remote = "somasis@genesis.whatbox.ca";
+        what = "";
+        where = "${config.home.homeDirectory}/mnt/sftp/genesis.whatbox.ca";
+        # options = defaultOptions;
+      };
+
+      gdrive-appstate = rec {
+        remote = "gdrive-appstate";
+        what = "";
+        where = "${config.home.homeDirectory}/mnt/gdrive/appstate";
+
+        # options = defaultOptions ++ [ "cache-dir=${config.xdg.cacheHome}/rclone/vfs-${remote}" ];
+      };
+
+      gdrive-appstate-shared = rec {
+        remote = "gdrive-appstate,shared_with_me";
+        what = "";
+        where = "${config.home.homeDirectory}/mnt/gdrive/appstate-shared";
+
+        # options = defaultOptions ++ [ "cache-dir=${config.xdg.cacheHome}/rclone/vfs-${remote}" ];
+      };
+
+      gdrive-personal = rec {
+        remote = "gdrive-personal";
+        what = "";
+        where = "${config.home.homeDirectory}/mnt/gdrive/personal";
+
+        # options = defaultOptions ++ [ "cache-dir=${config.xdg.cacheHome}/rclone/vfs-${remote}" ];
+      };
+
+      gdrive-personal-shared = rec {
+        remote = "gdrive-personal,shared_with_me";
+        what = "";
+        where = "${config.home.homeDirectory}/mnt/gdrive/personal-shared";
+
+        # options = defaultOptions ++ [ "cache-dir=${config.xdg.cacheHome}/rclone/vfs-${remote}" ];
+      };
+
+      gphotos-personal = {
+        remote = "gphotos-personal";
+        what = "";
+        where = "${config.home.homeDirectory}/mnt/gphotos/personal";
+        # options = defaultOptions;
+      };
+    };
   };
 
   home.file."vault".source = lib.mkIf (osConfig.networking.fqdnOrHostName != "spinoza.7596ff.com")

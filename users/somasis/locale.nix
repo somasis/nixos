@@ -71,9 +71,11 @@ in
   # };
 
   systemd.user.sessionVariables = {
-    GTK_IM_MODULE = lib.mkForce "xim";
-    QT_IM_MODULE = lib.mkForce "xim";
-    XMODIFIERS = lib.mkForce "@:bim=fcitx";
+    inherit (config.home.sessionVariables)
+      GTK_IM_MODULE
+      QT_IM_MODULE
+      XMODIFIERS
+      ;
   };
 
   persist.directories = [{ method = "symlink"; directory = config.lib.somasis.xdgConfigDir "fcitx5"; }];

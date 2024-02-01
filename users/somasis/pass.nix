@@ -17,7 +17,7 @@
     enable = true;
     enableExtraSocket = true;
     enableSshSupport = false;
-    pinentryFlavor = "gtk2";
+    pinentryFlavor = "gnome3";
   };
 
   programs.password-store = {

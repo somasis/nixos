@@ -14,11 +14,11 @@
     pkgs.lbreakout2
     pkgs.libsForQt5.kpat
     pkgs.opentyrian
-    pkgs.pingus
+    # pkgs.pingus
     pkgs.sgt-puzzles
     pkgs.zaz
 
-    pkgs.pcsx2
+    # pkgs.pcsx2
 
     pkgs.space-cadet-pinball
   ];
@@ -29,7 +29,7 @@
     directories = [
       { method = "symlink"; directory = ".lbreakout2"; }
       { method = "symlink"; directory = ".zaz"; }
-      { method = "symlink"; directory = config.lib.somasis.xdgConfigDir "PCSX2"; }
+      # { method = "symlink"; directory = config.lib.somasis.xdgConfigDir "PCSX2"; }
       { method = "symlink"; directory = config.lib.somasis.xdgConfigDir "opentyrian"; }
       { method = "symlink"; directory = config.lib.somasis.xdgConfigDir "pingus-0.8"; }
       { method = "symlink"; directory = config.lib.somasis.xdgDataDir "kpat"; }

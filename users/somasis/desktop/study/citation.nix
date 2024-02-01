@@ -134,7 +134,7 @@ in
 
           # HACK: Workaround for Cita addon error
           # <https://github.com/diegodlh/zotero-cita/issues/247>
-          "intl.locale.requested" = "en-CA"; # locale;
+          "intl.locale.requested" = "en-CA";
           "intl.accept_language" = "en-US, en";
 
           # Use Appalachian State University's OpenURL resolver
@@ -488,12 +488,9 @@ in
   };
 
   systemd.user.services.zotero = {
-    Unit = {
-      Description = pkgs.zotero.meta.description;
-      PartOf = [ "graphical-session.target" ];
-      After = [ "picom.service" "tray.target" ];
-    };
-    Install.WantedBy = [ "graphical-session.target" ];
+    Unit.Description = config.programs.zotero.package.meta.description;
+    Unit.PartOf = [ "graphical-session-autostart.target" ];
+    Install.WantedBy = [ "graphical-session-autostart.target" ];
 
     Service = {
       Type = "simple";

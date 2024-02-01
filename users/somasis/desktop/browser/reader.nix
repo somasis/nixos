@@ -11,9 +11,12 @@ let
 
     : "''${QUTE_FIFO:?}"
     : "''${QUTE_URL:?}"
-    : "''${QUTE_HTML:?}"
 
-    html="''${QUTE_SELECTED_HTML:-$(<"$QUTE_HTML")}"
+    if [ -z "$QUTE_SELECTED_HTML" ]; then
+        html="$QUTE_SELECTED_HTML"
+    else
+        html=$(cat "$QUTE_HTML")
+    fi
 
     umask 0077
 
@@ -31,6 +34,11 @@ let
         printf "message-error \"rdrview: could not find article content in '%s'\"\n" "$QUTE_URL" > "$QUTE_FIFO"
         exit 1
     fi
+
+    html=$(
+        rdrview ''${QUTE_USER_AGENT:+-A "$QUTE_USER_AGENT"} \
+            -T title,byline,body -u "$base" -H <<<"$html"
+    )
 
     cat >"$tmp" <<EOF
     <!DOCTYPE html>
@@ -55,10 +63,7 @@ let
       </style>
     </head>
     <body>
-    $(
-        rdrview ''${QUTE_USER_AGENT:+-A "$QUTE_USER_AGENT"} \
-            -T title,byline,body -u "$base" -H <<<"$html"
-    )
+    $html
     </body>
     EOF
 

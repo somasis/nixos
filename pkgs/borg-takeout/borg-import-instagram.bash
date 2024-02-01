@@ -1,11 +1,26 @@
 usage() {
+    [[ "$#" -gt 0 ]] || printf 'error: %s\n' "$@" >&2
     cat >&2 <<'EOF'
-usage: borg-import-instagram username_YYYYMMDD.zip
+usage: borg-import-instagram [borg arguments --] username_YYYYMMDD.zip
 EOF
     exit 69
 }
 
-[[ "$#" -ge 1 ]] || usage
+borg_args=()
+case "$1" in
+    --) shift ;;
+    -*)
+        # Get list of args to pass to `borg`.
+        until [[ "$1" == '--' ]]; do
+            borg_args+=( "$1" )
+        done
+        shift
+        ;;
+esac
+
+if [[ "$#" -lt 1 ]]; then
+    usage 'no archives given'
+fi
 
 account=$(basename "$1" .zip)
 account=${account%_[0123456789][0123456789][0123456789][0123456789][0123456789][0123456789][0123456789][0123456789]}
@@ -21,7 +36,7 @@ printf '::instagram-%s-%s\n' "${account}" "${date}"
 
 # shellcheck disable=SC2016
 bsdtar -cf - --format=ustar @"$1" \
-    | borg \
+    | borg "${borg_args[@]}" \
         import-tar \
             --stats -p \
             --comment='imported with `borg import-tar`, via borg-import-instagram' \
@@ -29,12 +44,12 @@ bsdtar -cf - --format=ustar @"$1" \
             "::instagram-${account}-${date}.failed" \
             -
 
-borg \
+borg "${borg_args[@]}" \
     rename \
         "::instagram-${account}-${date}.failed" \
         "instagram-${account}-${date}"
 
-borg \
+borg "${borg_args[@]}" \
     prune \
         --keep-monthly=12 --keep-yearly=4 \
         -a "instagram-${account}-*"

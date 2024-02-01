@@ -25,7 +25,6 @@ let
       lib.generators.mkValueStringDefault { } v
   ;
 
-
   rcloneFormat = pkgs.formats.ini {
     listToValue = rcloneConfigValue;
     mkKeyValue = lib.generators.mkKeyValueDefault { mkValueString = rcloneConfigValue; } "=";
@@ -36,7 +35,7 @@ let
       inherit rcloneExe;
       jqExe = lib.getExe config.programs.jq.package;
     } ''
-    $rcloneExe ${lib.escapeShellArgs rcloneCfg.extraOptions} config providers \
+    $rcloneExe config providers \
         | $jqExe -e '
             map(.Name, (.Prefix // empty), (.Aliases // empty))
                 | flatten
@@ -93,7 +92,7 @@ in
       extraOptions = mkOption {
         type = with types; listOf nonEmptyStr;
         description = ''
-          Extra arguments to pass to all `rclone` invocations.
+          Extra arguments to pass to `rclone` invocations by default.
           See `rclone help flags` for a list of supported global flags, networking-related flags, etc.
         '';
         default = [ ];
@@ -157,7 +156,8 @@ in
               options = mkOption {
                 type = with types; listOf str;
                 description = ''
-                  Options to pass to `rclone mount`. See `rclone mount --help` for details.
+                  Options for `rclone mount` and the mount services *only*.
+                  See `rclone mount --help` for details.
                 '';
                 default = [ ];
                 example = [ "vfs-cache-max-size=1G" ];
@@ -233,8 +233,6 @@ in
           lib.hm.dag.entryAfter [ "linkGeneration" "writeBoundary" ]
             (
               let
-                rclone = "${rcloneExe} ${lib.escapeShellArgs rcloneCfg.extraOptions}";
-
                 getRemovedKeys = pkgs.writeJqScript "get-removed-keys.jq" { null-input = true; raw-output = true; } ''
                   [
                     (
@@ -262,28 +260,29 @@ in
                     )[]
                 '';
 
-                prune-rclone-config = pkgs.writeShellScript "prune-rclone-config" ''
-                  rclone_removed_paths=$(
-                      ${getRemovedKeys} \
-                          <(${rclone} --config ${rcloneFormat.generate "generated-rclone.conf" rcloneCfg.remotes} config dump) \
-                          <(${rclone} --config ${lib.escapeShellArg config.xdg.configHome}/rclone/rclone.conf config dump)
-                  )
+                # prune-rclone-config = pkgs.writeShellScript "prune-rclone-config" ''
+                #   rclone_removed_paths=$(
+                #       ${getRemovedKeys} \
+                #           <(${rcloneExe} --config ${rcloneFormat.generate "generated-rclone.conf" rcloneCfg.remotes} config dump) \
+                #           <(${rcloneExe} --config ${lib.escapeShellArg config.xdg.configHome}/rclone/rclone.conf config dump)
+                #   )
 
-                  ${rclone} config dump \
-                      | ${lib.getExe pkgs.jq} -r --argjson removedPaths "$rclone_removed_paths" 'delpaths($removedPaths)' \
-                      | ${json2ini} \
-                      | ${pkgs.moreutils}/bin/sponge ${lib.escapeShellArg config.xdg.configHome}/rclone/rclone.conf
-                '';
+                #   ${rcloneExe} config dump \
+                #       | ${lib.getExe pkgs.jq} -r --argjson removedPaths "$rclone_removed_paths" 'delpaths($removedPaths)' \
+                #       | ${json2ini} \
+                #       | ${pkgs.moreutils}/bin/sponge ${lib.escapeShellArg config.xdg.configHome}/rclone/rclone.conf
+                # '';
 
                 setCommand = remote: key: value: ''
                   ${lib.toShellVar "rclone_remote" remote}
                   ${lib.toShellVar "rclone_key" key}
                   ${lib.toShellVar "rclone_value" (rcloneConfigValue value)}
 
-                  if ${rclone} listremotes | ${pkgs.gnugrep}/bin/grep -Fq "''${rclone_remote%%,*}"; then
-                      $DRY_RUN_CMD ${rclone} \
-                          config update --non-interactive --no-obscure \
+                  if ${rcloneExe} listremotes | ${pkgs.gnugrep}/bin/grep -Fq "''${rclone_remote}:"; then
+                      $DRY_RUN_CMD ${rcloneExe} \
+                          config update \
                           "$rclone_remote" "$rclone_key=$rclone_value" \
+                          --non-interactive --no-obscure \
                           >/dev/null
 
                       if [ -n "$DRY_RUN_CMD" ]; then
@@ -296,14 +295,16 @@ in
                       fi
                   else
                       if [ "$rclone_key" = "type" ]; then
-                          $DRY_RUN_CMD ${rclone} \
-                              config create --non-interactive --no-obscure \
+                          $DRY_RUN_CMD ${rcloneExe} \
+                              config create \
                               "$rclone_remote" "$rclone_value" \
+                              --non-interactive --no-obscure \
                               >/dev/null
                       else
-                          $DRY_RUN_CMD ${rclone} \
-                              config create --non-interactive --no-obscure \
+                          $DRY_RUN_CMD ${rcloneExe} \
+                              config create \
                               "$rclone_remote" "$rclone_key=$rclone_value" \
+                              --non-interactive --no-obscure \
                               >/dev/null
                       fi
 
@@ -319,17 +320,24 @@ in
                 '';
 
                 setCommands = lib.mapAttrsToList
-                  (remote: remoteSettings: lib.mapAttrsToList (setCommand remote) remoteSettings)
+                  (remote: remoteSettings:
+                    # Ensure `type` is always the first attribute. `rclone config create` needs a type
+                    # when creating a remote, and it would complicate activation script logic if we
+                    # needed to keep track of the `type` in order to process further remote settings.
+                    [ (setCommand remote "type" remoteSettings.type) ]
+                    ++ lib.mapAttrsToList
+                      (setCommand remote)
+                      (builtins.removeAttrs remoteSettings [ "type" ])
+                  )
                   config.programs.rclone.remotes;
 
                 set-rclone-config = pkgs.writeShellScript "set-rclone-config" (
                   lib.concatMapStrings lib.concatStrings setCommands
                 );
               in
+              # $VERBOSE_ECHO "Pruning rclone configuration of any removed keys"
+                # $DRY_RUN_CMD ${prune-rclone-config}
               ''
-                $VERBOSE_ECHO "Pruning rclone configuration of any removed keys"
-                $DRY_RUN_CMD ${prune-rclone-config}
-
                 $VERBOSE_ECHO "Setting rclone configuration"
                 $DRY_RUN_CMD ${set-rclone-config}
               ''
@@ -347,6 +355,15 @@ in
             let
               unitPath = escapeSystemdPath mount.where;
               unitDescription = "Mount ${mount.remote}:${mount.what} at ${mount.where}";
+
+              # rclone recommends using
+              # > You should not run two copies of rclone using the same VFS cache with
+              # > the same or overlapping remotes if using `--vfs-cache-mode > off`.
+              # > This can potentially cause data corruption if you do. You can work
+              # > around this by giving each rclone its own cache hierarchy with
+              # > `--cache-dir`. You don't need to worry about this if the remotes in
+              # > use don't overlap.
+              # rcloneCache = "${config.xdg.cacheHome}/rclone/
             in
             lib.recursiveUpdate
               units
@@ -368,13 +385,14 @@ in
                     # > as absolute paths via rclone arguments.
                     ExecStartPre = [
                       (pkgs.writeShellScript "check-rclone-config" ''
-                        exec ${rcloneExe} \
-                            ${lib.escapeShellArgs rcloneCfg.extraOptions} \
+                        ${rcloneExe} \
                             --config ${lib.escapeShellArg config.xdg.configHome}/rclone/rclone.conf \
                             --cache-dir ${lib.escapeShellArg config.xdg.cacheHome}/rclone \
                             config touch
                       '')
-                      (pkgs.writeShellScript "mount-rclone-mkdir" "exec ${pkgs.coreutils}/bin/mkdir -p ${lib.escapeShellArg mount.where}")
+                      (pkgs.writeShellScript "mount-rclone-mkdir" ''
+                        ${pkgs.coreutils}/bin/mkdir -p ${lib.escapeShellArg mount.where}
+                      '')
                     ];
 
                     ExecStart = lib.singleton (pkgs.writeShellScript "mount-rclone" ''
@@ -382,7 +400,6 @@ in
                         []
                           ++ [ "--config" "${config.xdg.configHome}/rclone/rclone.conf" ]
                           ++ [ "--cache-dir" "${config.xdg.cacheHome}/rclone" ]
-                          ++ rcloneCfg.extraOptions
                           ++ [ "mount" "${mount.remote}:${mount.what}" mount.where ]
                           ++ lib.optionals (mount.options != [ ]) (
                             [ "-o" ] ++ lib.intersperse "-o" mount.options
@@ -401,7 +418,7 @@ in
                     Type = "rclone";
                     What = "${mount.remote}:${mount.what}";
                     Where = mount.where;
-                    Options = lib.concatStringsSep "," ([ "rw" "_netdev" "args2env" ] ++ mount.options);
+                    Options = lib.concatStringsSep "," ([ "rw" "_netdev" "args2env" ]);
                   };
                 };
 

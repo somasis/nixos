@@ -89,15 +89,14 @@ in
   systemd.user.services.signal = {
     Unit = {
       Description = signalDescription;
-      PartOf = [ "graphical-session.target" ];
-      After = [ "graphical-session-pre.target" "tray.target" ];
-      Requires = [ "tray.target" ];
+      PartOf = [ "graphical-session-autostart.target" ];
+      Wants = [ "tray.target" ];
 
       StartLimitIntervalSec = 1;
       StartLimitBurst = 1;
       StartLimitAction = "none";
     };
-    Install.WantedBy = [ "graphical-session.target" ];
+    Install.WantedBy = [ "graphical-session-autostart.target" ];
 
     Service = {
       Type = "simple";

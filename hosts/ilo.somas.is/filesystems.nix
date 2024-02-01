@@ -8,6 +8,9 @@
 
   boot.swraid.enable = false;
 
+  # Fix there not being enough space for some Nix builds
+  boot.tmp.useTmpfs = true;
+
   fileSystems = {
     "/" = {
       device = "none";
@@ -62,6 +65,9 @@
   boot.extraModprobeConfig = ''
     options zfs zfs_arc_max=${toString (1024000000 * 8)}
   '';
+
+  # <https://nixos.org/manual/nixos/unstable/#sec-zfs-state>
+  cache.files = [ "/etc/zfs/zpool.cache" ];
 
   programs.fuse.userAllowOther = true;
 

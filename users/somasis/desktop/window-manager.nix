@@ -47,8 +47,12 @@ in
     };
 
     extraConfig = ''
-      ${bspc} config external_rules_command ${lib.escapeShellArg config.home.homeDirectory}/bin/bspwm-rules
+      ${bspc} config external_rules_command "$HOME"/bin/bspwm-rules
     '';
+
+    startupPrograms = lib.mkBefore [
+      "${pkgs.systemd}/bin/systemctl --user start window-manager.target"
+    ];
   };
 
   services.picom = {
@@ -133,26 +137,44 @@ in
     fi
   '');
 
-  systemd.user.services = {
-    bspwm-react = {
-      Unit.Description = "React to bspwm(1) events";
-      Service.Type = "simple";
-      Service.ExecStart = "${config.home.homeDirectory}/bin/bspwm-react";
-      Unit.PartOf = [ "graphical-session.target" ];
-      Install.WantedBy = [ "graphical-session.target" ];
+  systemd.user = {
+    targets.window-manager = {
+      Unit = {
+        Description = "Services that constitute a fully-working window manager";
+        # PartOf = [ "graphical-session.target" ];
+        After = [ "graphical-session-pre.target" "graphical-session.target" ];
+        Requires = [ "graphical-session-pre.target" "graphical-session.target" ];
+        # Before = [ "panel.service" "tray.target" ];
+      };
+      # Install.WantedBy = [ "graphical-session.target" ];
     };
 
-    bspwm-urgent = {
-      Unit.Description = pkgs.bspwm-urgent.meta.description;
-      Service.Type = "simple";
-      Service.ExecStart = lib.getExe pkgs.bspwm-urgent;
-      Unit.PartOf = [ "graphical-session.target" ];
-      Install.WantedBy = [ "graphical-session.target" ];
-    };
+    services = {
+      picom = {
+        Install.WantedBy = lib.mkForce [ "window-manager.target" ];
+        Unit.PartOf = lib.mkForce [ "window-manager.target" ];
+      };
 
-    xsecurelock.Service = {
-      ExecStartPre = [ "-${pkgs.systemd}/bin/systemctl --user stop picom.service" ];
-      ExecStopPost = [ "-${pkgs.systemd}/bin/systemctl --user start picom.service" ];
+      bspwm-react = {
+        Unit.Description = "React to bspwm(1) events";
+        Service.Type = "simple";
+        Service.ExecStart = "${config.home.homeDirectory}/bin/bspwm-react";
+        Unit.PartOf = [ "window-manager.target" ];
+        Install.WantedBy = [ "window-manager.target" ];
+      };
+
+      bspwm-urgent = {
+        Unit.Description = pkgs.bspwm-urgent.meta.description;
+        Service.Type = "simple";
+        Service.ExecStart = lib.getExe pkgs.bspwm-urgent;
+        Unit.PartOf = [ "window-manager.target" ];
+        Install.WantedBy = [ "window-manager.target" ];
+      };
+
+      xsecurelock.Service = {
+        ExecStartPre = [ "-${pkgs.systemd}/bin/systemctl --user stop picom.service" ];
+        ExecStopPost = [ "-${pkgs.systemd}/bin/systemctl --user start picom.service" ];
+      };
     };
   };
 
@@ -209,7 +231,14 @@ in
       fi
 
       bspc node "$id" -g locked=on || :
-      mapw -t "$(printf '0x%X\n' "$id")"
+
+      if [ -z "$(lsw "$(printf '0x%x\n' "$id")")" ]; then # window is unmapped
+          mapw -m "$(printf '0x%X\n' "$id")"
+          bspc desktop -f "$(bspc query -D -n "$id")"
+          bspc node -f "$id"
+      else
+          mapw -u "$(printf '0x%X\n' "$id")"
+      fi
     '')
 
     (pkgs.writeShellScriptBin "bspwm-hide-or-close" ''

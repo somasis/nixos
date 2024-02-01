@@ -65,22 +65,24 @@
     pkgs.editorconfig-core-c
   ];
 
-  # TODO: can remove on next Kakoune release, maybe
-  #       <https://github.com/mawww/kakoune/pull/4699>
-  xdg.desktopEntries.kakoune = {
-    name = "Kakoune";
-    genericName = "Text Editor";
-    comment = "Edit text files";
-    icon = "kakoune";
-    categories = [ "Utility" "TextEditor" ];
+  xdg = {
+    # TODO: can remove on next Kakoune release, maybe
+    #       <https://github.com/mawww/kakoune/pull/4699>
+    desktopEntries.kakoune = {
+      name = "Kakoune";
+      genericName = "Text Editor";
+      comment = "Edit text files";
+      icon = "kakoune";
+      categories = [ "Utility" "TextEditor" ];
 
-    exec = "kak %F";
-    terminal = true;
-    mimeType = [ "text/*" ];
-    startupNotify = false;
+      exec = "kak -- %F";
+      terminal = true;
+      mimeType = [ "text/*" ];
+      startupNotify = false;
+    };
+
+    mimeApps.defaultApplications = lib.genAttrs [ "text/*" "text/plain" ] (_: "kakoune.desktop");
   };
-
-  xdg.mimeApps.defaultApplications = lib.genAttrs [ "text/*" "text/plain" ] (_: "kakoune.desktop");
 
   programs.kakoune = {
     enable = true;

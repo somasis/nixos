@@ -77,25 +77,52 @@
     enable = true;
     iconTheme.name = "Papirus";
     iconTheme.package = pkgs.papirus-icon-theme;
+
     theme.name = "Arc-Darker";
     theme.package = pkgs.arc-theme;
+
     font.name = "sans";
     font.size = 10;
 
     gtk2.configLocation = "${config.xdg.configHome}/gtk-2.0/gtkrc";
 
-    gtk3.extraConfig = {
-      gtk-cursor-blink = true;
-      gtk-cursor-blink-time = 750;
-      gtk-cursor-blink-timeout = 0;
-      gtk-cursor-aspect-ratio = "0.10";
+    gtk3 = {
+      extraConfig = {
+        gtk-cursor-aspect-ratio = "0.10";
+        gtk-cursor-blink = true;
+        gtk-cursor-blink-time = 750;
+        gtk-decoration-layout = "menu:";
+        gtk-enable-animations = false;
+        gtk-overlay-scrolling = true;
+        gtk-primary-button-warps-slider = true;
+        gtk-shell-shows-desktop = false;
+        gtk-titlebar-double-click = "none";
+        gtk-titlebar-right-click = "none";
+      };
+
+      extraCss = ''
+        /* Use monospace font for Thunar's list view */
+        window.thunar grid paned paned grid paned notebook scrolledwindow treeview {
+            font: 10pt monospace;
+        }
+
+        /* Hide header bar title entirely. */
+        window .titlebar .title {
+            font-size: 0;
+        }
+      '';
     };
 
     gtk4.extraConfig = {
-      gtk-cursor-blink = false;
-      gtk-cursor-blink-time = 750;
-      gtk-cursor-blink-timeout = 0;
       gtk-cursor-aspect-ratio = "0.10";
+      gtk-cursor-blink = true;
+      gtk-cursor-blink-time = 750;
+      gtk-decoration-layout = "menu:";
+      gtk-enable-animations = false;
+      gtk-primary-button-warps-slider = true;
+      gtk-shell-shows-desktop = false;
+      gtk-titlebar-double-click = "none";
+      gtk-titlebar-right-click = "none";
     };
   };
 
@@ -116,6 +143,10 @@
     # LanguageTool on LibreOffice)
     # Crashes constantly.
     # _JAVA_OPTIONS = "-Dawt.useSystemAAFontSettings=on";
+
+    # This is for gtk4, but it applies to *all* GTK apps, which means Arc-Darker
+    # will not be used if it is set...
+    # GTK_THEME = "Arc:dark";
   };
 
   # systemd.user.sessionVariables._JAVA_OPTIONS = "-Dawt.useSystemAAFontSettings=on";
@@ -138,7 +169,7 @@
       "Net/EnableEventSounds" = 0;
       "Net/EnableInputFeedbackSounds" = 0;
       "Gtk/EnableAnimations" = 0;
-      "Gtk/OverlayScrolling" = false;
+      "Gtk/OverlayScrolling" = true;
 
       "Gtk/PrimaryButtonWarpsSlider" = true;
       "Gtk/MenuImages" = 1;

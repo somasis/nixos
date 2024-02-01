@@ -278,6 +278,8 @@
         config.programs.jq.package
         pkgs.coreutils
         pkgs.s6-portable-utils
+        pkgs.upower
+        pkgs.jc
       ];
 
       text = ''
@@ -340,6 +342,13 @@
                     done
                 done
         )
+
+        if upower -i /org/freedesktop/UPower/devices/DisplayDevice \
+            | jc --upower \
+            | jq -er '.[].state == "discharging"' >/dev/null; then
+            info 'on battery, preferring remote builders for jobs'
+            set -- -j 0 "$@"
+        fi
 
         info '$ nixos %s%s\n' "''${args[*]:+[development inputs]}" "$*"
         exec nixos "''${args[@]}" "''${@:-switch}"

@@ -119,6 +119,7 @@ in
       { tags = [ "computer" ]; title = "Susam Pal"; url = "https://susam.net/blog/feed.xml"; }
       { tags = [ "computer" ]; title = "Susam Pal: maze"; url = "https://susam.net/maze/feed.xml"; }
       { title = "journcy"; url = feeds.urls.gemini "gemini://journcy.net"; }
+      { url = "https://feed.tedium.co/"; }
 
       # Comics
       { tags = [ "comics" ]; url = "https://xkcd.com/atom.xml"; }
@@ -142,6 +143,7 @@ in
       { tags = [ "computer" "kakoune" ]; title = "Kakoune: plugins"; url = "https://discuss.kakoune.com/c/plugins/5.rss"; }
       { tags = [ "computer" "kakoune" ]; title = "Kakoune: recipes and guides"; url = "https://discuss.kakoune.com/c/recipes-and-guides/8.rss"; }
       { tags = [ "computer" "kakoune" ]; title = "Kakoune: terminal tools"; url = "https://discuss.kakoune.com/c/terminal-tools/15.rss"; }
+      { tags = [ "computer" ]; title = "qutebrowser: discussions"; url = "https://github.com/qutebrowser/qutebrowser/discussions.atom"; }
 
       # Music
       { tags = [ "music" "review" ]; url = "https://constantlyhating.substack.com/feed"; }

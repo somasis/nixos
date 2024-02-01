@@ -110,7 +110,10 @@ in
     repo = repoSpinoza;
   };
 
-  systemd.services."borgbackup-job-spinoza".serviceConfig.Nice = 19;
+  systemd = {
+    timers."borgbackup-job-spinoza".wants = [ "network-online.target" ];
+    services."borgbackup-job-spinoza".serviceConfig.Nice = 19;
+  };
 
   environment.systemPackages =
     let

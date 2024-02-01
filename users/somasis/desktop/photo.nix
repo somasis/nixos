@@ -2,7 +2,11 @@
 , config
 , pkgs
 , ...
-}: {
+}:
+let
+  inherit (config.lib.somasis) relativeToHome xdgCacheDir xdgConfigDir;
+in
+{
   xdg.userDirs.pictures = "${config.home.homeDirectory}/pictures";
 
   home.packages = [
@@ -22,21 +26,23 @@
   ];
 
   persist.directories = [
-    { method = "symlink"; directory = config.lib.somasis.relativeToHome config.xdg.userDirs.pictures; }
+    { method = "symlink"; directory = relativeToHome config.xdg.userDirs.pictures; }
 
-    { method = "symlink"; directory = config.lib.somasis.xdgConfigDir "GIMP"; }
-    { method = "symlink"; directory = config.lib.somasis.xdgConfigDir "gmic"; }
+    { method = "symlink"; directory = xdgConfigDir "GIMP"; }
 
-    { method = "symlink"; directory = config.lib.somasis.xdgConfigDir "darktable"; }
-    { method = "symlink"; directory = config.lib.somasis.xdgConfigDir "inkscape"; }
+    # G'MIC seems to recreate the directory if it is a symlink?
+    { method = "bindfs"; directory = xdgConfigDir "gmic"; }
+
+    { method = "symlink"; directory = xdgConfigDir "darktable"; }
+    { method = "symlink"; directory = xdgConfigDir "inkscape"; }
   ];
 
   cache.directories = [
-    { method = "symlink"; directory = config.lib.somasis.xdgCacheDir "gimp"; }
-    { method = "symlink"; directory = config.lib.somasis.xdgCacheDir "gmic"; }
+    { method = "symlink"; directory = xdgCacheDir "gimp"; }
+    { method = "symlink"; directory = xdgCacheDir "gmic"; }
 
-    { method = "symlink"; directory = config.lib.somasis.xdgCacheDir "darktable"; }
-    { method = "symlink"; directory = config.lib.somasis.xdgCacheDir "gallery-dl"; }
+    { method = "symlink"; directory = xdgCacheDir "darktable"; }
+    { method = "symlink"; directory = xdgCacheDir "gallery-dl"; }
   ];
 
   xdg.mimeApps = {

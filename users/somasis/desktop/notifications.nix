@@ -103,14 +103,5 @@
     "-${config.services.dunst.package}/bin/dunstctl set-paused false"
   ];
 
-  programs.autorandr.hooks.postswitch."notify" = ''
-    ${pkgs.libnotify}/bin/notify-send \
-        -a autorandr \
-        -i preferences-desktop-display \
-        -u low \
-        'autorandr' \
-        "Switched to profile '$AUTORANDR_CURRENT_PROFILE'."
-  '';
-
   home.packages = [ pkgs.libnotify ];
 }

@@ -5,6 +5,7 @@
 , ...
 }:
 let
+  inherit (config.lib.somasis) xdgConfigDir xdgCacheDir xdgDataDir;
   inherit (osConfig.services) tor;
 
   tc = config.theme.colors;
@@ -88,35 +89,66 @@ in
   ];
 
   persist = {
-    directories = [ "etc/qutebrowser" ];
+    directories = [
+      (xdgConfigDir "qutebrowser")
+      (xdgConfigDir "chromium")
+    ];
 
     # files = [
     #   # BUG(?): Can't make autoconfig.yml an impermanent file; I think qutebrowser
     #   #         modifies it atomically (write new file -> rename to replace) so I
     #   #         think that it gets upset when a bind mount is used.
-    #   # "etc/qutebrowser/autoconfig.yml"
-    #   # "etc/qutebrowser/bookmarks/urls"
-    #   # "etc/qutebrowser/quickmarks"
+    #   # (xdgConfigDir "qutebrowser/autoconfig.yml")
+    #   # (xdgConfigDir "qutebrowser/bookmarks/urls")
+    #   # (xdgConfigDir "qutebrowser/quickmarks")
     # ];
   };
 
   cache = {
     directories = [
-      "share/qutebrowser/qtwebengine_dictionaries"
-      "share/qutebrowser/sessions"
-      "share/qutebrowser/webengine"
-      "var/cache/qutebrowser"
+      (xdgDataDir "qutebrowser/qtwebengine_dictionaries")
+      (xdgDataDir "qutebrowser/sessions")
+      (xdgDataDir "qutebrowser/webengine")
+      (xdgCacheDir "qutebrowser")
+      (xdgCacheDir "chromium")
     ];
 
     files = [
-      "share/qutebrowser/cmd-history"
-      "share/qutebrowser/cookies"
-      "share/qutebrowser/history.sqlite"
-      "share/qutebrowser/state"
+      (xdgDataDir "qutebrowser/cmd-history")
+      (xdgDataDir "qutebrowser/cookies")
+      (xdgDataDir "qutebrowser/history.sqlite")
+      (xdgDataDir "qutebrowser/state")
     ];
   };
 
   home.sessionVariables."BROWSER" = "qutebrowser";
+  xdg.mimeApps = {
+    defaultApplications = lib.genAttrs
+      [
+        "application/xhtml"
+        "text/html"
+        "text/xml"
+        "x-scheme-handler/http"
+        "x-scheme-handler/https"
+        "x-scheme-handler/about"
+        "x-scheme-handler/unknown"
+      ]
+      (_: "org.qutebrowser.qutebrowser.desktop")
+    ;
+
+    # associations.removed = lib.genAttrs
+    #   [
+    #     "application/xhtml"
+    #     "text/html"
+    #     "text/xml"
+    #     "x-scheme-handler/http"
+    #     "x-scheme-handler/https"
+    #     "x-scheme-handler/about"
+    #     "x-scheme-handler/unknown"
+    #   ]
+    #   (_: "chromium.desktop")
+    # ;
+  };
 
   programs.qutebrowser = {
     enable = true;
@@ -181,6 +213,8 @@ in
 
       content = {
         proxy = builtins.toString (builtins.head proxies);
+
+        webrtc_ip_handling_policy = "default-public-interface-only";
 
         tls.certificate_errors = "ask-block-thirdparty";
 
@@ -249,6 +283,8 @@ in
       # than the site's URL of origin.
       content.notifications.show_origin = false;
 
+      confirm_quit = [ "downloads" ];
+
       zoom.mouse_divider = 2048; # Allow for more precise zooming increments.
 
       qt.highdpi = true;
@@ -276,6 +312,7 @@ in
 
         statusbar = "default_size monospace";
         keyhint = "default_size monospace";
+        hints = "default_size monospace";
 
         contextmenu = "10pt sans-serif";
         tooltip = "10pt sans-serif";
@@ -358,6 +395,12 @@ in
           bg = tc.background;
           fg = tc.foreground;
           suffix.fg = tc.red;
+        };
+
+        hints = {
+          bg = tc.background;
+          fg = tc.foreground;
+          match.fg = tc.red;
         };
 
         prompts = {
@@ -451,7 +494,7 @@ in
       fonts.tabs.selected = "bold default_size monospace";
 
       # Window.
-      window.title_format = "qutebrowser{title_sep}{host}{title_sep}{current_title}";
+      window.title_format = "qutebrowser{title_sep}{current_title}";
 
       # Messages.
       messages.timeout = 5000;
@@ -466,31 +509,14 @@ in
       };
 
       url.open_base_url = true;
+
+      scrolling.bar = "overlay";
     };
 
     extraConfig = ''
       # TODO how is this done properly in programs.qutebrowser.settings?
       c.statusbar.padding = {"top": 7, "bottom": 7, "left": 4, "right": 4}
       c.tabs.padding = {"top": 7, "bottom": 6, "left": 6, "right": 6}
-
-      config.unbind("<Escape>")
-      config.unbind("F")
-      config.unbind("f")
-      config.unbind("gi")
-      config.unbind("j")
-      config.unbind("k")
-      config.unbind("q")
-      config.unbind("wf")
-      config.unbind("r")
-      config.unbind("d")
-      config.unbind("b")
-      config.unbind("<Ctrl+Tab>")
-      config.unbind("<Ctrl+Shift+Tab>")
-      config.unbind("q")
-      config.unbind("<Ctrl+q>")
-      config.unbind("<F11>")
-
-      config.unbind("<Ctrl+y>", mode="prompt")
     '';
 
     # enableDefaultBindings = false;
@@ -499,74 +525,99 @@ in
       yank-text-anchor = "spawn -u ${yank-text-anchor}";
     };
 
-    keyBindings = {
-      passthrough."<Shift+Escape>" = "mode-leave";
-      normal = {
-        "<Shift+Escape>" = "mode-enter passthrough";
+    keyBindings = lib.mkMerge [
+      {
+        passthrough."<Shift+Escape>" = "mode-leave";
+        normal = {
+          "<Shift+Escape>" = "mode-enter passthrough";
 
-        "zpt" = "translate {url}";
-        "ya" = "yank-text-anchor";
+          "zpt" = "translate {url}";
+          "ya" = "yank-text-anchor";
 
-        "ql" = "cmd-set-text -s :quickmark-load";
-        "qL" = "bookmark-list";
-        "qa" = "cmd-set-text -s :quickmark-add {url} \"{url:host}\"";
-        "qd" = lib.mkMerge [ "cmd-set-text :quickmark-del {url:domain}" "fake-key -g <Tab>" ];
+          "ql" = "cmd-set-text -s :quickmark-load";
+          "qL" = "bookmark-list";
+          "qa" = "cmd-set-text -s :quickmark-add {url} \"{url:host}\"";
+          "qd" = lib.mkMerge [ "cmd-set-text :quickmark-del {url:domain}" "fake-key -g <Tab>" ];
 
-        "bl" = "cmd-set-text -s :bookmark-load";
-        "bL" = "bookmark-list -j";
-        "ba" = "cmd-set-text -s :bookmark-add {url} \"{title}\"";
-        "bd" = lib.mkMerge [ "cmd-set-text :bookmark-del {url:domain}" "fake-key -g <Tab>" ];
+          "bl" = "cmd-set-text -s :bookmark-load";
+          "bL" = "bookmark-list -j";
+          "ba" = "cmd-set-text -s :bookmark-add {url} \"{title}\"";
+          "bd" = lib.mkMerge [ "cmd-set-text :bookmark-del {url:domain}" "fake-key -g <Tab>" ];
 
-        "!" = "cmd-set-text :open !";
-        "gss" = "cmd-set-text -s :open site:{url:domain}";
+          "!" = "cmd-set-text :open !";
+          "gss" = "cmd-set-text -s :open site:{url:domain}";
 
-        "cnp" = ''config-cycle -p content.proxy ${lib.concatStringsSep " " proxies}'';
+          "cnp" = ''config-cycle -p content.proxy ${lib.concatStringsSep " " proxies}'';
 
-        ";;" = "hint all";
+          ";;" = "hint all";
 
-        # Akin to catgirl(1).
-        "<Alt+Shift+Left>" = "navigate prev";
-        "<Alt+Shift+Right>" = "navigate next";
-        "<Alt+Shift+Up>" = "navigate strip";
-        "<Alt+Left>" = "back --quiet";
-        "<Alt+Right>" = "forward --quiet";
-        "<Alt+Up>" = "navigate up";
-        "<Alt+Shift+a>" = "tab-prev";
-        "<Alt+a>" = "tab-next";
+          # Akin to catgirl(1).
+          "<Alt+Shift+Left>" = "navigate prev";
+          "<Alt+Shift+Right>" = "navigate next";
+          "<Alt+Shift+Up>" = "navigate strip";
+          "<Alt+Left>" = "back --quiet";
+          "<Alt+Right>" = "forward --quiet";
+          "<Alt+Up>" = "navigate up";
+          "<Alt+Shift+a>" = "tab-prev";
+          "<Alt+a>" = "tab-next";
 
-        # Firefox-ish.
-        "<Ctrl+r>" = "reload";
-        "<Ctrl+Shift+r>" = "reload -f";
-        "<Ctrl+t>" = "open -t";
-        "<Ctrl+l>" = "cmd-set-text :open {url}";
-        "<Ctrl+f>" = "cmd-set-text /";
-        "<Ctrl+Shift+f>" = "cmd-set-text ?";
-        "<Ctrl+Shift+i>" = "devtools window";
+          # Firefox-ish.
+          "<Ctrl+r>" = "reload";
+          "<Ctrl+Shift+r>" = "reload -f";
+          "<Ctrl+t>" = "open -t";
+          "<Ctrl+l>" = "cmd-set-text :open {url}";
+          "<Ctrl+f>" = "cmd-set-text /";
+          "<Ctrl+Shift+f>" = "cmd-set-text ?";
+          "<Ctrl+Shift+i>" = "devtools window";
 
-        # Emulate Tree Style Tabs keyboard shortcuts.
-        "<F1>" = lib.mkMerge [
-          "config-cycle tabs.show never always"
-          "config-cycle statusbar.show in-mode always"
-          "config-cycle scrolling.bar never always"
-        ];
+          # Emulate Tree Style Tabs keyboard shortcuts.
+          "<F1>" = lib.mkMerge [
+            "config-cycle tabs.show never always"
+            "config-cycle statusbar.show in-mode always"
+          ];
 
-        # Provide some Kakoune-style keyboard shortcuts.
-        "gg" = "scroll-to-perc 0";
-        "ge" = "scroll-to-perc 100";
+          # Provide some Kakoune-style keyboard shortcuts.
+          "gg" = "scroll-to-perc 0";
+          "ge" = "scroll-to-perc 100";
 
-        "zsm" = "open -rt https://mastodon.social/authorize_interaction?uri={url}";
-        "zst" = "open -rt https://twitter.com/share?url={url}";
+          "zsm" = "open -rt https://mastodon.social/authorize_interaction?uri={url}";
+          "zst" = "open -rt https://twitter.com/share?url={url}";
 
-        "cnt" =
-          lib.optionalString
-            (tor.enable
-              && tor.client.enable
-              && tor.settings.ControlPort != [ ]
-              && tor.settings.ControlPort != null)
-            "spawn --userscript tor_identity"
+          "cnt" =
+            lib.optionalString
+              (tor.enable
+                && tor.client.enable
+                && tor.settings.ControlPort != [ ]
+                && tor.settings.ControlPort != null)
+              "spawn --userscript tor_identity"
+          ;
+        };
+      }
+      {
+        prompt."<Ctrl+y>" = null;
+
+        normal = lib.genAttrs [
+          "<Escape>"
+          "F"
+          "f"
+          "gi"
+          "j"
+          "k"
+          "q"
+          "wf"
+          "r"
+          "d"
+          "b"
+          "<Ctrl+Tab>"
+          "<Ctrl+Shift+Tab>"
+          "q"
+          "<Ctrl+q>"
+          "<F11>"
+        ]
+          (key: null)
         ;
-      };
-    };
+      }
+    ];
   };
 
   systemd.user = rec {
@@ -599,7 +650,7 @@ in
         ExecStart = pkgs.writeShellScript "qutebrowser-vacuum" ''
           set -eu
 
-          PATH="${lib.makeBinPath [ pkgs.sqlite pkgs.xe ]}:$PATH"
+          PATH="${lib.makeBinPath [ pkgs.sqlite.bin pkgs.xe ]}:$PATH"
 
           for db in ${lib.escapeShellArgs [ "${config.xdg.dataHome}/qutebrowser/history.sqlite" ]}; do
               sqlite3 "$db" <<'EOF'
@@ -652,7 +703,74 @@ in
     };
   };
 
-  home.packages = [ pkgs.qutebrowser-sync pkgs.ffsclient ];
+  programs = {
+    chromium = {
+      enable = true;
+      package = pkgs.ungoogled-chromium;
+      dictionaries = [
+        pkgs.hunspellDictsChromium.en-us
+        pkgs.hunspellDictsChromium.en-gb
+      ];
+
+      extensions = [
+        { id = "cjpalhdlnbpafiamejdnhcphjbkeiagm"; }
+      ];
+    };
+
+    # browserpass = lib.mkIf config.programs.chromium.enable {
+    #   enable = true;
+    #   browsers = [ "chromium" ];
+    # };
+  };
+
+  # services.xsuspender.rules =
+  #   let
+  #     execSuspend = builtins.toString (pkgs.writeShellScript "xsuspender-exec-suspend" ''
+  #       ${lib.toShellVar "PATH" (lib.makeBinPath [ pkgs.pulseaudio pkgs.gnugrep ])}
+  #       set -x
+  #       # sound currently playing
+  #       if pacmd list-sink-inputs | grep -q 'state: RUNNING'; then
+  #           exit 1
+  #       fi
+  #       exit
+  #     '');
+  #     # [ "$(bspc query -D -n "$XID")" = "$(bspc query -D -d focused)" ]; then
+  #     # window to suspend is on focused desktop, don't suspend
+  #   in
+  #   {
+  #     qutebrowser = {
+  #       matchWmClassGroupContains = "qutebrowser";
+  #       suspendSubtreePattern = "QtWebEngineProcess";
+
+  #       onlyOnBattery = true;
+  #       downclockOnBattery = 0;
+
+  #       suspendDelay = 15;
+  #       resumeFor = 5;
+  #       resumeEvery = 60;
+
+  #       # inherit execSuspend;
+  #     };
+
+  #     chromium = {
+  #       matchWmClassGroupContains = "chromium";
+  #       suspendSubtreePattern = "chromium";
+
+  #       onlyOnBattery = true;
+  #       downclockOnBattery = 0;
+
+  #       suspendDelay = 15;
+  #       resumeFor = 5;
+  #       resumeEvery = 60;
+
+  #       inherit execSuspend;
+  #     };
+  #   };
+
+  # home.packages = [
+  #   pkgs.qutebrowser-sync
+  #   pkgs.ffsclient
+  # ];
 
   # services.dunst.settings.zz-qutebrowser = {
   #   desktop_entry = "org.qutebrowser.qutebrowser";

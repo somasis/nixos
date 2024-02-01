@@ -3,7 +3,15 @@
 , lib
 , osConfig
 , ...
-}: {
+}:
+let
+  commaPicker = pkgs.writeShellScript "comma-picker" (
+    if config.programs.dmenu.enable then ''exec dmenu -p "," -S 2>/dev/null''
+    else if config.programs.skim.enable then ''exec sk -p ", " --no-sort 2>/dev/null''
+    else ''exec ${lib.getExe pkgs.fzy}'' # comma's default COMMA_PICKER value
+  );
+in
+{
   home.shellAliases = rec {
     # LC_COLLATE=C sorts uppercase before lowercase.
     ls = "LC_COLLATE=C ls --hyperlink=auto --group-directories-first --dereference-command-line-symlink-to-dir --time-style=iso --color -AFlh";
@@ -80,27 +88,17 @@
     '')
 
     (pkgs.writeShellScriptBin "pe" ''
-      ${pkgs.xe}/bin/xe -LL -j0 "$@" | sort -snk1 | cut -d' ' -f2-
+      ${lib.getExe pkgs.xe} -LL -j0 "$@" | sort -snk1 | cut -d' ' -f2-
     '')
 
-    (if (config.programs.dmenu.enable || config.programs.skim.enable) then
-      (pkgs.wrapCommand {
-        package = pkgs.comma;
-        wrappers = [{
-          prependFlags = lib.escapeShellArgs [
-            "--picker"
-            (pkgs.writeShellScript "comma-picker" (
-              if config.programs.dmenu.enable then ''exec dmenu -p "," -S 2>/dev/null''
-              else ''exec sk -p ", " --no-sort 2>/dev/null''
-            ))
-          ];
-        }];
-      })
-    else
-      pkgs.comma
-    )
-
+    (pkgs.wrapCommand {
+      package = pkgs.comma;
+      wrappers = [{ command = "/bin/,"; setEnvironmentDefault.COMMA_PICKER = commaPicker; }];
+    })
     (pkgs.writeShellScriptBin ",m" ''
+      : "''${COMMA_NIXPKGS_FLAKE:=nixpkgs}"
+      ${lib.toShellVar "COMMA_PICKER" commaPicker}
+
       usage() {
           cat >&2 <<EOF
       usage: ,m [section] name
@@ -108,19 +106,24 @@
           exit 69
       }
 
-      pick() {
-          dmenu -p ",m" -S -n "$@"
-      }
-
       if [[ "$#" -eq 2 ]]; then
-          output=$(nix-locate --minimal --top-level --regex '/share/man/man'"$1"'/'"$2"."$1" | pick)
+          regex='/share/man/man'"$1"'/'"$2"'\.'"$1"
       elif [[ "$#" -eq 1 ]]; then
-          output=$(nix-locate --minimal --top-level --regex '/share/man/man.*'/"$1" | pick)
+          regex='/share/man/man.*'/"$1"'\.'
       else
           usage
       fi
 
-      MANPATH="$output''${MANPATH:+:$MANPATH}" man "$@"
+      path=$(nix-locate --minimal --at-root --regex "$regex" 2>/dev/null | eval "$COMMA_PICKER")
+      path=$(nix build --no-link --print-out-paths "$COMMA_NIXPKGS_FLAKE"#"$path")/share/man
+
+      case "''${MANPATH:-}" in
+          :*) MANPATH="$path$MANPATH" ;;
+          "") MANPATH="$path:" ;;
+          *)  MANPATH="$path:$MANPATH" ;;
+      esac
+      export MANPATH
+      man "$@"
     '')
 
     (pkgs.writeShellScriptBin "edo" ''

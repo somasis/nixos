@@ -4,7 +4,6 @@
 , overlays
 , ...
 }:
-let prevOverlays = overlays; in
 nixpkgs.lib.nixosSystem {
   inherit (nixpkgs) lib;
 
@@ -18,40 +17,25 @@ nixpkgs.lib.nixosSystem {
           # contentAddressedByDefault = true;
         };
 
+        # localSystem = {
+        #   isx86_64 = true;
+        #   isEfi = true;
+        #   isLinux = true;
+        #   isMusl = true;
+        #   useLLVM = true;
+        #   system = "x86_64-unknown-linux-musl";
+        # };
+
         localSystem = {
           system = "x86_64-linux";
           isLinux = true;
           isx86_64 = true;
-
           # isMusl = true;
           # isLLVM = true;
         };
+        # hostPlatform = "x86_64-linux";
 
-        overlays =
-          prevOverlays
-          ++ [
-            # Fix `nixos-option` to work with Flakes.
-            # Based on <https://github.com/NixOS/nixpkgs/issues/97855#issuecomment-1075818028>.
-            (final: prev: {
-              nixos-option =
-                let
-                  prefix =
-                    ''(import ${inputs.flake-compat} { src = /etc/nixos; }).defaultNix.nixosConfigurations.${lib.strings.escapeNixString config.networking.hostName}'';
-                in
-                prev.wrapCommand {
-                  package = prev.nixos-option;
-
-                  wrappers = [{
-                    prependFlags = lib.escapeShellArgs (
-                      [ ]
-                      ++ [ "--config_expr" "${prefix}.config" ]
-                      ++ [ "--options_expr" "${prefix}.options" ]
-                    );
-                  }];
-                };
-            })
-          ]
-        ;
+        inherit overlays;
       };
     })
 

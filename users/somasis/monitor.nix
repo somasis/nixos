@@ -85,6 +85,9 @@
     ];
   };
 
+  # HACK Remove once <https://github.com/nix-community/home-manager/issues/4947> is solved
+  xdg.configFile."htop/htoprc".force = true;
+
   # Silence warning about being unable to write to configuration file.
   # Use programs.bash instead of home.shellAliases because of the `2>/dev/null` usage.
   programs.bash.shellAliases.htop = "2>/dev/null htop";

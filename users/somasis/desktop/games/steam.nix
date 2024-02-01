@@ -16,12 +16,10 @@ assert steam.enable;
   home.packages = [ pkgs.r2modman ];
 
   systemd.user.services.steam = {
-    Unit = {
-      Description = steam.package.meta.description;
-      PartOf = [ "graphical-session.target" ];
-    };
+    Unit.Description = steam.package.meta.description;
+    Unit.PartOf = [ "graphical-session-autostart.target" ];
+    Install.WantedBy = [ "graphical-session-autostart.target" ];
 
-    Install.WantedBy = [ "graphical-session.target" ];
     Service = {
       Type = "simple";
 
@@ -42,11 +40,11 @@ assert steam.enable;
     };
   };
 
-  services.xsuspender.rules.steam = {
-    matchWmClassGroupContains = "steam";
-    downclockOnBattery = 0;
-    suspendDelay = 15;
-    resumeEvery = 180;
-    resumeFor = 5;
-  };
+  # services.xsuspender.rules.steam = {
+  #   matchWmClassGroupContains = "steam";
+  #   downclockOnBattery = 0;
+  #   suspendDelay = 15;
+  #   resumeEvery = 180;
+  #   resumeFor = 5;
+  # };
 }

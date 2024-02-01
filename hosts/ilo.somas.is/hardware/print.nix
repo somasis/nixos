@@ -16,4 +16,12 @@
 
   cache.directories = [ "/var/cache/cups" ];
   log.directories = [ "/var/log/cups" ];
+
+  networking.networkmanager.dispatcherScripts = [{
+    type = "basic";
+    source = pkgs.writeText "restart-avahi" ''
+      [ "$2" = "up" ] \
+          && ${pkgs.systemd}/bin/systemctl try-restart avahi-daemon.service
+    '';
+  }];
 }

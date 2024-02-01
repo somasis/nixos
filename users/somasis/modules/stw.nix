@@ -256,10 +256,11 @@ in
         targets.stw = {
           Unit = {
             Description = "All text widgets on the root window";
-            PartOf = [ "graphical-session-post.target" "default.target" ];
+            PartOf = [ "graphical-session-post.target" ];
+            After = [ "window-manager.target" ];
+            Wants = [ "window-manager.target" ];
           };
-
-          Install.WantedBy = [ "graphical-session-post.target" "default.target" ];
+          Install.WantedBy = [ "graphical-session-post.target" ];
         };
       }
       (lib.mapAttrsToList (n: v: v) cfg.widgets)

@@ -91,6 +91,14 @@
 
   xresources.path = "${config.xdg.configHome}/xorg/xresources";
 
+  xdg.portal = {
+    enable = true;
+    config.bspwm.default = "gtk";
+    extraPortals = [ pkgs.xdg-desktop-portal-gtk ];
+    configPackages = [ pkgs.xdg-desktop-portal-gtk ];
+    # xdgOpenUsePortal = true;
+  };
+
   services.xsuspender = {
     # Basically disable xsuspender by default; only enable for certain programs.
     enable = config.services.xsuspender.rules != { };
@@ -105,4 +113,16 @@
   };
 
   somasis.tunnels.enable = true;
+
+  systemd.user.targets.graphical-session-autostart = {
+    Unit = {
+      Description = "Applications to be run after the graphical session is initialized";
+      Requires = [ "graphical-session.target" "graphical-session-post.target" "window-manager.target" ];
+      After = [ "graphical-session.target" "window-manager.target" ];
+    };
+  };
+
+  xsession.windowManager.bspwm.startupPrograms = lib.mkAfter [
+    "${pkgs.systemd}/bin/systemctl --user start graphical-session-autostart.target"
+  ];
 }

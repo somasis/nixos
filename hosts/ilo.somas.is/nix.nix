@@ -1,7 +1,6 @@
 { config
 , pkgs
 , lib
-
 , inputs
 , self
 , nixpkgs
@@ -37,9 +36,8 @@
 
       trusted-users = [ "@wheel" ];
 
-      max-jobs = 8;
+      max-jobs = 4;
       log-lines = 1000;
-
 
       auto-optimise-store = true;
       min-free = 1024000000; # 512 MB
@@ -107,23 +105,34 @@
 
     # NOTE: Disabling channels breaks pkgs.comma. Instead (and just because we
     #       still need to use flakes as channels for various nix tools), we just
-    #       make a registry, nixPath, and /etc/nix/inputs from the flake inputs.
+    #       make a registry, nixPath, and /etc/nix/path from the flake inputs.
+    #       Stolen in part from <https://github.com/Misterio77/nix-starter-configs/blob/972935c1b35d8b92476e26b0e63a044d191d49c3/standard/nixos/configuration.nix#L52-L65>.
     # channel.enable = false;
 
     registry =
-      lib.mapAttrs' (name: input: lib.nameValuePair name { flake = input; }) inputs
+      lib.mapAttrs
+        (_: flake: { inherit flake; })
+        ((lib.filterAttrs (_: lib.isType "flake")) inputs)
       // {
+        # Make sure nixpkgs points to the nixpkgs in use on the host.
         nixpkgs.flake = nixpkgs;
         self.flake = self;
-      };
+      }
+    ;
 
-    nixPath = lib.mapAttrsToList (name: path: "${name}=/etc/nix/inputs/${name}") inputs;
+    nixPath = [ "/etc/nix/path" ];
   };
 
-  environment.etc."nix/inputs".source =
-    pkgs.linkFarm "nix-flake-inputs-as-channels" (
-      lib.mapAttrsToList (name: path: { inherit name path; }) inputs
-    )
+  environment.systemPackages =
+    lib.optional config.programs.bash.enableCompletion pkgs.nix-bash-completions;
+
+  environment.etc =
+    lib.mapAttrs'
+      (name: value: {
+        name = "nix/path/${name}";
+        value.source = value.flake;
+      })
+      config.nix.registry
   ;
 
   programs.ssh.extraConfig = ''

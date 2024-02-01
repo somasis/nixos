@@ -30,8 +30,6 @@
 
     impermanence.url = "github:nix-community/impermanence";
 
-    nix-filter.url = "github:numtide/nix-filter";
-
     # catgirl.flake = false;
     # catgirl.url = "git+https://git.causal.agency/catgirl?ref=somasis/tokipona";
     dmenu-flexipatch.flake = false;
@@ -75,20 +73,24 @@
     control-panel-for-twitter.url = "github:insin/control-panel-for-twitter";
   };
 
-  outputs = { self, nixpkgs, home-manager, ... }@inputs:
+  outputs =
+    { self
+    , nixpkgs
+    , home-manager
+    , ...
+    }@inputs:
     let
       inherit (nixpkgs) lib;
+      forAllSystems = lib.genAttrs lib.systems.flakeExposed;
       system = builtins.currentSystem or "x86_64-linux";
     in
     {
       overlays.default = import ./pkgs;
-      packages = lib.genAttrs lib.systems.flakeExposed
-        (
-          system:
-          import ./pkgs
-            nixpkgs.legacyPackages.${system}
-            nixpkgs.legacyPackages.${system}
-        );
+      packages = forAllSystems (system:
+        import ./pkgs
+          nixpkgs.legacyPackages.${system}
+          nixpkgs.legacyPackages.${system}
+      );
 
       nixosConfigurations.ilo = import ./hosts/ilo.somas.is {
         inherit self inputs nixpkgs;
@@ -117,7 +119,6 @@
         };
       };
 
-      formatter =
-        lib.genAttrs lib.systems.flakeExposed (system: nixpkgs.legacyPackages.${system}.nixpkgs-fmt);
+      formatter = forAllSystems (system: nixpkgs.legacyPackages.${system}.nixpkgs-fmt);
     };
 }

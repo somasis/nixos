@@ -360,12 +360,12 @@ in
     panel = {
       Unit = {
         Description = "lemonbar(1) based panel";
-        PartOf = [ "graphical-session.target" "graphical-session-post.target" "tray.target" ];
-        After = [ "picom.service" ];
-        Wants = [ "tray.target" ];
+        PartOf = [ "graphical-session-post.target" "tray.target" ];
+        After = [ "window-manager.target" ];
+        Wants = [ "window-manager.target" "tray.target" ];
         StartLimitInterval = 0;
       };
-      Install.WantedBy = [ "graphical-session.target" "graphical-session-post.target" "tray.target" ];
+      Install.WantedBy = [ "graphical-session-post.target" "tray.target" ];
 
       Service = {
         Type = "notify";

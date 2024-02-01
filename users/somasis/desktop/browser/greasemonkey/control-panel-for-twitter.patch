@@ -1,6 +1,6 @@
 --- ./script.js
 +++ ./script.js
-@@ -40,51 +40,51 @@ const config = {
+@@ -40,47 +40,47 @@ const config = {
    debug: false,
    // Shared
    addAddMutedWordMenuItem: true,
@@ -18,8 +18,7 @@
 +  fastBlock: false,
 -  followButtonStyle: 'monochrome',
 +  followButtonStyle: 'themed',
--  hideAnalyticsNav: true,
-+  hideAnalyticsNav: false,
+   hideAdsNav: true,
    hideBlueReplyFollowedBy: false,
    hideBlueReplyFollowing: false,
    hideBookmarkButton: false,
@@ -28,7 +27,6 @@
    hideBookmarksNav: false,
 -  hideCommunitiesNav: false,
 +  hideCommunitiesNav: true,
-   hideConnectNav: true,
 -  hideExplorePageContents: true,
 +  hideExplorePageContents: false,
 -  hideFollowingMetrics: true,
@@ -36,9 +34,6 @@
 -  hideForYouTimeline: true,
 +  hideForYouTimeline: false,
    hideGrokNav: true,
-   hideHelpCenterNav: true,
--  hideKeyboardShortcutsNav: false,
-+  hideKeyboardShortcutsNav: true,
 -  hideLikeMetrics: true,
 +  hideLikeMetrics: false,
    hideListsNav: false,
@@ -61,7 +56,6 @@
 +  hideTotalTweetsMetrics: false,
 -  hideTweetAnalyticsLinks: false,
 +  hideTweetAnalyticsLinks: true,
-   hideTwitterAdsNav: true,
 -  hideTwitterBlueReplies: false,
 +  hideTwitterBlueReplies: true,
    hideTwitterBlueUpsells: true,
@@ -74,7 +68,7 @@
    listRetweets: 'ignore',
    mutableQuoteTweets: true,
    mutedQuotes: [],
-@@ -90,24 +90,24 @@ const config = {
+@@ -90,25 +90,25 @@ const config = {
    reducedInteractionMode: false,
    restoreLinkHeadlines: true,
    replaceLogo: true,
@@ -102,6 +96,7 @@
 -  hideExploreNavWithSidebar: true,
 +  hideExploreNavWithSidebar: false,
    hideMessagesDrawer: true,
+   hideProNav: true,
 -  hideSidebarContent: true,
 +  hideSidebarContent: false,
    navBaseFontSize: true,

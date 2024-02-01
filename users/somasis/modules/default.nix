@@ -18,8 +18,9 @@ with lib;
   config = mkIf config.services.stw.enable {
     systemd.user.targets.graphical-session-post = {
       Unit = {
-        Description = "All services that ought to run after the graphical session is initialized";
-        After = [ "picom.service" ];
+        Description = "All non-applications to be run after the graphical session is initialized";
+        Requires = [ "graphical-session.target" "window-manager.target" ];
+        After = [ "graphical-session-pre.target" "graphical-session.target" "window-manager.target" ];
       };
 
       # HACK(?): graphical-session-post.target is triggered by bspwm's configuration
@@ -32,15 +33,16 @@ with lib;
       # Install.WantedBy = [ "graphical-session.target" ];
     };
 
+    # Make sure this happens last.
     xsession.windowManager.bspwm.extraConfig = lib.mkAfter ''
-      ${pkgs.systemd}/bin/systemctl --user start --all graphical-session-post.target
+      ${pkgs.systemd}/bin/systemctl --user start graphical-session-post.target
     '';
 
     services.sxhkd.keybindings = {
       "super + F1" = ''
-        ${pkgs.systemd}/bin/systemctl --user -q is-active --all graphical-session-post.target \
-            && ${pkgs.systemd}/bin/systemctl --user stop --all graphical-session-post.target \
-            || ${pkgs.systemd}/bin/systemctl --user start --all graphical-session-post.target
+        ${pkgs.systemd}/bin/systemctl --user -q is-active graphical-session-post.target \
+            && ${pkgs.systemd}/bin/systemctl --user stop graphical-session-post.target \
+            || ${pkgs.systemd}/bin/systemctl --user start graphical-session-post.target
       '';
 
       "super + shift + F1" = ''

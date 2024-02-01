@@ -131,7 +131,7 @@ in
                 border-radius: 0 !important;
 
                 /* No shadows */
-                box-shadow: none !imporatnt;
+                box-shadow: none !important;
               }
 
               :host, :root {
@@ -174,11 +174,13 @@ in
                 --treeitem-background-selected: ${tc.accent} !important; /* tc.accent */
                 --treeitem-background-active: ${tc.accent} !important; /* tc.accent */
 
-
                 --listbox-selected-bg: ${tc.accent} !important; /* tc.accent */
                 --listbox-focused-selected-bg: ${tc.accent} !important; /* tc.accent */
                 --selected-item-color: ${tc.accent} !important; /* tc.accent */
+
                 --selected-item-text-color: #ffffff !important;
+                --new-folder-color: #ffffff !important;
+                --treeitem-text-active: #ffffff !important;
 
                 --toolbar-button-hover-background-color: initial !important;
                 --toolbar-button-hover-border-color: initial !important;
@@ -198,6 +200,8 @@ in
 
                 --sidebar-background-color: #ffffff !important;
                 --foldertree-background: #ffffff !important;
+                --layout-background-1: #f5f6f7 !important;
+                --splitter-color: #dcdfe3 !important;
 
                 ${lib.concatLines (
                   modulateColor "red" tc.red
@@ -222,13 +226,24 @@ in
                 color: revert !important;
               }
 
+              /* Menubar */
+              /* Move menubar to the top of the window */
+              #toolbar-menubar {
+                  order: -1 !important;
+              }
+
+              .button-appmenu { display: none !important; }
+
               /* Folder list */
 
               /* Folder list > header toolbar */
-              #folderPaneWriteMessage, #folderPaneWriteMessage:hover /* New message button */
+              #folderPaneWriteMessage,
+              #folderPaneWriteMessage:hover /* New message button */
               {
                 background-color: ${tc.accent} !important; /* tc.accent */
               }
+
+              /* Folder list > list items */
 
               .container {
                 margin-inline: 0 !important;
@@ -295,6 +310,11 @@ in
 
               /* Message view */
 
+              /* Message view > thread preview */
+              .header-buttons-container toolbarbutton {
+                border-radius: 0 !important;
+              }
+
               /* Message view > message notifications (remote content warnings, etc...) */
               /* Disable box-shadow on remote content blocking notifications */
               .container.infobar {
@@ -305,6 +325,12 @@ in
               /* Remove margins */
               :host([message-bar-type="infobar"]) {
                 margin: 0 !important;
+              }
+
+              /* Message view > message notifications > remote content warning */
+              /* Make them stand out less as they're rarely necessary to act on */
+              :host([value="remoteContent"]) {
+                --message-bar-background-color: var(--layout-background-1);
               }
             '';
           # .button,
@@ -336,8 +362,8 @@ in
 
   systemd.user.services.thunderbird = lib.mkIf tbEnable {
     Unit.Description = config.programs.thunderbird.package.meta.description;
-    Unit.PartOf = [ "graphical-session.target" ];
-    Install.WantedBy = [ "graphical-session.target" ];
+    Unit.PartOf = [ "graphical-session-autostart.target" ];
+    Install.WantedBy = [ "graphical-session-autostart.target" ];
 
     Service = {
       Type = "simple";

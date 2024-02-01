@@ -19,8 +19,8 @@ in
       clang-enable-autocomplete
       clang-enable-diagnostics
 
-      set-option window formatcmd "${format}"
-      set-option window lintcmd "${lint}"
+      set-option window formatcmd ${format}
+      set-option window lintcmd ${lint}
     '';
   }];
 }

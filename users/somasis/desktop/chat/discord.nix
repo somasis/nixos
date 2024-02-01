@@ -187,15 +187,14 @@ in
   systemd.user.services.discord = {
     Unit = {
       Description = discordDescription;
-      PartOf = [ "graphical-session.target" ];
-      After = [ "graphical-session-pre.target" "tray.target" ];
-      Requires = [ "tray.target" ];
+      PartOf = [ "graphical-session-autostart.target" ];
+      Wants = [ "tray.target" ];
 
       StartLimitIntervalSec = 1;
       StartLimitBurst = 1;
       StartLimitAction = "none";
     };
-    Install.WantedBy = [ "graphical-session.target" ];
+    Install.WantedBy = [ "graphical-session-autostart.target" ];
 
     Service = {
       Type = "simple";
@@ -220,10 +219,10 @@ in
     };
   };
 
-  systemd.user.services.mpd-discord-rpc.Unit.BindsTo =
-    [ "discord.service" ]
-    ++ lib.optional config.services.mpd.enable "mpd.service"
-  ;
+  systemd.user.services.mpd-discord-rpc.Unit = {
+    BindsTo = [ "discord.service" ] ++ lib.optional config.services.mpd.enable "mpd.service";
+    After = [ "discord.service" ] ++ lib.optional config.services.mpd.enable "mpd.service";
+  };
 
   services.dunst.settings = {
     zz-discord = {

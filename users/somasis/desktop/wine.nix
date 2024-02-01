@@ -5,8 +5,8 @@
 }: {
   home.packages = [
     pkgs.winetricks
-    pkgs.wineWowPackages.stagingFull
-    pkgs.wineasio
+    pkgs.wineWowPackages.stable
+    # pkgs.wineasio
   ];
 
   # Disable Wine's fixme messages.
@@ -15,7 +15,7 @@
   xsession.windowManager.bspwm.rules."fl64.exe".state = "tiled";
 
   persist.directories = [
-    "etc/wine"
-    { method = "symlink"; directory = config.lib.somasis.xdgDataDir "wine"; }
+    "etc/wineprefixes"
+    { method = "symlink"; directory = config.lib.somasis.xdgDataDir "wineprefixes"; }
   ];
 }
