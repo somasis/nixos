@@ -5,91 +5,79 @@
 , ...
 }:
 let
-  # These would be more correct, but they cause unnecessary rebuilds of the derivations
-  # bfs = pkgs.bfs.overrideAttrs (finalAttrs: prevAttrs: {
-  #   postInstall = ''
-  #     ln -s bfs $out/bin/find
-  #   '';
-  # });
+  withLinks = package: links:
+    # example:
+    # withLinks pkgs.bfs [
+    #   { to = "bin/bfs"; at = "bin/find"; }
+    #   { to = "share/man/man1/bfs.1.gz"; at = "share/man/man1/find.1.gz"; }
+    # ]
+    pkgs.symlinkJoin {
+      name = "${package.pname}-with-links";
+      paths = [
+        package
+        (pkgs.runCommandLocal "links" { } (
+          lib.concatLines (
+            map
+              (link: ''
+                mkdir -p $out/${lib.escapeShellArg (builtins.dirOf link.at)}
+                ln -s ${lib.escapeShellArg package}/${lib.escapeShellArg link.to} $out/${lib.escapeShellArg link.at}
+              '')
+              links
+          )
+        ))
+      ];
+    }
+  ;
 
-  # libarchive = pkgs.libarchive.overrideAttrs (finalAttrs: prevAttrs: {
-  #   configureFlags = prevAttrs.configureFlags ++ [ "--enable-bsdtar" "--enable-bsdcpio" ];
-  # });
+  sbase = pkgs.stdenv.mkDerivation rec {
+    pname = "sbase";
+    version = config.lib.somasis.flakeModifiedDateToVersion inputs.sbase;
 
-  bfs = pkgs.symlinkJoin {
-    name = "bfs";
-    paths = [
-      pkgs.bfs
-      (pkgs.runCommandLocal "find" { } ''
-        mkdir -p $out/bin
-        ln -s ${pkgs.bfs}/bin/bfs $out/bin/find
-      '')
-    ];
+    src = inputs.sbase;
+
+    makeFlags = [ "PREFIX=${placeholder "out"}" ];
+    buildFlags = [ "sbase-box" ];
+    installFlags = [ "sbase-box-install" ];
+
+    postInstall = ''
+      rm \
+          $out/bin/cksum  $out/share/man/man1/cksum.1 \
+          $out/bin/find   $out/share/man/man1/find.1 \
+          $out/bin/xargs  $out/share/man/man1/xargs.1 \
+          $out/bin/sponge $out/share/man/man1/sponge.1
+    '';
+
+    enableParallelBuilding = true;
+
+    meta = with lib; {
+      description = "suckless Unix tools";
+      license = licenses.mit;
+      maintainers = with maintainers; [ somasis ];
+    };
   };
 
-  libarchive = pkgs.symlinkJoin {
-    name = "libarchive-utils";
-    paths = [
-      pkgs.libarchive
-      (pkgs.runCommandLocal "bsdarchive" { } ''
-        mkdir -p $out/bin
-        ln -s ${pkgs.libarchive}/bin/bsdcpio $out/bin/cpio
-        ln -s ${pkgs.libarchive}/bin/bsdtar $out/bin/tar
-      '')
-    ];
+  ubase = pkgs.stdenv.mkDerivation rec {
+    pname = "ubase";
+    version = config.lib.somasis.flakeModifiedDateToVersion inputs.ubase;
+
+    src = inputs.ubase;
+
+    postPatch = ''
+      sed -i \
+          -e '1i#include <sys/sysmacros.h>' \
+          mountpoint.c stat.c libutil/tty.c
+    '';
+
+    makeFlags = [ "PREFIX=${placeholder "out"}" ];
+
+    enableParallelBuilding = true;
+
+    meta = with lib; {
+      description = "suckless Linux base utils";
+      license = licenses.mit;
+      maintainers = with maintainers; [ somasis ];
+    };
   };
-
-  sbase =
-    pkgs.stdenv.mkDerivation rec {
-      pname = "sbase";
-      version = config.lib.somasis.flakeModifiedDateToVersion inputs.sbase;
-
-      src = inputs.sbase;
-
-      makeFlags = [ "PREFIX=${placeholder "out"}" ];
-      buildFlags = [ "sbase-box" ];
-      installFlags = [ "sbase-box-install" ];
-
-      postInstall = ''
-        rm \
-            $out/bin/cksum  $out/share/man/man1/cksum.1 \
-            $out/bin/find   $out/share/man/man1/find.1 \
-            $out/bin/xargs  $out/share/man/man1/xargs.1 \
-            $out/bin/sponge $out/share/man/man1/sponge.1
-      '';
-
-      enableParallelBuilding = true;
-
-      meta = with lib; {
-        description = "suckless Unix tools";
-        license = licenses.mit;
-        maintainers = with maintainers; [ somasis ];
-      };
-    };
-
-  ubase =
-    pkgs.stdenv.mkDerivation rec {
-      pname = "ubase";
-      version = config.lib.somasis.flakeModifiedDateToVersion inputs.ubase;
-
-      src = inputs.ubase;
-
-      postPatch = ''
-        sed -i \
-            -e '1i#include <sys/sysmacros.h>' \
-            mountpoint.c stat.c libutil/tty.c
-      '';
-
-      makeFlags = [ "PREFIX=${placeholder "out"}" ];
-
-      enableParallelBuilding = true;
-
-      meta = with lib; {
-        description = "suckless Linux base utils";
-        license = licenses.mit;
-        maintainers = with maintainers; [ somasis ];
-      };
-    };
 in
 {
   home.packages = [
@@ -102,9 +90,17 @@ in
 
     # (pkgs.toybox.override { enableStatic = true; })
 
-    bfs
+    (withLinks pkgs.bfs [
+      { to = "bin/bfs"; at = "bin/find"; }
+      { to = "share/man/man1/bfs.1.gz"; at = "share/man/man1/find.1.gz"; }
+    ])
 
-    libarchive
+    (withLinks pkgs.libarchive [
+      { to = "bin/bsdcpio"; at = "bin/cpio"; }
+      { to = "bin/bsdtar"; at = "bin/tar"; }
+      { to = "share/man/man1/bsdcpio.1.gz"; at = "share/man/man1/cpio.1.gz"; }
+      { to = "share/man/man1/bsdtar.1.gz"; at = "share/man/man1/tar.1.gz"; }
+    ])
 
     # sbase
     # ubase
