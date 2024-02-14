@@ -30,7 +30,6 @@
       pkgs.linja-suwi
       pkgs.nasin-nanpa
       pkgs.sitelen-seli-kiwen
-      pkgs.sitelen-pona-pi-lasin-lukin
 
       pkgs.spleen
 
