@@ -7,8 +7,8 @@
 let
   xdgRuntimeDir = "/run/user/${toString osConfig.users.users.${config.home.username}.uid}";
 
-  pass-mpdscribble = pkgs.writeShellApplication {
-    name = "pass-mpdscribble";
+  secret-mpdscribble = pkgs.writeShellApplication {
+    name = "secret-mpdscribble";
     runtimeInputs = [ config.programs.password-store.package ];
 
     text = ''
@@ -41,7 +41,7 @@ let
 
     wrappers = [{
       command = "/bin/mpdscribble";
-      prependFlags = ''--conf <(${pass-mpdscribble}/bin/pass-mpdscribble)'';
+      prependFlags = ''--conf <(${secret-mpdscribble}/bin/secret-mpdscribble)'';
     }];
   };
 in

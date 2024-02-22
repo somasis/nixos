@@ -5,8 +5,8 @@
 , ...
 }:
 let
-  pass-beets = pkgs.writeShellApplication {
-    name = "pass-beets";
+  secret-beets = pkgs.writeShellApplication {
+    name = "secret-beets";
     runtimeInputs = [
       config.programs.jq.package
       config.programs.password-store.package
@@ -15,7 +15,7 @@ let
 
     text = ''
       fail() {
-          [[ "$1" -ne 0 ]] && printf 'pass-beets: "failed"\n' && exit 0
+          [[ "$1" -ne 0 ]] && printf 'secret-beets: "failed"\n' && exit 0
       }
 
       trap 'fail $?' ERR
@@ -243,7 +243,7 @@ in
     #   '';
     # })
 
-    pass-beets
+    secret-beets
   ];
 
   programs.beets = {
@@ -305,15 +305,15 @@ in
           trap : INT
           trap 'rm -f "$BEETS_LOCK"' EXIT
 
-          # Feed pass-beets info via a FIFO so it never hits the disk.
-          ${beets}/bin/beet -c <(pass-beets) "$@" || e=$?
+          # Feed secret-beets info via a FIFO so it never hits the disk.
+          ${beets}/bin/beet -c <(secret-beets) "$@" || e=$?
 
           trap - INT
           exit $?
           EOF
         '')
 
-        pass-beets
+        secret-beets
 
         beets.man
         beets.doc

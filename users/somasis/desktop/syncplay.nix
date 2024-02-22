@@ -107,8 +107,8 @@ let
     };
   };
 
-  pass-syncplay = pkgs.writeShellApplication {
-    name = "pass-syncplay";
+  secret-syncplay = pkgs.writeShellApplication {
+    name = "secret-syncplay";
     runtimeInputs = [
       config.programs.password-store.package
       pkgs.coreutils
@@ -119,7 +119,7 @@ let
 
       : "''${XDG_CONFIG_HOME:=$HOME/.config}"
       : "''${XDG_RUNTIME_DIR:=/run/user/$(id -un)}"
-      runtime="''${XDG_RUNTIME_DIR}/pass-syncplay"
+      runtime="''${XDG_RUNTIME_DIR}/secret-syncplay"
 
       hostname="$1"; shift
       port="$1"; shift
@@ -140,7 +140,7 @@ let
   };
 in
 {
-  systemd.user.services."pass-syncplay" = {
+  systemd.user.services.secret-syncplay = {
     Unit = {
       Description = "Authenticate `syncplay` using `pass`";
       PartOf = [ "graphical-session.target" ];
@@ -153,12 +153,12 @@ in
       Type = "oneshot";
       RemainAfterExit = true;
 
-      ExecStart = [ "${pass-syncplay}/bin/pass-syncplay journcy.net 8999" ];
-      ExecStop = [ "${pkgs.coreutils}/bin/rm -rf %t/pass-syncplay" ];
+      ExecStart = [ "${secret-syncplay}/bin/secret-syncplay journcy.net 8999" ];
+      ExecStop = [ "${pkgs.coreutils}/bin/rm -rf %t/secret-syncplay" ];
     };
   };
 
-  home.packages = [ pass-syncplay syncplay ];
+  home.packages = [ secret-syncplay syncplay ];
 
   xdg.configFile = {
     "Syncplay/MainWindow.conf".text = lib.generators.toINI { } {

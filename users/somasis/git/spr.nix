@@ -4,8 +4,8 @@
 , ...
 }:
 let
-  pass-spr = pkgs.writeShellApplication {
-    name = "pass-spr";
+  secret-spr = pkgs.writeShellApplication {
+    name = "secret-spr";
     runtimeInputs = [
       config.programs.password-store.package
       pkgs.coreutils
@@ -17,7 +17,7 @@ let
       hostname="$1"; shift
       username="$1"; shift
 
-      runtime="''${XDG_RUNTIME_DIR:=/run/user/$(id -u)}/pass-spr"
+      runtime="''${XDG_RUNTIME_DIR:=/run/user/$(id -u)}/secret-spr"
       config="$runtime/$hostname/$username.conf"
       [ -d "$runtime" ] || mkdir -m 700 "$runtime"
       [ -d "$runtime/$hostname" ] || mkdir -m 700 "$runtime/$hostname"
@@ -27,7 +27,7 @@ let
 
       cat > "$config" <<EOF
       [spr]
-      githubAuthToken = $(pass "${osConfig.networking.fqdnOrHostName}/spr/$hostname/$username")
+      githubAuthToken = $(pass ${lib.escapeShellArg osConfig.networking.fqdnOrHostName}"/spr/$hostname/$username")
       EOF
 
       for p in "$runtime"/*/*.conf; do
@@ -39,7 +39,7 @@ in
 {
   programs.git = {
     includes = [{
-      path = "/run/user/${toString osConfig.users.users.somasis.uid}/pass-spr/gitconfig";
+      path = "/run/user/${toString osConfig.users.users.somasis.uid}/secret-spr/gitconfig";
     }];
 
     extraConfig.spr = {
@@ -48,7 +48,7 @@ in
     };
   };
 
-  systemd.user.services."pass-spr" = {
+  systemd.user.services.secret-spr = {
     Unit = {
       Description = "Authenticate `spr` to github.com using `pass`";
       PartOf = [ "default.target" ];
@@ -59,13 +59,13 @@ in
       Type = "oneshot";
       RemainAfterExit = true;
 
-      ExecStart = [ "${pass-spr}/bin/pass-spr github.com somasis" ];
-      ExecStop = [ "${pkgs.coreutils}/bin/rm -rf %t/pass-spr" ];
+      ExecStart = [ "${secret-spr}/bin/secret-spr github.com somasis" ];
+      ExecStop = [ "${pkgs.coreutils}/bin/rm -rf %t/secret-spr" ];
     };
   };
 
   home.packages = [
     pkgs.spr
-    pass-spr
+    secret-spr
   ];
 }
