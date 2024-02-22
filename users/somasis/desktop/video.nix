@@ -124,6 +124,7 @@ in
         # this with a lot of escapes for Nix's string interpolation.
         title = lib.replaceStrings [ "%" ] [ "$" ] (lib.concatStrings [
           ''%{?pause==yes:⏸}%{?pause==no:⏵} ''
+          ''%{!playlist-count==1:%{playlist-pos-1}/%{playlist-count}}'' # show playlist count if more than 1
           ''%{?metadata/by-key/Uploader:%{metadata/by-key/Uploader} - }''
           ''%{media-title:%{filename}}''
           ''%{?chapter:%{chapter-metadata/title}}''
