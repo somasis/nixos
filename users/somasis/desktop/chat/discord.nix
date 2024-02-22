@@ -37,9 +37,8 @@ let
 
   discordWindowClassName = "discord";
   # discordWindowClassName = "ArmCord";
-  discordDescription = discord.meta.description;
-  discordName = getExeName discord;
-  discordPath = "${discord}/bin/${discordName}";
+  discordExeName = getExeName discord;
+  discordExe = lib.getExe discord;
 
   makeCssFontList = list: lib.pipe list [
     (map (font: ''"${font}"''))
@@ -186,7 +185,7 @@ in
 
   systemd.user.services.discord = {
     Unit = {
-      Description = discordDescription;
+      Description = discord.meta.description;
       PartOf = [ "graphical-session-autostart.target" ];
       Wants = [ "tray.target" ];
 
@@ -199,7 +198,7 @@ in
     Service = {
       Type = "simple";
 
-      ExecStart = "${discordPath} " + lib.cli.toGNUCommandLineShell { } {
+      ExecStart = "${discordExe} " + lib.cli.toGNUCommandLineShell { } {
         start-minimized = true;
       };
 
@@ -219,14 +218,14 @@ in
     };
   };
 
-  systemd.user.services.mpd-discord-rpc.Unit = {
-    BindsTo = [ "discord.service" ] ++ lib.optional config.services.mpd.enable "mpd.service";
-    After = [ "discord.service" ] ++ lib.optional config.services.mpd.enable "mpd.service";
+  systemd.user.services.mpd-discord-rpc.Unit = lib.mkIf config.services.mpd.enable {
+    BindsTo = [ "discord.service" "mpd.service" ];
+    After = [ "discord.service" "mpd.service" ];
   };
 
   services.dunst.settings = {
     zz-discord = {
-      desktop_entry = discordWindowClassName;
+      desktop_entry = discord.pname;
 
       # Discord blue
       background = "#6654ec";
@@ -234,14 +233,16 @@ in
     };
 
     zz-discord-cassie = {
-      desktop_entry = discordWindowClassName;
+      desktop_entry = discord.pname;
+
       summary = "jan Kasi";
       background = "#7596ff";
       foreground = "#ffffff";
     };
 
     zz-discord-phidica = {
-      desktop_entry = discordWindowClassName;
+      desktop_entry = discord.pname;
+
       summary = "Phidica*";
       background = "#aa8ed6";
       foreground = "#ffffff";
@@ -251,7 +252,7 @@ in
   services.sxhkd.keybindings."super + d" = pkgs.writeShellScript "discord" ''
     ${pkgs.jumpapp}/bin/jumpapp \
         -c ${lib.escapeShellArg discordWindowClassName} \
-        -i ${lib.escapeShellArg discordName} \
+        -i ${lib.escapeShellArg discordExeName} \
         -f ${pkgs.writeShellScript "start-or-switch" ''
             if ! ${pkgs.systemd}/bin/systemctl --user is-active -q discord.service; then
                 ${pkgs.systemd}/bin/systemctl --user start discord.service && sleep 2
