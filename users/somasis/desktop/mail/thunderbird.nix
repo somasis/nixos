@@ -58,7 +58,7 @@ in
         "toolkit.scrollbox.smoothScroll" = false;
         "ui.prefersReducedMotion" = 1;
         "widget.gtk.native-context-menus" = true;
-        "widget.gtk.overlay-scrollbars.enabled" = true;
+        "widget.gtk.overlay-scrollbars.enabled" = false;
         "widget.gtk.theme-scrollbar-colors.enabled" = false;
         "mail.openMessageBehavior" = 0; # Open messages in new windows instead of tabs
 

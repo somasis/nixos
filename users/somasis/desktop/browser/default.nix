@@ -510,7 +510,7 @@ in
 
       url.open_base_url = true;
 
-      scrolling.bar = "overlay";
+      scrolling.bar = "always";
     };
 
     extraConfig = ''

@@ -93,7 +93,7 @@
         gtk-cursor-blink-time = 750;
         gtk-decoration-layout = "menu:";
         gtk-enable-animations = false;
-        gtk-overlay-scrolling = true;
+        gtk-overlay-scrolling = false;
         gtk-primary-button-warps-slider = true;
         gtk-shell-shows-desktop = false;
         gtk-titlebar-double-click = "none";
