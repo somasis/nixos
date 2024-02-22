@@ -14,7 +14,7 @@ with lib;
       builtins.toString (
         lib.path.removePrefix
           (/. + config.home.homeDirectory)
-          (/. + path)
+          (/. + (lib.strings.removePrefix "~/" path))
       )
     );
 
