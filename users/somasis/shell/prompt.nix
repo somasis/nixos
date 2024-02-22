@@ -16,6 +16,10 @@
             _*) return ;;
         esac
 
+        case "$_before_command_command" in
+            *' 2> '*) _before_command_command=''${_before_command_command%' 2> '*} ;;
+        esac
+
         printf '\e]0;%s\a' "''${SSH_CONNECTION:+$USER@$HOSTNAME: }''${_before_command_command}"
     }
 
