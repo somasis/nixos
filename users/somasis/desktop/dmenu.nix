@@ -104,7 +104,7 @@ in
   } // lib.optionalAttrs (osConfig.fonts.fontconfig.defaultFonts.emoji != [ ]) {
     "super + e" = "dmenu-emoji -c";
   } // lib.optionalAttrs config.programs.password-store.enable {
-    # "super + shift + p" was previously used, but thats used
+    # "super + shift + p" was previously used, but that's used
     # for the display settings key on the Framework keyboard
     "super + k" = "dmenu-pass -cn";
     "super + shift + k" = "dmenu-pass -cn -m otp";
@@ -121,6 +121,8 @@ in
       "zll" = "pass -H";
       "zlL" = "pass -H -d <Enter>";
       "zlz" = "pass -H -S";
+
+      "zlZ" = "pass -m fields";
 
       # Specific fills
       "zlu" = "pass -m username";

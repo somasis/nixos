@@ -8,8 +8,8 @@ me="${0##*/}"
 usage() {
     usage=$(
         cat <<EOF
-usage: ${me} [-HS] [-d DELIMITER] -m username|email|password|otp [QUERY]
-       ${me} [-HS] [-d DELIMITER] -m username|email|password|otp -u URL
+usage: ${me} [-HS] [-d DELIMITER] -m fields|username|email|password|otp [QUERY]
+       ${me} [-HS] [-d DELIMITER] -m fields|username|email|password|otp -u URL
        ${me} [-HS] [-d DELIMITER] -m generate [\`pass generate\` arguments] ENTRY
        ${me} [-HS] [-d DELIMITER] -m generate -u [\`pass generate\` arguments] URL
        ${me} -m url-to-entry URL
@@ -112,7 +112,7 @@ while getopts :SHud:m: arg >/dev/null 2>&1; do
             mode="${OPTARG}"
 
             case "${mode}" in
-                login | username | password | generate | otp | url-to-entry | generate-for-url) : ;;
+                fields | login | username | password | generate | otp | url-to-entry | generate-for-url) : ;;
                 *)
                     usage 'error: invalid mode\n'
                     ;;
@@ -145,6 +145,10 @@ fi
 : "${PASSWORD_STORE_DIR:=${HOME}/.password-store}"
 
 case "${mode}" in
+    fields)
+        fill fields "${query}"
+        ;;
+
     login)
         choice=$(dmenu-pass -m print -i "${query}") || exit 0
 

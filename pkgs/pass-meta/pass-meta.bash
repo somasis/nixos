@@ -6,7 +6,7 @@ PATH="@coreutils@:@gawk@:${PATH}"
 
 usage() {
     cat >&2 <<EOF
-usage: pass meta [-a] STORE FIELD
+usage: pass meta ENTRY [FIELD]
 EOF
     exit 69
 }
@@ -16,8 +16,7 @@ meta() {
         | awk \
             -F ":" \
             -v entry="$1" \
-            -v key="$2" \
-            -v one="${one}" '
+            -v key="$2" '
                 NR==1 { next }
                 $1 ~ key {
                     if ($key ~ ".*://|:$") {
@@ -30,12 +29,13 @@ meta() {
                     if ($one) { exit }
                 }
             '
+            # -v one="${one}"
 }
 
-one=0
-while getopts :a arg >/dev/null 2>&1; do
+# one=0
+while getopts : arg >/dev/null 2>&1; do
     case "${arg}" in
-        a) one=1 ;;
+        # a) one=1 ;;
         *) usage ;;
     esac
 done
@@ -46,11 +46,18 @@ shift $((OPTIND - 1))
 check_sneaky_paths "$1"
 
 case "${2:-}" in
-    "") cmd_show "$1" | tail -n +2 | cut -d: -f1 ;;
+    "")
+        {
+            printf '%s\n' password username
+            cmd_show "$1" | tail -n +2 | cut -d: -f1
+        } | uq
+        ;;
     login | name | user | username)
         username=$(meta "$1" "login|name|user|username")
         [[ -z "${username}" ]] && exec basename "$1"
         printf '%s\n' "${username}"
         ;;
+
+    pass | password) cmd_show "$@" ;;
     *) meta "$@" ;;
 esac
