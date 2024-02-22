@@ -142,10 +142,10 @@ in
       };
 
       scriptOpts = {
-        thumbnail = {
-          osc = false;
-          network = true;
-        };
+        # thumbnail = {
+        #   osc = false;
+        #   network = true;
+        # };
 
         osc = {
           windowcontrols = false;
@@ -195,7 +195,7 @@ in
 
         # Embed video metadata as much as possible
         embed-subs = true;
-        # write-auto-subs = true;
+        write-auto-subs = true;
         sub-langs = commaList [
           "en-US"
           "en.*"
@@ -205,11 +205,11 @@ in
           "es.*"
         ];
 
-        embed-chapters = true;
+        # embed-chapters = true;
 
-        embed-info-json = true;
-        embed-metadata = true;
-        embed-thumbnail = true;
+        # embed-info-json = true;
+        # embed-metadata = true;
+        # embed-thumbnail = true;
 
         concurrent-fragments = 4;
 
