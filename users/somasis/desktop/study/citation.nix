@@ -495,7 +495,8 @@ in
     Service = {
       Type = "simple";
       ExecStart = lib.getExe config.programs.zotero.package;
-      ExecStartPost = lib.singleton ''
+      ExecStartPost = pkgs.writeShellScript "hide-zotero" ''
+        set -x
         ${pkgs.xdotool}/bin/xdotool \
             search \
                 --class --classname --role --all \

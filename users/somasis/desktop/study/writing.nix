@@ -9,54 +9,6 @@ let
   inherit (config.lib.somasis) commaList xdgCacheDir xdgConfigDir;
   inherit (config.lib.somasis.generators) toXML;
 
-  languageToolVersion = pkgs.languagetool.version;
-
-  languageToolConfigFormat = lib.generators.toKeyValue {
-    mkKeyValue = k: v:
-      lib.generators.mkKeyValueDefault
-        {
-          mkValueString = value:
-            if lib.isList value then
-              commaList value
-            else
-              lib.escape [ ":" ] (lib.generators.mkValueStringDefault { } value)
-          ;
-        } "="
-        k
-        v
-    ;
-  };
-
-  # "Languagetool.cfg" is not a typo.
-  languageToolConfig = pkgs.writeText "Languagetool.cfg" (languageToolConfigFormat rec {
-    ltVersion = languageToolVersion;
-    motherTongue = "en-US";
-
-    autoDetect = false;
-
-    "disabledCategories.en-US" = [ "Creative Writing" "Wikipedia" ];
-    "disabledRules.en-US" = [ "HASH_SYMBOL" "WIKIPEDIA_CONTRACTIONS" "WIKIPEDIA_CURRENTLY" "TOO_LONG_SENTENCE" "WIKIPEDIA_12_PM" "WIKIPEDIA_12_AM" ];
-    "enabledRules.en-US" = [ "THREE_NN" "EN_REDUNDANCY_REPLACE" ];
-
-    fixedLanguage = motherTongue;
-
-    isMultiThread = true; # Use multiple cores for checking
-    noDefaultCheck = true;
-    doRemoteCheck = false; # Check locally
-    useOtherServer = false; # Check locally
-
-    numberParagraphs = -2;
-
-    # otherServerUrl = "http://127.0.0.1:${builtins.toString config.somasis.tunnels.tunnels.languagetool.port}";
-
-    # isPremium = true;
-    # remoteUserName = config.home.username;
-
-    taggerShowsDisambigLog = false;
-
-    useGUIConfig = false;
-  });
-
   lo = pkgs.libreoffice-fresh;
 
   loExtensions = [
@@ -103,10 +55,10 @@ let
     })
 
     # <https://extensions.libreoffice.org/en/extensions/show/languagetool>
-    # (pkgs.fetchurl {
-    #   url = "https://extensions.libreoffice.org/assets/downloads/3710/1691498123/LanguageTool-${languageToolVersion}.oxt";
-    #   hash = "sha256-Ck0SyckcoAz8fWgy/LQHRoTNtbvKkaH6xk0UovpRagg=";
-    # })
+    (pkgs.fetchurl {
+      url = "https://extensions.libreoffice.org/assets/downloads/3710/1704200967/LanguageTool-6.3.1.oxt";
+      hash = "sha256-N2Qo7BxZJLswqb0veocllOiOl4SANCVR2t0p8iQTM6Y=";
+    })
   ]
   ++ lib.optional config.programs.zotero.enable
     "${config.programs.zotero.package}/usr/lib/zotero-bin-${pkgs.zotero.version}/extensions/zoteroOpenOfficeIntegration@zotero.org/install/Zotero_OpenOffice_Integration.oxt"
@@ -133,9 +85,57 @@ let
       done
     '';
 
-  loSetLanguageToolConfiguration = pkgs.writeShellScript "libreoffice-set-languagetool-configuration" ''
-    cat ${languageToolConfig} > "''${XDG_CONFIG_HOME:=$HOME/.config}"/LanguageTool/LibreOffice/Languagetool.cfg
-  '';
+  languageToolVersion = pkgs.languagetool.version;
+
+  # languageToolConfigFormat = lib.generators.toKeyValue {
+  #   mkKeyValue = k: v:
+  #     lib.generators.mkKeyValueDefault
+  #       {
+  #         mkValueString = value:
+  #           if lib.isList value then
+  #             commaList value
+  #           else
+  #             lib.escape [ ":" ] (lib.generators.mkValueStringDefault { } value)
+  #         ;
+  #       } "="
+  #       k
+  #       v
+  #   ;
+  # };
+
+  # "Languagetool.cfg" is not a typo.
+  # languageToolConfig = pkgs.writeText "Languagetool.cfg" (languageToolConfigFormat rec {
+  #   ltVersion = languageToolVersion;
+  #   motherTongue = "en-US";
+
+  #   autoDetect = false;
+
+  #   "disabledCategories.en-US" = [ "Creative Writing" "Wikipedia" ];
+  #   "disabledRules.en-US" = [ "HASH_SYMBOL" "WIKIPEDIA_CONTRACTIONS" "WIKIPEDIA_CURRENTLY" "TOO_LONG_SENTENCE" "WIKIPEDIA_12_PM" "WIKIPEDIA_12_AM" ];
+  #   "enabledRules.en-US" = [ "THREE_NN" "EN_REDUNDANCY_REPLACE" ];
+
+  #   fixedLanguage = motherTongue;
+
+  #   isMultiThread = true; # Use multiple cores for checking
+  #   noDefaultCheck = true;
+  #   doRemoteCheck = false; # Check locally
+  #   useOtherServer = false; # Check locally
+
+  #   numberParagraphs = -2;
+
+  #   otherServerUrl = "http://127.0.0.1:${builtins.toString config.somasis.tunnels.tunnels.languagetool.port}";
+
+  #   isPremium = true;
+  #   # remoteUserName = config.home.username;
+
+  #   taggerShowsDisambigLog = false;
+
+  #   useGUIConfig = false;
+  # });
+
+  # loSetLanguageToolConfiguration = pkgs.writeShellScript "libreoffice-set-languagetool-configuration" ''
+  #   cat ${languageToolConfig} > "''${XDG_CONFIG_HOME:=$HOME/.config}"/LanguageTool/LibreOffice/Languagetool.cfg
+  # '';
 
   loWrapped = pkgs.wrapCommand {
     package = lo;
@@ -176,18 +176,18 @@ rec {
   # <https://wiki.documentfoundation.org/UserProfile#User_profile_content>
   persist = {
     directories = [{ method = "symlink"; directory = xdgConfigDir "libreoffice/4"; }];
-    # files = [ xdgConfigDir "LanguageTool/LibreOffice/Languagetool.cfg" ];
+    files = [ (xdgConfigDir "LanguageTool/LibreOffice/Languagetool.cfg") ];
   };
 
   cache.directories = [
     { method = "symlink"; directory = xdgConfigDir "LanguageTool/LibreOffice/cache"; }
     { method = "symlink"; directory = xdgCacheDir "libreoffice/backups"; }
   ];
-  # log.files = [ (xdgConfigDir "LanguageTool/LibreOffice/LanguageTool.log") ];
+  log.files = [ (xdgConfigDir "LanguageTool/LibreOffice/LanguageTool.log") ];
 
   xdg.configFile = {
     "libreoffice/jre".source = lo.unwrapped.jdk;
-    # "LanguageTool/LibreOffice/.keep".source = builtins.toFile "keep" "";
+    "LanguageTool/LibreOffice/.keep".source = builtins.toFile "keep" "";
 
     # TODO: why doesn't this work?
     #       LibreOffice will fail to recognize the Java environment at all, if I
