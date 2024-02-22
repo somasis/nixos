@@ -154,7 +154,7 @@
 
         level_args=()
         final_level="$level"
-        if [[ "$level" -ge 0 ]]; then
+        if [[ "$level" -gt 0 ]]; then
             while [[ "$level" -gt 0 ]]; do
                 level_args+=( --verbose )
                 level=$(( level - 1 ))
@@ -296,22 +296,22 @@
             set -- "$@" "$a"
         done
 
-        args=()
+        nixos_args=()
 
         final_level="$level"
-        if [[ "$level" -ge 0 ]]; then
+        if [[ "$level" -gt 0 ]]; then
             while [[ "$level" -gt 0 ]]; do
-                args+=( --verbose )
+                nixos_args+=( --verbose )
                 level=$(( level - 1 ))
             done
         else
             while [[ "$level" -lt 0 ]]; do
-                args+=( --quiet )
+                nixos_args+=( --quiet )
                 level=$(( level + 1 ))
             done
         fi
 
-        mapfile -d $'\0' -t -O "''${#args[@]}" args < <(
+        mapfile -d $'\0' -t -O "''${#nixos_args[@]}" nixos_args < <(
             nix flake metadata --json --no-write-lock-file /etc/nixos \
                 | jq -r '
                     .locks.nodes.root[][] as $input
@@ -343,15 +343,13 @@
                 done
         )
 
-        if upower -i /org/freedesktop/UPower/devices/DisplayDevice \
-            | jc --upower \
-            | jq -er '.[].state == "discharging"' >/dev/null; then
-            info 'on battery, preferring remote builders for jobs'
-            set -- -j 0 "$@"
+        if upower -d | jc --upower | jq -re '.[] | select(.type == "Daemon").on_battery' >/dev/null; then
+            info 'on battery, preferring remote builders for jobs\n'
+            nixos_args+=( -j 0 )
         fi
 
-        info '$ nixos %s%s\n' "''${args[*]:+[development inputs]}" "$*"
-        exec nixos "''${args[@]}" "''${@:-switch}"
+        info '$ nixos %s%s\n' "''${nixos_args[*]}" "$*"
+        exec nixos "''${nixos_args[@]}" "''${@:-switch}"
       '';
 
     })
@@ -410,7 +408,7 @@
 
         level_args=()
         final_level="$level"
-        if [[ "$level" -ge 0 ]]; then
+        if [[ "$level" -gt 0 ]]; then
             while [[ "$level" -gt 0 ]]; do
                 level_args+=( --verbose )
                 level=$(( level - 1 ))
