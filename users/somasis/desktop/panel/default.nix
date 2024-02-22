@@ -391,10 +391,10 @@ in
     snixembed = {
       Unit = {
         Description = pkgs.snixembed.meta.description;
-        PartOf = [ "tray.target" ];
+        PartOf = [ "graphical-session.target" ];
         After = [ "panel.service" ];
       };
-      Install.WantedBy = [ "tray.target" ];
+      Install.WantedBy = [ "graphical-session.target" "tray.target" ];
 
       Service = {
         # `--fork` means it'll fork *only* once ready.
