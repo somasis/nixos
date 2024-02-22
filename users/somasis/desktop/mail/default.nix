@@ -36,11 +36,20 @@ in
       account = address: extraAttrs:
         lib.recursiveUpdate
           {
-            "${address}" = let acc = config.accounts.email.accounts."${address}"; in {
+            "${address}" = let acc = config.accounts.email.accounts."${address}"; in rec {
               inherit address;
 
               realName = "Kylie McClain";
               passwordCommand = "${pass} show ${osConfig.networking.fqdnOrHostName}/nixos/${address}";
+
+              signature = {
+                showSignature = "append";
+                text = ''
+                  ${realName} (she/her)
+                  Appalachian State University, Boone, NC
+                  Major in Philosophy / Minor in Gender, Women's and Sexuality Studies
+                '';
+              };
 
               folders.inbox = "INBOX";
 
