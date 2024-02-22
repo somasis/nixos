@@ -77,16 +77,17 @@ in
     enable = true;
 
     settings = {
-      # Use cookies from qutebrowser if available
-      cookies-from-browser = lib.mkIf config.programs.qutebrowser.enable
-        "chromium:${config.xdg.dataHome}/qutebrowser/webengine";
+      extractor = {
+        # Use cookies from qutebrowser if available
+        cookies = lib.mkIf config.programs.qutebrowser.enable
+          [ "chromium" "${config.xdg.dataHome}/qutebrowser/webengine" ]
+        ;
 
-      # extractor = {
-      #   ytdl = {
-      #     enabled = true;
-      #     module = "yt_dlp";
-      #   };
-      # };
+        ytdl = lib.mkIf config.programs.yt-dlp.enable {
+          enabled = true;
+          module = "yt_dlp";
+        };
+      };
 
       # downloader = {
       #   ytdl.module = "yt_dlp";
