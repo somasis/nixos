@@ -37,11 +37,14 @@
     pkgs.ellipsis
     pkgs.frangipanni
     pkgs.fx
-    pkgs.html-tidy
     pkgs.ijq
     pkgs.json2nix
-    pkgs.lowdown
     pkgs.patchutils
+
+    pkgs.lowdown
+
+    pkgs.html-tidy
+    pkgs.pup
     pkgs.xmlstarlet
 
     pkgs.table
