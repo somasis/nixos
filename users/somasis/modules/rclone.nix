@@ -370,8 +370,9 @@ in
               {
                 services."${unitPath}" = {
                   Unit.Description = unitDescription;
-                  Unit.PartOf = [ "${unitPath}.mount" "rclone.target" ];
-                  Install.WantedBy = [ "${unitPath}.mount" "rclone.target" ];
+                  Unit.PartOf = [ "rclone.target" ];
+                  Unit.After = [ "${unitPath}.mount" ];
+                  Install.WantedBy = [ "rclone.target" "${unitPath}.mount" ];
 
                   Service = {
                     Type = "notify";
@@ -411,7 +412,8 @@ in
 
                 mounts."${unitPath}" = {
                   Unit.Description = unitDescription;
-                  Unit.Requires = [ "${unitPath}.service" "rclone.target" ];
+                  Unit.BindsTo = [ "${unitPath}.service" ];
+                  Unit.After = [ "${unitPath}.service" ];
                   Install.WantedBy = [ "mounts.target" "rclone.target" ];
 
                   Mount = {
@@ -424,7 +426,9 @@ in
 
                 automounts."${unitPath}" = {
                   Unit.Description = unitDescription;
-                  Unit.Requires = [ "${unitPath}.service" "rclone.target" ];
+                  Unit.PartOf = [ "rclone.target" ];
+                  Install.WantedBy = [ "rclone.target" ];
+
                   Automount.Where = mount.where;
                   Automount.TimeoutIdleSec = mount.linger;
                 };
