@@ -59,6 +59,13 @@
         rebase = true;
       };
 
+      fetch = {
+        output = "compact";
+
+        prune = true;
+        pruneTags = true;
+      };
+
       log.abbrevCommit = false;
 
       branch = {
@@ -66,10 +73,26 @@
         autoSetupMerge = "true";
       };
 
-      # Detect renames more aggressively.
-      diff.renames = "copies";
+      # Sort branch and tag lists by the date they were modified/created.
+      branch.sort = "-committerdate";
+      tag.sort = "taggerdate";
 
-      commit.verbose = true;
+      diff = {
+        # Detect renames more aggressively.
+        renames = "copies";
+
+        # Detects moved chunks of lines better than the default algorithm.
+        algorithm = "histogram";
+      };
+
+      commit = {
+        # Show a diff at the end of the commit message during editing.
+        verbose = true;
+
+        # Keep lines that start with comment indicators before the scissors line.
+        cleanup = "scissors";
+      };
+
       stash.showPatch = true;
       status = {
         showStash = true; # --show-stash
@@ -87,7 +110,11 @@
 
       url = {
         "gh:".insteadOf = "ssh://git@github.com:";
+        "https://github.com".insteadOf = "ssh://git@github.com:";
+
         "gl:".insteadOf = "ssh://git@gitlab.com:";
+        "https://gitlab.com".insteadOf = "ssh://git@gitlab.com:";
+
         "srht:".insteadOf = "ssh://git@git.sr.ht:";
       };
     };
@@ -173,12 +200,12 @@
     {
       name = "BufCreate";
       option = ".*";
-      commands = "evaluate-commands %sh{ git rev-parse >/dev/null 2>&1 && echo git show-diff }";
+      commands = "evaluate-commands %sh{ git rev-parse >/dev/null 2>&1 && echo git show-diff || : }";
     }
     {
       name = "BufWritePost";
       option = ".*";
-      commands = "evaluate-commands %sh{ git rev-parse >/dev/null 2>&1 && echo git show-diff }";
+      commands = "evaluate-commands %sh{ git rev-parse >/dev/null 2>&1 && echo git show-diff || : }";
     }
 
     # Lightly enforce the 50/72 rule for git(1) commit summaries.
