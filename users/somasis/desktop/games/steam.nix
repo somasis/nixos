@@ -8,7 +8,9 @@ let inherit (osConfig.programs) steam; in
 assert steam.enable;
 {
   persist.directories = [
-    "share/Steam"
+    ".steam"
+    (config.lib.somasis.xdgDataDir "Steam")
+
     { method = "symlink"; directory = "etc/r2modman"; }
     { method = "symlink"; directory = "etc/r2modmanPlus-local"; }
   ];
@@ -24,7 +26,8 @@ assert steam.enable;
       Type = "simple";
 
       Environment = [ "STEAM_FORCE_DESKTOPUI_SCALING=1.5" ];
-      ExecStart = "${steam.package}/bin/steam -silent";
+      ExecStart = "${steam.package}/bin/steam -silent -single_core";
+      ExecStop = "${steam.package}/bin/steam -shutdown";
 
       # We need to kill the PID listed in ~/.steampid, or else Steam
       # will exit unsuccesfully every time.
