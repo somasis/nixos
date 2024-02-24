@@ -118,6 +118,7 @@ in
       { tags = [ "computer" ]; title = "Wandering Thoughts: Chris Siebenmann"; url = "https://utcc.utoronto.ca/~cks/space/blog/?atom"; }
       { tags = [ "computer" ]; title = "Susam Pal"; url = "https://susam.net/blog/feed.xml"; }
       { tags = [ "computer" ]; title = "Susam Pal: maze"; url = "https://susam.net/maze/feed.xml"; }
+      { tags = [ "computer" ]; title = "Abort Retry Fail"; url = "https://www.abortretry.fail/feed"; }
       { title = "journcy"; url = feeds.urls.gemini "gemini://journcy.net"; }
       { url = "https://feed.tedium.co/"; }
 
