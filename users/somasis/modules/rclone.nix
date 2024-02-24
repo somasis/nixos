@@ -230,7 +230,7 @@ in
         packages = [ config.programs.rclone.package ];
 
         activation.applyRcloneSettings = lib.mkIf (config.programs.rclone.remotes != { }) (
-          lib.hm.dag.entryAfter [ "linkGeneration" "writeBoundary" ]
+          lib.hm.dag.entryAfter [ "writeBoundary" ]
             (
               let
                 getRemovedKeys = pkgs.writeJqScript "get-removed-keys.jq" { null-input = true; raw-output = true; } ''
@@ -260,7 +260,7 @@ in
                     )[]
                 '';
 
-                # prune-rclone-config = pkgs.writeShellScript "prune-rclone-config" ''
+                # prune-rclone-config = ''
                 #   rclone_removed_paths=$(
                 #       ${getRemovedKeys} \
                 #           <(${rcloneExe} --config ${rcloneFormat.generate "generated-rclone.conf" rcloneCfg.remotes} config dump) \
@@ -279,36 +279,36 @@ in
                   ${lib.toShellVar "rclone_value" (rcloneConfigValue value)}
 
                   if ${rcloneExe} listremotes | ${pkgs.gnugrep}/bin/grep -Fq "''${rclone_remote}:"; then
-                      $DRY_RUN_CMD ${rcloneExe} \
+                      run ${rcloneExe} \
                           config update \
                           "$rclone_remote" "$rclone_key=$rclone_value" \
                           --non-interactive --no-obscure \
                           >/dev/null
 
-                      if [ -n "$DRY_RUN_CMD" ]; then
+                      if [ -v DRY_RUN ]; then
                           printf 'would update settings for rclone remote "%s" (%q=%q)\n' \
                               "$rclone_remote" \
                               "$rclone_key" \
                               "$rclone_value"
                       else
-                          $VERBOSE_ECHO "updated settings for rclone remote '$rclone_remote' ($rclone_key=$rclone_value)"
+                          verboseEcho "updated settings for rclone remote '$rclone_remote' ($rclone_key=$rclone_value)"
                       fi
                   else
                       if [ "$rclone_key" = "type" ]; then
-                          $DRY_RUN_CMD ${rcloneExe} \
+                          run ${rcloneExe} \
                               config create \
                               "$rclone_remote" "$rclone_value" \
                               --non-interactive --no-obscure \
                               >/dev/null
                       else
-                          $DRY_RUN_CMD ${rcloneExe} \
+                          run ${rcloneExe} \
                               config create \
                               "$rclone_remote" "$rclone_key=$rclone_value" \
                               --non-interactive --no-obscure \
                               >/dev/null
                       fi
 
-                      if [ -n "$DRY_RUN_CMD" ]; then
+                      if [ -v DRY_RUN ]; then
                           printf 'would create rclone remote "%s"\n' "$rclone_remote"
                       else
                           printf 'created rclone remote %s, make sure to inspect its configuration before use.\n' "$rclone_remote"
@@ -330,16 +330,12 @@ in
                       (builtins.removeAttrs remoteSettings [ "type" ])
                   )
                   config.programs.rclone.remotes;
-
-                set-rclone-config = pkgs.writeShellScript "set-rclone-config" (
-                  lib.concatMapStrings lib.concatStrings setCommands
-                );
               in
               # $VERBOSE_ECHO "Pruning rclone configuration of any removed keys"
                 # $DRY_RUN_CMD ${prune-rclone-config}
               ''
-                $VERBOSE_ECHO "Setting rclone configuration"
-                $DRY_RUN_CMD ${set-rclone-config}
+                verboseEcho "Setting rclone configuration"
+                ${lib.concatMapStrings lib.concatStrings setCommands}
               ''
             )
         );
