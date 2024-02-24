@@ -47,7 +47,7 @@
     extraConfig = {
       sendemail = {
         annotate = true;
-        smtpserver = "${config.programs.msmtp.package or pkgs.msmtp}/bin/msmtp";
+        smtpserver = lib.getExe (config.programs.msmtp.package or pkgs.msmtp);
       };
 
       init.defaultBranch = "main";
@@ -151,9 +151,8 @@
   programs.bash.initExtra =
     let
       gitAliasesToShell = pkgs.runCommandLocal "git-aliases" { } ''
-        PATH=${lib.makeBinPath [ pkgs.s6-portable-utils ]}:"$PATH"
-
         ${lib.toShellVar "aliases" config.programs.git.aliases}
+        PATH=${lib.makeBinPath [ pkgs.s6-portable-utils ]}:"$PATH"
         for alias in "''${!aliases[@]}"; do
             command="''${aliases[$alias]}"
 
