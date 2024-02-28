@@ -141,6 +141,7 @@ in
 
       # Forums
       { tags = [ "nixos" ]; title = "NixOS Discourse: announcements"; url = "https://discourse.nixos.org/c/announcements/8.rss"; }
+      { tags = [ "nixos" ]; title = "NixOS Discourse: Nixpkgs architecture"; url = "https://discourse.nixos.org/c/dev/nixpkgs/44.rss"; }
       { tags = [ "computer" "kakoune" ]; title = "Kakoune: plugins"; url = "https://discuss.kakoune.com/c/plugins/5.rss"; }
       { tags = [ "computer" "kakoune" ]; title = "Kakoune: recipes and guides"; url = "https://discuss.kakoune.com/c/recipes-and-guides/8.rss"; }
       { tags = [ "computer" "kakoune" ]; title = "Kakoune: terminal tools"; url = "https://discuss.kakoune.com/c/terminal-tools/15.rss"; }
