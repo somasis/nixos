@@ -66,9 +66,7 @@
     pkgs.limitcpu
     pkgs.lr
     pkgs.ltrace
-    pkgs.moreutils
     pkgs.nq
-    pkgs.outils
     pkgs.pigz
     pkgs.pv
     pkgs.rlwrap
@@ -89,6 +87,12 @@
     pkgs.xsv
     pkgs.xz
     pkgs.zstd
+
+    # moreutils's /bin/ts conflicts with outils.
+    (pkgs.symlinkJoin {
+      name = "outils-moreutils";
+      paths = [ pkgs.outils pkgs.moreutils ];
+    })
   ];
 
   xdg.configFile."curlrc".text = lib.generators.toKeyValue { } {
