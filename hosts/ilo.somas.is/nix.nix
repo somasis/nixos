@@ -66,6 +66,8 @@
 
         "https://nix-community.cachix.org"
 
+        # Use ca-derivations cache
+        # <https://discourse.nixos.org/t/content-addressed-nix-call-for-testers/12881#:~:text=Level%203%20%E2%80%94%20Raider%20of%20the%20unknown>
         "https://cache.ngi0.nixos.org"
       ];
 
@@ -75,9 +77,6 @@
         "nix-community.cachix.org-1:mB9FSh9qf2dCimDSUo8Zy7bkq5CX+/rkCWyvRCYg3Fs="
         "cache.ngi0.nixos.org-1:KqH5CBLNSyX184S9BKZJo1LxrxJ9ltnY2uAs5c/f1MA="
       ];
-
-      # TODO Use content-addressed derivations?
-      # <https://discourse.nixos.org/t/content-addressed-nix-call-for-testers/12881#:~:text=Level%203%20%E2%80%94%20Raider%20of%20the%20unknown>
     };
 
     distributedBuilds = true;
@@ -104,26 +103,22 @@
     };
   };
 
+  # Only do garbage collection if not on battery.
+  systemd.services.nix-gc.unitConfig.ConditionACPower = true;
+
   environment.systemPackages =
     lib.optional config.programs.bash.enableCompletion pkgs.nix-bash-completions;
 
-  environment.etc =
-    lib.mapAttrs'
-      (name: value: {
-        name = "nix/path/${name}";
-        value.source = value.flake;
-      })
-      config.nix.registry
-  ;
+  programs.ssh = {
+    extraConfig = ''
+      Host spinoza.7596ff.com
+        ServerAliveInterval 15
+        Compression yes
+    '';
 
-  programs.ssh.extraConfig = ''
-    Host spinoza.7596ff.com
-      ServerAliveInterval 15
-      Compression yes
-  '';
-
-  programs.ssh.knownHosts.spinoza = {
-    hostNames = [ "spinoza.7596ff.com" ];
-    publicKey = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAINkIdO45PyZ3002vTGlstp2O15vpz8jE6mwcWS6f6QPN";
+    knownHosts.spinoza = {
+      hostNames = [ "spinoza.7596ff.com" ];
+      publicKey = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAINkIdO45PyZ3002vTGlstp2O15vpz8jE6mwcWS6f6QPN";
+    };
   };
 }
