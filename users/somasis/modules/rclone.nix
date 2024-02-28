@@ -367,7 +367,7 @@ in
                 services."${unitPath}" = {
                   Unit.Description = unitDescription;
                   Unit.PartOf = [ "rclone.target" ];
-                  Unit.After = [ "${unitPath}.mount" ];
+                  Unit.Upholds = [ "${unitPath}.mount" ];
                   Install.WantedBy = [ "rclone.target" "${unitPath}.mount" ];
 
                   Service = {
@@ -420,14 +420,16 @@ in
                   };
                 };
 
-                automounts."${unitPath}" = {
-                  Unit.Description = unitDescription;
-                  Unit.PartOf = [ "rclone.target" ];
-                  Install.WantedBy = [ "rclone.target" ];
+                # BUG These don't properly function right now...
+                #     not sure how userspace automounts ever would have worked.
+                # automounts."${unitPath}" = {
+                #   Unit.Description = unitDescription;
+                #   Unit.PartOf = [ "rclone.target" ];
+                #   Install.WantedBy = [ "rclone.target" ];
 
-                  Automount.Where = mount.where;
-                  Automount.TimeoutIdleSec = mount.linger;
-                };
+                #   Automount.Where = mount.where;
+                #   Automount.TimeoutIdleSec = mount.linger;
+                # };
               }
           )
           {
