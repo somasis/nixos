@@ -30,7 +30,7 @@ in
 
     { method = "symlink"; directory = xdgConfigDir "GIMP"; }
 
-    # G'MIC seems to recreate the directory if it is a symlink?
+    # NOTE G'MIC seems to recreate the directory if it is a symlink?
     { method = "bindfs"; directory = xdgConfigDir "gmic"; }
 
     { method = "symlink"; directory = xdgConfigDir "darktable"; }

@@ -17,7 +17,7 @@ let
 in
 {
   # XXX Don't use systemctl --user reload here; sxhkd is loaded on the fly in xsession for some reason
-  home.activation."sxhkd" = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
+  home.activation.sxhkd = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
     ${pkgs.procps}/bin/pgrep -u "$USER" sxhkd >/dev/null 2>&1 \
         && $DRY_RUN_CMD ${pkgs.procps}/bin/pkill -USR1 sxhkd \
         || :
