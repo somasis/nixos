@@ -84,6 +84,21 @@ in
     };
   };
 
+  systemd.user.services.geoclue-agent = {
+    # Remove "network-online.target" dependencies, since they don't really work...
+    # wants = lib.lists.remove "network-online.target" config.systemd.user.services.geoclue-agent.wants;
+    # after = lib.lists.remove "network-online.target" config.systemd.user.services.geoclue-agent.after;
+    wants = lib.mkForce [ ];
+    after = lib.mkForce [ ];
+
+    # then add them back through a hack since we can't really
+    # declare a user service's dependency on a system service.
+    # <https://github.com/systemd/systemd/issues/3312>
+    preStart = ''
+      ${pkgs.systemd-wait}/bin/systemd-wait -q network-online.target active
+    '';
+  };
+
   location.provider = "geoclue2";
 
   cache.directories = [

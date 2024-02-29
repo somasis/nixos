@@ -56,6 +56,16 @@
     user.services.usbguard-notifier = {
       # partOf = [ "graphical-session.target" ];
       wantedBy = [ "graphical-session.target" ];
+
+      # Remove "usbguard.service" dependency, since it doesn't really work
+      after = lib.mkForce [ ];
+
+      # then add back the dependency through a hack since we can't really
+      # declare a user service's dependency on a system service.
+      # <https://github.com/systemd/systemd/issues/3312>
+      preStart = ''
+        ${pkgs.systemd-wait}/bin/systemd-wait -q usbguard.service active
+      '';
     };
   };
 
