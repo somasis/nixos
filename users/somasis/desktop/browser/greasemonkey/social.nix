@@ -42,12 +42,54 @@
     # (pkgs.fetchurl { hash = "sha256-tNWUn4LQZxn3ehfSzJ6KFs7H41+I7V8o9773Ua5uQJE="; url = "https://greasyfork.org/scripts/413963-twitter-zoom-cursor/code/Twitter%20Zoom%20Cursor.user.js"; })
     # (pkgs.fetchurl { hash = "sha256-vVd6iKMCV1V5MazeKn8ksfsp7zVt55KOULgkIXt3lms="; url = "https://greasyfork.org/scripts/464506-twitter-advertiser-blocker/code/Twitter%20Advertiser%20Blocker.user.js"; })
 
+    # qutebrowser's greasemonkey support doesn't support setting configuration variables,
+    # so we just patch in our configuration into the script before installing it.
     (pkgs.runCommandLocal "control-panel-for-twitter.user.js"
       {
         src = inputs.control-panel-for-twitter + "/script.js";
-        patch = ./control-panel-for-twitter.patch;
+        config = lib.generators.toJSON { } {
+          defaultToLatestSearch = true;
+          disableTweetTextFormatting = true;
+          dontUseChirpFont = true;
+          fastBlock = false;
+          followButtonStyle = "themed";
+          hideBookmarkMetrics = false;
+          hideCommunitiesNav = true;
+          hideExplorePageContents = false;
+          hideFollowingMetrics = false;
+          hideForYouTimeline = false;
+          hideLikeMetrics = false;
+          hideQuoteTweetMetrics = false;
+          hideReplyMetrics = false;
+          hideRetweetMetrics = false;
+          hideSeeNewTweets = true;
+          hideTotalTweetsMetrics = false;
+          hideTweetAnalyticsLinks = true;
+          hideTwitterBlueReplies = true;
+          hideViews = false;
+          hideWhoToFollowEtc = false;
+          restoreOtherInteractionLinks = true;
+          retweets = "ignore";
+          showBlueReplyFollowersCount = true;
+          tweakQuoteTweetsPage = false;
+          fullWidthMedia = false;
+          hideExploreNav = false;
+          hideExploreNavWithSidebar = false;
+          hideSidebarContent = false;
+        };
       }
-      ''${pkgs.patch}/bin/patch -p1 -i "$patch" -o "$out" "$src"''
+      ''
+        {
+            echo H
+            echo '/^const config =/'
+            ${pkgs.jq}/bin/jq -r '
+              to_entries[]
+                | "/^ *\(.key): */"
+                , "s/: .*/: \(.value | tojson),/"
+            ' <<< "$config"
+            echo "wq $out";
+        } | ${pkgs.ed}/bin/ed "$src"
+      ''
     )
 
     # Mastodon
