@@ -155,7 +155,10 @@ in
         remote = "gphotos-personal";
         what = "";
         where = "${config.home.homeDirectory}/mnt/gphotos/personal";
-        # options = defaultOptions;
+
+        # NOTE rclone says
+        # > --vfs-cache-mode writes or full is recommended for this remote as it can't stream
+        options = cacheOptions;
       };
     };
   };
