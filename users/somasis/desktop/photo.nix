@@ -78,10 +78,27 @@ in
 
     settings = {
       extractor = {
+        directory = "./";
+        filename =
+          (lib.concatStringsSep "-" [
+            "{date!T|created_at!T}"
+            "{category}"
+            "{author['name']|user['name']|uploader}"
+            "{tweet_id|id}"
+            "{tags!S|filename}"
+          ]) + ".{extension}"
+        ;
+
         # Use cookies from qutebrowser if available
         cookies = lib.mkIf config.programs.qutebrowser.enable
           [ "chromium" "${config.xdg.dataHome}/qutebrowser/webengine" ]
         ;
+
+        postprocessors = [{
+          name = "exec";
+          command = "${lib.getExe pkgs.image_optim} {}";
+          async = true;
+        }];
 
         ytdl = lib.mkIf config.programs.yt-dlp.enable {
           enabled = true;
@@ -89,9 +106,15 @@ in
         };
       };
 
-      # downloader = {
-      #   ytdl.module = "yt_dlp";
-      # };
+      downloader = {
+        # Don't set mtime on downloaded files (we store it in the name).
+        mtime = false;
+
+        # ytdl = lib.mkIf config.programs.yt-dlp.enable {
+        #   # config-file = "${config.xdg.configHome}/yt-dlp/config";
+        #   forward-cookies = true;
+        # };
+      };
     };
   };
 }
