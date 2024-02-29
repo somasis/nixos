@@ -360,6 +360,8 @@ in
     panel = {
       Unit = {
         Description = "lemonbar(1) based panel";
+        Documentation = "man:lemonbar(1)";
+
         PartOf = [ "graphical-session-post.target" "tray.target" ];
         After = [ "window-manager.target" ];
         Wants = [ "window-manager.target" "tray.target" ];
@@ -368,8 +370,9 @@ in
       Install.WantedBy = [ "graphical-session-post.target" "tray.target" ];
 
       Service = {
-        Type = "notify";
-        NotifyAccess = "all";
+        Type = "exec";
+        # Type = "notify";
+        # NotifyAccess = "all";
 
         ExecStart = [ "${config.home.homeDirectory}/bin/panel" ];
         ExecStartPost = [
@@ -391,10 +394,10 @@ in
     snixembed = {
       Unit = {
         Description = pkgs.snixembed.meta.description;
-        PartOf = [ "graphical-session.target" ];
+        PartOf = [ "tray.target" ];
         After = [ "panel.service" ];
       };
-      Install.WantedBy = [ "graphical-session.target" "tray.target" ];
+      Install.WantedBy = [ "tray.target" ];
 
       Service = {
         # `--fork` means it'll fork *only* once ready.
