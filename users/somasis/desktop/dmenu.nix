@@ -114,7 +114,7 @@ in
   services.dunst.settings.global.dmenu = "dmenu -n -p 'notification'";
 
   programs.qutebrowser = lib.optionalAttrs config.programs.password-store.enable {
-    aliases."pass" = "spawn -u ${qute-pass}/bin/qute-pass";
+    aliases.pass = "spawn -u ${qute-pass}/bin/qute-pass";
 
     keyBindings.normal = {
       # Login

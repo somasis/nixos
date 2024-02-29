@@ -1,4 +1,8 @@
-{ pkgs, config, lib, ... }:
+{ pkgs
+, config
+, lib
+, ...
+}:
 let
   locale = "en_US.UTF-8";
   localeType = builtins.toString (builtins.tail (lib.splitString "." "${locale}"));
