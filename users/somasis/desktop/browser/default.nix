@@ -277,7 +277,15 @@ in
 
       # Languages preferences.
       spellcheck.languages = [ "en-US" "en-AU" "en-GB" "es-ES" ];
-      content.headers.accept_language = lib.concatStringsSep "," [ "en-US;q=0.9" "tok;q=0.8" "en;q=0.7" "es;q=0.6" ];
+      content.headers.accept_language = lib.concatStringsSep "," (lib.reverseList (lib.imap1
+        (i: v: ''${v};q=${lib.substring 0 5 (builtins.toString (i * .001))}'')
+        (lib.reverseList [
+          "en-US"
+          "en"
+          "tok"
+          "es"
+        ])
+      ));
 
       # Use the actual title for notification titles, rather
       # than the site's URL of origin.
