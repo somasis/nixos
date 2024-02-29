@@ -114,12 +114,10 @@
 
   somasis.tunnels.enable = true;
 
-  systemd.user.targets.graphical-session-autostart = {
-    Unit = {
-      Description = "Applications to be run after the graphical session is initialized";
-      Requires = [ "graphical-session.target" "graphical-session-post.target" "window-manager.target" ];
-      After = [ "graphical-session.target" "window-manager.target" ];
-    };
+  systemd.user.targets.graphical-session-autostart.Unit = {
+    Description = "Applications to be run after the graphical session is initialized";
+    Wants = [ "graphical-session.target" "graphical-session-post.target" "window-manager.target" ];
+    After = [ "graphical-session.target" "graphical-session-post.target" "window-manager.target" ];
   };
 
   xsession.windowManager.bspwm.startupPrograms = lib.mkAfter [
