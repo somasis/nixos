@@ -83,7 +83,6 @@ in
   imports = [
     ./greasemonkey
     ./blocking.nix
-    ./open.nix
     ./reader.nix
     ./search.nix
   ];

@@ -117,4 +117,9 @@ in
       };
     };
   };
+
+  programs.qutebrowser = {
+    aliases.gallery-dl = "spawn -u ${lib.getExe pkgs.gallery-dl}";
+    keyBindings.normal."zpg" = "gallery-dl -d ~/sync/gallery {url}";
+  };
 }
