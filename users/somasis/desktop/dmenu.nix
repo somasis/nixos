@@ -103,12 +103,38 @@ in
     '';
   } // lib.optionalAttrs (osConfig.fonts.fontconfig.defaultFonts.emoji != [ ]) {
     "super + e" = "dmenu-emoji -c";
-  } // lib.optionalAttrs config.programs.password-store.enable {
-    # "super + shift + p" was previously used, but that's used
-    # for the display settings key on the Framework keyboard
-    "super + k" = "dmenu-pass -cn";
-    "super + shift + k" = "dmenu-pass -cn -m otp";
-  };
+  } // lib.optionalAttrs config.programs.password-store.enable (
+    let
+      sxhkd-dmenu-pass = pkgs.writeShellScript "sxhkd-dmenu-pass" ''
+        PATH=${lib.makeBinPath [ pkgs.xdotool pkgs.coreutils pkgs.findutils ]}"''${PATH:+:$PATH}"
+
+        if appname=$(xdotool getactivewindow getwindowclassname); then
+            appname=''${appname/^\.+/}
+            appname=''${appname%%-*}
+
+            appname_matches=$(
+                find -L \
+                    ${lib.escapeShellArg config.programs.password-store.settings.PASSWORD_STORE_DIR} \
+                    -type f \
+                    -ipath "*/$appname*" \
+                    | wc -l
+            )
+
+            if [ "$appname_matches" -eq 0 ]; then
+                appname=
+            fi
+        fi
+
+        exec dmenu-pass ''${appname:+-i "''${appname}"} -cn "$@"
+      '';
+    in
+    {
+      # "super + shift + p" was previously used, but that's used
+      # for the display settings key on the Framework keyboard
+      "super + k" = "${sxhkd-dmenu-pass}";
+      "super + shift + k" = "${sxhkd-dmenu-pass} -m otp";
+    }
+  );
 
   # Use -n (instant) so that it doesn't require two clicks for one action.
   services.dunst.settings.global.dmenu = "dmenu -n -p 'notification'";
