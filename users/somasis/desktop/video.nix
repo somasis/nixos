@@ -124,7 +124,7 @@ in
         # this with a lot of escapes for Nix's string interpolation.
         title = lib.replaceStrings [ "%" ] [ "$" ] (lib.concatStrings [
           ''%{?pause==yes:⏸}%{?pause==no:⏵} ''
-          ''%{!playlist-count==1:%{playlist-pos-1}/%{playlist-count}}'' # show playlist count if more than 1
+          # ''%{!playlist-count==1:%{playlist-pos-1}/%{playlist-count}}'' # show playlist count if more than 1
           ''%{?metadata/by-key/Uploader:%{metadata/by-key/Uploader} - }''
           ''%{media-title:%{filename}}''
           ''%{?chapter:%{chapter-metadata/title}}''
@@ -152,7 +152,7 @@ in
           unicodeminus = true;
           hidetimeout = 1000;
           deadzonesize = 0;
-          scalewindowed = 1.5;
+          # scalewindowed = 1.5;
           vidscale = false;
         };
 
@@ -168,7 +168,7 @@ in
 
       package = pkgs.wrapMpv pkgs.mpv-unwrapped {
         # Use TZ=UTC for `mpv` so that screenshot-template always uses UTC time.
-        extraMakeWrapperArgs = [ "--set" "TZ" "UTC" ];
+        # extraMakeWrapperArgs = [ "--set" "TZ" "UTC" ];
 
         # We can't use programs.mpv.scripts because of this being set.
         scripts = [
@@ -206,12 +206,11 @@ in
         ];
 
         # embed-chapters = true;
-
         # embed-info-json = true;
         # embed-metadata = true;
         # embed-thumbnail = true;
 
-        concurrent-fragments = 4;
+        # concurrent-fragments = 4;
 
         trim-filenames = 128;
 
