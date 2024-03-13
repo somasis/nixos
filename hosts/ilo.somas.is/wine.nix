@@ -1,9 +1,23 @@
-{ pkgs, ... }: {
-  boot.binfmt.registrations."wine" = {
+{ pkgs
+, lib
+, ...
+}:
+let
+  wine = pkgs.wineWow64Packages.stableFull;
+in
+{
+  boot.binfmt.registrations.wine = {
     recognitionType = "magic";
     magicOrExtension = "MZ";
-    interpreter = "${pkgs.wineWowPackages.stableFull}/bin/wine";
+    interpreter = lib.getExe wine;
   };
+
+  environment.systemPackages = [
+    pkgs.winetricks
+    pkgs.wineasio
+
+    wine
+  ];
 
   boot.kernel.sysctl = {
     # Enable usage of performance data by non-admin programs.

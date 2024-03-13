@@ -9,6 +9,8 @@
     ./player.nix
     ./random.nix
     ./scrobble.nix
+
+    ./production.nix
   ];
 
   xdg.userDirs.music = "${config.home.homeDirectory}/audio/library";

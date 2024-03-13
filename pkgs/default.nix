@@ -63,6 +63,8 @@ lib.recursiveUpdate
     playtime = callPackage ./playtime { };
     table = callPackage ./table { };
 
+    wineprefix = callPackage ./wineprefix { };
+
     dmenu = callPackage ./dmenu { };
     dmenu-emoji = callPackage ./dmenu-emoji { };
     dmenu-pass = callPackage ./dmenu-pass { };
