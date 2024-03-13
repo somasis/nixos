@@ -137,6 +137,9 @@ in
           "intl.locale.requested" = "en-CA";
           "intl.accept_language" = "en-US, en";
 
+          # Use the flake-provided versions of translators and styles.
+          extensions.zotero.automaticScraperUpdates = false;
+
           # Use Appalachian State University's OpenURL resolver
           "extensions.zotero.openURL.resolver" = "${proxy}?url=https://resolver.ebscohost.com/openurl?";
           "extensions.zotero.findPDFs.resolvers" = [
@@ -298,14 +301,17 @@ in
     directories = [
       { method = "bindfs"; directory = ".zotero/zotero/default"; }
 
-      { method = "bindfs"; directory = config.lib.somasis.xdgDataDir "zotero/styles"; }
-      { method = "bindfs"; directory = config.lib.somasis.xdgDataDir "zotero/translators"; }
+      # { method = "bindfs"; directory = config.lib.somasis.xdgDataDir "zotero/styles"; }
+      # { method = "bindfs"; directory = config.lib.somasis.xdgDataDir "zotero/translators"; }
     ];
     files = [ "share/zotero/zotero.sqlite" ];
   };
 
   xdg.dataFile = {
     "zotero/storage".source = config.lib.file.mkOutOfStoreSymlink "${config.home.homeDirectory}/study/zotero";
+
+    "zotero/styles".source = inputs.zotero-styles;
+    "zotero/translators".source = inputs.zotero-translators;
 
     "zotero/locate/.keep".source = builtins.toFile "keep" "";
     "zotero/locate/engines.json".text = builtins.toJSON [

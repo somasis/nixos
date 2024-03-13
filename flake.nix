@@ -49,6 +49,11 @@
     qutebrowser-zotero.flake = false;
     qutebrowser-zotero.url = "github:parchd-1/qutebrowser-zotero";
 
+    zotero-styles.flake = false;
+    zotero-styles.url = "github:citation-style-language/styles";
+    zotero-translators.flake = false;
+    zotero-translators.url = "github:zotero/translators";
+
     murdos-musicbrainz.flake = false;
     murdos-musicbrainz.url = "github:murdos/musicbrainz-userscripts";
 
