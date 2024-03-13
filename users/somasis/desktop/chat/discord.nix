@@ -85,7 +85,13 @@ let
       {
         display: none !important;
       }
-    '')
+
+      /* hide profile effects */
+      [class^="profileEffects"]
+      {
+        display: none !important;
+      }
+      '')
   ];
 
   discord-theme = pkgs.runCommandLocal "discord-theme"
