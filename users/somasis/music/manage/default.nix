@@ -227,8 +227,6 @@ in
   };
 
   home.packages = [
-    pkgs.bandcamp-collection-downloader
-
     # (pkgs.symlinkJoin {
     #   name = "gazelle-origin-final";
 
