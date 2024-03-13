@@ -58,6 +58,6 @@ case "${2:-}" in
         printf '%s\n' "${username}"
         ;;
 
-    pass | password) cmd_show "$@" ;;
+    pass | password) cmd_show "$@" | head -n1 ;;
     *) meta "$@" ;;
 esac
