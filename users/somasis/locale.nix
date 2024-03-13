@@ -70,7 +70,7 @@ in
   #   };
   # };
 
-  systemd.user.sessionVariables = {
+  systemd.user.sessionVariables = lib.mkIf (config.i18n.inputMethod.enabled != null) {
     inherit (config.home.sessionVariables)
       GTK_IM_MODULE
       QT_IM_MODULE
