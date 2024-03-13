@@ -212,7 +212,6 @@ in
           done
           printf 'open -rt %s\n' "''${args[*]}" > "$QUTE_FIFO"
         '';
-
       in
       {
         memento = "spawn -u ${memento}";
@@ -221,7 +220,7 @@ in
       };
 
     keyBindings.normal = {
-      "gsw" = "search-with-selection !wikt";
+      gsw = "search-with-selection !wikt";
     }
     // (
       let
