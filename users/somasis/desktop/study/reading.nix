@@ -14,6 +14,7 @@
       sandbox = "none";
 
       selection-clipboard = "clipboard";
+      double-click-follow = true;
 
       incremental-search = false;
       page-cache-size = 30;
