@@ -108,8 +108,12 @@ nixpkgs.lib.nixosSystem {
 
       services.xserver.enable = true;
 
+      # Use dbus-broker since it's faster.
+      services.dbus.implementation = "broker";
+
       programs.command-not-found.enable = false;
       programs.nano.enable = false;
+
       environment = {
         systemPackages = [
           # Necessary for `nixos-rebuild`'s git stuff
