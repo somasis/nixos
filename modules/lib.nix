@@ -9,7 +9,7 @@ with lib;
   config.lib.nixos = import (nixpkgs + "/nixos/lib/utils.nix") { inherit lib config pkgs; };
 
   config.lib.somasis = rec {
-    # Make an absolute path that is relative to $HOME... relative to $HOME.
+    # Make an absolute path that is refers to a location under $HOME... be relative to $HOME.
     relativeToHome = path: lib.strings.removePrefix "./" (
       builtins.toString (
         lib.path.removePrefix
