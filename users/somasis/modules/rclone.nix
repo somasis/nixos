@@ -10,7 +10,7 @@ let
   inherit (config.lib.nixos) escapeSystemdPath escapeSystemdExecArgs;
 
   rcloneCfg = config.programs.rclone;
-  mountsCfg = config.somasis.mounts;
+  mountsCfg = config.services.rclone;
 
   rclonePkg = rcloneCfg.package;
   # rclonePkg = rcloneCfg.finalPackage;
@@ -51,6 +51,18 @@ let
 
   rcloneFlags = attrs: lib.cli.toGNUCommandLine { } attrs;
   rclonefsOptions = list: lib.concatStringsSep " " (map (option: "-o ${option}") list);
+
+  rcloneFlagToEnvVar = flag:
+    assert (lib.hasPrefix "--" flag);
+    let flagParts = lib.pipe flag [ (lib.removePrefix "--") (lib.splitString "=") ]; in
+    "RCLONE_"
+    + (lib.pipe (builtins.head flagParts) [ (lib.replaceStrings [ "-" ] [ "_" ]) (lib.toUpper) ])
+    + (if (lib.drop 1 flagParts) != [ ] then
+      "=${lib.concatStrings (lib.drop 1 flagParts)}"
+    else
+      "=true"
+    )
+  ;
 in
 {
   options = {
@@ -121,8 +133,8 @@ in
       };
     };
 
-    somasis.mounts = {
-      enable = mkEnableOption "Enable rclone mount configuration";
+    services.rclone = {
+      enable = mkEnableOption "Enable rclone mount services";
 
       mounts = mkOption {
         type = types.attrsOf (types.submodule (
@@ -233,32 +245,32 @@ in
           lib.hm.dag.entryAfter [ "writeBoundary" ]
             (
               let
-                getRemovedKeys = pkgs.writeJqScript "get-removed-keys.jq" { null-input = true; raw-output = true; } ''
-                  [
-                    (
-                      input as $configured
-                        | input as $actual
-                        | $actual
-                        | delpaths([(
-                          $configured
-                            | paths
-                            | select(length > 1)
-                            | select(.[1] != "token")
-                        )])
-                        | paths
-                        | select(length > 1))
-                  ] | map(select(.[1] != "token"))
-                ''
-                ;
+                # getRemovedKeys = pkgs.writeJqScript "get-removed-keys.jq" { null-input = true; raw-output = true; } ''
+                #   [
+                #     (
+                #       input as $configured
+                #         | input as $actual
+                #         | $actual
+                #         | delpaths([(
+                #           $configured
+                #             | paths
+                #             | select(length > 1)
+                #             | select(.[1] != "token")
+                #         )])
+                #         | paths
+                #         | select(length > 1))
+                #   ] | map(select(.[1] != "token"))
+                # ''
+                # ;
 
-                json2ini = pkgs.writeJqScript "json2ini.jq" { raw-output = true; } ''
-                  to_entries
-                    | map(
-                      "[\(.key)]",
-                      (.value | to_entries[] | "\(.key) = \(.value)"),
-                      ""
-                    )[]
-                '';
+                # json2ini = pkgs.writeJqScript "json2ini.jq" { raw-output = true; } ''
+                #   to_entries
+                #     | map(
+                #       "[\(.key)]",
+                #       (.value | to_entries[] | "\(.key) = \(.value)"),
+                #       ""
+                #     )[]
+                # '';
 
                 # prune-rclone-config = ''
                 #   rclone_removed_paths=$(
@@ -273,77 +285,107 @@ in
                 #       | ${pkgs.moreutils}/bin/sponge ${lib.escapeShellArg config.xdg.configHome}/rclone/rclone.conf
                 # '';
 
-                setCommand = remote: key: value: ''
+                setRemoteSetting = remote: key: value: ''
                   ${lib.toShellVar "rclone_remote" remote}
                   ${lib.toShellVar "rclone_key" key}
                   ${lib.toShellVar "rclone_value" (rcloneConfigValue value)}
 
-                  if ${rcloneExe} listremotes | ${pkgs.gnugrep}/bin/grep -Fq "''${rclone_remote}:"; then
-                      run ${rcloneExe} \
-                          config update \
-                          "$rclone_remote" "$rclone_key=$rclone_value" \
-                          --non-interactive --no-obscure \
-                          >/dev/null
+                  # verboseEcho "$(${rcloneExe} config dump | ${pkgs.jq}/bin/jq -rc '"rclone config: \(.)"')"
 
-                      if [ -v DRY_RUN ]; then
-                          printf 'would update settings for rclone remote "%s" (%q=%q)\n' \
-                              "$rclone_remote" \
-                              "$rclone_key" \
-                              "$rclone_value"
+                  if rclone_has_remote "$rclone_remote"; then
+                      if rclone_has_setting "$rclone_remote" "$rclone_key" "$rclone_value"; then
+                          verboseEcho "not updating rclone remote '$rclone_remote' setting '$rclone_key', as it is already set to that"
                       else
-                          verboseEcho "updated settings for rclone remote '$rclone_remote' ($rclone_key=$rclone_value)"
+                          verboseEcho "updating rclone remote '$rclone_remote' setting '$rclone_key'"
+
+                          if [[ -v DRY_RUN ]]; then
+                              verboseEcho "would update setting for rclone remote '$rclone_remote' setting '$rclone_key'"
+                          else
+                              if run ${rcloneExe} config update "$rclone_remote" "$rclone_key=$rclone_value" --non-interactive --no-obscure >/dev/null; then
+                                  verboseEcho "updated rclone remote '$rclone_remote' setting '$rclone_key'"
+                              else
+                                  errorEcho "error while updating rclone remote '$rclone_remote' setting '$rclone_key'"
+                              fi
+                          fi
                       fi
                   else
-                      if [ "$rclone_key" = "type" ]; then
-                          run ${rcloneExe} \
-                              config create \
-                              "$rclone_remote" "$rclone_value" \
-                              --non-interactive --no-obscure \
-                              >/dev/null
-                      else
-                          run ${rcloneExe} \
-                              config create \
-                              "$rclone_remote" "$rclone_key=$rclone_value" \
-                              --non-interactive --no-obscure \
-                              >/dev/null
-                      fi
+                      if [[ "$rclone_key" == "type" ]]; then
+                          if [[ -v DRY_RUN ]]; then
+                              verboseEcho "would create rclone remote '$rclone_remote'"
+                          else
+                              rclone_config_output=$(run ${rcloneExe} config create "$rclone_remote" "$rclone_value" --non-interactive --no-obscure)
+                              if [[ $? -eq 0 ]]; then
+                                  noteEcho "created rclone remote '$rclone_remote'"
 
-                      if [ -v DRY_RUN ]; then
-                          printf 'would create rclone remote "%s"\n' "$rclone_remote"
+                                  if ${pkgs.jq}/bin/jq -e '.State != "" or .Option.Required == true or .Error != ""' >/dev/null <<< "$rclone_config_output"; then
+                                      warnEcho \
+                                           $'    rclone indicated that there might be more to configure for this remote; consider running:\n' \
+                                           '    $ rclone config reconnect $rclone_remote:\n' \
+                                           '    to configure this remote further.'
+                                  fi
+                              else
+                                  errorEcho "ran into an error while creating remote '$rclone_remote'"
+                              fi
+                          fi
                       else
-                          printf 'created rclone remote %s, make sure to inspect its configuration before use.\n' "$rclone_remote"
-                          printf 'for example, if a token is required for the remote (Google Drive, etc.), run\n'
-                          printf '$ rclone config reconnect %q\n' "$rclone_remote:"
-                          printf 'and it will walk you through updating the token.\n'
+                          errorEcho "rclone does not have remote '$rclone_remote', but we tried to add setting '$rclone_key'"
+                          # run ${rcloneExe} config create "$rclone_remote" "$rclone_key=$rclone_value" --non-interactive --no-obscure
                       fi
                   fi
                 '';
 
-                setCommands = lib.mapAttrsToList
+                settingCommands = lib.mapAttrsToList
                   (remote: remoteSettings:
                     # Ensure `type` is always the first attribute. `rclone config create` needs a type
                     # when creating a remote, and it would complicate activation script logic if we
                     # needed to keep track of the `type` in order to process further remote settings.
-                    [ (setCommand remote "type" remoteSettings.type) ]
-                    ++ lib.mapAttrsToList
-                      (setCommand remote)
-                      (builtins.removeAttrs remoteSettings [ "type" ])
+                    [ (setRemoteSetting remote "type" remoteSettings.type) ]
+                    ++ lib.mapAttrsToList (setRemoteSetting remote) (builtins.removeAttrs remoteSettings [ "type" ])
                   )
-                  config.programs.rclone.remotes;
+                  config.programs.rclone.remotes
+                ;
               in
               # $VERBOSE_ECHO "Pruning rclone configuration of any removed keys"
                 # $DRY_RUN_CMD ${prune-rclone-config}
+                # verboseEcho "Setting rclone configuration"
               ''
-                verboseEcho "Setting rclone configuration"
-                ${lib.concatMapStrings lib.concatStrings setCommands}
+                rclone_has_remote() {
+                    local remote="$1"; remote=''${remote%%,*}
+
+                    ${rcloneExe} config dump \
+                        | ${pkgs.jq}/bin/jq -e \
+                            --arg remote "$remote" \
+                            'to_entries | map(select(.key == $remote)) != []' \
+                            >/dev/null
+                }
+
+                rclone_has_setting() {
+                    local remote="$1"; remote=''${remote%%,*}
+                    local key="$2"
+                    local value="$3"
+
+                    ${rcloneExe} config dump \
+                        | ${pkgs.jq}/bin/jq -e \
+                            --arg remote "$remote" \
+                            --arg key "$key" \
+                            --arg value "$value" '
+                            to_entries
+                              | map(
+                                select(.key == $remote) | .value | to_entries[]
+                                  | select(.key == $key and .value == $value)
+                              ) != []
+                            ' \
+                            >/dev/null
+                }
               ''
+              + (lib.concatMapStrings lib.concatStrings settingCommands)
             )
         );
       }
     ;
 
     systemd.user =
-      lib.mkIf (config.somasis.mounts.enable && config.somasis.mounts != { })
+      lib.mkIf (config.services.rclone.enable && config.services.rclone.mounts != { })
         (lib.foldr
           (
             mount:
@@ -364,16 +406,31 @@ in
             lib.recursiveUpdate
               units
               {
-                services."${unitPath}" = {
-                  Unit.Description = unitDescription;
-                  Unit.PartOf = [ "rclone.target" ];
-                  Unit.Upholds = [ "${unitPath}.mount" ];
-                  Install.WantedBy = [ "rclone.target" "${unitPath}.mount" ];
+                services.${unitPath} = {
+                  Unit = {
+                    Description = unitDescription;
+                    PartOf = [ "rclone.target" ];
+                    # Upholds = [ "${unitPath}.mount" ];
+                  };
+                  Install.WantedBy = [
+                    "rclone.target"
+                    # "${unitPath}.mount"
+                  ];
 
                   Service = {
                     Type = "notify";
 
-                    SyslogIdentifier = "${unitPath}";
+                    SyslogIdentifier = unitPath;
+
+                    Environment =
+                      [
+                        "RCLONE_CONFIG=%E/rclone/rclone.conf"
+                        "RCLONE_CACHE_DIR=%C/rclone"
+                        ''"WHERE=${mount.where}"''
+                        ''"WHAT=${mount.remote}:${mount.what}"''
+                      ]
+                      ++ lib.optionals (mount.options != [ ]) (map (flag: ''"${rcloneFlagToEnvVar "--${flag}"}"'') mount.options)
+                    ;
 
                     # <https://rclone.org/commands/rclone_mount/#systemd>
                     # > Note that systemd runs mount units without any environment variables
@@ -381,54 +438,62 @@ in
                     # > not work and you should provide `--config` and `--cache-dir` explicitly
                     # > as absolute paths via rclone arguments.
                     ExecStartPre = [
-                      (pkgs.writeShellScript "check-rclone-config" ''
-                        ${rcloneExe} \
-                            --config ${lib.escapeShellArg config.xdg.configHome}/rclone/rclone.conf \
-                            --cache-dir ${lib.escapeShellArg config.xdg.cacheHome}/rclone \
-                            config touch
-                      '')
-                      (pkgs.writeShellScript "mount-rclone-mkdir" ''
-                        ${pkgs.coreutils}/bin/mkdir -p ${lib.escapeShellArg mount.where}
-                      '')
+                      # ensure the configuration is there; `rclone config touch` seems to cause a race condition!
+                      "${rcloneExe} config dump"
+
+                      ''${pkgs.coreutils}/bin/mkdir -p ''${WHERE}''
                     ];
 
-                    ExecStart = lib.singleton (pkgs.writeShellScript "mount-rclone" ''
-                      exec ${rcloneExe} ${lib.escapeShellArgs (
-                        []
-                          ++ [ "--config" "${config.xdg.configHome}/rclone/rclone.conf" ]
-                          ++ [ "--cache-dir" "${config.xdg.cacheHome}/rclone" ]
-                          ++ [ "mount" "${mount.remote}:${mount.what}" mount.where ]
-                          ++ lib.optionals (mount.options != [ ]) (
-                            [ "-o" ] ++ lib.intersperse "-o" mount.options
-                          )
-                      )}
-                    '');
+                    ExecStart = [ ''${rcloneExe} mount ''${WHAT} ''${WHERE}'' ];
+                    ExecStopPost = [ ''-${pkgs.coreutils}/bin/rmdir ''${WHERE}'' ];
+
+                    StandardOutput = "null";
                   };
                 };
 
-                mounts."${unitPath}" = {
-                  Unit.Description = unitDescription;
-                  Unit.BindsTo = [ "${unitPath}.service" ];
-                  Unit.After = [ "${unitPath}.service" ];
-                  Install.WantedBy = [ "mounts.target" "rclone.target" ];
+                # mounts.${unitPath} = {
+                #   Unit = {
+                #     Description = unitDescription;
+                #     BindsTo = [ "${unitPath}.service" ];
+                #     After = [ "${unitPath}.service" ];
+                #   };
 
-                  Mount = {
-                    Type = "rclone";
-                    What = "${mount.remote}:${mount.what}";
-                    Where = mount.where;
-                    Options = lib.concatStringsSep "," ([ "rw" "_netdev" "args2env" ]);
-                  };
-                };
+                #   Install.WantedBy = [ "mounts.target" "rclone.target" ];
+
+                #   Mount = {
+                #     Type = "rclone";
+                #     What = "${mount.remote}:${mount.what}";
+                #     Where = mount.where;
+                #     # Options = lib.concatStringsSep "," ([ "rw" "_netdev" "args2env" ]);
+
+                #     # Necessary for `afuse` to work.
+                #     # LazyUnmount = true;
+                #   };
+                # };
 
                 # BUG These don't properly function right now...
                 #     not sure how userspace automounts ever would have worked.
-                # automounts."${unitPath}" = {
+                # automounts.${unitPath} = {
                 #   Unit.Description = unitDescription;
                 #   Unit.PartOf = [ "rclone.target" ];
                 #   Install.WantedBy = [ "rclone.target" ];
 
                 #   Automount.Where = mount.where;
                 #   Automount.TimeoutIdleSec = mount.linger;
+                # };
+
+                # services."afuse-${unitPath}" = {
+                #   Unit.Description = "Automount for ${mount.remote}:${mount.what} at ${mount.where}";
+                #   Install.WantedBy = [ "rclone.target" ];
+
+                #   Service = {
+                #     Type = "simple";
+                #     ExecStart = lib.singleton ''
+                #       ${pkgs.afuse}/bin/afuse \
+                #           -o mount_template="${pkgs.systemd}/bin/systemctl --user start ${unitPath}.mount" \
+                #           -o unmount_template="${pkgs.systemd}/bin/systemctl --user stop ${userPath}.mount"
+                #     '';
+                #   };
                 # };
               }
           )
@@ -438,7 +503,7 @@ in
               Install.WantedBy = [ "default.target" ];
             };
           }
-          (lib.mapAttrsToList (n: v: v) config.somasis.mounts.mounts)
+          (lib.mapAttrsToList (n: v: v) config.services.rclone.mounts)
         )
     ;
   };

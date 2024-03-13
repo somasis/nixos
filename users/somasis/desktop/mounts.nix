@@ -17,10 +17,14 @@ let
   ];
 in
 {
-  # home.packages = [ pkgs.rclone pkgs.sshfs ];
-
-  persist.directories = [{ method = "bindfs"; directory = config.lib.somasis.xdgConfigDir "rclone"; }];
-  cache.directories = [{ method = "symlink"; directory = config.lib.somasis.xdgCacheDir "rclone"; }];
+  persist.directories = [{
+    method = "bindfs";
+    directory = config.lib.somasis.xdgConfigDir "rclone";
+  }];
+  cache.directories = [{
+    method = "symlink";
+    directory = config.lib.somasis.xdgCacheDir "rclone";
+  }];
 
   programs.rclone = {
     enable = true;
@@ -94,7 +98,7 @@ in
       };
   };
 
-  somasis.mounts = {
+  services.rclone = {
     enable = true;
 
     mounts = {
@@ -164,6 +168,6 @@ in
   };
 
   home.file."vault".source = lib.mkIf (osConfig.networking.fqdnOrHostName != "spinoza.7596ff.com")
-    (config.lib.file.mkOutOfStoreSymlink "${config.somasis.mounts.mounts.spinoza-raid.where}/backup/vault")
+    (config.lib.file.mkOutOfStoreSymlink "${config.services.rclone.mounts.spinoza-raid.where}/backup/vault")
   ;
 }
