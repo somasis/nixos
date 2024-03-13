@@ -59,7 +59,7 @@
     original_date = true;
 
     import = {
-      languages = [ "tok" "en" "jp" ];
+      languages = [ "en" "jp" ];
 
       # Interactive mode
       bell = true;

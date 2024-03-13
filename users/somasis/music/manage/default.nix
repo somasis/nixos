@@ -223,7 +223,7 @@ in
 
   home.file = lib.optionalAttrs notServer {
     "audio/library/source".source = config.lib.file.mkOutOfStoreSymlink "${config.home.homeDirectory}/mnt/sftp/spinoza.7596ff.com_raid/audio/library/source";
-    "audio/library/lossless".source = config.lib.file.mkOutOfStoreSymlink "${config.home.homeDirectory}/mnt/sftp/spinoza.7596ff.com_raid/audio/library/lossless";
+    "audio/library/lossy".source = config.lib.file.mkOutOfStoreSymlink "${config.home.homeDirectory}/mnt/sftp/spinoza.7596ff.com_raid/audio/library/lossy";
   };
 
   home.packages = [
@@ -320,8 +320,8 @@ in
     };
 
     settings = {
-      directory = "${config.xdg.userDirs.music}/lossless";
-      library = "${config.xdg.userDirs.music}/lossless/beets.db";
+      directory = "${config.xdg.userDirs.music}/lossy";
+      library = "${config.xdg.userDirs.music}/lossy/beets.db";
 
       # Default `beet list` options
       sort_case_insensitive = false;

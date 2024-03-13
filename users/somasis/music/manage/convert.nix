@@ -1,4 +1,4 @@
-# Convert to Opus for other devices
+# Convert to Opus on import
 { lib
 , config
 , pkgs
@@ -6,27 +6,32 @@
 , ...
 }: {
   programs.beets.settings = rec {
-    plugins = [ "convert" "alternatives" ];
+    plugins = [
+      "convert"
+      # "alternatives"
+    ];
 
-    alternatives.lossy = {
-      directory = "${config.xdg.userDirs.music}/lossy";
-      formats = "opus";
+    # alternatives.lossy = {
+    #   directory = "${config.xdg.userDirs.music}/lossy";
+    #   formats = "opus";
 
-      query = "";
+    #   query = "";
 
-      paths.default = "%if{$mb_albumartistid,$mb_albumartistid/}%if{$mb_albumid,$mb_albumid/}%ifdef{mb_releasetrackid,%ifdef{mb_trackid}}";
+    #   paths.default = "%if{$mb_albumartistid,$mb_albumartistid/}%if{$mb_albumid,$mb_albumid/}%ifdef{mb_releasetrackid,%ifdef{mb_trackid}}";
 
-      removable = false;
-    };
+    #   removable = false;
+    # };
 
     convert = {
-      # auto = true;
-
       copy_album_art = true;
       embed = false;
       album_art_maxwidth = 2048;
 
-      dest = "${config.xdg.userDirs.music}/lossy";
+      # Convert imported files to Opus automatically, then back them up to lossless
+      auto = true;
+      keep_new = true;
+      delete_originals = true;
+      dest = "${config.xdg.userDirs.music}/lossless";
 
       format = "opus";
       formats.opus = {
@@ -36,7 +41,7 @@
         extension = "opus";
       };
 
-      paths.default = "%if{$mb_albumartistid,$mb_albumartistid/}%if{$mb_albumid,$mb_albumid/}%ifdef{mb_releasetrackid,%ifdef{mb_trackid}}";
+      # paths.default = "%if{$mb_albumartistid,$mb_albumartistid/}%if{$mb_albumid,$mb_albumid/}%ifdef{mb_releasetrackid,%ifdef{mb_trackid}}";
     };
   };
 }
