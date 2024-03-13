@@ -23,13 +23,12 @@ in
 
   accounts.email.maildirBasePath = "mail";
 
-  persist = {
-    directories =
-      [{ method = "symlink"; directory = "mail/sms"; }]
-      ++ lib.optional config.programs.offlineimap.enable { method = "symlink"; directory = config.lib.somasis.xdgDataDir "offlineimap"; }
-      ++ map (x: { method = "symlink"; directory = "mail/${x.maildir.path}"; }) (builtins.attrValues config.accounts.email.accounts)
-    ;
-  };
+  persist.directories = lib.mkIf config.programs.offlineimap.enable (
+    [{ method = "symlink"; directory = config.lib.somasis.xdgDataDir "offlineimap"; }]
+    ++ map
+      (x: { method = "symlink"; directory = "mail/${x.maildir.path}"; })
+      (builtins.attrValues config.accounts.email.accounts)
+  );
 
   accounts.email.accounts =
     let
@@ -53,21 +52,16 @@ in
 
               folders.inbox = "INBOX";
 
-              offlineimap.enable = true;
-              msmtp.enable = true;
+              offlineimap.enable = false;
+              msmtp.enable = false;
 
               imapnotify = {
-                enable = true;
+                enable = false;
                 onNotify = "offlineimap -a ${address} -u syslog";
                 boxes = [ "INBOX" ];
               };
 
-              thunderbird = {
-                enable = true;
-                # settings = id: {
-                #   "mail.server.server_${id}.directory" = "${config.accounts.email.maildirBasePath}/${address}";
-                # };
-              };
+              thunderbird.enable = true;
             };
           }
           { "${address}" = extraAttrs; }
