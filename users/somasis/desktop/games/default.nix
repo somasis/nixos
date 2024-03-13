@@ -12,7 +12,8 @@
 
   home.packages = [
     pkgs.lbreakout2
-    pkgs.libsForQt5.kpat
+    pkgs.lbreakouthd
+    pkgs.kdePackages.kpat
     pkgs.opentyrian
     # pkgs.pingus
     pkgs.sgt-puzzles
@@ -28,6 +29,7 @@
 
     directories = [
       { method = "symlink"; directory = ".lbreakout2"; }
+      { method = "symlink"; directory = ".lbreakouthd"; }
       { method = "symlink"; directory = ".zaz"; }
       # { method = "symlink"; directory = config.lib.somasis.xdgConfigDir "PCSX2"; }
       { method = "symlink"; directory = config.lib.somasis.xdgConfigDir "opentyrian"; }
