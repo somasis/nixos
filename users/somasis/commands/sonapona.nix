@@ -155,4 +155,7 @@ in
 
     command = "sonapona ! -name '*.long'";
   };
+
+  # sometimes stw can fail?
+  systemd.user.services.stw-sonapona.Service.Restart = "on-failure";
 }
