@@ -112,7 +112,10 @@ in
 
   systemd = {
     timers."borgbackup-job-spinoza".wants = [ "network-online.target" ];
-    services."borgbackup-job-spinoza".serviceConfig.Nice = 19;
+    services."borgbackup-job-spinoza" = {
+      unitConfig.ConditionACPower = true;
+      serviceConfig.Nice = 19;
+    };
   };
 
   environment.systemPackages =
