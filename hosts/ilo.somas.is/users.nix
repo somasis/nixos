@@ -14,18 +14,15 @@
         description = "Kylie McClain";
         uid = 1000;
 
-        extraGroups = [
-          "systemd-journal"
-
-          # ./users/somasis/games/retroarch.nix: controller detection
-          "input"
-        ]
-        ++ lib.optional config.security.sudo.enable "wheel"
-        ++ lib.optional config.hardware.brillo.enable "video"
-        ++ lib.optionals config.networking.networkmanager.enable [ "network" "networkmanager" ]
-        ++ lib.optional config.hardware.sane.enable "scanner"
-        ++ lib.optional config.services.printing.enable "lp"
-        ++ lib.optional config.programs.adb.enable "adbusers"
+        extraGroups =
+          [ "systemd-journal" ]
+          ++ lib.optional config.hardware.uinput.enable "input"
+          ++ lib.optional config.security.sudo.enable "wheel"
+          ++ lib.optional config.hardware.brillo.enable "video"
+          ++ lib.optionals config.networking.networkmanager.enable [ "network" "networkmanager" ]
+          ++ lib.optional config.hardware.sane.enable "scanner"
+          ++ lib.optional config.services.printing.enable "lp"
+          ++ lib.optional config.programs.adb.enable "adbusers"
         ;
 
         hashedPassword = "$y$j9T$TBHE4K4AUdpPQS6tXfWJJ.$bi.vigEvgXkq0G.gKZeKVvFX1m4hsiWNzI.SAZ2ConC";

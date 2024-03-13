@@ -69,6 +69,10 @@
     };
   };
 
+  # RetroArch joysticks and stuff
+  services.udev.packages = [ pkgs.game-devices-udev-rules ];
+  hardware.uinput.enable = true;
+
   persist.directories = [ "/var/lib/fwupd" ];
 
   cache.directories = [

@@ -5,7 +5,7 @@
   imports = [
     ./minecraft.nix
     # TODO ./nx.nix
-    # ./retroarch.nix
+    ./retroarch.nix
     ./steam.nix
     ./urbanterror.nix
   ];
