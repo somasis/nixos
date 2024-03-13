@@ -551,6 +551,14 @@ in
           "ba" = "cmd-set-text -s :bookmark-add {url} \"{title}\"";
           "bd" = lib.mkMerge [ "cmd-set-text :bookmark-del {url:domain}" "fake-key -g <Tab>" ];
 
+          "dd" = "download";
+          "dc" = "download-cancel";
+          "dq" = "download-clear";
+          "dD" = "download-delete";
+          "do" = "download-open";
+          "dr" = "download-remove";
+          "dR" = "download-retry";
+
           "!" = "cmd-set-text :open !";
           "gss" = "cmd-set-text -s :open site:{url:domain}";
 
@@ -604,6 +612,9 @@ in
         prompt."<Ctrl+y>" = null;
 
         normal = lib.genAttrs [
+          "gd"
+          "ad"
+          "cd"
           "<Escape>"
           "F"
           "f"
