@@ -78,14 +78,15 @@ in
 
     settings = {
       extractor = {
-        directory = "./";
+        base-directory = ".";
+
         filename =
           (lib.concatStringsSep "-" [
-            "{date!T|created_at!T}"
+            "{date|created_at!T}"
             "{category}"
-            "{author['name']|user['name']|uploader}"
+            "{author[name]|user[name]|uploader}"
             "{tweet_id|id}"
-            "{tags!S|filename}"
+            "{filename}"
           ]) + ".{extension}"
         ;
 
@@ -96,7 +97,9 @@ in
 
         postprocessors = [{
           name = "exec";
-          command = "${lib.getExe pkgs.image_optim} {}";
+          command = pkgs.writeShellScript "image-optim" ''
+            ${pkgs.moreutils}/bin/chronic ${lib.getExe pkgs.image_optim} --no-progress "$@"
+          '';
           async = true;
         }];
 
@@ -118,8 +121,15 @@ in
     };
   };
 
-  programs.qutebrowser = {
-    aliases.gallery-dl = "spawn -u ${lib.getExe pkgs.gallery-dl}";
-    keyBindings.normal."zpg" = "gallery-dl -d ~/sync/gallery {url}";
-  };
+  programs.qutebrowser =
+    let
+      gallery-dl = pkgs.writeShellScript "gallery-dl" ''
+        exec ${lib.getExe config.programs.gallery-dl.package} -o output.log='{"level": "warning"}' "$@"
+      '';
+    in
+    {
+      aliases.gallery-dl = "spawn -m ${gallery-dl}";
+      keyBindings.normal.dG = "gallery-dl -D ${config.xdg.userDirs.download} {url}";
+      keyBindings.normal.dg = "gallery-dl -D ~/sync/gallery {url}";
+    };
 }

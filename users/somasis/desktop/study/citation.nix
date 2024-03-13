@@ -429,31 +429,14 @@ in
         _description = "Search Anna's Archive";
         _icon = "https://annas-archive.org/favicon-32x32.png";
 
-        _urlTemplate = "https://annas-archive.org/search?index=&q={rft:isbn}";
+        _urlTemplate = "https://annas-archive.org/search?index=&q={rft:isbn}+{z:DOI}";
         _urlParams = [ ];
 
         _urlNamespaces = {
           "" = "http://a9.com/-/spec/opensearch/1.1/";
           z = "http://www.zotero.org/namespaces/openSearch#";
-          rft = "info:ofi/fmt:kev:mtx:book";
-        };
-      }
-
-      {
-        _hidden = false;
-
-        _name = "Library Genesis";
-        _alias = "Library Genesis";
-        _description = "Search Library Genesis";
-        _icon = "http://libgen.rs/favicon.ico";
-
-        _urlTemplate = "http://libgen.rs/search.php?req={rft:isbn}&open=0&res=25&view=detailed&phrase=1&column=identifier";
-        _urlParams = [ ];
-
-        _urlNamespaces = {
-          "" = "http://a9.com/-/spec/opensearch/1.1/";
-          z = "http://www.zotero.org/namespaces/openSearch#";
-          rft = "info:ofi/fmt:kev:mtx:book";
+          # rft = "info:ofi/fmt:kev:mtx:book";
+          rft = "info:ofi/fmt:kev:mtx";
         };
       }
 
@@ -473,6 +456,7 @@ in
           z = "http://www.zotero.org/namespaces/openSearch#";
         };
       }
+
       {
         _hidden = false;
 

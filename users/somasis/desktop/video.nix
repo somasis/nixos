@@ -244,12 +244,5 @@ in
     };
   };
 
-  home = {
-    packages = [
-      pkgs.catt
-      pkgs.pulseaudio-dlna
-    ];
-
-    shellAliases.ytaudio = "yt-dlp --format bestaudio --extract-audio --audio-format wav";
-  };
+  home.shellAliases.ytaudio = "yt-dlp --format bestaudio --extract-audio --audio-format wav";
 }
