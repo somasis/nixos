@@ -658,11 +658,8 @@ in
         # > skipped). Exit code of 0 or those matching SuccessExitStatus= will
         # > continue execution to the next command(s).
         ExecCondition = pkgs.writeShellScript "wait-for-qutebrowser" ''
-          set -eu
-          set -- $(${pkgs.procps}/bin/pgrep -u "''${USER:-$(${pkgs.coreutils}/bin/id -un)}" "qutebrowser")
-
-          [ "$#" -gt 0 ] || exit 0
-          ${pkgs.procps}/bin/pwait "$@"
+          set -euo pipefail
+          test "$(${pkgs.procps}/bin/pgrep -c -u "$USER" "qutebrowser")" -eq 0
         '';
 
         ExecStart = pkgs.writeShellScript "qutebrowser-vacuum" ''
