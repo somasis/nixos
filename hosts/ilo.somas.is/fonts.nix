@@ -7,6 +7,8 @@
 
     packages = [
       pkgs.noto-fonts
+      pkgs.noto-fonts-cjk-sans
+      pkgs.noto-fonts-cjk-serif
 
       pkgs.iosevka-bin
       (pkgs.iosevka-bin.override { variant = "aile"; })
@@ -16,7 +18,7 @@
       (pkgs.iosevka-bin.override { variant = "curly-slab"; })
       (pkgs.nerdfonts.override { fonts = [ "NerdFontsSymbolsOnly" ]; })
 
-      # pkgs.sarasa-gothic # CJK in a style similar to Iosevka
+      pkgs.sarasa-gothic # CJK in a style similar to Iosevka
 
       pkgs.lmodern
 
