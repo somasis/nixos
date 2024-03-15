@@ -10,6 +10,8 @@ in
   xdg.userDirs.pictures = "${config.home.homeDirectory}/pictures";
 
   home.packages = [
+    pkgs.image-optimize
+
     pkgs.nsxiv
 
     (pkgs.gimp-with-plugins.override {
@@ -97,9 +99,7 @@ in
 
         postprocessors = [{
           name = "exec";
-          command = pkgs.writeShellScript "image-optim" ''
-            ${pkgs.moreutils}/bin/chronic ${lib.getExe pkgs.image_optim} --no-progress "$@"
-          '';
+          command = "${lib.getExe pkgs.image-optimize} -q {}";
           async = true;
         }];
 

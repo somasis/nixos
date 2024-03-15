@@ -47,6 +47,7 @@ lib.recursiveUpdate
       }
     ;
 
+    image-optimize = callPackage ./image-optimize { };
     screenshot = callPackage ./screenshot { };
     xinput-notify = callPackage ./xinput-notify { };
 
