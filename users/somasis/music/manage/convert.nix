@@ -27,11 +27,9 @@
       embed = false;
       album_art_maxwidth = 2048;
 
-      # Convert imported files to Opus automatically, then back them up to lossless
+      # Convert imported files to Opus automatically and keep the converted ones as the library files
       auto = true;
       keep_new = true;
-      delete_originals = true;
-      dest = "${config.xdg.userDirs.music}/lossless";
 
       format = "opus";
       formats.opus = {

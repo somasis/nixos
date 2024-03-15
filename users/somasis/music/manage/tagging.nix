@@ -85,8 +85,6 @@
         "singleton" = "_single/$artist/$title%if{$year, ($year)}";
 
         "albumtype:soundtrack" = "_soundtrack/${stem}";
-
-        "sample:true" = "_sample/${default}";
       };
 
     match.max_rec = {
@@ -190,10 +188,7 @@
       backend = "ffmpeg";
     };
 
-    types = {
-      rating = "float";
-      sample = "bool";
-    };
+    types.rating = "float";
 
     # Ensure there is never art left embedded in imported files.
     zero = {

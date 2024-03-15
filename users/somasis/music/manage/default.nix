@@ -188,7 +188,7 @@ let
     { beets = pkgs.beetsPackages.beets-minimal; }
   ;
 
-  beets = pkgs.beets-unstable.override {
+  beets = pkgs.beets.override {
     pluginOverrides = {
       # beetcamp = { enable = true; propagatedBuildInputs = [ beetcamp ]; };
       # fetchartist = { enable = true; propagatedBuildInputs = [ beets-fetchartist ]; };
@@ -214,9 +214,6 @@ in
     ./ripping.nix
     ./tagging.nix
   ];
-
-  # NOTE fix aacgain build failure on nixpkgs unstable (which causes beets to fail.
-  nixpkgs.overlays = [ (final: prev: { inherit (pkgs.stable) aacgain; }) ];
 
   xdg.userDirs.music = "${config.home.homeDirectory}/audio/library";
 
