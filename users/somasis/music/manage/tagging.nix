@@ -24,7 +24,7 @@
       "importadded"
 
       # Fetch genres from Last.fm
-      # "lastgenre"
+      "lastgenre"
 
       # Fetch/display lyrics
       "lyrics"
@@ -74,7 +74,7 @@
       # Always start over imports of half-imported releases
       resume = false;
 
-      log = "${config.xdg.userDirs.music}/lossless/beets.log";
+      log = "${config.xdg.userDirs.music}/lossy/beets.log";
     };
 
     paths =
@@ -97,7 +97,7 @@
 
     musicbrainz = {
       # NOTE: conflicts with lastgenre
-      genres = true;
+      # genres = true;
       extra_tags = [
         "catalognum"
         "country"
@@ -153,13 +153,13 @@
 
     importadded.preserve_mtimes = true;
 
-    # lastgenre = {
-    #   auto = true;
+    lastgenre = {
+      auto = true;
 
-    #   count = 5;
-    #   prefer_specific = true;
-    #   title_case = false;
-    # };
+      count = 5;
+      prefer_specific = true;
+      title_case = false;
+    };
 
     lyrics.sources = [ "musixmatch" "genius" ];
 

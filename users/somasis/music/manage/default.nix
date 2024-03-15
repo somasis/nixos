@@ -223,7 +223,7 @@ in
 
   home.file = lib.optionalAttrs notServer {
     "audio/library/source".source = config.lib.file.mkOutOfStoreSymlink "${config.home.homeDirectory}/mnt/sftp/spinoza.7596ff.com_raid/audio/library/source";
-    "audio/library/lossy".source = config.lib.file.mkOutOfStoreSymlink "${config.home.homeDirectory}/mnt/sftp/spinoza.7596ff.com_raid/audio/library/lossy";
+    "audio/library/lossless".source = config.lib.file.mkOutOfStoreSymlink "${config.home.homeDirectory}/mnt/sftp/spinoza.7596ff.com_raid/audio/library/lossless";
   };
 
   home.packages = [
@@ -327,9 +327,6 @@ in
       sort_case_insensitive = false;
       sort_item = "artist+ date+ album+ disc+ track+";
       sort_album = "artist+ date+ album+ disc+ track+";
-
-      # I simply cannot trust anyone to read tags properly.
-      id3v23 = true;
 
       plugins = [ "parentwork" "noimport" ]
         ++ lib.optional config.services.mpd.enable "mpdupdate";
