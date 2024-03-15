@@ -22,14 +22,15 @@ if [[ "$#" -lt 1 ]]; then
     usage 'no archives given'
 fi
 
-account=$(basename "$1" .zip)
-account=${account#facebook-}
+account=$(bsdtar -Oxf "$1" personal_information/profile_information/profile_information.json)
+account=$(jq -r .profile_v2.username <<<"${account}")
 
 temp=$(mktemp -d)
-first_file=$(bsdtar -tf "$1" | grep -e '\.json$' -e '\.txt$' | head -n1)
+date=$(bsdtar -tf "$1" personal_information/profile_information/profile_information.json)
+date=$(grep -v '/$' <<<"${date}" | head -n1)
 
-bsdtar -C "${temp}" -xf "$(readlink -f "$1")" "${first_file}"
-date=$(TZ=UTC stat -c '%Y' "${temp}"/"${first_file}")
+bsdtar -C "${temp}" -xf "$1" "${date}"
+date=$(TZ=UTC stat -c '%Y' "${temp}"/"${date}")
 date=$(dateconv -i "%s" -z UTC -f '%Y-%m-%dT%H:%M:%SZ' "${date}")
 rm -r "${temp}"
 
