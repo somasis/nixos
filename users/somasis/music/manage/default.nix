@@ -188,8 +188,7 @@ let
     { beets = pkgs.beetsPackages.beets-minimal; }
   ;
 
-  beets = pkgs.beets.override {
-    aacgain = pkgs.stable.aacgain;
+  beets = pkgs.beets-unstable.override {
     pluginOverrides = {
       # beetcamp = { enable = true; propagatedBuildInputs = [ beetcamp ]; };
       # fetchartist = { enable = true; propagatedBuildInputs = [ beets-fetchartist ]; };
