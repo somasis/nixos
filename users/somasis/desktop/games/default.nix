@@ -6,7 +6,7 @@
     ./minecraft.nix
     # TODO ./nx.nix
     ./retroarch.nix
-    ./steam.nix
+    # ./steam.nix
     ./urbanterror.nix
   ];
 
