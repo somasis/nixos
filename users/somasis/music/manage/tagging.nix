@@ -154,6 +154,7 @@
     lastgenre = {
       auto = true;
 
+      separator = ";";
       count = 5;
       prefer_specific = true;
       title_case = false;
