@@ -6,7 +6,6 @@
 }:
 let
   inherit (config.lib.somasis) xdgConfigDir xdgCacheDir xdgDataDir;
-  inherit (osConfig.services) tor;
 
   tc = config.theme.colors;
 
@@ -69,13 +68,13 @@ let
   '';
 
   proxies =
-    [ "system" ]
-    ++ (lib.optional (tor.enable && tor.client.enable)
-      "socks://${tor.client.socksListenAddress.addr}:${toString tor.client.socksListenAddress.port}"
-    )
-    ++ (lib.mapAttrsToList
+    let tor = osConfig.services.tor.client; inherit (config.somasis) tunnels; in
+    [ ]
+    ++ lib.optional tor.enable
+      "socks://${tor.socksListenAddress.addr}:${toString tor.socksListenAddress.port}"
+    ++ lib.optionals tunnels.enable (lib.mapAttrsToList
       (_: tunnel: "socks://127.0.0.1:${toString tunnel.port}")
-      (lib.filterAttrs (_: tunnel: tunnel.type == "dynamic") config.somasis.tunnels.tunnels)
+      (lib.filterAttrs (_: tunnel: tunnel.type == "dynamic") tunnels.tunnels)
     )
   ;
 in
@@ -211,7 +210,7 @@ in
       prompt.radius = 0;
 
       content = {
-        proxy = builtins.toString (builtins.head proxies);
+        proxy = "system";
 
         webrtc_ip_handling_policy = "default-public-interface-only";
 
@@ -562,7 +561,7 @@ in
           "!" = "cmd-set-text :open !";
           "gss" = "cmd-set-text -s :open site:{url:domain}";
 
-          "cnp" = ''config-cycle -p content.proxy ${lib.concatStringsSep " " proxies}'';
+          "cnp" = lib.mkIf (proxies != [ ]) ''config-cycle -p content.proxy ${lib.concatStringsSep " " ([ "system" ] ++ proxies)}'';
 
           ";;" = "hint all";
 

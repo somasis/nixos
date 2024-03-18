@@ -94,7 +94,7 @@
   };
 
   services.tor = {
-    enable = true;
+    enable = false;
     client = {
       enable = true;
       dns.enable = true;
@@ -108,7 +108,7 @@
     };
   };
 
-  powerManagement.resumeCommands = ''
+  powerManagement.resumeCommands = lib.mkIf config.services.tor.enable ''
     ${config.systemd.package}/bin/systemctl try-restart tor.service
   '';
 
