@@ -12,15 +12,15 @@ let
     : "''${QUTE_FIFO:?}"
     : "''${QUTE_URL:?}"
 
-    if [ -z "$QUTE_SELECTED_HTML" ]; then
+    if [ -n "$QUTE_SELECTED_HTML" ]; then
         html="$QUTE_SELECTED_HTML"
     else
-        html=$(cat "$QUTE_HTML")
+        html=$(<"$QUTE_HTML")
     fi
 
     umask 0077
 
-    PATH=${lib.makeBinPath [ pkgs.html-tidy pkgs.rdrview pkgs.trurl pkgs.coreutils ]}:"$PATH"
+    PATH=${lib.makeBinPath [ pkgs.html-tidy pkgs.rdrview pkgs.trurl pkgs.coreutils ]}"''${PATH:+:$PATH}"
 
     case "$QUTE_URL" in
         file://*) QUTE_URL=''${QUTE_URL#file://} ;;
@@ -43,7 +43,7 @@ let
     cat >"$tmp" <<EOF
     <!DOCTYPE html>
     <head>
-      <meta charset="utf-8">
+      <meta charset="utf-8" />
       <title>rdrview''${QUTE_TITLE:+: $QUTE_TITLE}</title>
       <style>
         $(cat ${hello-css})
