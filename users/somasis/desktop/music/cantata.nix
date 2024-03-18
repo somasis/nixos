@@ -260,7 +260,7 @@ let
 
     # Interface > Tweaks
     General.ignorePrefixes = null; # "artist & album sorting"
-    General.composerGenres = null; # "composer support"
+    General.composerGenres = [ "classical" ]; # "composer support"
     General.singleTracksFolders = null;
 
     General.cueSupport = "ignore"; # CUE files: "do not list"
