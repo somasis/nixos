@@ -90,7 +90,7 @@
   # NOTE: systemd-resolved actually breaks `hostname -f`!
   services.resolved = {
     enable = true;
-    dnssec = "false"; # slow as fuck
+    dnssec = "false"; # slow as fuck and often broken
   };
 
   services.tor = {
