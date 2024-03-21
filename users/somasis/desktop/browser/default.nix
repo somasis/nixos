@@ -67,11 +67,13 @@ let
     printf 'yank -q inline "%s" ;; message-info "Yanked URL of highlighted text to clipboard: %s"\n' "''${url}" "''${url}"
   '';
 
+  inherit (config.somasis) tunnels;
+  inherit (osConfig.services) tor;
+
   proxies =
-    let tor = osConfig.services.tor.client; inherit (config.somasis) tunnels; in
     [ ]
-    ++ lib.optional tor.enable
-      "socks://${tor.socksListenAddress.addr}:${toString tor.socksListenAddress.port}"
+    ++ lib.optional tor.client.enable
+      "socks://${tor.client.socksListenAddress.addr}:${toString tor.client.socksListenAddress.port}"
     ++ lib.optionals tunnels.enable (lib.mapAttrsToList
       (_: tunnel: "socks://127.0.0.1:${toString tunnel.port}")
       (lib.filterAttrs (_: tunnel: tunnel.type == "dynamic") tunnels.tunnels)
@@ -599,8 +601,7 @@ in
 
           "cnt" =
             lib.optionalString
-              (tor.enable
-                && tor.client.enable
+              (tor.client.enable
                 && tor.settings.ControlPort != [ ]
                 && tor.settings.ControlPort != null)
               "spawn --userscript tor_identity"
