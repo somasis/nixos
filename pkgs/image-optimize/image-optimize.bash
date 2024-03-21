@@ -4,7 +4,7 @@ usage() {
     # shellcheck disable=SC2059
     [[ "$#" -eq 0 ]] || printf "$@" >&2
     cat >&2 <<EOF
-usage: ${0##*/} [-v] IMAGE...
+usage: ${0##*/} [-qv] IMAGE...
 
 Losslessly optimize a given IMAGE (in-place), using the appropriate tool
 for its format.
