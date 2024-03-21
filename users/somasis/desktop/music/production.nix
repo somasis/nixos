@@ -46,13 +46,20 @@ let
   # - https://soundsfromsci.bandcamp.com/album/4-vsts-from-anosci
 in
 {
+  home.packages = [ pkgs.audacity ];
+
   xsession.windowManager.bspwm.rules = {
     "fl.exe".state = "tiled";
     "fl64.exe".state = "tiled";
   };
 
-  persist.directories = [{
-    method = "symlink";
-    directory = xdgDataDir "flstudio";
-  }];
+  persist.directories = [
+    { method = "symlink"; directory = xdgConfigDir "audacity"; }
+    { method = "symlink"; directory = xdgDataDir "flstudio"; }
+  ];
+
+  cache.directories = [
+    { method = "symlink"; directory = xdgCacheDir "audacity"; }
+    { method = "symlink"; directory = xdgDataDir "audacity"; }
+  ];
 }

@@ -339,8 +339,6 @@ let
   });
 in
 {
-  persist.directories = [{ method = "symlink"; directory = xdgConfigDir "audacity"; }];
-
   cache.directories = [
     { method = "symlink"; directory = xdgDataDir "cantata"; }
     { method = "symlink"; directory = xdgCacheDir "cantata"; }
@@ -348,8 +346,6 @@ in
 
   home.packages = [
     envtag
-
-    pkgs.audacity
 
     (pkgs.symlinkJoin rec {
       name = "cantata-with-pass";
