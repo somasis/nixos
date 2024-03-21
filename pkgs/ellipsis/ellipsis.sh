@@ -1,4 +1,4 @@
-#!/bin/sh
+# shellcheck shell=sh
 
 usage() {
     [ "$#" -gt 0 ] && printf '%s\n' "$@" >&2
