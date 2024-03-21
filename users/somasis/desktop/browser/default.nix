@@ -259,6 +259,11 @@ in
             }
           '')
 
+          # Disable all element animations
+          (pkgs.writeText "disable-animations.user.css" ''
+            * { animation: none !important; }
+          '')
+
           # NOTE: causes problems with some websites (Twitter, for example) not showing
           #       anything when highlighting text in input boxes and textareas.
           # (pkgs.writeText "system-highlight-color.user.css" ''
