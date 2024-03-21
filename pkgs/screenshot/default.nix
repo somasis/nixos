@@ -1,6 +1,7 @@
 { lib
 , writeShellApplication
 
+, bspwm
 , coreutils
 , libnotify
 , maim
@@ -10,6 +11,7 @@
 , yq-go
 , xclip
 , xdg-user-dirs
+, xdg-utils
 , xdotool
 , zbar
 }:
@@ -17,6 +19,7 @@
   name = "screenshot";
 
   runtimeInputs = [
+    bspwm
     coreutils
     libnotify
     maim
@@ -26,6 +29,7 @@
     yq-go
     xclip
     xdg-user-dirs
+    xdg-utils
     xdotool
     zbar
   ];
