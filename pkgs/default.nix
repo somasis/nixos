@@ -62,6 +62,7 @@ lib.recursiveUpdate
     mimetest = callPackage ./mimetest { };
     nocolor = callPackage ./nocolor { };
     playtime = callPackage ./playtime { };
+    sonapona = callPackage ./sonapona { };
     table = callPackage ./table { };
 
     wineprefix = callPackage ./wineprefix { };
