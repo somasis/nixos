@@ -15,7 +15,7 @@
 , xdotool
 , zbar
 }:
-(writeShellApplication {
+writeShellApplication {
   name = "screenshot";
 
   runtimeInputs = [
@@ -35,7 +35,7 @@
   ];
 
   text = builtins.readFile ./screenshot.sh;
-}) // {
+
   meta = with lib; {
     description = "Take a screenshot of the desktop";
     license = licenses.unlicense;

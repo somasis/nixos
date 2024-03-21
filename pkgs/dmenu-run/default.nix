@@ -1,7 +1,6 @@
 { lib
 , writeShellApplication
 
-, bfs
 , coreutils
 , dmenu
 , findutils
@@ -12,11 +11,10 @@
 , systemd
 , uq
 }:
-(writeShellApplication {
+writeShellApplication {
   name = "dmenu-run";
 
   runtimeInputs = [
-    bfs
     coreutils
     dmenu
     findutils
@@ -29,7 +27,7 @@
   ];
 
   text = builtins.readFile ./dmenu-run.bash;
-}) // {
+
   meta = with lib; {
     description = "An application runner that uses dmenu";
     license = licenses.unlicense;

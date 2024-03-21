@@ -10,7 +10,7 @@
 , util-linux
 , xdotool
 }:
-(writeShellApplication {
+writeShellApplication {
   name = "qute-pass";
 
   runtimeInputs = [
@@ -25,7 +25,7 @@
   ];
 
   text = builtins.readFile ./qute-pass.bash;
-}) // {
+
   meta = with lib; {
     description = "Glue qutebrowser to pass and dmenu-pass";
     license = licenses.unlicense;

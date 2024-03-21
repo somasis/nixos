@@ -8,12 +8,10 @@
 
 mkdir -p "${DMENU_RUN_HISTORY%/*}"
 
-executable_paths=()
-
 # shellcheck source=/dev/null
 [[ -e "${DMENU_RUN_SCRIPT}" ]] && . "${DMENU_RUN_SCRIPT}"
 
-mapfile -t executable_paths <<<"${PATH//:/$'\n'}"
+IFS=: read -r -a executable_paths <<<"${PATH}"
 
 choice=$(
     {

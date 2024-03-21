@@ -13,7 +13,7 @@
 , xdotool
 }:
 wrapCommand {
-  package = (writeShellApplication {
+  package = writeShellApplication {
     name = "dmenu-emoji";
 
     runtimeInputs = [
@@ -29,7 +29,7 @@ wrapCommand {
     ];
 
     text = builtins.readFile ./dmenu-emoji.bash;
-  }) // {
+
     meta = with lib; {
       description = "An emoji picker that uses dmenu";
       license = licenses.unlicense;

@@ -4,7 +4,7 @@
 , coreutils
 , nixfmt
 }:
-(writeShellApplication {
+writeShellApplication {
   name = "json2nix";
 
   runtimeInputs = [
@@ -14,7 +14,7 @@
   ];
 
   text = builtins.readFile ./json2nix.sh;
-}) // {
+
   meta = with lib; {
     description = "Convert JSON to Nix expressions";
     license = licenses.unlicense;

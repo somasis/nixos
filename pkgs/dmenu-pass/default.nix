@@ -14,7 +14,7 @@
 , uq
 , xclip
 }:
-(writeShellApplication {
+writeShellApplication {
   name = "dmenu-pass";
 
   runtimeInputs = [
@@ -31,7 +31,7 @@
   ];
 
   text = builtins.readFile ./dmenu-pass.bash;
-}) // {
+
   meta = with lib; {
     description = "Access the password store with dmenu";
     license = licenses.unlicense;

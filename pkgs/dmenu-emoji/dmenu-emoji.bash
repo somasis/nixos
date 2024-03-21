@@ -1,7 +1,7 @@
 # shellcheck shell=bash
 
 : "${DMENU_EMOJI_LIST:?}"
-: "${DMENU_EMOJI_HISTORY:=${XDG_CACHE_HOME:=~/.cache}/dmenu/dmenu-emoji.cache}"
+: "${DMENU_EMOJI_HISTORY:=${XDG_CACHE_HOME:=${HOME}/.cache}/dmenu/dmenu-emoji.cache}"
 
 usage() {
     cat >&2 <<EOF

@@ -4,7 +4,7 @@
 , coreutils
 , unixtools
 }:
-(writeShellApplication {
+writeShellApplication {
   name = "table";
 
   runtimeInputs = [
@@ -19,7 +19,7 @@
         exec cat
     fi
   '';
-}) // {
+
   meta = with lib; {
     description = "Use column(1) to format a table while playing well with usage in pipes";
     license = licenses.unlicense;

@@ -13,7 +13,7 @@
 , xe
 , yq-go
 }:
-(writeShellApplication {
+writeShellApplication {
   name = "qutebrowser-sync";
 
   runtimeInputs = [
@@ -31,7 +31,7 @@
   ];
 
   text = builtins.readFile ./qutebrowser-sync.bash;
-}) // {
+
   meta = with lib; {
     description = "Synchronize qutebrowser profile with Firefox Sync";
     license = licenses.unlicense;

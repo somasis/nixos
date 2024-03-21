@@ -9,7 +9,7 @@
 , systemd
 }:
 let inherit (xorg) xset; in
-(writeShellApplication {
+writeShellApplication {
   name = "dmenu-session";
 
   runtimeInputs = [
@@ -21,7 +21,7 @@ let inherit (xorg) xset; in
   ];
 
   text = builtins.readFile ./dmenu-session.sh;
-}) // {
+
   meta = with lib; {
     description = "A logout/etc. prompt that uses dmenu";
     license = licenses.unlicense;

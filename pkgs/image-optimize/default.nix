@@ -8,22 +8,21 @@
 , optipng
 , jpegoptim
 }:
-lib.recursiveUpdate
-  (writeShellApplication {
-    name = "image-optimize";
+writeShellApplication {
+  name = "image-optimize";
 
-    runtimeInputs = [
-      coreutils
-      file
-      gnugrep
-      oxipng
-      optipng
-      jpegoptim
-    ];
+  runtimeInputs = [
+    coreutils
+    file
+    gnugrep
 
-    text = builtins.readFile ./image-optimize.bash;
-  })
-{
+    oxipng
+    optipng
+    jpegoptim
+  ];
+
+  text = builtins.readFile ./image-optimize.bash;
+
   meta = with lib; {
     description = "Losslessly optimize an image file";
     license = licenses.unlicense;

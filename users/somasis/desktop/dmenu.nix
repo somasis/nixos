@@ -81,7 +81,7 @@ in
       );
 
       paths = lib.optionalString (config.home.sessionPath != [ ]) ''
-        PATH=${lib.escapeShellArg (lib.concatStringsSep ":" config.home.sessionPath)}"''${PATH:+:$PATH}"
+        PATH=${lib.concatStringsSep ":" config.home.sessionPath}"''${PATH:+:$PATH}"
       '';
     in
     ''

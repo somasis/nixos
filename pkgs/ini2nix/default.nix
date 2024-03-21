@@ -8,7 +8,7 @@
 , coreutils
 , diffutils
 }:
-(writeShellApplication {
+writeShellApplication {
   name = "ini2nix";
 
   runtimeInputs = [
@@ -43,7 +43,7 @@
   # '';
 
   text = builtins.readFile ./ini2nix.sh;
-}) // {
+
   meta = with lib; {
     description = "Convert INI to Nix expressions";
     license = licenses.unlicense;

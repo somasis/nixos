@@ -3,15 +3,13 @@
 
 , coreutils
 }:
-(writeShellApplication {
+writeShellApplication {
   name = "ellipsis";
 
-  runtimeInputs = [
-    coreutils
-  ];
+  runtimeInputs = [ coreutils ];
 
   text = builtins.readFile ./ellipsis.sh;
-}) // {
+
   meta = with lib; {
     description = "Truncate a string with ellipsis";
     license = licenses.unlicense;

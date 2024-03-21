@@ -12,7 +12,7 @@
 let
   inherit (xorg) xinput;
 in
-(writeShellApplication {
+writeShellApplication {
   name = "xinput-notify";
 
   runtimeInputs = [
@@ -25,7 +25,7 @@ in
   ];
 
   text = builtins.readFile ./xinput-notify.sh;
-}) // {
+
   meta = with lib; {
     description = "Toggle the state of an Xorg input device and show a notification";
     license = licenses.unlicense;
