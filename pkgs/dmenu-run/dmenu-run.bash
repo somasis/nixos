@@ -36,7 +36,12 @@ choice=$(
 
 {
     systemd-cat -t "dmenu-run" --level-prefix=false \
-        "${SHELL:-/bin/sh}" -x -c "${choice}"
+        "${SHELL:-/bin/sh}" <<EOF
+$(declare -f)
+$(alias -p)
+set -x
+${choice}
+EOF
 } &
 
 touch "${DMENU_RUN_HISTORY}"
@@ -50,7 +55,7 @@ cat - "${DMENU_RUN_HISTORY}" <<<"${choice}" \
     | uq \
     | while read -r line; do
         base=${line%% *}
-        if command -v "${base}" >/dev/null 2>&1; then
+        if type -t "${base}" >/dev/null 2>&1; then
             printf "%s\n" "${line}"
         elif [[ "${line_i}" -eq 0 ]]; then
             # don't notify for every invalid command in the history;
