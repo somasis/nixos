@@ -87,6 +87,7 @@ in
     ''
       ${paths}
       ${aliases}
+      eval "$(wineprefix print-aliases)"
     ''
   ;
 

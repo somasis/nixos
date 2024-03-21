@@ -40,6 +40,10 @@ in
     file.".wine".source = mkOutOfStoreSymlink "${config.xdg.configHome}/wineprefixes/default";
   };
 
+  programs.bash.initExtra = ''
+    eval "$(wineprefix print-aliases)"
+  '';
+
   xdg.configFile = {
     "wineprefixes/init".source = pkgs.writeShellScript "wineprefix-init" ''
       : "''${TMPDIR:=/tmp}"

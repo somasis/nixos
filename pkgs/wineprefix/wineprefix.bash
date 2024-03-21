@@ -6,111 +6,255 @@ usage() {
     [[ "$#" -eq 0 ]] || printf "$@" >&2
 
     cat >&2 <<EOF
-usage: ${0##*/} [-I] prefix command...
-       ${0##*/} [-I] -E command...
-       ${0##*/} -l prefix
-       ${0##*/} -s prefix application
-       ${0##*/} -L
+Create, manage, or run commands under Wine prefixes.
+
+usage: ${0##*/} [run [-i]] (<prefix> | all) <command>...
+       ${0##*/} list-prefixes
+       ${0##*/} list-applications (<prefix> | all))
+       ${0##*/} start [-i] <prefix> <application>
+       ${0##*/} print-aliases
+
+commands:
+    [run [-i]] (<prefix> | all) <command>...
+        Run <command> in <prefix>.
+
+        If <prefix> is an existing Wine prefix, and no options are applied
+        to \`run\`, specifying \`run\` is not necessary.
+
+        If 'all' is specified, run <command> in all existing Wine prefixes.
+
+    list-prefixes
+        Print a list of all known Wine prefixes.
+
+    list-applications (<prefix> | all)
+        Print a list of all start menu entries/applications under <prefix>.
+
+    start [-i] <prefix> <application>
+        Start the <application> that belongs to <prefix>
+        (see \`list application <prefix>\` for valid applications).
+
+    print-aliases
+        Print sh(1) format alias declarations for each application
+        in each prefix.
+
+options:
+    -i              do not run any initialization before running a command
+
+See wine(1) for more details.
 EOF
     [[ "$#" -eq 0 ]] || exit 1
     exit 69
 }
 
-prefix=
+list_prefixes() {
+    local prefix
+    for prefix in "${XDG_DATA_HOME}"/wineprefixes/*/system.reg; do
+        prefix=${prefix%/system.reg}
+        prefix=${prefix##*/}
+        case "${prefix}" in .*) continue ;; esac
+        prefix_exists "${prefix}" && printf '%s\n' "${prefix}"
+    done
+}
+
+prefix_exists() {
+    local prefix=${1:?no Wine prefix given}
+
+    if ! [[ -e "${XDG_DATA_HOME}/wineprefixes/${prefix}/system.reg" ]]; then
+        printf 'error: no Wine prefix named "%s" exists\n' "${prefix}" >&2
+        return 1
+    fi
+}
+
+run_in_prefix() (
+    local opt
+    while getopts :i opt >/dev/null 2>&1; do
+        case "${opt}" in
+            i) run_init=false ;;
+            *) usage 'unknown option -- %s\n' "${OPTARG}" ;;
+        esac
+    done
+    shift $((OPTIND - 1))
+    unset opt
+
+    local prefix="${1:?no Wine prefix given}"
+    shift
+
+    [[ "${prefix}" == "all" ]] && run_in_each_prefix "$@"
+
+    [[ "$#" -gt 0 ]] || usage 'error: no command provided\n'
+
+    prefix_exists "${prefix}" \
+        && export WINEPREFIX="${XDG_DATA_HOME}/wineprefixes/${prefix}"
+
+    if [[ "${run_init}" == true ]]; then
+        if ! [[ -d "${WINEPREFIX}" ]]; then
+            printf 'initializing wineprefix %q...\n' "${prefix}" >&2
+            wineboot -i
+        fi
+
+        local init
+        for init in "${XDG_CONFIG_HOME}"/wineprefixes/init "${XDG_CONFIG_HOME}"/wineprefixes/"${prefix}".init; do
+            # shellcheck disable=SC1090
+            if [[ -f "${init}" ]] && [[ -r "${init}" ]]; then . "${init}"; fi
+        done
+    fi
+
+    exec -- "$@"
+)
+
+list_prefix_applications() (
+    local prefix=${1:?no Wine prefix given}
+    shift
+
+    [[ "${prefix}" == "all" ]] && list_each_prefix_applications "$@"
+
+    prefix_exists "${prefix}"
+
+    prefix="${XDG_DATA_HOME}"/wineprefixes/"${prefix}"
+
+    if [[ -d "${prefix}/drive_c/users/${USER}/AppData/Roaming/Microsoft/Windows/Start Menu/Programs" ]]; then
+        cd "${prefix}/drive_c/users/${USER}/AppData/Roaming/Microsoft/Windows/Start Menu/Programs" || exit 1
+        find .// -type f -iname '*.lnk' | sed 's|^\.//||; s|\.lnk$||' | sort
+    else
+        exit 1
+    fi
+)
+
+start_prefix_application() {
+    local opt
+    while getopts :i opt >/dev/null 2>&1; do
+        case "${opt}" in
+            i) run_init=false ;;
+            *) usage 'unknown option -- %s\n' "${OPTARG}" ;;
+        esac
+    done
+    shift $((OPTIND - 1))
+    unset opt
+
+    local prefix=${1:?no Wine prefix given}
+    prefix_exists "${prefix}"
+    shift
+
+    local application=${1:?no valid start menu entry given}
+    shift
+
+    application="C:/Users/${USER}/AppData/Roaming/Microsoft/Windows/Start Menu/Programs/${application}.lnk"
+    application=${application//\//\\}
+
+    run_in_prefix "${prefix}" wine start "${application}" "$@"
+}
+
+run_in_each_prefix() {
+    local prefixes
+    mapfile -t prefixes < <(list_prefixes)
+
+    for prefix in "${prefixes[@]}"; do
+        run_in_prefix "${prefix}" "$@" || exit $?
+    done
+    exit
+}
+
+list_each_prefix_applications() {
+    local prefixes
+    mapfile -t prefixes < <(list_prefixes)
+
+    for prefix in "${prefixes[@]}"; do
+        list_prefix_applications "${prefix}" \
+            | while IFS= read -r application; do
+                printf '%s\t%s\n' "${prefix}" "${application}"
+            done
+    done
+    exit
+}
+
+print_aliases() {
+    local prefixes
+    local applications
+    local alias_name alias_command
+
+    format_alias_command() {
+        local out
+        out=$(printf '%q ' "$@")
+        out=${out% }
+        printf '%s' "${out}"
+    }
+
+    mapfile -t prefixes < <(list_prefixes)
+
+    for prefix in "${prefixes[@]}"; do
+        if [[ "${prefix}" == "default" ]]; then
+            alias_name=wine
+            alias_prefix=wine
+        else
+            alias_name=${prefix,,}
+            alias_prefix=${alias_name}
+            alias_name=${alias_name//[[:blank:]]/-}
+        fi
+
+        alias_command=$(format_alias_command "${0##*/}" run "${prefix}" wine)
+        printf 'alias %q=%q\n' "${alias_prefix}" "${alias_command}"
+
+        # entries ending in "..." are usually pointless shortcuts to websites
+        mapfile -t applications < <(list_prefix_applications "${prefix}" | grep -v '\.\.\.$')
+        for application in "${applications[@]}"; do
+            alias_name=${application#*/}
+            alias_name=${alias_name,,}
+            alias_name=${alias_name//[[:blank:]]/-}
+            alias_command=$(format_alias_command "${0##*/}" start "${prefix}" "${application}")
+
+            printf 'alias %q=%q\n' \
+                "${alias_prefix}-${alias_name}" "${alias_command}"
+        done
+    done
+    exit
+}
 
 run_init=true
-mode=run
-while getopts :EILls opt; do
-    case "${opt}" in
-        E) mode=for_each_prefix ;;
-        I) run_init=false ;;
-        L) mode=list_prefixes ;;
 
-        l) mode=list_prefix_applications ;;
-        s) mode=start_prefix_application ;;
+[[ "$#" -gt 0 ]] || usage
 
-        *) usage 'unknown option -- %s\n' "${OPTARG}" ;;
-    esac
-done
-shift $((OPTIND - 1))
-unset opt
-
-case "${mode}" in
-    list_prefix_applications)
-        prefix=${1:-}
-        shift
-
-        [[ -n "${prefix}" ]] || usage 'error: no prefix given\n'
-        [[ -e "${XDG_DATA_HOME}"/wineprefixes/"${prefix}" ]] || usage 'error: no prefix named %q exists\n' "${prefix}"
-        prefix="${XDG_DATA_HOME}"/wineprefixes/"${prefix}"
-
-        if [[ -d "${prefix}/drive_c/users/${USER}/AppData/Roaming/Microsoft/Windows/Start Menu/Programs" ]]; then
-            cd "${prefix}/drive_c/users/${USER}/AppData/Roaming/Microsoft/Windows/Start Menu/Programs" || exit 1
-            find .// -type f -iname '*.lnk' | sed 's|^\.//||; s|\.lnk$||' || :
-        else
-            exit 1
-        fi
-        ;;
-
-    start_prefix_application)
-        prefix=${1:-}
-        shift
-
-        [[ -n "${prefix}" ]] || usage 'error: no prefix given\n'
-        [[ -e "${XDG_DATA_HOME}"/wineprefixes/"${prefix}" ]] || usage 'error: no prefix named %q exists\n' "${prefix}"
-
-        application=${1:-}
-        shift
-
-        [[ -n "${application}" ]] || usage 'error: no application given\n'
-        application="C:/Users/${USER}/AppData/Roaming/Microsoft/Windows/Start Menu/Programs/${application}.lnk"
-        application=${application//\//\\}
-
-        exec wineprefix "${prefix}" wine start "${application}" "$@"
-        ;;
-
-    list_prefixes)
-        for prefix in "${XDG_DATA_HOME}"/wineprefixes/*/system.reg; do
-            [[ -e "${prefix}" ]] || break
-            prefix=${prefix%/system.reg}
-            prefix=${prefix##*/}
-
-            printf '%s\n' "${prefix}"
-        done
-        exit
-        ;;
-    for_each_prefix)
-        for prefix in "${XDG_DATA_HOME}"/wineprefixes/*/system.reg; do
-            [[ -e "${prefix}" ]] || break
-            prefix=${prefix%/system.reg}
-            prefix=${prefix##*/}
-
-            "$0" "${prefix}" "$@" || exit $?
-        done
-        exit
-        ;;
+case "${1}" in
     run)
-        [[ -n "${1:-}" ]] || usage 'error: no Wine prefix specified\n'
-        prefix="$1"
-        export WINEPREFIX="${XDG_DATA_HOME}/wineprefixes/${prefix}"
         shift
+        run_in_prefix "$@"
+        ;;
 
-        [[ "$#" -gt 0 ]] || usage 'error: no command provided\n'
+    run-for-each)
+        shift
+        run_in_each_prefix "$@"
+        ;;
 
-        if [[ "${run_init}" == true ]]; then
-            if ! [[ -d "${WINEPREFIX}" ]]; then
-                printf 'initializing wineprefix %q...\n' "${prefix}" >&2
-                wineboot -i
+    start)
+        shift
+        start_prefix_application "$@"
+        ;;
+
+    list-prefixes)
+        shift
+        list_prefixes "$@"
+        ;;
+
+    list-applications)
+        shift
+        list_prefix_applications "$@"
+        ;;
+
+    print-aliases)
+        shift
+        print_aliases "$@"
+        ;;
+
+    help | --help) usage ;;
+
+    *)
+        if prefix_exists "${1}" 2>/dev/null && [[ "$#" -ge 2 ]]; then
+            run_in_prefix "$@"
+        else
+            if [[ "$#" -gt 1 ]]; then
+                usage 'error: no prefix named "%s" exists\n' "${1}"
+            else
+                usage 'error: unknown command -- "%s"\n' "$1"
             fi
-
-            for init in "${XDG_CONFIG_HOME}"/wineprefixes/init "${XDG_CONFIG_HOME}"/wineprefixes/"${prefix}".init; do
-                # shellcheck disable=SC1090
-                if [[ -f "${init}" ]] && [[ -r "${init}" ]]; then . "${init}"; fi
-            done
-            unset init
         fi
-
-        unset prefix
-        exec -- "$@"
         ;;
 esac
