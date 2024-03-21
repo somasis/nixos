@@ -83,6 +83,9 @@
 
         # Detects moved chunks of lines better than the default algorithm.
         algorithm = "histogram";
+
+        # Don't print a/ and b/ prefixes on diffs in `git log`.
+        noprefix = true;
       };
 
       commit = {
@@ -146,53 +149,36 @@
     switch = "git switch";
     branch = "git branch -v";
     branchoff = "git branchoff";
-  };
+  }
+  # Add git aliases to the shell
+  // lib.mapAttrs (_: v: if lib.hasPrefix "!" v then lib.removePrefix "!" v else "git ${v}") config.programs.git.aliases
+  ;
 
-  programs.bash.initExtra =
-    let
-      gitAliasesToShell = pkgs.runCommandLocal "git-aliases" { } ''
-        ${lib.toShellVar "aliases" config.programs.git.aliases}
-        PATH=${lib.makeBinPath [ pkgs.s6-portable-utils ]}:"$PATH"
-        for alias in "''${!aliases[@]}"; do
-            command="''${aliases[$alias]}"
+  programs.bash.initExtra = ''
+    _git_prompt() {
+        [ -n "''${_git_prompt:=$(git rev-parse --abbrev-ref=loose HEAD 2>/dev/null)}" ] \
+            && printf '%s ' "''${_git_prompt}"
+        _git_prompt=
+    }
 
-            case "$command" in
-                '!'*) command=''${command#"!"} ;;
-                *) command="git $command" ;;
-            esac
-            command=$(s6-quote -d "'" "$command")
-
-            printf 'alias %s=%s\n' "$alias" "$command"
-        done > "$out"
-      '';
-    in
-    ''
-      . ${gitAliasesToShell}
-
-      _git_prompt() {
-          [ -n "''${_git_prompt:=$(git rev-parse --abbrev-ref=loose HEAD 2>/dev/null)}" ] \
-              && printf '%s ' "''${_git_prompt}"
-          _git_prompt=
-      }
-
-      gitlukin() {
-          set -- $(
-              git log \
-                  --color=always \
-                  --no-merges \
-                  --oneline \
-                  --reverse "$@" \
-              | sk \
-                  --ansi \
-                  --no-sort \
-                  -d ' ' \
-                  --preview='git log --color=always -1 --patch-with-stat {1}' \
-                  --preview-window=down:75% \
-              | cut -d' ' -f1
-          )
-          log --no-merges "$@"
-      }
-    '';
+    gitlukin() {
+        set -- $(
+            git log \
+                --color=always \
+                --no-merges \
+                --oneline \
+                --reverse "$@" \
+            | sk \
+                --ansi \
+                --no-sort \
+                -d ' ' \
+                --preview='git log --color=always -1 --patch-with-stat {1}' \
+                --preview-window=down:75% \
+            | cut -d' ' -f1
+        )
+        log --no-merges "$@"
+    }
+  '';
 
   programs.kakoune.config.hooks = [
     # Show git diff on save
