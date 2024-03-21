@@ -5,11 +5,13 @@
 , ...
 }:
 let
-  commaPicker = pkgs.writeShellScript "comma-picker" (
-    if config.programs.dmenu.enable then ''exec dmenu -p "," -S 2>/dev/null''
-    else if config.programs.skim.enable then ''exec sk -p ", " --no-sort 2>/dev/null''
-    else ''exec ${lib.getExe pkgs.fzy}'' # comma's default COMMA_PICKER value
-  );
+  commaPicker = lib.optionalString (config.programs.dmenu.enable or config.programs.skim.enable) (pkgs.writeShellScript "comma-picker" ''
+    if [ -t 0 ]; then
+        ${lib.optionalString config.programs.dmenu.enable "exec dmenu -p ',' -S 2>/dev/null"}
+    else
+        ${lib.optionalString config.programs.skim.enable "exec sk -p ', ' --no-sort 2>/dev/null"}
+    fi
+  '');
 in
 {
   home.shellAliases = rec {
@@ -91,40 +93,14 @@ in
       ${lib.getExe pkgs.xe} -LL -j0 "$@" | sort -snk1 | cut -d' ' -f2-
     '')
 
-    (pkgs.wrapCommand {
-      package = pkgs.comma;
-      wrappers = [{ command = "/bin/,"; setEnvironmentDefault.COMMA_PICKER = commaPicker; }];
-    })
-    (pkgs.writeShellScriptBin ",m" ''
-      : "''${COMMA_NIXPKGS_FLAKE:=nixpkgs}"
-      ${lib.toShellVar "COMMA_PICKER" commaPicker}
-
-      usage() {
-          cat >&2 <<EOF
-      usage: ,m [section] name
-      EOF
-          exit 69
-      }
-
-      if [[ "$#" -eq 2 ]]; then
-          regex='/share/man/man'"$1"'/'"$2"'\.'"$1"
-      elif [[ "$#" -eq 1 ]]; then
-          regex='/share/man/man.*'/"$1"'\.'
-      else
-          usage
-      fi
-
-      path=$(nix-locate --minimal --at-root --regex "$regex" 2>/dev/null | eval "$COMMA_PICKER")
-      path=$(nix build --no-link --print-out-paths "$COMMA_NIXPKGS_FLAKE"#"$path")/share/man
-
-      case "''${MANPATH:-}" in
-          :*) MANPATH="$path$MANPATH" ;;
-          "") MANPATH="$path:" ;;
-          *)  MANPATH="$path:$MANPATH" ;;
-      esac
-      export MANPATH
-      man "$@"
-    '')
+    (if commaPicker != "" then
+      (pkgs.wrapCommand {
+        package = pkgs.comma;
+        wrappers = [{ command = "/bin/,"; setEnvironmentDefault.COMMA_PICKER = commaPicker; }];
+      })
+    else
+      pkgs.comma
+    )
 
     (pkgs.writeShellScriptBin "edo" ''
       # <https://stackoverflow.com/questions/2683279/how-to-detect-if-a-script-is-being-sourced/14706745#14706745
@@ -176,5 +152,73 @@ in
     newt() (
         nohup terminal "$@" >/dev/null 2>&1 &
     )
+
+    man() {
+          local man_args=( "$@" )
+
+          local COMMA_NIXPKGS_FLAKE COMMA_PICKER
+          : "''${COMMA_NIXPKGS_FLAKE:=nixpkgs}"
+          ${lib.toShellVar "COMMA_PICKER" commaPicker}
+
+          local MANPATH="$MANPATH"
+          local old_MANPATH="$MANPATH"
+
+          local man_sections man_section new_man_path
+          mapfile -t man_sections < <(
+              IFS=:
+
+              if [[ "''${MANPATH:0:1}" == : ]]; then
+                  local MANPATH=( ''${MANPATH:1} )
+              else
+                  local MANPATH=( ''${MANPATH} )
+              fi
+              unset IFS
+
+              find -L \
+                  "''${MANPATH[@]}" \
+                  -mindepth 1 \
+                  -type d \
+                  -name 'man*' \
+                  -printf '%f\n' \
+                  | cut -c4- \
+                  | sort -ud
+          )
+
+          MANPATH="$old_MANPATH"
+
+          if command man -w "''${man_args[@]}" >/dev/null 2>&1; then
+              command man "''${man_args[@]}"
+          else
+              local regex
+              while [[ "$#" -ge 1 ]]; do
+                  for man_section in "''${man_sections[@]}"; do
+                      if [[ "$1" == "$man_section" ]] && [[ "$#" -ge 2 ]]; then
+                          regex='/share/man/man'"$man_section"'/'"$2"'\.'"$man_section"
+                          shift
+                          break
+                      else
+                          regex='/share/man/man.*'/"$1"'\.'
+                          break
+                      fi
+                  done
+                  shift
+
+                  new_man_path=$(nix-locate --minimal --at-root --regex "$regex" 2>/dev/null | grep -v '^(')
+                  [[ -n "$new_man_path" ]] || continue
+
+                  new_man_path=$(eval "$COMMA_PICKER" <<< "$new_man_path")
+                  new_man_path=$(nix build --no-link --print-out-paths "$COMMA_NIXPKGS_FLAKE"#"$new_man_path")
+                  new_man_path="$new_man_path/share/man"
+
+                  case "$MANPATH" in
+                      :*) MANPATH="$new_man_path$MANPATH" ;;
+                      "") MANPATH="$new_man_path:" ;;
+                      *)  MANPATH="$new_man_path:$MANPATH" ;;
+                  esac
+              done
+
+              MANPATH="$MANPATH" command man "''${man_args[@]}"
+          fi
+    }
   '';
 }
