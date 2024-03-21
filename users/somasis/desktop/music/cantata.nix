@@ -252,7 +252,7 @@ let
     General.showStopButton = true;
     General.showCoverWidget = true; # "Show cover of current track"
     General.showTechnicalInfo = true;
-    General.showRatingWidget = false; # TODO find a way to synchronize my ratings with beets over the network; "Show track rating"
+    General.showRatingWidget = true; # TODO find a way to synchronize my ratings with beets over the network; "Show track rating"
 
     # Interface > External
     General.mpris = false; # mpris is managed by mpdris2; "Enable MPRIS D-BUS interface"

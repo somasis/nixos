@@ -1,9 +1,10 @@
 { config
 , lib
+, pkgs
 , ...
 }:
 let
-  inherit (config.lib.somasis) xdgDataDir;
+  inherit (config.lib.somasis) xdgConfigDir xdgCacheDir xdgDataDir;
 
   # $ curl -Lfs \
   #       -I -o /dev/null \
