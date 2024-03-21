@@ -11,11 +11,11 @@
       pkgs.noto-fonts-cjk-serif
 
       pkgs.iosevka-bin
-      (pkgs.iosevka-bin.override { variant = "aile"; })
-      (pkgs.iosevka-bin.override { variant = "etoile"; })
-      (pkgs.iosevka-bin.override { variant = "slab"; })
-      (pkgs.iosevka-bin.override { variant = "curly"; })
-      (pkgs.iosevka-bin.override { variant = "curly-slab"; })
+      (pkgs.iosevka-bin.override { variant = "Aile"; })
+      (pkgs.iosevka-bin.override { variant = "Etoile"; })
+      (pkgs.iosevka-bin.override { variant = "Slab"; })
+      (pkgs.iosevka-bin.override { variant = "Curly"; })
+      (pkgs.iosevka-bin.override { variant = "CurlySlab"; })
       (pkgs.nerdfonts.override { fonts = [ "NerdFontsSymbolsOnly" ]; })
 
       pkgs.sarasa-gothic # CJK in a style similar to Iosevka

@@ -71,7 +71,7 @@
       extraConfig = ''
         DeviceScale=1
       '';
-      font = "${pkgs.iosevka-bin}/share/fonts/truetype/iosevka-regular.ttc";
+      font = "${pkgs.iosevka-bin}/share/fonts/truetype/Iosevka-Regular.ttc";
     };
   };
 
