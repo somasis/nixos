@@ -40,9 +40,7 @@
     config =
       lib.recursiveUpdate
         (osConfig.nixpkgs.config or { })
-        {
-          allowUnfree = true;
-        }
+        { allowUnfree = true; }
     ;
 
     overlays =
