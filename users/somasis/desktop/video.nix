@@ -12,6 +12,23 @@ let
     actionTypes = [ "skip" ];
   };
 
+  # Use % instead of $, just so I don't have to clutter
+  # this with a lot of escapes for Nix's string interpolation.
+  mpvTitle = [
+    ''%{?pause==yes:⏸}%{?pause==no:⏵} ''
+    ''%{!playlist-count==1:(%{playlist-pos-1}/%{playlist-count}) }'' # show playlist count if more than 1
+
+    ''%{?metadata/by-key/Track:%{metadata/by-key/Track}. }''
+    ''%{?metadata/by-key/Uploader:%{metadata/by-key/Uploader} - }''
+    ''%{?metadata/by-key/Artist:%{metadata/by-key/Artist} - }''
+    ''%{media-title}''
+    ''%{?metadata/by-key/Album: (%{metadata/by-key/Album})}''
+
+    ''%{?chapter:%{chapter-metadata/title}}''
+
+    # ''%{?chapter-metadata/title:: %{chapter}. "%{chapter-metadata/title}"}''
+  ];
+
   sponsorBlock = pkgs.runCommandLocal "sb.js"
     rec {
       settings_json = builtins.toJSON sponsorBlockSettings;
@@ -86,7 +103,7 @@ in
     mpv = {
       enable = true;
 
-      config = {
+      config = rec {
         hwdec = "auto-safe";
 
         # Use yt-dlp's format preference.
@@ -120,17 +137,12 @@ in
         osd-margin-x = 24;
         osd-margin-y = 24;
 
-        # Use % instead of $, just so I don't have to clutter
-        # this with a lot of escapes for Nix's string interpolation.
-        title = lib.replaceStrings [ "%" ] [ "$" ] (lib.concatStrings [
-          ''%{?pause==yes:⏸}%{?pause==no:⏵} ''
-          # ''%{!playlist-count==1:%{playlist-pos-1}/%{playlist-count}}'' # show playlist count if more than 1
-          ''%{?metadata/by-key/Uploader:%{metadata/by-key/Uploader} - }''
-          ''%{media-title:%{filename}}''
-          ''%{?chapter:%{chapter-metadata/title}}''
-          # ''%{?chapter-metadata/title:: %{chapter}. "%{chapter-metadata/title}"}''
-          ''%{?duration: (%{time-pos}/%{duration})}''
-        ]);
+        title = lib.replaceStrings [ "%" ] [ "$" ] (lib.concatStrings mpvTitle);
+        term-title = lib.concatStrings [
+          "mpv: "
+          title
+          (lib.replaceStrings [ "%" ] [ "$" ] '' (%{time-pos}/%{duration})'')
+        ];
 
         # Watch later preferences
         watch-later-directory = "${config.xdg.cacheHome}/mpv/watch-later";
