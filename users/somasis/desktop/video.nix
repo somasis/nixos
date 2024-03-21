@@ -106,6 +106,10 @@ in
       config = rec {
         hwdec = "auto-safe";
 
+        # Buffer before starting playback, to prevent playback
+        # from ending up stopping due to a slow start to streaming.
+        cache-pause-initial = true;
+
         # Use yt-dlp's format preference.
         ytdl = true;
         ytdl-format = "ytdl";
