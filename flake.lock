@@ -3,11 +3,11 @@
     "adblockEasyList": {
       "flake": false,
       "locked": {
-        "lastModified": 1711821500,
-        "narHash": "sha256-UCCQ09z3tm6QsquQrr8iBvTGoOE8YCFftNBjKLqmH0o=",
+        "lastModified": 1711825074,
+        "narHash": "sha256-36LSPnW/w8xmbcmE7JqNtHskKcoB+XWRCbIF+M3pGWo=",
         "owner": "thedoggybrad",
         "repo": "easylist-mirror",
-        "rev": "1d10779b1235eb999e9b848c805a572587ff4629",
+        "rev": "89a3509d9c5bfa516e30d59c405f320faf05f218",
         "type": "github"
       },
       "original": {
