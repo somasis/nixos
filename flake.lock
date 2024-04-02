@@ -3,11 +3,11 @@
     "adblockEasyList": {
       "flake": false,
       "locked": {
-        "lastModified": 1712075479,
-        "narHash": "sha256-61sKLj6M5PFWlBx1Q6dFk1BtoDWuz6KEI3LMcKQpxYs=",
+        "lastModified": 1712076361,
+        "narHash": "sha256-GDXAkldFM5J0CgnFEIpVRD0bX2kBFuFQn7vDR1orn4U=",
         "owner": "thedoggybrad",
         "repo": "easylist-mirror",
-        "rev": "e952a5a18e1009b24f894118339d3136fab1e9f0",
+        "rev": "96c40c75464d0476839e7e1567acbda7d9318679",
         "type": "github"
       },
       "original": {
@@ -258,16 +258,16 @@
     },
     "nixpkgs": {
       "locked": {
-        "lastModified": 1711703276,
-        "narHash": "sha256-iMUFArF0WCatKK6RzfUJknjem0H9m4KgorO/p3Dopkk=",
+        "lastModified": 1712004559,
+        "narHash": "sha256-87vZKDepF3ZqpinX5zarC5Xb9dwpGgmfcl4Woy26lYA=",
         "owner": "nixos",
         "repo": "nixpkgs",
-        "rev": "d8fe5e6c92d0d190646fb9f1056741a229980089",
+        "rev": "5476cea4892cedbf6f8bbebdb93ba07e3f5f5e38",
         "type": "github"
       },
       "original": {
         "owner": "nixos",
-        "ref": "nixos-unstable",
+        "ref": "nixos-unstable-small",
         "repo": "nixpkgs",
         "type": "github"
       }
