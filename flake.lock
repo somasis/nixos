@@ -3,11 +3,11 @@
     "adblockEasyList": {
       "flake": false,
       "locked": {
-        "lastModified": 1711990142,
-        "narHash": "sha256-g63UOGJ9McOvKRswj2K0ve47/CooAAZ2hcOGL8yP+ro=",
+        "lastModified": 1712075479,
+        "narHash": "sha256-61sKLj6M5PFWlBx1Q6dFk1BtoDWuz6KEI3LMcKQpxYs=",
         "owner": "thedoggybrad",
         "repo": "easylist-mirror",
-        "rev": "aafe64e855e1b7a1a130a4ef292458a23c08df4d",
+        "rev": "e952a5a18e1009b24f894118339d3136fab1e9f0",
         "type": "github"
       },
       "original": {
@@ -47,11 +47,11 @@
     "control-panel-for-twitter": {
       "flake": false,
       "locked": {
-        "lastModified": 1709463614,
-        "narHash": "sha256-yE4RDryIqhXcn1egx/n09C7rgyeBAXRvunEoycDkd9k=",
+        "lastModified": 1712047080,
+        "narHash": "sha256-ArK3+ORVQybxqcyK4zAXjUj14QMzuq9DiLnR6lwBrpg=",
         "owner": "insin",
         "repo": "control-panel-for-twitter",
-        "rev": "fdf6c1b1ece8182c78fff439cacf00cd075a6a46",
+        "rev": "696626fb64c9d658fdccf5a0c71e3950bc40d110",
         "type": "github"
       },
       "original": {
@@ -128,11 +128,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1711915616,
-        "narHash": "sha256-co6LoFA+j6BZEeJNSR8nZ4oOort5qYPskjrDHBaJgmo=",
+        "lastModified": 1712016346,
+        "narHash": "sha256-O2nO7pD+krq+4HgkLB4VThRtAucIPfXDs/jJqCGlK1w=",
         "owner": "nix-community",
         "repo": "home-manager",
-        "rev": "820be197ccf3adaad9a8856ef255c13b6cc561a6",
+        "rev": "4be0464472675212654dedf3e021bd5f1d58b92f",
         "type": "github"
       },
       "original": {
@@ -351,11 +351,11 @@
     "uAssets": {
       "flake": false,
       "locked": {
-        "lastModified": 1711981329,
-        "narHash": "sha256-Dm/2bPMWT70YCUg4zrnGcp9LjsBQeWJfLSy0U6brh5U=",
+        "lastModified": 1712071294,
+        "narHash": "sha256-0Xkx1h4yE8ilQOOHFEhSq0pnfxfsIaFvM2ErAucarBs=",
         "owner": "uBlockOrigin",
         "repo": "uAssetsCDN",
-        "rev": "40a76084f606ee98de75b02a39b4110ba2aa77f5",
+        "rev": "8d3d1b47227a0ca016058cd620c65e10f43c6618",
         "type": "github"
       },
       "original": {
@@ -399,11 +399,11 @@
     "zotero-translators": {
       "flake": false,
       "locked": {
-        "lastModified": 1711570297,
-        "narHash": "sha256-AT5hPkRDIsXDoMgZU1kfwBJU9J3qCr87Ux266g9V4uY=",
+        "lastModified": 1711999387,
+        "narHash": "sha256-I1s0oduB0TXtUoqiMwMGj+9cCBp0wbXZPbuXPtwHA2I=",
         "owner": "zotero",
         "repo": "translators",
-        "rev": "ff73d0dcb84f27419499a7ddfa1affb2d6244340",
+        "rev": "b6d1b858e853858f0e7e8e807f5123f62ef6ef9c",
         "type": "github"
       },
       "original": {
