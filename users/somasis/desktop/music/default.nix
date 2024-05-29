@@ -7,7 +7,7 @@
     ./cantata.nix
     ./daemon.nix
     ./player.nix
-    ./random.nix
+    # ./random.nix
     ./scrobble.nix
 
     ./production.nix

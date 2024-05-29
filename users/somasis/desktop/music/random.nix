@@ -4,7 +4,7 @@
 , ...
 }:
 let
-  inherit (config.lib.somasis) commaList;
+  inherit (config.lib.somasis) xdgDataDir commaList;
   inherit (lib.generators) mkKeyValueDefault toINI;
 in
 {
@@ -23,7 +23,10 @@ in
     })
   ];
 
-  cache.directories = [ "share/mpd_sima" ];
+  persist.directories = [{
+    method = "symlink";
+    directory = xdgDataDir "mpd_sima";
+  }];
 
   xdg.configFile."mpd_sima/mpd_sima.cfg".text = lib.generators.toINI
     {
@@ -57,16 +60,23 @@ in
     }
   ;
 
-  systemd.user.services.mpd-sima = {
-    Unit = {
-      Description = pkgs.mpd-sima.meta.description;
-      BindsTo = [ "mpd.service" ];
-      After = [ "mpd.service" ];
-    };
+  # systemd.user.services.mpd-sima = {
+  #   Unit = {
+  #     Description = pkgs.mpd-sima.meta.description;
+  #     BindsTo = [ "mpd.service" ];
+  #     After = [ "mpd.service" ];
+  #     Wants = [ "mpd.service" ];
+  #   };
 
-    Service = {
-      Type = "simple";
-      ExecStart = "${pkgs.mpd-sima}/bin/mpd-sima";
-    };
-  };
+  #   Service = {
+  #     Type = "forking";
+  #     Environment =
+  #       [ ''MPD_PORT=${builtins.toString config.services.mpd.network.port}'' ]
+  #       ++ lib.optional (config.services.mpd.network.listenAddress != "any") ''MPD_HOST=${config.services.mpd.network.listenAddress}''
+  #     ;
+
+  #     ExecStartPre = "${lib.getExe pkgs.mpd-sima} config-test";
+  #     ExecStart = "${lib.getExe pkgs.mpd-sima} --daemon";
+  #   };
+  # };
 }

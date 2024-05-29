@@ -15,23 +15,43 @@ in
 
     extraConfig =
       let
-        tags = [
+        tags = map (x: "+${x}") [
           "title"
-          "track"
-          "album"
-          "albumartist"
-          "artist"
-          "performer"
-          "composer"
-          "date"
+          "name"
           "genre"
-          "label"
+          "date"
+          "originaldate"
+
+          "location"
+          "grouping"
+          "comment"
           "disc"
+          "label"
+
+          "artist"
+          "artistsort"
+          "composer"
+          "composersort"
+          "performer"
+          "conductor"
+          "ensemble"
           "musicbrainz_artistid"
-          "musicbrainz_albumid"
+
+          "albumartist"
+          "albumartistsort"
           "musicbrainz_albumartistid"
+
+          "album"
+          "albumsort"
+          "musicbrainz_albumid"
+
+          "track"
           "musicbrainz_trackid"
           "musicbrainz_releasetrackid"
+
+          "movement"
+          "movementnumber"
+          "work"
           "musicbrainz_workid"
         ];
       in
@@ -45,6 +65,8 @@ in
             type "pulse"
             name "PulseAudio"
         }
+
+        replaygain "auto"
       '';
   };
 
