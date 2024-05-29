@@ -9,8 +9,8 @@ buildGoModule rec {
 
   src = fetchFromGitHub {
     owner = "Mikescher";
-    repo = pname;
-    rev = "v${version}";
+    repo = "firefox-sync-client";
+    rev = "22a13d733404519bfac33da6f790c9b7197a82c6";
     hash = "sha256-Zl+7JkOcX0R15+s1jZPtoIPPW8yWR2VsgkHyj7DW/F4=";
   };
 

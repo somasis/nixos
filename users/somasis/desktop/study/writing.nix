@@ -11,6 +11,8 @@ let
 
   lo = pkgs.libreoffice-fresh;
 
+  ltVersion = pkgs.languagetool.version;
+
   loExtensions = [
     # <https://extensions.libreoffice.org/en/extensions/show/27416>
     (pkgs.fetchurl {
@@ -56,8 +58,8 @@ let
 
     # <https://extensions.libreoffice.org/en/extensions/show/languagetool>
     (pkgs.fetchurl {
-      url = "https://extensions.libreoffice.org/assets/downloads/3710/1704200967/LanguageTool-6.3.1.oxt";
-      hash = "sha256-N2Qo7BxZJLswqb0veocllOiOl4SANCVR2t0p8iQTM6Y=";
+      url = "https://languagetool.org/download/LanguageTool-${ltVersion}.oxt";
+      sha256 = "0f1f39ff2438d322f15962f1d30a5c293bb121a7f709c7bbdc1099636b91625e";
     })
   ]
   ++ lib.optional config.programs.zotero.enable
@@ -85,8 +87,6 @@ let
       done
     '';
 
-  languageToolVersion = pkgs.languagetool.version;
-
   # languageToolConfigFormat = lib.generators.toKeyValue {
   #   mkKeyValue = k: v:
   #     lib.generators.mkKeyValueDefault
@@ -105,7 +105,7 @@ let
 
   # "Languagetool.cfg" is not a typo.
   # languageToolConfig = pkgs.writeText "Languagetool.cfg" (languageToolConfigFormat rec {
-  #   ltVersion = languageToolVersion;
+  #   inherit ltVersion;
   #   motherTongue = "en-US";
 
   #   autoDetect = false;
@@ -137,23 +137,18 @@ let
   #   cat ${languageToolConfig} > "''${XDG_CONFIG_HOME:=$HOME/.config}"/LanguageTool/LibreOffice/Languagetool.cfg
   # '';
 
-  loWrapped = pkgs.wrapCommand {
-    package = lo;
+  loWrapperBeforeCommands = pkgs.writeShellScript "libreoffice-before-execute" ''
+    if [[ "$(pgrep -c -u "''${USER:=$(id -un)}" 'soffice\.bin')" -eq 0 ]]; then
+        ${loInstallExtensions} || :
+    fi
+  '';
+  # ${loSetLanguageToolConfiguration} || :
 
-    wrappers =
-      map
-        (commandName: {
-          command = "/bin/${commandName}";
-          prependFlags = ''--nologo'';
-          beforeCommand = lib.singleton ''
-            if [[ "$(pgrep -c -u "''${USER:=$(id -un)}" 'soffice\.bin')" -eq 0 ]]; then
-                ${loInstallExtensions} || :
-            fi
-          '';
-          # ${loSetLanguageToolConfiguration} || :
-        })
-        [ "libreoffice" "soffice" "sbase" "scalc" "sdraw" "simpress" "smath" "swriter" ]
-    ;
+  loWrapped = lo.override {
+    extraMakeWrapperArgs = [
+      "--add-flags '--nologo'"
+      "--run ${loWrapperBeforeCommands}"
+    ];
   };
 in
 rec {

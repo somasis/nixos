@@ -20,31 +20,42 @@
     pkgs.qt6Packages.qtstyleplugin-kvantum
     pkgs.arc-kde-theme
 
-    # TODO Disable for now until they're in nixpkgs
-    # # toki pona
-    # pkgs.nasin-nanpa
-    # pkgs.linja-sike
-    # pkgs.linja-pi-pu-lukin
-    # pkgs.linja-pona
-    # pkgs.linja-suwi
-    # pkgs.linja-pi-tomo-lipu
-    # pkgs.linja-wawa
-    # pkgs.linja-luka
-    # pkgs.linja-pimeja-pona
-    # pkgs.sitelen-seli-kiwen
+    pkgs.noto-fonts
+    pkgs.noto-fonts-cjk-sans
+    pkgs.noto-fonts-cjk-serif
 
-    # pkgs.raleway
-    # pkgs.roboto
+    pkgs.iosevka-bin
+    (pkgs.iosevka-bin.override { variant = "Aile"; })
+    (pkgs.iosevka-bin.override { variant = "Etoile"; })
+    (pkgs.iosevka-bin.override { variant = "Slab"; })
+    (pkgs.iosevka-bin.override { variant = "Curly"; })
+    (pkgs.iosevka-bin.override { variant = "CurlySlab"; })
+    (pkgs.nerdfonts.override { fonts = [ "NerdFontsSymbolsOnly" ]; })
+
+    pkgs.sarasa-gothic # CJK in a style similar to Iosevka
+
+    pkgs.lmodern
+
+    pkgs.linja-luka
+    pkgs.linja-namako
+    pkgs.linja-pi-pu-lukin
+    pkgs.linja-pi-tomo-lipu
+    pkgs.linja-pimeja-pona
+    pkgs.linja-pona
+    pkgs.linja-sike
+    pkgs.linja-suwi
+    pkgs.nasin-nanpa
+    pkgs.sitelen-seli-kiwen
+
+    pkgs.spleen
+
+    pkgs.twitter-color-emoji
   ];
 
   xdg.dataFile = {
     "Kvantum".source = "${pkgs.arc-kde-theme}/share/Kvantum";
     "color-schemes".source = "${pkgs.arc-kde-theme}/share/color-schemes";
   };
-
-  # See <configuration.nix> for actual font settings; this is just to make fontconfig
-  # see the fonts installed by home-manager.
-  fonts.fontconfig.enable = true;
 
   xresources.properties = {
     "Xft.antialias" = 1;
@@ -153,7 +164,8 @@
 
   qt = {
     enable = true;
-    platformTheme = "qtct";
+    platformTheme.name = "qtct";
+
     style.name = "qt5ct";
   };
 
@@ -180,4 +192,27 @@
     menubar-accel = "F1";
     overlay-scrolling = false;
   };
+
+  # fonts.fontconfig = {
+  #   enable = true;
+  #   # defaultFonts = {
+  #   #   sansSerif = [
+  #   #     "Noto Sans"
+  #   #     "nasin-nanpa"
+  #   #     "emoji"
+  #   #   ];
+  #   #   serif = [
+  #   #     "Noto Serif"
+  #   #     "nasin-nanpa"
+  #   #     "emoji"
+  #   #   ];
+  #   #   monospace = [
+  #   #     "Iosevka"
+  #   #     "Sarasa Term CL"
+  #   #     "nasin-nanpa"
+  #   #     "emoji"
+  #   #   ];
+  #   #   emoji = [ "Twitter Color Emoji" ];
+  #   # };
+  # };
 }

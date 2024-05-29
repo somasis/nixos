@@ -1,6 +1,9 @@
-{ pkgs, ... }: {
+{ pkgs
+, ...
+}: {
   programs.jq.enable = true;
 
+  # not using writeJqScript, as it produces a shell script
   home.file.".jq".text = ''
     # <https://rosettacode.org/wiki/URL_decoding#jq>
     def uri_decode:
@@ -35,6 +38,7 @@
 
   home.packages = [
     pkgs.ellipsis
+    pkgs.sqlite-interactive.bin
     pkgs.frangipanni
     pkgs.fx
     pkgs.ijq
@@ -53,26 +57,7 @@
     pkgs.ini2nix
     pkgs.json2nix
 
-    (pkgs.symlinkJoin {
-      name = "yq-go-with-completion";
-
-      paths = [ pkgs.yq-go ];
-
-      postBuild = ''
-        install -d $out/share/bash-completion/completions
-        ${pkgs.yq-go}/bin/yq shell-completion bash > $out/share/bash-completion/completions/yq
-      '';
-    })
-
-    (pkgs.symlinkJoin {
-      name = "jc-with-completion";
-
-      paths = [ pkgs.jc ];
-
-      postBuild = ''
-        install -d $out/share/bash-completion/completions
-        ${pkgs.jc}/bin/jc -B > $out/share/bash-completion/completions/jc
-      '';
-    })
+    pkgs.yq-go
+    pkgs.jc
   ];
 }

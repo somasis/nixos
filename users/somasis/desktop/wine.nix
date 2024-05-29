@@ -37,7 +37,7 @@ in
     sessionVariables.WINEDEBUG = "fixme-all";
 
     # Integrate default wineprefix into wineprefix setup
-    file.".wine".source = mkOutOfStoreSymlink "${config.xdg.configHome}/wineprefixes/default";
+    file.".wine".source = mkOutOfStoreSymlink "${config.xdg.dataHome}/wineprefixes/default";
   };
 
   programs.bash.initExtra = ''

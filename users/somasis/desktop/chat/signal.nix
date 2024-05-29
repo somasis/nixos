@@ -122,7 +122,7 @@ in
             : "''${1?no secret entry given}"
             : "''${2?no secret file given}"
 
-            PATH=${lib.makeBinPath [ pkgs.coreutils config.programs.password-store.package ]}
+            PATH=${lib.makeBinPath [ pkgs.diffutils config.programs.password-store.package ]}
 
             # Regardless of if the entry exists or not, sync the changes.
             # If it exists and they have changed, sync the changes to the entry,
@@ -140,19 +140,14 @@ in
           ExecStart = ''${secret-signal} ''${ENTRY} %t/signal.secret'';
 
           # Only create the secret link after a successful start.
-          ExecStartPost = ''ln -sf %t/signal.secret ''${CONFIG}'';
+          ExecStartPost = ''${pkgs.coreutils}/bin/ln -sf %t/signal.secret ''${CONFIG}'';
 
           # Synchronize the file with the entry on changes.
           ExecStop = ''${secret-signal-sync} ''${ENTRY} %t/signal.secret'';
           RemainAfterExit = true;
 
           # Remove the secret file.
-          ExecStopPost = ''rm -f ''${CONFIG} %t/signal.secret'';
-
-          ExecSearchPath = lib.makeBinPath [
-            pkgs.coreutils
-            config.programs.password-store.package
-          ];
+          ExecStopPost = ''${pkgs.coreutils}/bin/rm -f ''${CONFIG} %t/signal.secret'';
 
           Environment = [
             ''"CONFIG=%E/${signalWindowClassName}/config.json"''

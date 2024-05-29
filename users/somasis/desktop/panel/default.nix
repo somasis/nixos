@@ -339,21 +339,17 @@ in
     #   };
     # }))
     pkgs.stalonetray
-    pkgs.snixembed
     pkgs.xorg.xwininfo
   ];
 
   programs.autorandr.hooks = {
-    # preswitch.panel = "${pkgs.systemd}/bin/systemctl --user stop panel.service";
-    # postswitch.panel = "${pkgs.systemd}/bin/systemctl --user start panel.service";
-    postswitch.panel = builtins.toString (pkgs.writeShellScript "restart-panel" ''
-      ${pkgs.systemd}/bin/systemctl --user is-active -q panel.service >/dev/null 2>&1 \
-          && ${pkgs.systemd}/bin/systemctl --user restart panel.service
-    '');
-    postswitch.snixembed = builtins.toString (pkgs.writeShellScript "restart-snixembed" ''
-      ${pkgs.systemd}/bin/systemctl --user is-active -q snixembed.service >/dev/null 2>&1 \
-          && ${pkgs.systemd}/bin/systemctl --user restart snixembed.service
-    '');
+    postswitch.panel = ''
+      ${pkgs.systemd}/bin/systemctl --user try-restart panel.service
+    '';
+
+    postswitch.snixembed = ''
+      ${pkgs.systemd}/bin/systemctl --user try-restart snixembed.service
+    '';
   };
 
   systemd.user.services = {
@@ -362,9 +358,10 @@ in
         Description = "lemonbar(1) based panel";
         Documentation = "man:lemonbar(1)";
 
-        PartOf = [ "graphical-session-post.target" "tray.target" ];
-        After = [ "window-manager.target" ];
-        Wants = [ "window-manager.target" "tray.target" ];
+        Conflicts = [ "game.target" ];
+        PartOf = [ "tray.target" "graphical-session-post.target" ];
+        After = [ "tray.target" "window-manager.target" ];
+        Wants = [ "tray.target" "window-manager.target" ];
         StartLimitInterval = 0;
       };
       Install.WantedBy = [ "graphical-session-post.target" "tray.target" ];
@@ -390,20 +387,8 @@ in
         ExitType = "cgroup";
       };
     };
-
-    snixembed = {
-      Unit = {
-        Description = pkgs.snixembed.meta.description;
-        PartOf = [ "tray.target" ];
-        After = [ "panel.service" ];
-      };
-      Install.WantedBy = [ "tray.target" ];
-
-      Service = {
-        # `--fork` means it'll fork *only* once ready.
-        Type = "forking";
-        ExecStart = [ "${pkgs.snixembed}/bin/snixembed --fork" ];
-      };
-    };
   };
+
+  services.snixembed.enable = true;
+  systemd.user.services.snixembed.Unit.After = [ "panel.service" ];
 }

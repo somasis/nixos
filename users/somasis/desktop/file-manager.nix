@@ -1,6 +1,7 @@
 { lib
 , pkgs
 , config
+, osConfig
 , ...
 }:
 let
@@ -22,35 +23,41 @@ let
       "--disable-wallpaper-plugin"
     ];
   });
+
+  # See <https://docs.xfce.org/xfce/tumbler/start>
+  tumblerConfig = lib.generators.toINI {} {
+
+  };
 in
 {
-  gtk.gtk3.bookmarks = map (x: "file://${x}") [
-    "/home/somasis/mess/current"
-    "/home/somasis/mess/current/incoming"
-    "/home/somasis/mess/current/screenshots"
-    "/home/somasis/mess/current/src"
-    "/home/somasis/audio"
-    "/home/somasis/audio/library/lossless"
-    "/home/somasis/diary"
-    "/home/somasis/ledger"
-    "/home/somasis/list"
-    "/home/somasis/mnt/gdrive"
-    "/home/somasis/mnt/gphotos"
-    "/home/somasis/mnt/sftp"
-    "/home/somasis/pictures"
-    "/home/somasis/shared"
-    "/home/somasis/src"
-    "/home/somasis/study/current"
-    "/home/somasis/sync"
-    "/home/somasis/tracks"
-    "/home/somasis/video"
-    "/home/somasis/video/anime"
-    "/home/somasis/video/film"
-    "/home/somasis/video/tv"
-    "/cache"
-    "/log"
-    "/persist"
-  ];
+  gtk.gtk3.bookmarks = map (x: "file://${x}") ([
+    config.xdg.userDirs.music
+    "${config.home.homeDirectory}/diary"
+    "${config.home.homeDirectory}/ledger"
+    "${config.home.homeDirectory}/list"
+    config.xdg.userDirs.desktop
+    config.xdg.userDirs.download
+    "${config.home.homeDirectory}/mess/current/screenshots"
+    "${config.home.homeDirectory}/mess/current/src"
+    "${config.home.homeDirectory}/mnt/gdrive"
+    "${config.home.homeDirectory}/mnt/gphotos"
+    "${config.home.homeDirectory}/mnt/sftp"
+    config.xdg.userDirs.pictures
+    "${config.home.homeDirectory}/shared"
+    "${config.home.homeDirectory}/src"
+    config.xdg.userDirs.documents
+    "${config.home.homeDirectory}/study/doc"
+    "${config.home.homeDirectory}/sync"
+    "${config.home.homeDirectory}/tracks"
+
+    config.xdg.userDirs.videos
+    "${config.xdg.userDirs.videos}/anime"
+    "${config.xdg.userDirs.videos}/film"
+    "${config.xdg.userDirs.videos}/tv"
+  ]
+  ++ lib.mapAttrsToList (_: x: x.persistentStoragePath) config.home.persistence
+  ++ builtins.attrNames (osConfig.environment.persistence or { })
+  );
 
   dconf.settings = {
     "org/gtk/settings/file-chooser" = {
@@ -89,23 +96,79 @@ in
 
     pkgs.xfce.xfconf
 
-    (pkgs.writeShellScriptBin "mount-archive" ''
-      set -e
+    pkgs.ratarmount
+    (pkgs.writeShellApplication {
+      name = "mount-archive";
 
-      n=''${1%%.*}
-      a=~/mnt/archive/"$n"
+      runtimeInputs = [
+        pkgs.coreutils
+        pkgs.ratarmount
+        # pkgs.libarchive
+        pkgs.libnotify
+        pkgs.xdg-utils
+      ];
 
-      mkdir -p "$a"
-      ${pkgs.archivemount}/bin/archivemount -f -o auto_unmount "$1" "$a" &
-      p=$!
+      text = ''
+        archive=''${1:?no archive given}
+        archive_name=''${archive%.*}
 
-      trap '${pkgs.fuse}/bin/fusermount -u "$a"' EXIT
+        mountpoint_base=~/mnt/archive
 
-      xdg-open "$a" &
-      f=$!
+        archive_mountpoint=''${archive_name//\//_}
+        archive_mountpoint="$mountpoint_base"/"$archive_mountpoint"
 
-      wait
-    '')
+        if ! pathchk "$archive_mountpoint"; then
+            archive_mountpoint=$(sha1sum <<<"$archive_name")
+            archive_mountpoint="$mountpoint_base"/''${archive_mountpoint%%[[:blank:]]*}
+        fi
+
+        mkdir -p "$archive_mountpoint"
+
+        # TODO some way to detect if an archive requires a password?
+        # archive_password_protected=false
+        # archive_first_filename=$(bsdtar --null --no-recursion -tf "$archive" | head -n1)
+        # if ! bsdtar -C "/var/empty" \
+        #     --passphrase " " \
+        #     --null \
+        #     --no-recursion \
+        #     -Oxf "$archive" \
+        #     "$archive_first_filename" &>/dev/null
+        #     then
+        #     archive_password_protected=true
+        #     else
+
+        ratarmount \
+            --foreground \
+            --detect-gnu-incremental \
+            --lazy \
+            --indent-file ":memory:" \
+            "$archive" \
+            "$archive_mountpoint" &
+
+        # if ratarmount PID still exists...
+        if kill -0 %1 >/dev/null 2>&1; then
+            notify-send \
+                -a mount-archive \
+                -i utilities-file-archiver \
+                -e \
+                "Archive mounted" \
+                "''${archive_name@Q} has been mounted at ''${archive_mountpoint@Q}."
+        else
+            notify-send \
+                -a mount-archive \
+                -i utilities-file-archiver \
+                "Archive mounting failed" \
+                "''${archive_name@Q} could not be mounted at ''${archive_mountpoint@Q}."
+            exit 1
+        fi
+
+        trap 'ratarmount -u "$archive_mountpoint"' EXIT
+
+        xdg-open "$archive_mountpoint" &
+
+        wait -f %1 %2
+      '';
+    })
   ];
 
   xdg.desktopEntries.mount-archive = {

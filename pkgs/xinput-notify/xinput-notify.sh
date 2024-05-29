@@ -1,4 +1,4 @@
-# shellcheck shell=sh
+# shellcheck shell=bash
 
 usage() {
     cat >&2 <<EOF
@@ -15,21 +15,25 @@ xinput() {
 mode_enable() {
     xinput enable "$1" \
         && notify-send \
-            -a xinput \
+            -a xinput-notify \
             -i "${icon}" \
             -e \
-            "xinput" \
-            "${class} '${name%" ${class}"}' enabled."
+            "${class@u}" \
+            "Device '${1%" ${class}"}' enabled."
 }
 
 mode_disable() {
     xinput disable "$1" \
         && notify-send \
-            -a xinput \
+            -a xinput-notify \
             -i "${icon}" \
             -e \
-            "xinput" \
-            "${class} '${name%" ${class}"}' disabled."
+            "${class@u}" \
+            "Device '${1%" ${class}"}' disabled."
+}
+
+device_names() {
+    xinput list --name-only | sed -e 's/^∼ //'
 }
 
 mode=toggle
@@ -43,23 +47,21 @@ while getopts :de arg >/dev/null 2>&1; do
 done
 shift $((OPTIND - 1))
 
-[ $# -gt 0 ] || usage
+[[ $# -gt 0 ]] || usage
 
-case "$1" in
-    touchpad | pen | tablet | finger | keyboard | mouse | pointer)
-        # shellcheck disable=SC2046
-        eval "set -- $(printf '%s ' $(xinput list --name-only | grep -iF "$1" | xe s6-quote))"
-        ;;
-esac
+for device in "$@"; do
+    case "${device}" in
+        touchpad | pen | tablet | finger | keyboard | mouse | pointer)
+            # shellcheck disable=SC2046
+            device=$(device_names | grep -Fi "${device}" | head -n1)
+            ;;
+    esac
 
-while [ $# -gt 0 ]; do
-    name="$1"
-
-    [ "$(xinput list --name-only | grep -Fc "${name}")" -eq 0 ] \
-        && printf 'error: no device named "%s"\n' "${name}" >&2 \
+    [[ "$(device_names | grep -Fic "${device}")" -eq 0 ]] \
+        && printf 'error: no device named "%s"\n' "${device}" >&2 \
         && exit 2
 
-    case "$(printf '%s\n' "$1" | tr '[:upper:]' '[:lower:]')" in
+    case "${device,,}" in
         *touchpad*)
             icon=input-touchpad
             class=Touchpad
@@ -92,13 +94,12 @@ while [ $# -gt 0 ]; do
 
     case "${mode}" in
         toggle)
-            if [ "$(xinput list-props "$1" | sed '/Device Enabled/!d; s/.*:[\t ]*//')" -eq 1 ]; then
-                mode_disable "$1"
+            if [[ "$(xinput list-props "${device}" | sed '/Device Enabled/!d; s/.*:[\t ]*//')" -eq 1 ]]; then
+                mode_disable "${device}"
             else
-                mode_enable "$1"
+                mode_enable "${device}"
             fi
             ;;
-        enable | disable) mode_"${mode}" "$1" ;;
+        enable | disable) mode_"${mode}" "${device}" ;;
     esac
-    shift
 done

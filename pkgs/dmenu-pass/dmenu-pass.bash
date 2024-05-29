@@ -4,7 +4,10 @@
 : "${PASSWORD_STORE_CLIP_TIME:=45}"
 : "${XDG_CACHE_HOME:=${HOME}/.cache}"
 
-: "${DMENU_PASS_HISTORY:=${XDG_CACHE_HOME}/dmenu/dmenu-pass.cache}"
+: "${DMENU:=dmenu -p 'pass'}"
+
+: "${DMENU_PASS_CACHE:=${XDG_CACHE_HOME}/dmenu-pass}"
+: "${DMENU_PASS_HISTORY:=${DMENU_PASS_CACHE}/history}"
 
 me=${0##*/}
 
@@ -48,11 +51,17 @@ while getopts :cni:m: arg >/dev/null 2>&1; do
 done
 shift $((OPTIND - 1))
 
+dmenu_args=("$@")
+
 if [[ -n "${initial}" ]]; then
     DMENU_PASS_INITIAL_HISTORY=$(md5sum <<<"${initial}")
     DMENU_PASS_INITIAL_HISTORY=${DMENU_PASS_INITIAL_HISTORY%% *}
-    DMENU_PASS_INITIAL_HISTORY="${XDG_CACHE_HOME}/dmenu/dmenu-pass_${DMENU_PASS_INITIAL_HISTORY}.cache"
+    DMENU_PASS_INITIAL_HISTORY="${DMENU_PASS_CACHE}/${DMENU_PASS_INITIAL_HISTORY}.history"
+
+    dmenu_args+=(-n -it "${initial}")
 fi
+
+dmenu_args+=(-p "pass${mode:+ [${mode}]}")
 
 mkdir -p "${DMENU_PASS_HISTORY%/*}" ${initial:+"${DMENU_PASS_INITIAL_HISTORY%/*}"}
 touch "${DMENU_PASS_HISTORY}" ${initial:+"${DMENU_PASS_INITIAL_HISTORY}"}
@@ -70,7 +79,7 @@ choice=$(
             | sed 's@^[0-9]* @@; s@^\.//@@; s@\.gpg$@@' \
             | cat ${initial:+"${DMENU_PASS_INITIAL_HISTORY}"} "${DMENU_PASS_HISTORY}" - 2>/dev/null
     )   | uq \
-        | ${DMENU:-dmenu} ${initial:+-n -it "${initial}"} -S -p "pass${mode:+ [${mode}]}" "$@"
+        | eval "${DMENU} ${dmenu_args[*]@Q}"
 )
 
 [[ -n "${choice}" ]] || exit 0
@@ -91,7 +100,7 @@ case "${mode}" in
         fi
         ;;
     fields)
-        field=$(pass meta "${choice}" | "${DMENU:-dmenu}" -S -p "pass [${choice}]" "$@")
+        field=$(pass meta "${choice}" | ${DMENU:-dmenu} -p "pass [${choice}]" "$@")
 
         [[ -n "${field}" ]] || exit 0
 
@@ -128,6 +137,8 @@ cat - "${DMENU_PASS_HISTORY}" <<<"${choice}" \
     | grep -v "^\s*$" \
     | uq \
     | while read -r entry; do
-        test -e "${PASSWORD_STORE_DIR}"/"${entry}".gpg && printf '%s\n' "${entry}"
+        test -e "${PASSWORD_STORE_DIR}"/"${entry}".gpg \
+            && ! test -d "${PASSWORD_STORE_DIR}"/"${entry}".gpg \
+            && printf '%s\n' "${entry}"
     done \
     | ifne sponge "${DMENU_PASS_HISTORY}"

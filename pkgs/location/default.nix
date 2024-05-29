@@ -7,7 +7,7 @@
 , jq
 , jc
 }:
-(writeShellApplication {
+writeShellApplication {
   name = "location";
 
   runtimeInputs = [
@@ -21,7 +21,7 @@
     PATH=${geoclue2-with-demo-agent}/libexec/geoclue-2.0/demos:"$PATH"
   '' + builtins.readFile ./location.bash
   ;
-}) // {
+
   meta = with lib; {
     description = "Get a geolocation using various methods (and resolve it if requested)";
     license = licenses.unlicense;

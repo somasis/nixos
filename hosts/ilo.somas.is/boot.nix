@@ -18,6 +18,9 @@
         enable = true;
         editor = false;
         configurationLimit = 25;
+
+        memtest86.enable = true;
+        netbootxyz.enable = true;
       };
 
       timeout = 0;
@@ -25,10 +28,7 @@
 
     # Silent boot.
     consoleLogLevel = 3;
-    kernelParams = [
-      "quiet"
-      "udev.log_level=3"
-    ];
+    kernelParams = [ "quiet" "udev.log_level=3" ];
 
     extraModprobeConfig = ''
       options i915 enable_fbc=1
@@ -71,7 +71,8 @@
       extraConfig = ''
         DeviceScale=1
       '';
-      font = "${pkgs.iosevka-bin}/share/fonts/truetype/Iosevka-Regular.ttc";
+      # font = "${pkgs.iosevka-bin}/share/fonts/truetype/Iosevka-Regular.ttc";
+      font = "${pkgs.noto-fonts}/share/fonts/noto/NotoSans[wdth,wght].ttf";
     };
   };
 
@@ -126,10 +127,5 @@
     };
 
     getty.greetingLine = "o kama pona tawa ${config.networking.fqdnOrHostName}.";
-  };
-
-  # Don't create any virtual terminals except the one used by Xorg.
-  services.logind.extraConfig = lib.generators.toKeyValue { } {
-    NAutoVTs = 1;
   };
 }

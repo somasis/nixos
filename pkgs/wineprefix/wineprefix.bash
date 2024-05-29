@@ -112,12 +112,18 @@ list_prefix_applications() (
 
     prefix="${XDG_DATA_HOME}"/wineprefixes/"${prefix}"
 
-    if [[ -d "${prefix}/drive_c/users/${USER}/AppData/Roaming/Microsoft/Windows/Start Menu/Programs" ]]; then
-        cd "${prefix}/drive_c/users/${USER}/AppData/Roaming/Microsoft/Windows/Start Menu/Programs" || exit 1
-        find .// -type f -iname '*.lnk' | sed 's|^\.//||; s|\.lnk$||' | sort
-    else
-        exit 1
-    fi
+    local directories=(
+        "${prefix}/drive_c/users/${USER}/AppData/Roaming/Microsoft/Windows/Start Menu/Programs"
+        "${prefix}/ProgramData/Microsoft/Windows/Start Menu/Programs"
+    )
+    local d
+
+    for d in "${directories[@]}"; do
+        [[ -d "${d}" ]] && cd "${d}" || continue
+        find .// -type f -iname '*.lnk'
+    done \
+        | sed 's|^\.//||; s|\.lnk$||' \
+        | sort
 )
 
 start_prefix_application() {

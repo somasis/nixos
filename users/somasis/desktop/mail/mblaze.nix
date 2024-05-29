@@ -1,9 +1,6 @@
 { pkgs, config, inputs, ... }: {
   home.packages = [
-    (pkgs.mblaze.overrideAttrs (prev: {
-      src = inputs.mblaze;
-      version = config.lib.somasis.flakeModifiedDateToVersion inputs.mblaze;
-    }))
+    pkgs.mblaze
 
     # (pkgs.writeShellScriptBin "minbox" ''
     #     if [ $# -gt 0 ]; then

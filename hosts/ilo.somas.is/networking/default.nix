@@ -33,6 +33,8 @@
         macAddress = "random";
         powersave = true;
       };
+
+      dns = "dnsmasq";
     };
   };
 
@@ -88,10 +90,18 @@
   '';
 
   # NOTE: systemd-resolved actually breaks `hostname -f`!
-  services.resolved = {
-    enable = true;
-    dnssec = "false"; # slow as fuck and often broken
-  };
+  # services.resolved = {
+  #   enable = true;
+  #   dnssec = "false"; # slow as fuck and often broken
+  # };
+
+  # services.dnsmasq = {
+  #   enable = true;
+  #   settings = {
+  #     listen-address = [ "::1,127.0.0.1" ];
+  #     cache-size = 10000;
+  #   };
+  # };
 
   services.tor = {
     enable = false;

@@ -1,4 +1,5 @@
-{ lib
+{ config
+, lib
 , pkgs
 , ...
 }: {
@@ -13,6 +14,7 @@
 
     # PDF editing tools
     pkgs.ocrmypdf
+    pkgs.tesseract
     pkgs.pdfarranger
 
     # Scan editing tools
@@ -51,8 +53,13 @@
 
   home.shellAliases = {
     pdfgrep = "pdfgrep --cache";
-    ocr = "ocrmypdf --deskew --clean";
+    tesseract = ''tesseract --user-words "$XDG_DATA_HOME"/tesseract/eng.user-words'';
+    ocrmypdf = ''ocrmypdf --user-words "$XDG_DATA_HOME"/tesseract/eng.user-words --sidecar "$XDG_CACHE_HOME"/ocrmypdf/sidecar.txt'';
   };
 
-  cache.directories = [ "var/cache/pdfgrep" ];
+  persist.directories = [{ method = "symlink"; directory = config.lib.somasis.xdgDataDir "tesseract"; }];
+  cache.directories = [
+    { method = "symlink"; directory = config.lib.somasis.xdgCacheDir "pdfgrep"; }
+    { method = "symlink"; directory = config.lib.somasis.xdgCacheDir "ocrmypdf"; }
+  ];
 }

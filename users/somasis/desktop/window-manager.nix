@@ -138,15 +138,22 @@ in
   '');
 
   systemd.user = {
-    targets.window-manager = {
-      Unit = {
-        Description = "Services that constitute a fully-working window manager";
-        # PartOf = [ "graphical-session.target" ];
-        After = [ "graphical-session-pre.target" "graphical-session.target" ];
-        Requires = [ "graphical-session-pre.target" "graphical-session.target" ];
-        # Before = [ "panel.service" "tray.target" ];
+    targets = {
+      window-manager = {
+        Unit = {
+          Description = "Services that constitute a fully-working window manager";
+          # PartOf = [ "graphical-session.target" ];
+          After = [ "graphical-session-pre.target" "graphical-session.target" ];
+          Requires = [ "graphical-session-pre.target" "graphical-session.target" ];
+          # Before = [ "panel.service" "tray.target" ];
+        };
+        # Install.WantedBy = [ "graphical-session.target" ];
       };
-      # Install.WantedBy = [ "graphical-session.target" ];
+
+      lock.Unit = {
+        Conflicts = [ "picom.service" ];
+        OnSuccess = [ "picom.service" ];
+      };
     };
 
     services = {
@@ -170,11 +177,10 @@ in
         Unit.PartOf = [ "window-manager.target" ];
         Install.WantedBy = [ "window-manager.target" ];
       };
-
-      xsecurelock.Service = {
-        ExecStartPre = [ "-${pkgs.systemd}/bin/systemctl --user stop picom.service" ];
-        ExecStopPost = [ "-${pkgs.systemd}/bin/systemctl --user start picom.service" ];
-      };
+      # xsecurelock.Service = {
+      #   ExecStartPre = [ "-${pkgs.systemd}/bin/systemctl --user stop picom.service" ];
+      #   ExecStopPost = [ "-${pkgs.systemd}/bin/systemctl --user start picom.service" ];
+      # };
     };
   };
 
@@ -196,17 +202,15 @@ in
 
       PATH=${lib.makeBinPath [
         config.xsession.windowManager.bspwm.package
-        pkgs.gnugrep
         pkgs.wmutils-core
         pkgs.xdotool
       ]}
 
       set -eu
 
-      class="$1"
-      classname="$2"
-      role="$3"
-      shift 3
+      class=''${1:?no class given}; shift
+      classname=''${1:?no class name given}; shift
+      role=''${1:?no role given}; shift
 
       wait_for_window() {
           xdotool search \
@@ -216,7 +220,7 @@ in
               --all \
               --limit 1 \
               --sync \
-              "^$classname$|^$class$|^$role$" \
+              "^$class$|^$classname$|^$role$" \
               2>/dev/null
       }
 
@@ -224,15 +228,14 @@ in
 
       if [[ -z "$id" ]]; then
           printf 'error: no windows matching "%s", "%s", and "%s"\n' \
-              "$classname" \
-              "$class" \
-              "$role"
+              "$class" "$classname" "$role" \
+              >&2
           exit 1
       fi
 
       bspc node "$id" -g locked=on || :
 
-      if [ -z "$(lsw "$(printf '0x%x\n' "$id")")" ]; then # window is unmapped
+      if [[ -z "$(lsw "$(printf '0x%x\n' "$id")")" ]]; then # window is unmapped
           mapw -m "$(printf '0x%X\n' "$id")"
           bspc desktop -f "$(bspc query -D -n "$id")"
           bspc node -f "$id"
@@ -242,9 +245,7 @@ in
     '')
 
     (pkgs.writeShellScriptBin "bspwm-hide-or-close" ''
-      PATH=${lib.makeBinPath (
-        [ config.xsession.windowManager.bspwm.package pkgs.coreutils pkgs.xdotool ]
-      )}
+      PATH=${lib.makeBinPath ([ config.xsession.windowManager.bspwm.package pkgs.xdotool ])}
 
       ido() {
           # shellcheck disable=SC2015
@@ -253,11 +254,6 @@ in
       }
 
       # If we're closing a window,
-
-      : "''${XDG_CACHE_HOME:=$HOME/.cache}"
-
-      cache="$XDG_CACHE_HOME"/bspwm
-      mkdir -p "$cache"
 
       node=$(bspc query -N -n "$@")
       mapfile -t locked_nodes < <(bspc query -N "$node" -n '.locked')
@@ -280,48 +276,51 @@ in
 
   services.sxhkd.keybindings = lib.mkMerge [
     (lib.optionalAttrs config.xsession.windowManager.bspwm.enable {
-      # Window management: change to desktop {1-10} on focused monitor
+      # Change to desktop {1-10} on focused monitor
       "super + {1-9,0}" = "${bspc} desktop -f focused:'^{1-9,10}'";
 
-      # Window management: send focused node to desktop {1-10} on focused monitor
+      # Send focused node to desktop {1-10} on focused monitor
       "super + shift + {1-9,0}" = "${bspc} node -d focused:'^{1-9,10}'";
 
-      # Window management: send focused node to focused desktop on monitor {1-10}
+      # Send focused node to focused desktop on monitor {1-10}
       "super + ctrl + {1-9,0}" = "${bspc} node -d ^{1-9,10}:focused";
 
-      # Window management: switch to {next,previous} window
+      # Switch to {next,previous} window
       "super + {_,shift} + a" = "${bspc} node -f {next,prev}.!hidden.window";
 
-      # Window management: rotate desktop layout
+      # Switch to {next,previous} window of same class
+      "super + {_,shift} + tab" = "${bspc} node -f {next,prev}.!hidden.window.same_class";
+
+      # Rotate desktop layout
       "super + {_,shift} + r" = "${bspc} node @/ -R {90,-90}";
 
-      # Window management: close (or minimize) window
+      # Close (or hide) window
       "super + w" = "bspwm-hide-or-close";
 
-      # Window management: kill window
+      # Kill window
       "super + shift + w" = "${bspc} node -k";
 
-      # Window management: set desktop layout to {tiled, monocle}
+      # Set desktop layout to {tiled, monocle}
       "super + m" = "${bspc} desktop -l next";
 
-      # Window management: set window state to {tiled, pseudo-tiled, floating, fullscreen}
+      # Set window state to {tiled, pseudo-tiled, floating, fullscreen}
       "super + {t,shift + t,f,m}" = "${bspc} node -t {tiled,pseudo_tiled,floating,fullscreen}";
 
-      # Window management: move window to window {left, down, up, right} of current window
+      # Move window to window {left, down, up, right} of current window
       "super + shift + {Left,Down,Up,Right}" = "${bspc} node -s {west,south,north,east}";
 
-      # Window management: focus {previous, next} window on the current desktop
+      # Focus {previous, next} window on the current desktop
       "super + {Left,Right}" = "${bspc} node -f {prev,next}.local.!hidden.window";
 
-      # Window management: change to {next, previous} window
+      # Change to {next, previous} window
       "super + {button5,button4}" = "${bspc} node -f {next,prev}.!hidden.window";
 
-      # Window management: change to desktop {1-10} on focused monitor
+      # Change to desktop {1-10} on focused monitor
       "super + shift + {button5,button4}" = "${bspc} desktop -f focused#{next,prev}";
     })
 
     (lib.optionalAttrs config.services.picom.enable {
-      # Compositing: invert window
+      # Invert window
       "super + shift + i" = pkgs.writeShellScript "toggle-window-invert" ''
         xprop -id "$(xdotool getwindowfocus)" -format KYLIE_INVERT 8c \
             -set KYLIE_INVERT "$(

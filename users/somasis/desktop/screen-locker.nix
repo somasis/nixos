@@ -4,125 +4,130 @@
 , pkgs
 , ...
 }:
-# TODO Utilize <https://git.sr.ht/~whynothugo/systemd-lock-handler> in some way,
-# it looks a lot more purpose-built to actually do what I'm trying to do here
+assert osConfig.services.systemd-lock-handler.enable;
 let
-  # inherit (config.lib.somasis) camelCaseToScreamingSnakeCase;
+  inherit (config.lib.somasis) camelCaseToScreamingSnakeCase;
 
-  # xsecurelock = pkgs.xsecurelock;
-  # xsecurelock = pkgs.xsecurelock.overrideAttrs (prev: {
-  #   version = "unstable-2023-01-16";
-  #   src = pkgs.fetchFromGitHub {
-  #     owner = "google";
-  #     repo = prev.pname;
-
-  #     # TODO Remove once xsecurelock is updated in nixpkgs.
-  #     rev = "15e9b01b02f64cc40f02184f001849971684ce15";
-  #     hash = "sha256-k7xkM53hLJtjVDkv4eklvOntAR7n1jsxWHEHeRv5GJU=";
-  #   };
-  # });
+  usbguardCfg = osConfig.services.usbguard;
+  usbguardPkg = usbguardCfg.package or pkgs.usbguard-nox;
 in
 {
-  # systemd.user.services = {
-  #   xssproxy = {
-  #     Unit.Description = "Forward DBus calls relating to screensaver to Xss";
-  #     Service.Type = "simple";
-  #     Service.ExecStart = "${pkgs.xssproxy}/bin/xssproxy";
-  #     Unit.PartOf = [ "graphical-session.target" ];
-  #     Install.WantedBy = [ "graphical-session.target" ];
-  #   };
+  services = {
+    xsecurelock = {
+      enable = true;
+      settings = {
+        XSECURELOCK_BACKGROUND_COLOR = "#000000";
+        XSECURELOCK_AUTH_BACKGROUND_COLOR = "#000000";
+        XSECURELOCK_AUTH_FOREGROUND_COLOR = "#ffffff";
+        XSECURELOCK_AUTH_WARNING_COLOR = "#ff0000";
 
-  #   xsecurelock = {
-  #     Unit = {
-  #       Description = "Run xsecurelock with specified configuration";
-  #       Before = [ "sleep.target" ];
-  #       # OnFailure = [ "xsecurelock-failure.service" ];
-  #     };
+        XSECURELOCK_FONT = "monospace:style=bold:size=11";
 
-  #     Install.WantedBy = [ "sleep.target" ];
+        XSECURELOCK_DATETIME_FORMAT = "%a, %b %d, %i:%m %p";
+        XSECURELOCK_PASSWORD_PROMPT = "time";
 
-  #     Service = {
-  #       Type = "simple";
+        XSECURELOCK_SHOW_DATETIME = 0;
+        XSECURELOCK_SHOW_HOSTNAME = 0;
+        XSECURELOCK_SHOW_USERNAME = 0;
+        XSECURELOCK_SHOW_KEYBOARD_LAYOUT = 0;
 
-  #       ProtectSystem = "strict";
-  #       UnsetEnvironment = [
-  #         "HOME"
-  #         "PATH"
-  #         "XDG_RUNTIME_DIR"
-  #         "TERM"
-  #       ];
-  #       # PassEnvironment = [ "NOTIFY_SOCKET" ];
-  #       # NotifyAccess = "all";
+        XSECURELOCK_AUTH_TIMEOUT = 30;
+        XSECURELOCK_BLANK_TIMEOUT = 15;
 
-  #       Environment = lib.mapAttrsToList (n: v: "\"XSECURELOCK_${camelCaseToScreamingSnakeCase n}=${lib.escape [ "\"" ] (builtins.toString v)}\"") {
-  #         backgroundColor = "#000000";
+        # XSECURELOCK_DIM_TIME_MS = 15 * 1000;
+        # XSECURELOCK_NO_PAM_RHOST = 1; # necessary to make fprintd work?
+      };
+    };
 
-  #         authBackgroundColor = "#000000";
-  #         authForegroundColor = "#ffffff";
+    xssproxy = {
+      enable = true;
+      verbose = true;
+    };
 
-  #         font = "monospace:style=bold:size=11";
+    sxhkd.keybindings = {
+      "super + l" = "${pkgs.systemd}/bin/loginctl lock-session";
+      "super + shift + l" = "toggle-xsecurelock";
+      "super + ctrl + l" = "toggle-dpms";
+    };
+  };
 
-  #         datetimeFormat = "%%a, %%b %%d, %%i:%%m %%p";
-  #         passwordPrompt = "time";
+  systemd.user = {
+    services.xsecurelock = {
+      # Unit.OnFailure = [ "xsecurelock-failure.service" ];
+      Unit.Conflicts = [ "usbguard-notifier.service" ];
+      Unit.OnSuccess = [ "usbguard-notifier.service" ];
 
-  #         showDatetime = 0;
-  #         showHostname = 0;
-  #         showUsername = 0;
-  #         showKeyboardLayout = 0;
+      Service = {
+        ExecStartPre =
+          # Disable the ability to switch between virtual terminals.
+          [ "-${lib.getExe pkgs.xorg.setxkbmap} -option srvrkeys:none" ]
+          # Implement something like GNOME's USBGuard integration
+          ++ lib.optionals usbguardCfg.enable [
+            "${usbguardPkg}/bin/usbguard set-parameter InsertedDevicePolicy block"
+            "${usbguardPkg}/bin/usbguard set-parameter ImplicitPolicyTarget block"
+            # "${pkgs.systemd}/bin/systemctl --user stop usbguard-notifier.service"
+          ];
 
-  #         # noPamRhost = 1; # necessary to make fprintd work.
+        ExecStopPost = lib.optionals osConfig.services.usbguard.enable [
+          # "${pkgs.systemd}/bin/systemctl --user start usbguard-notifier.service"
+          "${usbguardPkg}/bin/usbguard set-parameter InsertedDevicePolicy ${usbguardCfg.insertedDevicePolicy}"
+          "${usbguardPkg}/bin/usbguard set-parameter ImplicitPolicyTarget ${usbguardCfg.implicitPolicyTarget}"
+        ];
+      };
+    };
 
-  #         authTimeout = 30;
-  #         blankTimeout = 15;
-  #       }
-  #         # ++ lib.mapAttrsToList (key: command: "XSECURELOCK_KEY_${key}_COMMAND=${builtins.toString command}") {
+    # services.xsecurelock-failure = {
+    #   Unit.Description = "Bring down the system when xsecurelock fails";
+    #   Service.Type = "oneshot";
+    #   Service.ExecStart = "${pkgs.systemd}/bin/systemctl poweroff";
+    # };
 
-  #         # }
-  #       ;
-
-  #       # Implement something like GNOME's USBGuard integration
-  #       ExecStartPre =
-  #         [ "${pkgs.xorg.setxkbmap}/bin/setxkbmap -option srvrkeys:none" ]
-  #         ++ lib.optionals osConfig.services.usbguard.enable [
-  #           "${pkgs.usbguard}/bin/usbguard set-parameter InsertedDevicePolicy block"
-  #           "${pkgs.usbguard}/bin/usbguard set-parameter ImplicitPolicyTarget block"
-  #           "${pkgs.systemd}/bin/systemctl --user stop usbguard-notifier.service"
-  #         ];
-
-  #       ExecStart = [ "${xsecurelock}/bin/xsecurelock" ];
-
-  #       ExecStopPost =
-  #         [ "${pkgs.systemd}/bin/systemctl --user start setxkbmap.service" ]
-  #         ++ lib.optionals osConfig.services.usbguard.enable [
-  #           "${pkgs.systemd}/bin/systemctl --user start usbguard-notifier.service"
-  #           "${pkgs.usbguard}/bin/usbguard set-parameter InsertedDevicePolicy ${osConfig.services.usbguard.insertedDevicePolicy}"
-  #           "${pkgs.usbguard}/bin/usbguard set-parameter ImplicitPolicyTarget ${osConfig.services.usbguard.implicitPolicyTarget}"
-  #         ];
-
-  #       Restart = "on-failure";
-  #       RestartSec = 0;
-  #     };
-  #   };
-
-  #   xsecurelock-failure = {
-  #     Unit.Description = "Bring down the system when xsecurelock fails";
-  #     Service.Type = "oneshot";
-  #     Service.ExecStart = "${pkgs.systemd}/bin/systemctl poweroff";
-  #   };
-  # };
+    # Re-initialize keyboard settings when system is unlocked.
+    services.setxkbmap = {
+      Unit.PartOf = [ "unlock.target" ];
+      Install.WantedBy = [ "unlock.target" ];
+    };
+  };
 
   # I only need this so I can react to logind's lock-session stuff and suspend events
-  # services.screen-locker = {
-  #   enable = true;
-  #   xautolock.enable = false; # Use xss-lock
-  #   lockCmd = "${pkgs.systemd}/bin/systemctl --user start xsecurelock.service";
+  services.screen-locker = {
+    enable = true;
+    lockCmd = "${pkgs.systemd}/bin/loginctl lock-session";
+    inactiveInterval = 15; # lock after x minutes of inactivity
 
-  #   inactiveInterval = 15; # minutes
-  #   xss-lock = {
-  #     extraOptions = [ "-l" ];
-  #     screensaverCycle = 60 * 15;
-  #   };
-  # };
+    xautolock = {
+      enable = false; # Use xss-lock
+      # extraOptions =
+      #   let
+      #     xsecurelockNotifier = pkgs.writeShellScript "xsecurelock-notifier" ''
+      #       ${lib.toShellVar "XSECURELOCK_DIM_TIME_MS" xsecurelockSettings.dimTimeMs}
+      #       ${lib.toShellVar "XSECURELOCK_WAIT_TIME_MS" xsecurelockSettings.waitTimeMs}
+      #       exec ${xsecurelockPkg}/lib/xsecurelock/until_nonidle ${xsecurelockPkg}/lib/xsecurelock/dimmer
+      #     '';
+      #   in
+      #   [
+      #     "-notify ${xsecurelockSettings.dimTimeMs / 1000}"
+      #     "-notifier ${xsecurelockNotifier}"
+      #   ];
+    };
+
+    xss-lock = {
+      extraOptions =
+        # let
+        #   xsecurelockDimmer = pkgs.writeShellScript "xsecurelock-dimmer" ''
+        #     ${lib.toShellVar "XSECURELOCK_DIM_TIME_MS" xsecurelockSettings.dimTimeMs}
+        #     ${lib.toShellVar "XSECURELOCK_WAIT_TIME_MS" xsecurelockSettings.waitTimeMs}
+        #     exec ${xsecurelockPkg}/lib/xsecurelock/dimmer
+        #   '';
+        # in
+        [
+          # "-n ${xsecurelockDimmer}"
+          "-l"
+        ];
+
+      screensaverCycle = 60 * 15;
+    };
+  };
 
   # services.xidlehook = {
   #   enable = false;
@@ -142,76 +147,64 @@ in
   #   ];
   # };
 
-  # home.packages = [
-  #   (pkgs.writeShellApplication {
-  #     name = "toggle-xsecurelock";
+  home.packages = [
+    (pkgs.writeShellApplication {
+      name = "toggle-xsecurelock";
 
-  #     runtimeInputs = [
-  #       pkgs.libnotify
-  #       pkgs.systemd
-  #     ];
+      runtimeInputs = [
+        pkgs.libnotify
+        pkgs.systemd
+      ];
 
-  #     text = ''
-  #       if systemctl --user -q is-active xss-lock.service; then
-  #           systemctl --user stop xss-lock.service \
-  #               && exec \
-  #                   notify-send \
-  #                       -a xsecurelock \
-  #                       -i preferences-desktop-screensaver \
-  #                       'xsecurelock' \
-  #                       'Screensaver disabled, screen will not automatically lock.'
-  #       else \
-  #           systemctl --user start xss-lock.service \
-  #               && exec \
-  #                   notify-send \
-  #                       -a xsecurelock \
-  #                       -i preferences-desktop-screensaver \
-  #                       'xsecurelock' \
-  #                       'Screensaver enabled, screen will automatically lock.'
-  #       fi
-  #     '';
-  #   })
+      text = ''
+        if systemctl --user -q is-active xss-lock.service; then
+            systemctl --user stop xss-lock.service \
+                && exec \
+                    notify-send \
+                        -a xsecurelock \
+                        -i preferences-desktop-screensaver \
+                        'xsecurelock' \
+                        'Screensaver disabled, screen will not automatically lock.'
+        else \
+            systemctl --user start xss-lock.service \
+                && exec \
+                    notify-send \
+                        -a xsecurelock \
+                        -i preferences-desktop-screensaver \
+                        'xsecurelock' \
+                        'Screensaver enabled, screen will automatically lock.'
+        fi
+      '';
+    })
 
-  #   (pkgs.writeShellApplication {
-  #     name = "toggle-dpms";
+    (pkgs.writeShellApplication {
+      name = "toggle-dpms";
 
-  #     runtimeInputs = [
-  #       pkgs.gnugrep
-  #       pkgs.libnotify
-  #       pkgs.xorg.xset
-  #     ];
+      runtimeInputs = [
+        pkgs.gnugrep
+        pkgs.libnotify
+        pkgs.xorg.xset
+      ];
 
-  #     text = ''
-  #       if LC_ALL=C xset q | grep -q 'DPMS is Enabled'; then
-  #           xset -dpms \
-  #               && exec \
-  #                   notify-send \
-  #                       -a dpms-toggle \
-  #                       -i preferences-desktop-display \
-  #                       'dpms-toggle' \
-  #                       'DPMS disabled, monitor will not go to sleep automatically.'
-  #       else
-  #           xset +dpms \
-  #               && exec \
-  #                   notify-send \
-  #                       -a dpms-toggle \
-  #                       -i preferences-desktop-display \
-  #                       'dpms-toggle' \
-  #                       'DPMS enabled, monitor will sleep automatically.'
-  #       fi
-  #     '';
-  #   })
-  # ];
-
-  # services.xscreensaver = {
-  #   enable = true;
-  # };
-
-  services.sxhkd.keybindings = {
-    "super + l" = "${pkgs.systemd}/bin/loginctl lock-session";
-
-    # "super + shift + l" = "toggle-xsecurelock";
-    # "super + ctrl + l" = "toggle-dpms";
-  };
-
+      text = ''
+        if LC_ALL=C xset q | grep -q 'DPMS is Enabled'; then
+            xset -dpms \
+                && exec \
+                    notify-send \
+                        -a dpms-toggle \
+                        -i preferences-desktop-display \
+                        'dpms-toggle' \
+                        'DPMS disabled, monitor will not go to sleep automatically.'
+        else
+            xset +dpms \
+                && exec \
+                    notify-send \
+                        -a dpms-toggle \
+                        -i preferences-desktop-display \
+                        'dpms-toggle' \
+                        'DPMS enabled, monitor will sleep automatically.'
+        fi
+      '';
+    })
+  ];
 }

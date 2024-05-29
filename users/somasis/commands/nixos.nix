@@ -9,11 +9,19 @@
     remote = "somasis@spinoza.7596ff.com";
   };
 
+  nix.settings = {
+    show-trace = true;
+    use-xdg-base-directories = true;
+  };
+
   cache.directories = [
-    "var/lib/nix" # Using `method = "symlink"` will cause issues while switching generations.
+    # Using `method = "symlink"` will cause issues while switching generations.
+    (config.lib.somasis.xdgStateDir "nix")
+
+    # { method = "symlink"; directory = config.lib.somasis.xdgCacheDir "cached-nix-shell"; }
 
     { method = "symlink"; directory = config.lib.somasis.xdgCacheDir "nix"; }
-    # "var/cache/vulnix"
+    # (config.lib.somasis.xdgCacheDir "vulnix")
   ];
 
   programs.bash = {
@@ -24,10 +32,31 @@
     '';
   };
 
-  nix.settings.show-trace = true;
+  xdg.configFile."nix-init/config.toml".source = (pkgs.formats.toml { }).generate "nix-init-config.toml" {
+    maintainers = [ "somasis" ];
+
+    access-tokens."github.com".command =
+      lib.optionals config.programs.password-store.enable
+        [ "pass" "${osConfig.networking.fqdnOrHostName}/gh/github.com/somasis" ]
+    ;
+  };
 
   home.packages = [
     # nixosRepl
+
+    # (pkgs.symlinkJoin {
+    #   name = "cached-nix-shell-with-symlink";
+    #   buildInputs = [ pkgs.makeWrapper ];
+    #   paths = [ pkgs.cached-nix-shell ];
+    #   postBuild = ''
+    #     mkdir -p $out/bin
+    #     makeWrapper ${pkgs.cached-nix-shell}/bin/cached-nix-shell $out/bin/nix-shell \
+    #         --prefix PATH : ${lib.escapeShellArg (lib.makeBinPath [ config.nix.package ])}
+    #   '';
+    # })
+
+    pkgs.nurl
+    pkgs.nix-init
 
     pkgs.nvd
     # pkgs.vulnix
@@ -213,7 +242,7 @@
                                     log --reverse --no-merges --oneline "$before..$after"
                             fi
                         else
-                            ido git merge --abort
+                            ido git -C "$d" merge --abort
                             exit 1
                         fi
                         break
@@ -447,11 +476,11 @@
 
         # systemctl -q is-active systemd-journald.service && ido sudo journalctl --flush
 
-        if fwupdmgr get-updates --json --no-authenticate | jq -e '.Devices | length > 0' >/dev/null; then
+        [[ "$e" -eq 0 ]] || exit $e
+
+        if fwupdmgr get-updates --json --no-authenticate 2>/dev/null | jq -e '.Devices | length > 0' >/dev/null; then
             fwupdmgr update
         fi
-
-        [[ "$e" -eq 0 ]] || exit $e
 
         _nixos_new_system=$(get_system_generation)
         _nixos_new_home=$(get_home_generation) || :

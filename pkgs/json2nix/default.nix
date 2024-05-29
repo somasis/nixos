@@ -13,7 +13,7 @@ writeShellApplication {
     nixfmt
   ];
 
-  text = builtins.readFile ./json2nix.sh;
+  text = builtins.readFile ./json2nix.bash;
 
   meta = with lib; {
     description = "Convert JSON to Nix expressions";

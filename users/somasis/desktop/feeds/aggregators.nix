@@ -201,7 +201,7 @@ in
     {
       url = "https://discourse.nixos.org/c/links/12.rss";
       title = "NixOS Discourse: links";
-      tags = [ "aggregator" "NixOS" ];
+      tags = [ "aggregator" "nixos" ];
     }
 
     # (reddit { subreddit = "Spanish"; extraTags = [ "es" ]; })

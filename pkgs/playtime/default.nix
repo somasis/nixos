@@ -6,7 +6,7 @@
 , gnugrep
 , khal
 }:
-(writeShellApplication {
+writeShellApplication {
   name = "playtime";
 
   runtimeInputs = [
@@ -17,7 +17,7 @@
   ];
 
   text = builtins.readFile ./playtime.sh;
-}) // {
+
   meta = with lib; {
     description = "Exit unsuccessfully if you should be working right now";
     license = licenses.unlicense;

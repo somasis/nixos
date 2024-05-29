@@ -4,7 +4,7 @@
 , coreutils
 , gnused
 }:
-(writeShellApplication {
+writeShellApplication {
   name = "nocolor";
 
   runtimeInputs = [
@@ -21,7 +21,7 @@
         exec cat
     fi
   '';
-}) // {
+
   meta = with lib; {
     description = "Strip color codes from stdin/files only if NO_COLOR is set";
     license = licenses.unlicense;

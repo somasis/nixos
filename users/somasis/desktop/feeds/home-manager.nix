@@ -13,13 +13,13 @@ in
 
   programs.newsboat.urls = [{
     url = "file://${config.xdg.dataHome}/newsboat/home-manager-news.atom";
-    tags = [ "computer" "NixOS" ];
+    tags = [ "computer" "nixos" ];
     title = "Home Manager";
   }];
 
   xdg.dataFile."newsboat/home-manager-news.atom".source = runCommandLocal "home-manager-news.atom"
     {
-      filter = writeJqScript "filter" { } ''
+      filter = writeJqScript "home-manager-news-filter" { } ''
         map(select(.condition == true))
             | sort_by(.time)
             | map(
@@ -63,9 +63,7 @@ in
 
       json = writeText "home-manager-news.json" (toJSON config.news.entries);
     } ''
-    export PATH=${makeBinPath [ config.programs.jq.package pkgs.yq-go ]}:"$PATH"
-
-    "$filter" < "$json" > filtered.json
-    yq --input-format json --output-format xml --xml-strict-mode < filtered.json > "$out"
+    $filter < $json > filtered.json
+    ${pkgs.yq-go}/bin/yq --input-format json --output-format xml --xml-strict-mode < filtered.json > $out
   '';
 }

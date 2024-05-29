@@ -115,5 +115,13 @@
 
   xsession.windowManager.bspwm.rules."Zathura".state = "tiled";
 
-  programs.qutebrowser.settings.content.pdfjs = false;
+  # got tired of having to download PDFs just to see if they were worth checking out
+  programs.qutebrowser.settings.content.pdfjs = true;
+
+  somasis.tunnels.tunnels.home-printer = {
+    port = 6631;
+    remote = "somasis@spinoza.7596ff.com";
+    remoteHost = "BRWD88083FAD788.local";
+    remotePort = 631;
+  };
 }

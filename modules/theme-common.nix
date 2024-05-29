@@ -7,11 +7,13 @@ let
   inherit mkThemeColorOption;
 
   inherit (lib)
-    mapAttrs'
-    nameValuePair
-    mkOption
-    mkAliasOptionModule
     types
+
+    mapAttrs'
+    mkAliasOptionModule
+    mkOption
+    nameValuePair
+    optionalAttrs
     ;
 
   inherit (config.lib) somasis;
@@ -119,7 +121,7 @@ in
       "*colorBrightCyan" = brightCyan;
       "*colorBrightWhite" = brightWhite;
     }
-    // lib.optionalAttrs (cfg.allowCustomXresources) (lib.mapAttrs' (n: v: lib.nameValuePair "*${n}" v) cfg.colors)
+    // optionalAttrs (cfg.allowCustomXresources) (mapAttrs' (n: v: nameValuePair "*${n}" v) cfg.colors)
     ;
   };
 }

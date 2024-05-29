@@ -86,37 +86,44 @@ let
 
     runtimeInputs = [
       pkgs.checkbashisms
+      pkgs.coreutils
+      pkgs.gnused
       pkgs.shellcheck
     ];
 
     text = ''
       shebang=$(head -n1 "$@")
+      shell=
 
-      case "$shebang" in
-          '#!/usr/bin/env nix-shell'|'#! /usr/bin/env nix-shell')
-              # <https://github.com/koalaman/shellcheck/issues/1210>
-              SHLINT_SHELL=$(
-                  sed -nE \
-                      -e '!p' \
-                      -e '/^#! ?nix-shell / { s/.* -i (\S+) .*/\1/; p }' \
-                      "$@"
-              )
-              ;;
-      esac
+      if [[ "$shebang" =~ ^'#!'.*[/[:blank:]]'nix-shell' ]]; then
+          # <https://github.com/koalaman/shellcheck/issues/1210>
+          shell=$(
+              sed -nE \
+                  -e '!p' \
+                  -e "/^#![[:blank:]]*nix-shell[[:blank:]]+.*-i[[:blank:]]+[^[:blank:]\"']+/ {
+                      s/.*[[:blank:]]+-i[[:blank:]]+([^[:blank:]\"']+).*/\1/
+                      p
+                  }" \
+                  "$@"
+          )
+      fi
 
-      case "''${SHLINT_SHELL:-}" in
-          'bash')
-              (
-                  set +e
-                  checkbashisms -l "$@" 2>/dev/null
-                  e=$?
-                  [[ "$e" -ne 4 ]] || exit "$e" # exit 4 == "No bashisms were detected in a bash script."
-                  exit 0
-              ) &
-              ;;
-      esac
+      if [[ -n "$shell" ]]; then
+          case "$shell" in
+              bash)
+                  (
+                      set +e
+                      checkbashisms -l "$@" 2>/dev/null
+                      e=$?
+                      [[ "$e" -ne 4 ]] || exit "$e" # exit 4 == "No bashisms were detected in a bash script."
+                      exit 0
+                  ) &
+                  ;;
+          esac
+          export SHELLCHECK_OPTS="--shell $shell''${SHELLCHECK_OPTS:+ $SHELLCHECK_OPTS}}"
+      fi
 
-      shellcheck ''${SHLINT_SHELL:+-s "$SHLINT_SHELL"} -f gcc -x "$@" &
+      shellcheck -f gcc -x "$@" &
       wait
     '';
   };
@@ -144,19 +151,13 @@ in
 
     # Make bash's command editing buffers nicer to use.
     {
+      group = "bash-fc";
       name = "WinCreate";
       option = ".*/bash-fc\.[^\/]+";
       commands = ''
         set-option window filetype sh
-        set-option window formatcmd "shformat"
-        set-option window lintcmd "SHLINT_SHELL=bash shlint"
-
-        # Insert a shellcheck directive so it knows this is bash.
-        try %{
-            execute-keys -draft 'gg' 'x' 's# shellcheck shell=bash<ret>'
-        } catch %{
-            execute-keys -draft 'gg' 'i# shellcheck shell=bash<ret><esc>'
-        }
+        set-option window formatcmd "SHELLCHECK_OPTS='--shell=bash' shformat"
+        set-option window lintcmd "SHELLCHECK_OPTS='--shell=bash' shlint"
 
         # Clean up the stuff bash gives us so it looks nicer for editing...
         format-buffer
@@ -182,7 +183,6 @@ in
         lint-buffer
       '';
     }
-
   ];
 
   xdg.configFile."shellcheckrc".text =

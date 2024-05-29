@@ -111,13 +111,10 @@ in
       { tags = [ "OpenBSD" ]; title = "Ted Unangst: flak"; url = "https://flak.tedunangst.com/rss"; }
       { tags = [ "computer" ]; url = "https://mforney.org/blog/atom.xml"; }
       { tags = [ "computer" ]; url = "https://ariadne.space/feed/"; }
-      { tags = [ "computer" ]; url = "https://christine.website/blog.atom"; }
       { tags = [ "computer" ]; url = "https://whynothugo.nl/posts.xml"; }
       { tags = [ "computer" ]; url = "https://jcs.org/rss"; }
       { tags = [ "computer" ]; title = "hisham.hm"; url = "https://hisham.hm/?x=feed:rss2&category=1"; }
       { tags = [ "computer" ]; title = "Wandering Thoughts: Chris Siebenmann"; url = "https://utcc.utoronto.ca/~cks/space/blog/?atom"; }
-      { tags = [ "computer" ]; title = "Susam Pal"; url = "https://susam.net/blog/feed.xml"; }
-      { tags = [ "computer" ]; title = "Susam Pal: maze"; url = "https://susam.net/maze/feed.xml"; }
       { tags = [ "computer" ]; title = "Abort Retry Fail"; url = "https://www.abortretry.fail/feed"; }
       { title = "journcy"; url = feeds.urls.gemini "gemini://journcy.net"; }
       { url = "https://feed.tedium.co/"; }
@@ -215,6 +212,10 @@ in
 
       { tags = [ "games" "urbanterror" ]; title = "Urban Terror: news"; url = "https://www.urbanterror.info/rss/news/all"; }
       { tags = [ "urbanterror" ]; title = "Urban Terror: blogs"; url = "https://www.urbanterror.info/rss/blogs/all/"; }
+
+      { tags = [ "philosophy" ]; url = "https://crittheoryworkgroup.blog/feed/"; }
+      { tags = [ "technology" ]; url = "https://theluddite.org/feed.rss"; }
+      { tags = [ "law" "philosophy" ]; url = "https://lpeproject.org/blog/"; }
     ];
   };
 
@@ -314,36 +315,35 @@ in
       };
     };
 
-  programs.qutebrowser = lib.optionalAttrs
-    config.programs.dmenu.enable
-    {
-      aliases."feeds" =
-        let
-          quteFeeds = writeShellScript "qutebrowser-feeds" ''
-            PATH=${makeBinPath [ pkgs.coreutils pkgs.moreutils pkgs.sfeed pkgs.xclip ]}:$PATH
+  programs.qutebrowser = lib.optionalAttrs config.programs.dmenu.enable {
+    aliases."feeds" =
+      let
+        quteFeeds = writeShellScript "qutebrowser-feeds" ''
+          PATH=${makeBinPath [ pkgs.coreutils pkgs.moreutils pkgs.sfeed pkgs.xclip ]}:$PATH
 
-            : "''${QUTE_FIFO:?}"
-            : "''${QUTE_HTML:?}"
+          : "''${QUTE_FIFO:?}"
+          : "''${QUTE_HTML:?}"
 
-            feeds=$(<"$QUTE_HTML" sfeed_web "$1" | cut -f1)
+          feeds=$(<"$QUTE_HTML" sfeed_web "$1" | cut -f1)
 
-            if [[ -n "$feeds" ]]; then
-                feeds=$(dmenu -l 4 -g 2 -p "qutebrowser [feeds]:" <<<"$feeds")
-                xclip -selection clipboard -i <<< "$feeds"
+          if [[ -n "$feeds" ]]; then
+              feeds=$(dmenu -l 4 -g 2 -p "qutebrowser [feeds]:" <<<"$feeds")
+              xclip -selection clipboard -i <<< "$feeds"
 
-                printf 'message-info "%s"\n' \
-                    "feeds: copied feed to clipboard." \
-                    > "''${QUTE_FIFO}"
-            else
-                printf 'message-warning "%s"\n' \
-                    "feeds: no feeds were found." \
-                    > "''${QUTE_FIFO}"
-            fi
-          '';
-        in
-        "spawn -u ${quteFeeds} {url:domain}";
+              printf 'message-info "%s"\n' \
+                  "feeds: copied feed to clipboard" \
+                  > "''${QUTE_FIFO}"
+          else
+              printf 'message-warning "%s"\n' \
+                  "feeds: no feeds were found" \
+                  > "''${QUTE_FIFO}"
+          fi
+        '';
+      in
+      "spawn -u ${quteFeeds} {url:domain}";
 
-      keyBindings.normal."zpf" = "feeds";
-    };
+    keyBindings.normal."zpf" = "feeds";
+  };
+
   home.packages = [ pkgs.newslinkrss ];
 }

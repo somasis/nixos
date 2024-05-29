@@ -87,7 +87,7 @@ with lib;
     # Type: camelCaseToScreamingSnakeCase :: str -> str
     camelCaseToScreamingSnakeCase = x:
       if toLower x == x then
-        x
+        toUpper x
       else
         replaceStrings
           (upperChars ++ lowerChars)
@@ -531,7 +531,8 @@ with lib;
 
     # jhide can handle multiple lists, but the memory usage is much better
     # if you have a script per list.
-    greasemonkey.jhide = lists:
+    greasemonkey.jhide = excludeDomains: lists:
+      assert (lib.isList excludeDomains);
       assert (lib.isString lists || lib.isList lists);
 
       let
@@ -542,14 +543,21 @@ with lib;
             [ lists ]
         ;
 
-        excludeDomains = [ "mail.google.com" ];
-      in
+        allowList =
+          lib.optionalString (excludeDomains != [ ])
+            ''--whitelist ${lib.escapeShellArg (lib.concatStringsSep "," excludeDomains)}''
+        ;
 
-      pkgs.runCommandLocal "jhide-${builtins.hashString ''sha256'' (lib.concatStringsSep '','' (map (builtins.hashFile ''sha256'') lists'))}.user.js" { } ''
-        ${lib.getExe pkgs.jhide} \
-            -o $out \
-            --whitelist ${lib.escapeShellArg (lib.concatStringsSep "," excludeDomains)} \
-            ${lib.escapeShellArgs lists'}
+        # Create a hash of all lists' hashes combined together.
+        hash =
+          builtins.hashString "sha256"
+            (lib.concatStringsSep "," (
+              map (builtins.hashFile "sha256") lists'
+            ))
+        ;
+      in
+      pkgs.runCommandLocal "jhide-${hash}.user.js" { } ''
+        ${lib.getExe pkgs.jhide} -o $out ${allowList} ${lib.escapeShellArgs lists'}
       '';
 
     # Return from a flake argument, a string suitable for use as a package version.
@@ -562,6 +570,289 @@ with lib;
         day = builtins.substring 6 2 flake.lastModifiedDate;
       in
       "unstable-${year}-${month}-${day}"
+    ;
+
+    makeXorgApplicationService =
+      command:
+      { class ? null
+      , className ? null
+      , role ? null
+      , name ? null
+      }:
+        assert (class != null || className != null || name != null);
+        assert (lib.isPath command || lib.isString command);
+        let
+          inherit (config.lib.nixos) escapeSystemdExecArgs;
+
+          # the amount of effort I put into this script may
+          # indicate that there's something wrong with me
+          start-hide-notify =
+            pkgs.writeShellScript "start-hide-notify" ''
+              set -euo pipefail
+
+              old_PATH="''${PATH:-}"
+              ${lib.toShellVar "PATH" (lib.makeBinPath [ config.xsession.windowManager.bspwm.package pkgs.coreutils pkgs.jq pkgs.systemd pkgs.xdotool pkgs.xe pkgs.xorg.xprop ])}
+
+              usage() {
+                  # shellcheck disable=SC2059
+                  [[ "$#" -eq 0 ]] || printf "$@" >&2
+                  cat >&2 <<EOF
+              usage: [NOTIFY_SOCKET=...] [WINDOW_CLASS=...] [WINDOW_CLASSNAME=...]
+                     [WINDOW_NAME=...] [WINDOW_ROLE=...] ''${0##*/} <command>
+
+              Start an Xorg-utilizing command and wait for its window to appear,
+              determining which is the one belonging to the command in question
+              according to a given criteria.
+
+              At least one of $WINDOW_CLASS, $WINDOW_CLASSNAME or $WINDOW_NAME
+              must be set.
+
+              Environment variables:
+                  $WINDOW_CLASS''${WINDOW_CLASS:+ (current value: $WINDOW_CLASS)}
+                  $WINDOW_CLASSNAME''${WINDOW_CLASSNAME:+ (current value: $WINDOW_CLASSNAME)}
+                  $WINDOW_NAME''${WINDOW_NAME:+ (current value: $WINDOW_NAME)}
+                  $WINDOW_ROLE''${WINDOW_ROLE:+ (current value: $WINDOW_ROLE)}
+              EOF
+                  [[ "$#" -eq 0 ]] || exit 127
+                  exit 69
+              }
+
+              wait_for_window() {
+                  local loops=0
+                  local maximum_loops=15
+
+                  # seems like this helps to avoid race conditions
+                  until xprop -id "$1" >/dev/null 2>&1 && bspc query -N -n "$1" >/dev/null 2>&1; do
+                      loops=$(( loops + 1 ))
+
+                      if [[ "$loops" -gt "$maximum_loops" ]]; then
+                          printf 'error: something happened to window %s while we were automating window management. is it still there?\n' "$1" >&2
+                          exit 127
+                      fi
+
+                      if [[ "$loops" -ge "5" ]]; then
+                          systemd-notify --status='Waiting for a moment... (this is a workaround to avoid bspwm/Xorg-originating race conditions that mess up automation)'
+                      fi
+
+                      sleep 1
+                  done
+              }
+
+              window_is_hidden() {
+                  bspc query -T -n "$1" | jq -e '.hidden == true' >/dev/null
+              }
+
+              get_window() {
+                  local xdotool_args=()
+
+                  xdotool_args=(
+                      ''${WINDOW_CLASS:+'--class'}
+                      ''${WINDOW_CLASSNAME:+'--classname'}
+                      ''${WINDOW_NAME:+'--name'}
+                      ''${WINDOW_ROLE:+'--role'}
+                  )
+
+                  if [[ -z "''${xdotool_args[*]}" ]]; then
+                      usage 'error: no class, class name, name, or role was set, but at least one is required\n'
+                  fi
+
+                  xdotool search "''${xdotool_args[@]}" --all "$@" "$regex"
+              }
+
+              remove_oneshot_rules() {
+                  local desired_rule="$1"; shift
+                  local desired_rule_flags="$*"
+
+                  local rule_number rule_name rule_oneshot rule_flags
+
+                  bspc rule -l \
+                      | nl -b a -d "" -f n -w 1 -s ' ' \
+                      | tac \
+                      | while IFS=' ' read -r rule_number rule_oneshot rule_name _ rule_flags; do
+                          i=$(( i + 1 ))
+                          case "$rule_oneshot" in
+                              '=>') rule_oneshot=false ;;
+                              '->') rule_oneshot=true ;;
+                          esac
+
+                          if \
+                              [[ "$rule_name" == "$desired_rule" ]] \
+                              && [[ "$rule_flags" == "$desired_rule_flags" ]] \
+                              && [[ "$rule_oneshot" == true ]]
+                              then
+                              bspc rule -r ^"$rule_number"
+                          fi
+                      done
+              }
+
+              [[ -v NOTIFY_SOCKET ]] || usage 'error: no NOTIFY_SOCKET was set by systemd\n'
+
+              : "''${WINDOW_CLASS:=}"
+              : "''${WINDOW_CLASSNAME:=}"
+              : "''${WINDOW_NAME:=}"
+              : "''${WINDOW_ROLE:=}"
+
+              regex=
+              rule=
+
+              if [[ -z "$WINDOW_CLASS$WINDOW_CLASSNAME$WINDOW_NAME" ]]; then
+                  usage 'error: no class, class name, or name was set, but at least one is required\n'
+              fi
+
+              if [[ -z "$regex" ]]; then
+                  for part in "$WINDOW_CLASS" "$WINDOW_CLASSNAME" "$WINDOW_ROLE"; do
+                      [[ -n "$part" ]] || continue
+
+                      # make them literals; `xdotool search` uses POSIX ERE
+                      # <https://stackoverflow.com/a/400316>
+                      part=''${part//'.'/'\\.'}
+                      part=''${part//'^'/'\\^'}
+                      part=''${part//'$'/'\\$'}
+                      part=''${part//'*'/'\\*'}
+                      part=''${part//'+'/'\\+'}
+                      part=''${part//'?'/'\\?'}
+                      part=''${part//'('/'\\('}
+                      part=''${part//')'/'\\)'}
+                      part=''${part//'['/'\\['}
+                      part=''${part//'{'/'\\{'}
+                      part=''${part//'\\'/'\\\\'}
+                      part=''${part//'|'/'\\|'}
+
+                      regex+="''${regex:+|}^''${part}$"
+                  done
+
+                  if [[ -z "$regex" ]]; then
+                      usage \
+                          'error: no regex for selecting the main window was determined (%s: %s, %s: %s, %s: %s, %s: %s)\n' \
+                          'class'       "''${WINDOW_CLASS@Q}" \
+                          'class name'  "''${WINDOW_CLASSNAME@Q}" \
+                          'name'        "''${WINDOW_NAME@Q}" \
+                          'role'        "''${WINDOW_ROLE@Q}"
+                  fi
+              fi
+
+              if [[ -z "$rule" ]]; then
+                  for part in "$WINDOW_CLASS" "$WINDOW_CLASSNAME" "$WINDOW_NAME"; do
+                      rule+="''${rule:+:}''${part:-*}"
+                  done
+
+                  if [[ -z "$rule" ]]; then
+                      usage \
+                          'error: no rule for selecting the main window was determined (%s: %s, %s: %s, %s: %s, %s: %s)\n' \
+                          'class'       "''${WINDOW_CLASS@Q}" \
+                          'class name'  "''${WINDOW_CLASSNAME@Q}" \
+                          'name'        "''${WINDOW_NAME@Q}" \
+                          'role'        "''${WINDOW_ROLE@Q}"
+                  fi
+              fi
+
+              unset part
+
+              {
+                  set -euo pipefail
+                  trap 'remove_oneshot_rules "$rule" "''${rule_flags[@]}"; kill $$' ERR
+
+                  rule_flags=(
+                      hidden=on
+                      state=floating
+                      layer=below
+                      focus=off
+                  )
+
+                  remove_bspwm_rules "$rule" "''${rule_flags[@]}" || :
+
+                  # hide the window during start (and also, make it float, so it
+                  # doesn't disrupt any already tiled windows on the desktop).
+                  systemd-notify --status="Adding window hiding rule (''${rule@Q}) to bspwm..."
+                  bspc rule -a "$rule" -o "''${rule_flags[@]}"
+                  systemd-notify --status="Added window hiding rule (''${rule@Q}) to bspwm."
+
+                  # wait for a window matching our regex to be created
+                  systemd-notify --status="Waiting for window (matched by ''${regex@Q}) to be detected..."
+                  window_id=$(get_window --sync --limit 1)
+                  [[ -n "$window_id" ]] \
+                      || usage \
+                          'error: could not find window matching regex %s; unable to mark service ready\n' \
+                          "''${regex@Q}"
+                  systemd-notify --status="Detected window (matched by ''${regex@Q}) successfully: $window_id"
+
+                  # heavily prone to race conditions, for some reason, so we need this often
+                  wait_for_window "$window_id"
+
+                  # and then make sure it's indeed marked hidden, which ensures that the rule matched it
+                  window_is_hidden "$window_id" \
+                      || usage \
+                          'error: could not find window matching rule %s (because window %s is not marked hidden); unable to mark service ready\n' \
+                          "''${rule@Q}" "$window_id"
+                  systemd-notify --status="Detected window hidden by rule ''${rule@Q} successfully: $window_id"
+
+                  wait_for_window "$window_id"
+
+                  # having found the window that matches both the regex and the rule, unmap it
+                  xdotool windowunmap "$window_id"
+                  systemd-notify --status="Attempted to unmap window ($window_id)."
+
+                  wait_for_window "$window_id"
+
+                  # revert the window's state to the state it was prior to the one-shot
+                  # rule setting it to be floating (probably tiling, but this seems more
+                  # right for reverting our rule, to me...)
+                  systemd-notify --status="Reverting bspwm one-shot rule changes to window ($window_id)..."
+                  bspc node "$window_id" -l normal
+                  bspc node "$window_id" -t ~floating
+                  while window_is_hidden "$window_id"; do
+                      bspc node "$window_id" -g hidden=off || wait_for_window "$window_id"
+                  done
+                  systemd-notify --status="Reverted bspwm one-shot rule changes to window ($window_id)."
+
+                  # this second unmap seems to be necessary since sometimes,
+                  # the unmap won't even work until the window is unhidden...
+                  xdotool windowunmap "$window_id"
+                  systemd-notify --status="Attempted to unmap window ($window_id)."
+
+                  # and if that's all good and well, then we're finally ready!
+                  ! window_is_hidden "$window_id" && exec systemd-notify --ready --status="Window ID: $window_id"
+
+                  printf 'error: something happened to window %s. is it still there?\n' "$window_id" >&2
+                  exit 127
+              } &
+
+              # restore environment
+              export PATH="$old_PATH"
+              unset \
+                  WINDOW_CLASS \
+                  WINDOW_CLASSNAME \
+                  WINDOW_ROLE \
+                  WINDOW_NAME \
+                  NOTIFY_SOCKET \
+                  old_PATH \
+                  regex \
+                  rule
+
+              exec -- "$@"
+            '';
+        in
+        {
+          Type = "notify";
+          NotifyAccess = "all";
+
+          ExecStart = escapeSystemdExecArgs [ start-hide-notify command ];
+          Environment =
+            # same method used by NixOS's systemd service generation stuff
+            # <nixpkgs/nixos/lib/systemd-lib.nix:498>
+            lib.optional (class != null) (builtins.toJSON "WINDOW_CLASS=${class}")
+            ++ lib.optional (className != null) (builtins.toJSON "WINDOW_CLASSNAME=${className}")
+            ++ lib.optional (name != null) (builtins.toJSON "WINDOW_NAME=${name}")
+            ++ lib.optional (role != null) (builtins.toJSON "WINDOW_ROLE=${role}")
+          ;
+
+          ExitType = "cgroup";
+          Restart = "on-abnormal";
+
+          # Don't restart if start-hide-notify exits with 127; this means that
+          # there's some issue with the invocation that was given.
+          RestartPreventExitStatus = 127;
+        }
     ;
   };
 }

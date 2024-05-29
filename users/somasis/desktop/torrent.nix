@@ -4,6 +4,8 @@
 , ...
 }:
 let
+  passwordEntry = "www/whatbox.ca";
+
   transmission = pkgs.wrapCommand {
     package = pkgs.transmission;
 
@@ -12,19 +14,21 @@ let
 
       beforeCommand = [
         ''
-          entry=www/whatbox.ca/somasis
+          {
+              ${lib.toShellVar "entry" passwordEntry}
 
-          case "$-" in
-              *x*)
-                  set +x
-                  TR_AUTH="$(${config.programs.password-store.package}/bin/pass meta "$entry" username):$(pass "$entry" | head -n1)"
-                  set -x
-                  ;;
-              *)
-                  TR_AUTH="$(${config.programs.password-store.package}/bin/pass meta "$entry" username):$(pass "$entry" | head -n1)"
-                  ;;
-          esac
-          export TR_AUTH
+              case "$-" in
+                  *x*)
+                      set +x
+                      TR_AUTH="$(${config.programs.password-store.package}/bin/pass meta "$entry" username):$(${config.programs.password-store.package}/bin/pass meta "$entry" password)"
+                      set -x
+                      ;;
+                  *)
+                      TR_AUTH="$(${config.programs.password-store.package}/bin/pass meta "$entry" username):$(${config.programs.password-store.package}/bin/pass meta "$entry password)"
+                      ;;
+              esac
+              export TR_AUTH
+          }
         ''
       ];
 
@@ -329,10 +333,12 @@ in
           (
               config=
               profile="genesis.whatbox.ca"
-              entry="www/whatbox.ca/somasis"
+              ${lib.toShellVar "entry" passwordEntry}
+              username=$(${config.programs.password-store.package}/bin/pass meta "$entry" username)
 
-              ${config.programs.password-store.package}/bin/pass "$entry" \
+              ${config.programs.password-store.package}/bin/pass meta "$entry" password \
                   | ${config.programs.jq.package}/bin/jq -R \
+                        --arg username "$username" \
                         --arg profile "$profile" \
                         --arg entry "$entry" \
                         '
@@ -340,7 +346,7 @@ in
                             profiles: [
                               {
                                 "profile-name": $profile,
-                                "username": ($entry | split("/")[-1]),
+                                "username": $username,
                                 "password": .
                               }
                             ]

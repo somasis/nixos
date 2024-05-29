@@ -1,10 +1,10 @@
-final: prev:
+{ pkgs ? import <nixpkgs> { } }:
 let
-  inherit (prev) lib callPackage;
+  inherit (pkgs) lib callPackage makeOverridable;
 
-  buildZoteroXpiAddon = prev.makeOverridable (
-    { stdenv ? prev.stdenv
-    , fetchurl ? prev.fetchurl
+  buildZoteroXpiAddon = makeOverridable (
+    { stdenv ? pkgs.stdenv
+    , fetchurl ? pkgs.fetchurl
     , pname
     , version
     , addonId

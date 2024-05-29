@@ -30,6 +30,15 @@ let
     # });
 
     withVencord = true;
+    # vencord = pkgs.vencord.overrideAttrs (prev: {
+    #   src = pkgs.fetchFromGitHub {
+    #     repo = "Equicord";
+    #     owner = "Equicord";
+    #     rev = "b2ce909c71d75bc6c8437c24659c14ad1bdb3f73";
+    #     hash = "sha256-2CPmwrrxPC/qGdYh+/XJBARPiiYc555aL/XP1N0F6cQ=";
+    #   };
+    #   npmDepsHash = lib.fakeHash;
+    # });
     # withOpenASAR = true;
   };
 
@@ -91,7 +100,7 @@ let
       {
         display: none !important;
       }
-      '')
+    '')
   ];
 
   discord-theme = pkgs.runCommandLocal "discord-theme"
@@ -111,17 +120,7 @@ in
 {
   home.packages = [
     discord
-
     pkgs.discordchatexporter-cli
-
-    # Used for developing discord-tokipona.
-    pkgs.bc
-    pkgs.gnugrep
-    pkgs.gnumake
-    pkgs.gnused
-    pkgs.jq
-    pkgs.rwc
-    pkgs.xe
   ];
 
   persist = {
@@ -224,9 +223,11 @@ in
     };
   };
 
-  systemd.user.services.mpd-discord-rpc.Unit = lib.mkIf config.services.mpd.enable {
-    BindsTo = [ "discord.service" "mpd.service" ];
-    After = [ "discord.service" "mpd.service" ];
+  systemd.user.services.mpd-discord-rpc = lib.mkIf config.services.mpd.enable {
+    Unit.BindsTo = [ "discord.service" "mpd.service" ];
+    Unit.After = [ "discord.service" "mpd.service" ];
+    Install.UpheldBy = [ "discord.service" ];
+    Unit.ConditionPathExistsGlob = "%t/discord-ipc-*";
   };
 
   services.dunst.settings = {

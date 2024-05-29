@@ -62,7 +62,7 @@ let
       "re:/persist/home/somasis/etc/discord(canary)?/[0-9\.]+/.*"
     ];
 
-    extraArgs = "--lock-wait 600 --progress";
+    extraArgs = "--lock-wait 600";
     extraCreateArgs = "-c 300 --stats --exclude-caches --keep-exclude-tags --exclude-if-present .stfolder";
 
     inhibitsSleep = true;

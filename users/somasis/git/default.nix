@@ -103,6 +103,9 @@
         short = true; # -s, --short
       };
 
+      # Prefer origin's branches when switching without specifying a remote.
+      checkout.defaultRemote = "origin";
+
       # Parallelize more things.
       checkout.workers = "-1";
       fetch.parallel = "0";
@@ -147,7 +150,7 @@
     rebase = "git rebase";
 
     switch = "git switch";
-    branch = "git branch -v";
+    branch = "git branch -vv";
     branchoff = "git branchoff";
   }
   # Add git aliases to the shell
@@ -210,10 +213,21 @@
     {
       name = "WinSetOption";
       option = "filetype=git-.*";
-      commands = ''
-        set-option window autowrap_column 72
-      '';
+      commands = ''set-option window autowrap_column 72'';
     }
+
+    # # Honor pre-commit files.
+    # {
+    #   name = "BufWritePre";
+    #   option = ".*";
+    #   commands = ''
+    #     evaluate-commands %sh{
+    #         if [ -e "$(git rev-parse --show-toplevel 2>/dev/null || echo /dev/null)"/.pre-commit-config.yaml ]; then
+    #             printf 'set-option window formatcmd "%s"\n' 'pre-commit run --files %val{buffile}'
+    #         fi
+    #     }
+    #   '';
+    # }
   ];
 
   persist.directories = [{
@@ -222,6 +236,8 @@
   }];
 
   home.packages = [
+    pkgs.pre-commit
+
     pkgs.git-open
 
     (pkgs.writeShellScriptBin "git-curlam" ''

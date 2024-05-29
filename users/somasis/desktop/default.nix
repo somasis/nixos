@@ -68,7 +68,6 @@
     pkgs.ffmpeg-full
     pkgs.gnome.zenity
     pkgs.hyperfine
-    pkgs.nurl
     pkgs.xcolor
     pkgs.xorg.xinput
     pkgs.xzoom
@@ -96,7 +95,6 @@
     config.bspwm.default = "gtk";
     extraPortals = [ pkgs.xdg-desktop-portal-gtk ];
     configPackages = [ pkgs.xdg-desktop-portal-gtk ];
-    # xdgOpenUsePortal = true;
   };
 
   services.xsuspender = {

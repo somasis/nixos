@@ -1,7 +1,7 @@
 # shellcheck shell=bash
 
 : "${XDG_PICTURES_DIR:=$(xdg-user-dir PICTURES)}" || :
-: "${SCREENSHOT_DIR:=${XDG_PICTURES_DIR:-~/Pictures}/Screenshots}"
+: "${SCREENSHOT_DIR:=${XDG_PICTURES_DIR:-$HOME/Pictures}/Screenshots}"
 
 : "${SCREENSHOT_FREEZE:=false}"
 

@@ -53,16 +53,21 @@
           dontUseChirpFont = true;
           fastBlock = false;
           followButtonStyle = "themed";
+          fullWidthMedia = false;
           hideBookmarkMetrics = false;
           hideCommunitiesNav = true;
+          hideExploreNav = false;
+          hideExploreNavWithSidebar = false;
           hideExplorePageContents = false;
           hideFollowingMetrics = false;
-          hideForYouTimeline = false;
+          hideForYouTimeline = true;
           hideLikeMetrics = false;
           hideQuoteTweetMetrics = false;
           hideReplyMetrics = false;
           hideRetweetMetrics = false;
           hideSeeNewTweets = true;
+          hideSidebarContent = false;
+          hideSpacesNav = true;
           hideTotalTweetsMetrics = false;
           hideTweetAnalyticsLinks = true;
           hideTwitterBlueReplies = true;
@@ -72,10 +77,6 @@
           retweets = "ignore";
           showBlueReplyFollowersCount = true;
           tweakQuoteTweetsPage = false;
-          fullWidthMedia = false;
-          hideExploreNav = false;
-          hideExploreNavWithSidebar = false;
-          hideSidebarContent = false;
         };
       }
       ''

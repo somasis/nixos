@@ -77,13 +77,6 @@ in
         "somasis@lacan.somas.is" = sftp "somasis@lacan.somas.is" { };
         "somasis@genesis.whatbox.ca" = sftp "somasis@genesis.whatbox.ca" { };
 
-        gdrive-appstate = {
-          type = "drive";
-          scope = "drive";
-          drive-export-formats = [ "docx" "xlsx" "pptx" "svg" ];
-          poll-interval = "1m";
-        };
-
         gdrive-personal = {
           type = "drive";
           scope = "drive";
@@ -121,22 +114,6 @@ in
         what = "";
         where = "${config.home.homeDirectory}/mnt/sftp/genesis.whatbox.ca";
         # options = defaultOptions;
-      };
-
-      gdrive-appstate = rec {
-        remote = "gdrive-appstate";
-        what = "";
-        where = "${config.home.homeDirectory}/mnt/gdrive/appstate";
-
-        # options = defaultOptions ++ [ "cache-dir=${config.xdg.cacheHome}/rclone/vfs-${remote}" ];
-      };
-
-      gdrive-appstate-shared = rec {
-        remote = "gdrive-appstate,shared_with_me";
-        what = "";
-        where = "${config.home.homeDirectory}/mnt/gdrive/appstate-shared";
-
-        # options = defaultOptions ++ [ "cache-dir=${config.xdg.cacheHome}/rclone/vfs-${remote}" ];
       };
 
       gdrive-personal = rec {

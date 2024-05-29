@@ -178,7 +178,7 @@ let
     content_show_images = false;
     content_show_music = false;
     content_show_video = false;
-    content_video_directory = config.xdg.userDirs.videos;
+    content_video_directory = content_history_directory;
     content_image_history_directory = content_history_directory;
     content_music_history_directory = content_history_directory;
     content_video_history_directory = content_history_directory;
@@ -446,7 +446,7 @@ let
         stella # Atari - 2600
         virtualjaguar # Atari - Jaguar
         prboom # DOOM
-        mame # MAME
+        # mame # MAME
         freeintv # Mattel - Intellivision
         mgba # Nintendo - Game Boy Advance
         sameboy # Nintendo - Game Boy / Nintendo - Game Boy Color

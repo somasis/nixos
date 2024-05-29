@@ -36,8 +36,6 @@
     dmenu-flexipatch.url = "github:bakkeby/dmenu-flexipatch";
     lemonbar.flake = false;
     lemonbar.url = "github:drscream/lemonbar-xft/xft-port";
-    mblaze.flake = false;
-    mblaze.url = "github:leahneukirchen/mblaze";
     sbase.flake = false;
     sbase.url = "git://git.suckless.org/sbase";
     ubase.flake = false;
@@ -88,14 +86,13 @@
       inherit (nixpkgs) lib;
       forAllSystems = lib.genAttrs lib.systems.flakeExposed;
       system = builtins.currentSystem or "x86_64-linux";
+
+      nixpkgsFor = forAllSystems (system: import nixpkgs { inherit system; });
     in
+    rec
     {
-      overlays.default = import ./pkgs;
-      packages = forAllSystems (system:
-        import ./pkgs
-          nixpkgs.legacyPackages.${system}
-          nixpkgs.legacyPackages.${system}
-      );
+      overlays.default = final: prev: lib.recursiveUpdate prev (import ./pkgs { pkgs = final; });
+      packages = forAllSystems (system: import ./pkgs { pkgs = nixpkgsFor.${system}; });
 
       nixosConfigurations.ilo = import ./hosts/ilo.somas.is {
         inherit self inputs nixpkgs;
@@ -113,16 +110,17 @@
         modules = [ ./users/somasis ];
       };
 
+      homeManagerConfigurations = homeConfigurations;
+
       nixosModules = {
+        home-manager = import ./modules/home-manager;
+
+        impermanence = import ./modules/impermanence.nix;
         lib = import ./modules/lib.nix;
         theme = import ./modules/theme.nix;
-        impermanence = import ./modules/impermanence.nix;
-
-        home-manager = {
-          theme = import ./modules/theme-hm.nix;
-          impermanence = import ./modules/impermanence-hm.nix;
-        };
       };
+
+      homeManagerModules.default = import ./modules/home-manager;
 
       formatter = forAllSystems (system: nixpkgs.legacyPackages.${system}.nixpkgs-fmt);
     };

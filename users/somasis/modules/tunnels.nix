@@ -36,7 +36,7 @@ in
         { name, config, ... }: {
           options = {
             name = mkOption {
-              type = types.str;
+              type = types.nonEmptyStr;
               description = "Pretty name for use by other stuff";
               default = name;
               defaultText = literalExpression ''config.somasis.tunnels.tunnels.<name>.port'';
@@ -45,27 +45,40 @@ in
 
             type = mkOption {
               type = types.enum [ "local" "dynamic" ];
-              description = "What type of tunnel to create; a local port forward (see option -L on ssh(1)), or a dynamic port forward (see option -D on ssh(1))";
+              description = "What type of tunnel to create: a local port forward (corresponding to ssh(1) option -L), or a dynamic port forward (corresponding to -D).";
               default = "local";
               example = "dynamic";
             };
 
             port = mkOption {
-              type = types.int;
+              type = types.ints.between 1025 65536;
               description = "Local port to use for tunnel";
               default = null;
               example = 9400;
             };
 
             remote = mkOption {
-              type = types.str;
+              type = types.nonEmptyStr;
               description = "Remote SSH host to create a tunnel to";
               default = null;
               example = "snowdenej@nsa.gov";
             };
 
+            remoteHost = mkOption {
+              type = types.nonEmptyStr;
+              description = ''
+                Remote host which the tunnel should direct to.
+
+                Generally this should remain the default, unless you're using
+                the tunnel to connect to a host which is inaccessible from
+                outside the network the SSH host is on.
+              '';
+              default = "localhost";
+              example = "192.168.1.1";
+            };
+
             remotePort = mkOption {
-              type = types.int;
+              type = types.port;
               description = "Remote port to tunnel to (only does something when type == local)";
               default = config.port;
               defaultText = literalExpression ''config.somasis.tunnels.tunnels.<name>.port'';
@@ -73,14 +86,14 @@ in
             };
 
             linger = mkOption {
-              type = types.str;
+              type = types.nonEmptyStr;
               description = "How long the tunnel process should be kept around after its last connection (only does something when type == local)";
               default = "5m";
               example = "90s";
             };
 
             extraOptions = mkOption {
-              type = with types; listOf nonEmptyStr;
+              type = with types; listOf str;
               description = "Extra arguments to pass to the ssh tunnel process";
               default = [ ];
               example = [ "-o" "ConnectTimeout=5" ];
@@ -189,6 +202,8 @@ in
             Service =
               let
                 ssh-tunnel = pkgs.writeShellScript "ssh-tunnel" ''
+                  set -euo pipefail
+
                   PATH=${makeBinPath [ pkgs.coreutils (config.programs.ssh.package or pkgs.openssh) ]}:"$PATH"
 
                   : "''${XDG_RUNTIME_DIR:=/run/user/$(id -u)}"
@@ -196,6 +211,7 @@ in
                   ${toShellVar "target" target}
                   ${toShellVar "type" tunnel.type}
                   ${toShellVar "port" tunnel.port}
+                  ${toShellVar "remote_host" tunnel.remoteHost}
                   ${toShellVar "remote_port" tunnel.remotePort}
                   ${toShellVar "remote" tunnel.remote}
                   ${toShellVar "socket" socket}
@@ -229,7 +245,7 @@ in
                           ssh_args+=( -D "localhost:$port" )
                           ;;
                       "local")
-                          listen="$XDG_RUNTIME_DIR"/ssh-tunnel/"$socket":localhost:"$remote_port"
+                          listen="$XDG_RUNTIME_DIR"/ssh-tunnel/"$socket":"$remote_host":"$remote_port"
                           ssh_args+=( -L "$listen" )
                           ;;
                   esac

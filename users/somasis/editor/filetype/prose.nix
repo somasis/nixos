@@ -4,22 +4,20 @@
 , ...
 }:
 let
-  lint = pkgs.writeShellScript "lint-prose" ''
-    PATH=${lib.makeBinPath [ config.programs.jq.package pkgs.proselint ]}
+  proselintKakoune = pkgs.writeJqScript "proselint-kakoune" { raw-output = true; } ''
+    (.data.errors // [])
+      | map(
+        "\($ARGS.named.buffer):"
+          + "\(.line):"
+          + "\(.column): "
+          + "\(.severity): "
+          + .message
+          + " [\(.check)]"
+      )[]
+  '';
 
-    proselint -j "$1" \
-        | jq -r \
-            --arg buffer "$1" '
-                .data.errors[]
-                    | (
-                        "\($ARGS.named.buffer):" +
-                        + "\(.line|@text):"
-                        + "\(.column|@text): "
-                        + "\(.severity): "
-                        + .message
-                        + " [\(.check)]"
-                    )
-        '
+  lint = pkgs.writeShellScript "lint-prose" ''
+    ${pkgs.proselint}/bin/proselint -j "$1" | ${proselintKakoune} --arg buffer "$1"
   '';
 in
 {

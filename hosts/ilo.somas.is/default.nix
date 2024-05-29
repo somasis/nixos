@@ -39,14 +39,14 @@ nixpkgs.lib.nixosSystem {
       };
     })
 
+    # Modules from elsewhere
     nixosModules.lib
-
     impermanence.nixosModules.impermanence
-    nixosModules.impermanence
-
-    nixos-hardware.nixosModules.framework-11th-gen-intel
-
+    nixos-hardware.nixosModules.framework-12th-gen-intel
     nix-index-database.nixosModules.nix-index
+
+    # My modules
+    nixosModules.impermanence
 
     ({ config
      , pkgs
@@ -111,6 +111,14 @@ nixpkgs.lib.nixosSystem {
       # Use dbus-broker since it's faster.
       services.dbus.implementation = "broker";
 
+      services.flatpak.enable = true;
+      xdg.portal = {
+        enable = true;
+        config.bspwm.default = "gtk";
+        extraPortals = [ pkgs.xdg-desktop-portal-gtk ];
+        configPackages = [ pkgs.xdg-desktop-portal-gtk ];
+      };
+
       programs.command-not-found.enable = false;
       programs.nano.enable = false;
 
@@ -142,21 +150,23 @@ nixpkgs.lib.nixosSystem {
       };
 
       # Force is required because services.xserver forces xdg.*.enable to true.
-      xdg = lib.mkForce {
-        autostart.enable = false;
-        menus.enable = true;
-        mime.enable = true; # TODO
-        sounds.enable = false;
-      };
+      xdg.autostart.enable = lib.mkForce false;
+      xdg.menus.enable = lib.mkForce true;
+      xdg.mime.enable = lib.mkForce true; # TODO
+      xdg.sounds.enable = lib.mkForce false;
 
       programs.bash = {
         enableCompletion = true;
         enableLsColors = false;
       };
 
-      environment.pathsToLink = lib.optional config.programs.bash.enableCompletion "/share/bash-completion";
+      environment.pathsToLink =
+        lib.optional config.programs.bash.enableCompletion "/share/bash-completion"
+        ++ lib.optionals config.xdg.portal.enable [ "/share/xdg-desktop-portal" "/share/applications" ]
+      ;
 
       services.gvfs.enable = true;
+      services.tumbler.enable = true;
       programs.dconf.enable = true;
 
       system.stateVersion = "22.11";
@@ -172,15 +182,18 @@ nixpkgs.lib.nixosSystem {
 
         extraSpecialArgs = { inherit self inputs nixpkgs; };
 
-        sharedModules = with self; with inputs; [
-          nixosModules.lib
-          nixosModules.home-manager.theme
-
-          impermanence.nixosModules.home-manager.impermanence
-          nixosModules.home-manager.impermanence
-
-          nix-index-database.hmModules.nix-index
-        ];
+        sharedModules =
+          # Modules from elsewhere
+          (with inputs; [
+            impermanence.nixosModules.home-manager.impermanence
+            nix-index-database.hmModules.nix-index
+          ])
+          # My modules
+          ++ (with self; [
+            nixosModules.lib
+            homeManagerModules.default
+          ])
+        ;
 
         users.somasis = { pkgs, ... }: {
           imports = [

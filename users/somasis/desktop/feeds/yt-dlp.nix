@@ -107,7 +107,7 @@ let
   ;
 in
 {
-  # cache.directories = [ "var/cache/newsboat/yt-dlp" ];
+  # cache.directories = [ (config.lib.somasis.xdgCacheDir "newsboat/yt-dlp") ];
   programs.newsboat.urls = [
     (yt-dlp {
       url = "https://www.youtube.com/CathodeRayDude";

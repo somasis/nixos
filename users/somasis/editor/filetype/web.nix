@@ -4,14 +4,38 @@
 , ...
 }:
 let
-  formatPrettierWith = extraArgs:
-    "${pkgs.nodePackages.prettier}/bin/prettier --tab-width %opt{indentwidth} --print-width %opt{autowrap_column} --config-precedence prefer-file --stdin-filepath %val{buffile} ${extraArgs}"
-  ;
+  formatPrettierWith = extraArgs: pkgs.writeShellScript "format-prettier" ''
+    PATH=${lib.makeBinPath [ pkgs.nodePackages.prettier ]}
+
+    stdin=$(</dev/stdin)
+
+    original_args=("$@")
+    set -- ${extraArgs}
+
+    if \
+        stdout=$(
+            prettier \
+                --stdin-filepath "$kak_buffile" \
+                --config-precedence prefer-file \
+                ''${kak_opt_indentwidth:+--tab-width "$kak_opt_indentwidth"} \
+                ''${kak_opt_autowrap_column:+--print-width "$kak_opt_autowrap_column"} \
+                "''${original_args[@]}" \
+                <<<"$stdin"
+        ) \
+        && [[ "$?" -eq 0 ]] \
+        && [[ -n "$stdout" ]]; then
+        :
+    else
+        stdout="$stdin"
+    fi
+
+    printf '%s' "$stdout"
+  '';
 
   formatPrettier = formatPrettierWith "";
 
   # CSS
-  formatCSS = formatPrettier;
+  formatCSS = formatPrettierWith "--parser css";
   # TODO Need a new CSS linting tool; stylelint is broken with recent NixOS updates, it seems, due to
   #      not having a default configuration loaded
   # lintCSS = pkgs.writeShellScript "lint-css" ''
@@ -19,9 +43,7 @@ let
   # '';
 
   # HTML
-  formatHTML =
-    "${pkgs.html-tidy}/bin/tidy --quiet yes --wrap 0 --indent auto --indent-spaces %opt{tabstop} --tab-size %opt{tabstop} --tidy-mark no 2>/dev/null || :"
-  ;
+  formatHTML = formatPrettier;
   lintHTML = pkgs.writeShellScript "lint-html" ''
     : "''${kak_buffile:=}"
     ${pkgs.html-tidy}/bin/tidy \
@@ -72,8 +94,8 @@ let
   '';
 
   # YAML
-  # (not really how I mentally categorize YAML, but I don't want to put the
-  # prettier function at a higher scope.)
+  # (a "web"-related language is not really how I would mentally categorize
+  # YAML, but I don't want to put the prettier function at a higher scope.)
   formatYAML = formatPrettierWith "--parser yaml";
   lintYAML = pkgs.writeShellScript "lint-yaml" ''
     PATH=${lib.makeBinPath [ pkgs.gnused pkgs.yamllint ]}
@@ -90,7 +112,10 @@ in
     {
       name = "WinSetOption";
       option = "filetype=css";
-      commands = ''set-option window formatcmd "run() { ${formatCSS}; } && run"'';
+      commands = ''
+        set-option window formatcmd "run() { ${formatCSS}; } && run"
+      '';
+      # set-option window lintcmd ${lintCSS}
     }
 
     # Format, lint: JavaScript

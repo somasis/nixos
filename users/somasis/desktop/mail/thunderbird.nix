@@ -6,6 +6,12 @@
 let
   tbEnable = config.programs.thunderbird.enable;
   tc = config.theme.colors;
+
+  tbWindow = {
+    class = "thunderbird";
+    className = "Mail";
+    role = "3pane";
+  };
 in
 {
   persist = {
@@ -22,9 +28,15 @@ in
 
   programs.thunderbird = {
     enable = true;
-    profiles.default = {
+    profiles.default = rec {
       isDefault = true;
+
+      withExternalGnupg = config.programs.gpg.enable;
+
       settings = {
+        # Use maildir for new account storage
+        "mail.serverDefaultStoreContractID" = "@mozilla.org/msgstore/maildirstore;1";
+
         # Privacy
         "general.useragent.override" = "";
         "mailnews.headers.sendUserAgent" = false;
@@ -32,6 +44,11 @@ in
         "network.cookie.cookieBehavior" = 3; # Only accept 3rd party cookies from visited sites
         "network.proxy.socks_remote_dns" = true;
         "datareporting.healthreport.uploadEnabled" = false;
+        "geo.enabled" = false;
+
+        # Encryption
+        "mail.e2ee.auto_enable" = true;
+        "mail.openpgp.fetch_pubkeys_from_gnupg" = withExternalGnupg;
 
         # Locale
         "intl.date_time.pattern_override.connector_short" = "{1} {0}";
@@ -44,21 +61,33 @@ in
 
         # I know what I'm doing
         "general.warnOnAboutConfig" = false;
+        "mail.phishing.detection.enabled" = false;
+        "offline.autoDetect" = false;
+
+        # performance?
+        "mail.tabs.loadInBackground" = true;
+        "browser.tabs.loadDivertedInBackground" = true;
 
         # Integrate with system
-        "browser.display.use_document_fonts" = 0; # Don't allow messages to use non-default fonts.
         "browser.download.dir" = config.xdg.userDirs.download;
         "browser.download.downloadDir" = config.xdg.userDirs.download;
         "calendar.timezone.useSystemTimezone" = true;
+        "ui.use_activity_cursor" = true;
+        "mail.minimizeToTray" = true;
         "general.smoothScroll" = false;
         "mail.tabs.drawInTitlebar" = false; # Use system titlebar
         "mousewheel.min_line_scroll_amount" = 2;
+        "font.size.monospace.x-western" = 13;
+        "font.size.variable.x-western" = 14;
+        "browser.display.use_document_fonts" = 0; # Don't allow messages to use non-default fonts.
         "msgcompose.font_size" = 4;
         "pdfjs.disabled" = true;
         "toolkit.scrollbox.smoothScroll" = false;
         "ui.prefersReducedMotion" = 1;
         "widget.gtk.native-context-menus" = true;
+        "mousewheel.system_scroll_override.enabled" = false;
         "widget.gtk.overlay-scrollbars.enabled" = false;
+        "mail.display_glyph" = false; # don't turn emoticons into emojis
         "widget.gtk.theme-scrollbar-colors.enabled" = false;
         "mail.openMessageBehavior" = 0; # Open messages in new windows instead of tabs
 
@@ -69,13 +98,15 @@ in
         "calendar.alarms.playsound" = false;
         "calendar.alarms.showmissed" = false;
         "mail.biff.play_sound" = false;
+        "mail.chat.play_sound" = false;
+
 
         # Calendar settings
         "calendar.task.defaultdue" = "offsetnexthour";
 
         # Composition
-        "mail.SpellCheckBeforeSend" = true;
-        "mail.compose.autosaveinterval" = 2;
+        "mail.SpellCheckBeforeSend" = false;
+        "mail.compose.autosaveinterval" = 1;
 
         # Enable userChrome
         "toolkit.legacyUserProfileCustomizations.stylesheets" = true;
@@ -360,34 +391,28 @@ in
     };
   };
 
-  systemd.user.services.thunderbird = lib.mkIf tbEnable {
-    Unit.Description = config.programs.thunderbird.package.meta.description;
-    Unit.PartOf = [ "graphical-session-autostart.target" ];
-    Install.WantedBy = [ "graphical-session-autostart.target" ];
+  systemd.user = lib.mkIf tbEnable {
+    services.picom.Service.ExecStopPost = [
+      "${pkgs.systemd}/bin/systemctl --user try-restart thunderbird.service"
+    ];
 
-    Service = {
-      Type = "simple";
-      ExecStart = lib.getExe config.programs.thunderbird.package;
-      ExecStartPost = lib.singleton ''
-        ${pkgs.xdotool}/bin/xdotool \
-            search \
-                --class --classname --role --all \
-                --limit 1 \
-                --sync \
-                '^thunderbird$|^Mail$|^3pane$' \
-            windowunmap --sync
-      '';
+    services.thunderbird = {
+      Unit = {
+        Description = config.programs.thunderbird.package.meta.description;
+        PartOf = [ "graphical-session-autostart.target" ];
+        Conflicts = [ "game.target" ];
+        After = [ "game.target" ];
+      };
+      Install.WantedBy = [ "graphical-session-autostart.target" ];
 
-      ExitType = "cgroup";
-      SyslogIdentifier = "thunderbird";
-      Restart = "on-abnormal";
+      Service =
+        (config.lib.somasis.makeXorgApplicationService
+          (lib.getExe config.programs.thunderbird.package)
+          tbWindow
+        ) // { SyslogIdentifier = "thunderbird"; }
+      ;
     };
   };
 
-  # services.sxhkd.keybindings."super + t" = pkgs.writeShellScript "thunderbird" ''
-  #   ${pkgs.systemd}/bin/systemctl start --user thunderbird.service
-  #   bspwm-hide-unhide 'thunderbird' 'Mail' '3pane'
-  # '';
-
-  xsession.windowManager.bspwm.rules."thunderbird:Mail:*".locked = true;
+  xsession.windowManager.bspwm.rules."${tbWindow.class}:${tbWindow.className}:*".locked = true;
 }

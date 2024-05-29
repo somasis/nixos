@@ -6,17 +6,25 @@
 }:
 let
   commaPicker = lib.optionalString (config.programs.dmenu.enable or config.programs.skim.enable) (pkgs.writeShellScript "comma-picker" ''
-    if [ -t 0 ]; then
-        ${lib.optionalString config.programs.dmenu.enable "exec dmenu -p ',' -S 2>/dev/null"}
-    else
-        ${lib.optionalString config.programs.skim.enable "exec sk -p ', ' --no-sort 2>/dev/null"}
-    fi
+    items=$(</dev/stdin)
+    case "$(wc -l <<<"$items")" in
+        1)
+            printf '%s\n' "$items"
+            printf '%s%s\n' "''${PS4:-$ }" "$items" >&2
+            exit
+            ;;
+        0) exit 1 ;;
+    esac
+
+    ${lib.optionalString config.programs.dmenu.enable "if [ -v DISPLAY ]; then exec dmenu -p ',' -S; fi <<<\"$items\""}
+    ${lib.optionalString config.programs.skim.enable "exec sk -p ', ' --no-sort --reverse <<<\"$items\""}
   '');
 in
 {
   home.shellAliases = rec {
     # LC_COLLATE=C sorts uppercase before lowercase.
     ls = "LC_COLLATE=C ls --hyperlink=auto --group-directories-first --dereference-command-line-symlink-to-dir --time-style=iso --color -AFlh";
+
     vi = "$EDITOR";
 
     ip = "ip --color=auto";
@@ -32,18 +40,20 @@ in
     zstd = "zstd -T0 -19";
     gzip = "pigz -p $(( $(nproc) / 2 )) -9";
 
-    sys = "systemctl -l --legend=false";
-    user = "systemctl --user";
+    sys = "systemctl --legend=no";
+    user = "sys --user";
+
     journal = "journalctl -e";
-    syslog = "${journal} -b 0";
-    userlog = "${syslog} --user";
+    syslog = "journal -b 0";
+    userlog = "syslog --user";
+
     bus = "busctl --verbose -j";
 
     wget = "curl -q -Lf# -Z --no-clobber --remote-name-all --remote-header-name --remove-on-error --retry 20 --retry-delay 10";
 
     since = "datediff -f '%Yy %mm %ww %dd %0Hh %0Mm %0Ss'";
 
-    doas = lib.optionalString osConfig.security.sudo.enable "sudo";
+    doas = lib.mkIf osConfig.security.sudo.enable "sudo";
 
     which = "{ alias; declare -f; } | which --read-functions --read-alias";
   };
@@ -51,26 +61,51 @@ in
   home.packages = [
     pkgs.nocolor
 
+    (pkgs.writeShellScriptBin "upward" ''
+      usage() {
+          printf 'usage: %s file...\n' "''${0##*/}" >&2
+          exit 69
+      }
+
+      e=0
+      while [ $# -gt 0 ]; do
+          while [ "$PWD" != / ]; do
+              [ -f "$1" ] && printf "%s\n" "$(readlink -f "$1")" && break
+              e=$((e + 1))
+              cd ../
+          done
+          shift
+      done
+
+      [ "$e" -eq 0 ] && exit
+      exit 1
+    '')
+
     (pkgs.writeShellScriptBin "execurl" ''
       fetch_directory=$(${pkgs.coreutils}/bin/mktemp -d)
 
       fetch() {
           local file
 
-          printf '%s\n' "$1" >&2
+          printf '%s -> ' "$1" >&2
           file=$(
               ${pkgs.curl}/bin/curl \
                   -g \
                   -Lfs# \
                   --output-dir "$fetch_directory" \
+                  -o "file" \
+                  --remote-name \
+                  --remote-time \
+                  --no-clobber \
                   --remote-header-name \
                   --remote-name-all \
                   --remove-on-error \
                   -w '%{filename_effective}\n' \
                   "$1"
           )
+          printf '%s\n' "$file" >&2
 
-          printf '%s\n' "$file"
+          printf '%s' "$file"
       }
 
       error_code=0
@@ -180,8 +215,9 @@ in
                   -type d \
                   -name 'man*' \
                   -printf '%f\n' \
+                  2>/dev/null \
                   | cut -c4- \
-                  | sort -ud
+                  | sort -u
           )
 
           MANPATH="$old_MANPATH"

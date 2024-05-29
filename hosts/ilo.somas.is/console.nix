@@ -1,4 +1,5 @@
-{ lib
+{ config
+, lib
 , pkgs
 , ...
 }: {
@@ -24,6 +25,18 @@
       "e0d6d6" # color15: bright grey
     ];
   };
+
+  # Only create two virtual terminals, one for Xorg and one for getty.
+  services.logind.extraConfig = lib.generators.toKeyValue { } {
+    NAutoVTs = 2;
+  };
+
+  # Set the keyboard repeat rate to be the same as Xorg's
+  systemd.services."serial-getty@".preStart = ''
+    ${pkgs.kbd}/bin/kbdrate \
+        -r ${toString (config.services.xserver.autoRepeatInterval or 25)} \
+        -d ${toString (config.services.xserver.autoRepeatDelay or 660)}
+  '';
 
   # Show the system journal on tty12.
   services.journald.console = "/dev/tty12";

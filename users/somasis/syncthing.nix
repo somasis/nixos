@@ -23,7 +23,7 @@ in
     Service = {
       Environment = [ "GOMAXPROCS=1" ]
         # Use Tor to get around filters.
-        ++ lib.optionals (tor.enable && tor.client.enable)
+        ++ lib.optionals tor.client.enable
         [
           "all_proxy=socks5://${tor.client.socksListenAddress.addr}:${toString tor.client.socksListenAddress.port}"
 

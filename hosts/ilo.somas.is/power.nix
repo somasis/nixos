@@ -5,11 +5,13 @@
 }: {
   services.logind = {
     lidSwitch = "suspend";
-    lidSwitchExternalPower = "ignore";
+    lidSwitchExternalPower = "lock";
+    lidSwitchDocked = "ignore";
+
+    powerKey = "suspend";
+    powerKeyLongPress = "poweroff";
 
     extraConfig = ''
-      HandlePowerKey=suspend
-      HandlePowerKeyLongPress=poweroff
       PowerKeyIgnoreInhibited=yes
     '';
   };
@@ -23,7 +25,7 @@
     percentageAction = 0;
   };
 
-  powerManagement.cpuFreqGovernor = "performance";
+  powerManagement.cpuFreqGovernor = "powersave";
 
   # Auto-tune with powertop on boot.
   powerManagement.powertop.enable = true;
@@ -32,9 +34,10 @@
 
   # Manage CPU temperature.
   services.thermald.enable = true;
+  services.auto-cpufreq.enable = true; # they don't conflict, apparently
 
   # Manage battery life automatically.
-  services.tlp.enable = true;
+  services.tlp.enable = false;
 
   # Automatically `nice` programs for better performance.
   services.ananicy = {
@@ -172,6 +175,8 @@
 
   # ananicy spams the log constantly
   systemd.services.ananicy-cpp.serviceConfig.StandardOutput = "null";
+
+  services.systemd-lock-handler.enable = true;
 
   systemd.shutdown."wine-kill" = pkgs.writeShellScript "wine-kill" ''
     ${pkgs.procps}/bin/pkill '^winedevice\.exe$' || :

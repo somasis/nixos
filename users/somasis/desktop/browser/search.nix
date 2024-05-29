@@ -89,15 +89,15 @@ in
       "!" = "https://duckduckgo.com/?q=!+{}";
       "!i" = "https://duckduckgo.com/?q={}&ia=images&iax=images";
 
-      "!g" = "https://google.com/search?q={}";
+      "!g" = "https://google.com/search?udm=14&q={}";
       "!gi" = "https://google.com/search?tbm=isch&source=hp&q={}";
       "!yt" = "https://www.youtube.com/results?search_query={}";
 
       "!appstate" = "https://gb1.appstate.edu/search?q={}";
-      "!apppeople" = "https://search.appstate.edu/search.php?last={}&type=all";
-      "!atsd" = "https://jira.appstate.edu/browse/ATSD-{}";
-      "!tss" = "https://jira.appstate.edu/secure/QuickSearch.jspa?searchString={}";
-      "!dell" = "https://www.dell.com/support/home/en-us/product-support/servicetag/{}";
+      # "!apppeople" = "https://search.appstate.edu/search.php?last={}&type=all";
+      # "!atsd" = "https://jira.appstate.edu/browse/ATSD-{}";
+      # "!tss" = "https://jira.appstate.edu/secure/QuickSearch.jspa?searchString={}";
+      # "!dell" = "https://www.dell.com/support/home/en-us/product-support/servicetag/{}";
 
       "!libgen" = "http://libgen.rs/index.php?req={}";
       "!anna" = "https://annas-archive.org/search?q={}";
@@ -195,6 +195,9 @@ in
       "!vimm" = "https://vimm.net/vault/?p=list&q={}";
 
       "!gemini" = "https://portal.mozz.us/gemini/{unquoted}";
+
+      "!phish" = "https://phish.in/{unquoted}";
+      "!phishin" = "https://phish.net/setlists/?d={}";
     };
 
     aliases =
@@ -241,10 +244,10 @@ in
       # Google
       (pkgs.fetchurl { hash = "sha256-azHAQKmNxAcnyc7l08oW9X6DuMqAblFGPwD8T9DsrSs="; url = "https://greasyfork.org/scripts/32635-disable-google-search-result-url-redirector/code/Disable%20Google%20Search%20Result%20URL%20Redirector.user.js"; })
       (pkgs.fetchurl { hash = "sha256-Bb1QsU6R9xU718hRskGbuwNO7rrhuV7S1gvKtC9SlL0="; url = "https://greasyfork.org/scripts/37166-add-site-search-links-to-google-search-result/code/Add%20Site%20Search%20Links%20To%20Google%20Search%20Result.user.js"; })
-      (pkgs.fetchurl { hash = "sha256-5C7No5dYcYfWMY+DwciMeBmkdE/wnplu5fxk4q7OFZc="; url = "https://greasyfork.org/scripts/382039-speed-up-google-captcha/code/Speed%20up%20Google%20Captcha.user.js"; })
       (pkgs.fetchurl { hash = "sha256-r4UF6jr3jhVP7JxJNPBzEpK1fkx5t97YWPwf37XLHHE="; url = "https://greasyfork.org/scripts/383166-google-images-search-by-paste/code/Google%20Images%20-%20search%20by%20paste.user.js"; })
       (pkgs.fetchurl { hash = "sha256-O3u5XsGhgv63f49PwHaybekGjL718Biucb0T6wGGws8="; url = "https://gist.githubusercontent.com/bijij/58cc8cfc859331e4cf80210528a7b255/raw/viewimage.user.js"; })
       (pkgs.fetchurl { hash = "sha256-O+CuezLYKcK2Qh4jq4XxrtEEIPKOaruHnUGQNwkkCF8="; url = "https://greasyfork.org/scripts/381497-reddit-search-on-google/code/Reddit%20search%20on%20Google.user.js"; })
+      (pkgs.fetchurl { hash = "sha256-WCgJGlz+FOPCSo+dPDxXB6mdzXBa81mlZ7km+11dBhY="; url = "https://update.greasyfork.org/scripts/495275/Open%20Google%27s%20New%20%22Web%22%20Search%20by%20Default.user.js"; })
     ];
   };
 }

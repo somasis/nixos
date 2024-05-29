@@ -1,7 +1,9 @@
 # shellcheck shell=bash
 
+: "${XDG_CACHE_HOME:=${HOME}/.cache}"
+: "${DMENU:=dmenu}"
 : "${DMENU_EMOJI_LIST:?}"
-: "${DMENU_EMOJI_HISTORY:=${XDG_CACHE_HOME:=${HOME}/.cache}/dmenu/dmenu-emoji.cache}"
+: "${DMENU_EMOJI_HISTORY:=${XDG_CACHE_HOME}/dmenu-emoji/history}"
 
 usage() {
     cat >&2 <<EOF
@@ -23,6 +25,7 @@ list() {
     } | uq
 }
 
+dmenu_args=()
 clip=false
 list=false
 type=false
@@ -37,6 +40,8 @@ while getopts :clt arg >/dev/null 2>&1; do
 done
 shift $((OPTIND - 1))
 
+dmenu_args=("$@")
+
 mkdir -p "${DMENU_EMOJI_HISTORY%/*}"
 
 if "${list}"; then
@@ -44,8 +49,10 @@ if "${list}"; then
     exit
 fi
 
+dmenu_args=(-p "emoji")
+
 list \
-    | ${DMENU:-dmenu -fn "sans 20px" -l 8 -g 8} -S -i -p "emoji" "$@" \
+    | eval "${DMENU} ${dmenu_args[*]@Q}" \
     | while read -r emoji line; do
         "${clip}" \
             && xclip -i -selection clipboard -rmlastnl <<<"${emoji}" \

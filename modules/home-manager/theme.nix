@@ -6,7 +6,7 @@
 let
   inherit (config.lib.somasis) mkColorOption;
 in
-import ./theme-common.nix {
+import ../theme-common.nix {
   inherit lib config;
 
   mkThemeColorOption =

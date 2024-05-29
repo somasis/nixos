@@ -59,6 +59,7 @@ in
 
     greasemonkey = [
       (config.lib.somasis.greasemonkey.jhide
+        [ "mail.google.com" ]
         (map
           (lib.replaceStrings [ "file://" ] [ "" ])
           config.programs.qutebrowser.settings.content.blocking.adblock.lists

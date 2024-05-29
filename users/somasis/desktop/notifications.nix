@@ -95,13 +95,39 @@
     };
   };
 
-  systemd.user.services.xsecurelock.Service.ExecStartPre = [
-    "-${config.services.dunst.package}/bin/dunstctl set-paused true"
-  ];
+  # systemd.user.services = {
+  #   xsecurelock = {
+  #     Unit.Wants = [ "dunst-pause.service" ];
+  #     Unit.After = [ "dunst-pause.service" ];
+  #   };
 
-  systemd.user.services.xsecurelock.Service.ExecStopPost = [
-    "-${config.services.dunst.package}/bin/dunstctl set-paused false"
-  ];
+  #   dunst-pause = {
+  #     Unit = {
+  #       Description = "Pause notifications";
+  #       PartOf = [ "game.target" ];
+  #       Wants = [ "dunst.service" ];
+  #       After = [ "dunst.service" ];
+  #     };
+  #     Install.WantedBy = [ "game.target" ];
+
+  #     Service = {
+  #       Type = "oneshot";
+
+  #       ExecCondition = pkgs.writeShellScript "dunst-check" ''
+  #         case "$(${config.services.dunst.package}/bin/dunstctl is-paused)" in
+  #             true) exit 1 ;;
+  #             false) exit 0 ;;
+  #             *) exit 255 ;;
+  #         esac
+  #       '';
+
+  #       ExecStart = "${config.services.dunst.package}/bin/dunstctl set-paused true";
+  #       ExecStop = "${config.services.dunst.package}/bin/dunstctl set-paused false";
+
+  #       RemainAfterExit = true;
+  #     };
+  #   };
+  # };
 
   home.packages = [ pkgs.libnotify ];
 }

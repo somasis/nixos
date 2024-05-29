@@ -227,15 +227,13 @@
         {
           name = "BufWritePre";
           option = ".*";
-          commands = ''
-            evaluate-commands %sh{ [ -n "$kak_opt_lintcmd" ] && echo lint || echo nop }'';
+          commands = ''evaluate-commands %sh{ [ -n "$kak_opt_lintcmd" ] && echo lint || echo nop }'';
         }
 
         {
           name = "BufWritePre";
           option = ".*";
-          commands = ''
-            evaluate-commands %sh{ [ -n "$kak_opt_formatcmd" ] && echo format || echo nop }'';
+          commands = ''evaluate-commands %sh{ [ -n "$kak_opt_formatcmd" ] && echo format || echo nop }'';
         }
 
         # # Makefile(7).

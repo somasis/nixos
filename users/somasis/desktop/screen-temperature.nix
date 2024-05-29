@@ -1,4 +1,9 @@
-{ pkgs, osConfig, ... }: {
+{ pkgs
+, config
+, lib
+, osConfig
+, ...
+}: {
   services.sctd = {
     enable = true;
     baseTemperature = 3900;
@@ -10,19 +15,22 @@
       ExecStopPost = [ "-${pkgs.systemd}/bin/systemctl --user start sctd.service" ];
     };
 
-    sctd.Unit.After = [ "xiccd.service" ];
+    sctd.Unit = {
+      After = [ "game.target" "xiccd.service" ];
+      Conflicts = [ "game.target" ];
+    };
   };
 
-  programs.autorandr.hooks.postswitch.sctd = ''
-    # f="${osConfig.networking.fqdnOrHostName}"
+  programs.autorandr.hooks.postswitch.screen-temperature = ''
+    ${lib.toShellVar "machine" osConfig.networking.fqdnOrHostName}
 
-    # case "$AUTORANDR_CURRENT_PROFILE" in
-    #     "$f"[:+]"tv")
-    #         ${pkgs.systemd}/bin/systemctl --user stop sctd.service
-    #         ;;
-    #     "$f"|"$f"[:+]*)
+    case "$AUTORANDR_CURRENT_PROFILE" in
+        "$machine"[:+]"tv")
+            ${pkgs.systemd}/bin/systemctl --user stop sctd.service
+            ;;
+        "$machine"|"$machine"[:+]*)
             ${pkgs.systemd}/bin/systemctl --user try-restart sctd.service
-    #         ;;
-    # esac
+            ;;
+    esac
   '';
 }

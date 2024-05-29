@@ -40,6 +40,8 @@ in
   ];
 
   cache.directories = [
+    { method = "symlink"; directory = xdgCacheDir "nsxiv"; }
+
     { method = "symlink"; directory = xdgCacheDir "gimp"; }
     { method = "symlink"; directory = xdgCacheDir "gmic"; }
 
@@ -73,6 +75,15 @@ in
     );
 
     associations.removed = lib.genAttrs [ "image/jpeg" "image/png" "image/tiff" ] (_: "darktable.desktop");
+  };
+
+  xresources.properties = {
+    "Nsxiv.window.background" = config.theme.colors.darkBackground;
+    "Nsxiv.window.foreground" = config.theme.colors.darkForeground;
+    "Nsxiv.mark.foreground" = config.theme.colors.accent;
+    "Nsxiv.bar.background" = config.theme.colors.darkBackground;
+    "Nsxiv.bar.foreground" = config.theme.colors.darkForeground;
+    "Nsxiv.bar.font" = "monospace-11";
   };
 
   programs.gallery-dl = {

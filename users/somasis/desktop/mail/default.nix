@@ -82,16 +82,6 @@ in
 
         flavor = "fastmail.com";
       })
-
-      (account "mcclainkj@appstate.edu" {
-        passwordCommand = "${pass} show www/appstate.edu/mcclainkj";
-        aliases = [ "mcclainhj@appstate.edu" ];
-
-        flavor = "gmail.com";
-        folders.sent = "Sent Mail";
-
-        offlineimap.extraConfig = offlineimapNametransGmail;
-      })
     ]
   ;
 

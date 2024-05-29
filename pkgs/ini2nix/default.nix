@@ -6,7 +6,7 @@
 , nixfmt
 
 , coreutils
-, diffutils
+  # , diffutils
 }:
 writeShellApplication {
   name = "ini2nix";
@@ -42,7 +42,7 @@ writeShellApplication {
   #   ${diffutils}/bin/diff -u <($out/bin/ini2nix ${checkIni}) <(printf '%s' ${lib.toShellVar checkExpectedOutput})
   # '';
 
-  text = builtins.readFile ./ini2nix.sh;
+  text = builtins.readFile ./ini2nix.bash;
 
   meta = with lib; {
     description = "Convert INI to Nix expressions";

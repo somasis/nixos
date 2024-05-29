@@ -14,14 +14,35 @@
     nssmdns4 = true;
   };
 
-  cache.directories = [ "/var/cache/cups" ];
-  log.directories = [ "/var/log/cups" ];
+  persist.directories = [{
+    mode = "0755";
+    directory = "/var/lib/cups";
+  }];
+
+  cache.directories = [
+    { mode = "0770"; user = "root"; group = "lp"; directory = "/var/cache/cups"; }
+    { mode = "0710"; user = "root"; group = "lp"; directory = "/var/spool/cups"; }
+  ];
+
+  log.directories = [{
+    mode = "0755";
+    user = "root";
+    group = "lp";
+    directory = "/var/log/cups";
+  }];
 
   networking.networkmanager.dispatcherScripts = [{
     type = "basic";
     source = pkgs.writeText "restart-avahi" ''
-      [ "$2" = "up" ] \
-          && ${pkgs.systemd}/bin/systemctl try-restart avahi-daemon.service
+      if [ "$2" = "up" ]; then
+          ${pkgs.systemd}/bin/systemctl try-restart avahi-daemon.service
+      fi
     '';
   }];
+
+  # this seems to fix some discovery issues for me?
+  # systemd.services.cups-browsed = {
+  #   wants = [ "cups.service" ];
+  #   after = [ "cups.service" ];
+  # };
 }

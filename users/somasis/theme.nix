@@ -7,7 +7,7 @@
     darkBackground = "#2f343f";
     darkCursor = lightForeground;
     darkBorder = "#2b2e39";
-    darkSidebar = "#353946";
+    darkSidebar = "#3f434f";
 
     # Arc color scheme (light)
     lightForeground = "#696d78";

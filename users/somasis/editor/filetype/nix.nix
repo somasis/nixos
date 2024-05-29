@@ -13,20 +13,6 @@ let
     bufdir="''${kak_buffile%/*}"
     bufext="''${kak_buffile##*.}"
 
-    upward() {
-        local e=0
-        while [ $# -gt 0 ]; do
-            while [ "$PWD" != / ]; do
-                [ -f "$1" ] && printf "%s\n" "$(readlink -f "$1")" && break
-                e=$((e + 1))
-                cd ../
-            done
-            shift
-        done
-
-        [ "$e" -gt 0 ] && return 1 || return 0
-    }
-
     has_formatter() {
         nix-instantiate \
             --eval \

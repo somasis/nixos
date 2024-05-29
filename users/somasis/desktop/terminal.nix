@@ -312,6 +312,20 @@ in
     }];
   };
 
+  # systemd.user.services.xclickroot = lib.mkIf config.programs.kitty.enable {
+  #   Unit = {
+  #     Description = pkgs.xclickroot.meta.description;
+  #     PartOf = [ "graphical-session.target" ];
+  #     After = [ "wallpaper.service" ];
+  #   };
+
+  #   Install.WantedBy = [ "graphical-session.target" ];
+  #   Service = {
+  #     Type = "exec";
+  #     ExecStart = "${lib.getExe pkgs.xclickroot} -l kitty -1";
+  #   };
+  # };
+
   home.packages = [
     # (pkgs.writeShellScriptBin "xterm" ''exec alacritty "$@"'')
     (pkgs.writeShellScriptBin "xterm" ''exec kitty "$@"'')

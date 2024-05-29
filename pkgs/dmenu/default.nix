@@ -35,7 +35,6 @@
 , enableMouseSupport ? true
 , enableMultiSelection ? false
 , enableNavHistory ? false
-, enableNoColorEmoji ? false
 , enableNoSort ? true
 , enableNonBlockingStdin ? false
 , enableNumbers ? false
@@ -117,7 +116,6 @@ stdenv.mkDerivation rec {
         ${optionalCpp enableCaretWidth "CARET_WIDTH_PATCH"}
         ${optionalCpp enableCaseInsensitive "CASEINSENSITIVE_PATCH"}
         ${optionalCpp enableCenter "CENTER_PATCH"}
-        ${optionalCpp enableColorEmoji "COLOR_EMOJI_PATCH"}
         ${optionalCpp enableCtrlVToPaste "CTRL_V_TO_PASTE_PATCH"}
         ${optionalCpp enableDynamicOptions "DYNAMIC_OPTIONS_PATCH"}
         ${optionalCpp enableEmojiHighlight "EMOJI_HIGHLIGHT_PATCH"}
@@ -137,7 +135,7 @@ stdenv.mkDerivation rec {
         ${optionalCpp enableMouseSupport "MOUSE_SUPPORT_PATCH"}
         ${optionalCpp enableMultiSelection "MULTI_SELECTION_PATCH"}
         ${optionalCpp enableNavHistory "NAVHISTORY_PATCH"}
-        ${optionalCpp enableNoColorEmoji "NO_COLOR_EMOJI_PATCH"}
+        ${optionalCpp (!enableColorEmoji) "NO_COLOR_EMOJI_PATCH"}
         ${optionalCpp enableNoSort "NO_SORT_PATCH"}
         ${optionalCpp enableNonBlockingStdin "NON_BLOCKING_STDIN_PATCH"}
         ${optionalCpp enableNumbers "NUMBERS_PATCH"}

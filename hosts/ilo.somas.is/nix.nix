@@ -51,6 +51,8 @@
 
       builders-use-substitutes = true;
 
+      use-xdg-base-directories = true;
+
       connect-timeout = 5;
       http-connections = 64;
       max-substitution-jobs = 64;
@@ -104,7 +106,13 @@
   };
 
   # Only do garbage collection if not on battery.
-  systemd.services.nix-gc.unitConfig.ConditionACPower = true;
+  systemd.services.nix-gc = {
+    unitConfig.ConditionACPower = true;
+    serviceConfig = {
+      Nice = 19;
+      IOSchedulingPriority = 7;
+    };
+  };
 
   environment.systemPackages =
     lib.optional config.programs.bash.enableCompletion pkgs.nix-bash-completions;

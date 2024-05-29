@@ -17,31 +17,31 @@ assert steam.enable;
 
   home.packages = [ pkgs.r2modman ];
 
-  systemd.user.services.steam = {
-    Unit.Description = steam.package.meta.description;
-    Unit.PartOf = [ "graphical-session-autostart.target" ];
-    Install.WantedBy = [ "graphical-session-autostart.target" ];
+  # systemd.user.services.steam = {
+  #   Unit.Description = steam.package.meta.description;
+  #   Unit.PartOf = [ "graphical-session-autostart.target" ];
+  #   Install.WantedBy = [ "graphical-session-autostart.target" ];
 
-    Service = {
-      Type = "simple";
+  #   Service = {
+  #     Type = "simple";
 
-      Environment = [ "STEAM_FORCE_DESKTOPUI_SCALING=1.5" ];
-      ExecStart = "${steam.package}/bin/steam -silent -single_core";
-      ExecStop = "${steam.package}/bin/steam -shutdown";
+  #     Environment = [ "STEAM_FORCE_DESKTOPUI_SCALING=1.5" ];
+  #     ExecStart = "${steam.package}/bin/steam -silent -single_core";
+  #     ExecStop = "${steam.package}/bin/steam -shutdown";
 
-      # We need to kill the PID listed in ~/.steampid, or else Steam
-      # will exit unsuccesfully every time.
-      PIDFile = "%h/.steampid";
+  #     # We need to kill the PID listed in ~/.steampid, or else Steam
+  #     # will exit unsuccesfully every time.
+  #     PIDFile = "%h/.steampid";
 
-      Restart = "on-failure";
+  #     Restart = "on-failure";
 
-      # Keep Steam easy-going in the background.
-      Nice = 19;
-      CPUSchedulingPolicy = "idle";
-      IOSchedulingClass = "idle";
-      IOSchedulingPriority = 7;
-    };
-  };
+  #     # Keep Steam easy-going in the background.
+  #     Nice = 19;
+  #     CPUSchedulingPolicy = "idle";
+  #     IOSchedulingClass = "idle";
+  #     IOSchedulingPriority = 7;
+  #   };
+  # };
 
   # services.xsuspender.rules.steam = {
   #   matchWmClassGroupContains = "steam";

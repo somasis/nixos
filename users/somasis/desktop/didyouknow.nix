@@ -70,7 +70,7 @@ let
         curl "https://api.wikimedia.org/feed/v1/wikipedia/en/featured/$(date +%Y/%m/%d)"
     )
 
-    if [[ -n "$didyouknow" ]]; then
+    if [[ -n "''${didyouknow//[[:blank:]]/}" ]]; then
         didyouknow=$(
             jq -re .parse.text <<< "$didyouknow" \
                 | pup --charset UTF-8 'body > div > ul > li' \
@@ -85,7 +85,7 @@ let
         rm -f "$dir"/didyouknow.txt
     fi
 
-    if [[ -n "$featured" ]]; then
+    if [[ -n "''${featured//[[:blank:]]/}" ]]; then
         onthisday=$(
             jq -r '
                 .onthisday
@@ -146,20 +146,20 @@ let
                 | fmt
         )
 
-        if [[ -n "$onthisday" ]]; then
+        if [[ -n "''${onthisday//[[:blank:]]/}" ]]; then
             printf '%s in history...\n\n%s\n' "$(dateconv -f '%B %dth' now)" "$onthisday" > "$dir"/onthisday.txt
         else
             rm -f "$dir"/onthisday.txt
         fi
 
-        if [[ -n "$aotd" ]]; then
+        if [[ -n "''${aotd//[[:blank:]]/}" ]]; then
             printf 'Article of the day: %s\n' "$(fold -s -w 79 <<<"$aotd")" > "$dir"/aotd.txt
         else
             rm -f "$dir"/aotd.txt
         fi
     fi # [[ -n "$featured" ]]
 
-    if [[ -z "$didyouknow" ]] && [[ -z "$featured" ]]; then
+    if [[ -z "''${didyouknow//[[:blank:]]/}" ]] && [[ -z "''${featured//[[:blank:]]/}" ]]; then
         exit 1
     fi
   '';
